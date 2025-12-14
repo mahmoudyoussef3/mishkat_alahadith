@@ -14,6 +14,7 @@ import 'package:mishkat_almasabih/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'mishkat_almasabih.dart';
+import 'package:flutter/rendering.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +27,7 @@ Future<void> main() async {
   //await Firebase.initializeApp();
 
   // تهيئة الـ FCM (مرة واحدة بس)
-  await PushNotification.init();
+ // await PushNotification.init();
   // Setup notification tap handlers
   await LocalNotification.init();
   //await PushNotification.getApnsToken();
@@ -64,6 +65,7 @@ Future<void> main() async {
     return true;
   };
   await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
+  debugRepaintRainbowEnabled = true;
 
   runApp(app);
 }

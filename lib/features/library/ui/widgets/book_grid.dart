@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
 import 'package:mishkat_almasabih/features/library/ui/widgets/book_card.dart';
@@ -11,7 +10,6 @@ class BookGrid extends StatelessWidget {
   final bool isShimmer;
 
   const BookGrid._({
-    super.key,
     this.books,
     required this.aspectRatio,
     required this.isShimmer,
@@ -33,9 +31,11 @@ class BookGrid extends StatelessWidget {
     return SliverPadding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
       sliver: SliverGrid(
+
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 12.w,
+          
           mainAxisSpacing: 12.h,
           childAspectRatio: aspectRatio,
         ),
