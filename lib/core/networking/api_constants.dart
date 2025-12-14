@@ -23,6 +23,7 @@ class ApiConstants {
   static const String googleLogin = "auth/google-login";
   static const String getUserProfile = "auth/profile";
   static const String updateUserProfile = "auth/update-profile";
+  static const String getUserStats = "auth/profile/stats";
 
   // -----------------------------
   // Islamic Library
@@ -85,65 +86,69 @@ class ApiConstants {
   static const String deleteAllSearch = "/search-history/user";
 }
 
-   const Map<String, String> bookWriters = {
-    "Sahih Bukhari": "الإمام البخاري",
-    "Sahih Muslim": "الإمام مسلم",
-    "Jami' Al-Tirmidhi": "الإمام الترمذي",
-    "Sunan Abu Dawood": "الإمام أبو داود السجستاني",
-    "Sunan Ibn-e-Majah": "الإمام ابن ماجه القزويني",
-    "Sunan An-Nasa`i": "الإمام النسائي",
-    "Mishkat Al-Masabih": "الإمام الخطيب التبريزي",
-    "رياض الصالحين": "الإمام يحيى بن شرف النووي",
-    "موطأ مالك": "الإمام مالك بن أنس",
-    "سنن الدارمي": "الإمام عبد الرحمن بن الدارمي",
-    "بلوغ المرام": "الإمام ابن حجر العسقلاني",
-    "الأربعون النووية": "الإمام يحيى بن شرف النووي",
-    "الأربعون القدسية": "مجموعة من العلماء",
-    "أربعون ولي الله الدهلوي": "الشاه ولي الله الدهلوي",
-    "الأدب المفرد": "الإمام البخاري",
-    "الشمائل المحمدية": "الإمام الترمذي",
-    "حصن المسلم": "سعيد بن علي بن وهف القحطاني",
-  };
+const Map<String, String> bookWriters = {
+  "Sahih Bukhari": "الإمام البخاري",
+  "Sahih Muslim": "الإمام مسلم",
+  "Jami' Al-Tirmidhi": "الإمام الترمذي",
+  "Sunan Abu Dawood": "الإمام أبو داود السجستاني",
+  "Sunan Ibn-e-Majah": "الإمام ابن ماجه القزويني",
+  "Sunan An-Nasa`i": "الإمام النسائي",
+  "Mishkat Al-Masabih": "الإمام الخطيب التبريزي",
+  "رياض الصالحين": "الإمام يحيى بن شرف النووي",
+  "موطأ مالك": "الإمام مالك بن أنس",
+  "سنن الدارمي": "الإمام عبد الرحمن بن الدارمي",
+  "بلوغ المرام": "الإمام ابن حجر العسقلاني",
+  "الأربعون النووية": "الإمام يحيى بن شرف النووي",
+  "الأربعون القدسية": "مجموعة من العلماء",
+  "أربعون ولي الله الدهلوي": "الشاه ولي الله الدهلوي",
+  "الأدب المفرد": "الإمام البخاري",
+  "الشمائل المحمدية": "الإمام الترمذي",
+  "حصن المسلم": "سعيد بن علي بن وهف القحطاني",
+  "الأربعون الرياضية": "الشيخ محمد خير رمضان يوسف",
+};
 
-   const Map<String, String> bookNamesArabic = {
-    "Sahih Bukhari": "صحيح البخاري",
-    "Sahih Muslim": "صحيح مسلم",
-    "Jami' Al-Tirmidhi": "جامع الترمذي",
-    "Sunan Abu Dawood": "سنن أبي داود",
-    "Sunan Ibn-e-Majah": "سنن ابن ماجه",
-    "Sunan An-Nasa`i": "سنن النسائي",
-    "Mishkat Al-Masabih": "مشكات المصابيح",
-    "رياض الصالحين": "رياض الصالحين",
-    "موطأ مالك": "موطأ مالك",
-    "سنن الدارمي": "سنن الدارمي",
-    "بلوغ المرام": "بلوغ المرام",
-    "الأربعون النووية": "الأربعون النووية",
-    "الأربعون القدسية": "الأربعون القدسية",
-    "أربعون ولي الله الدهلوي": "الأربعون لولي الله الدهلوي",
-    "الأدب المفرد": "الأدب المفرد",
-    "الشمائل المحمدية": "الشمائل المحمدية",
-    "حصن المسلم": "حصن المسلم",
-  };
+const Map<String, String> bookNamesArabic = {
+  "Sahih Bukhari": "صحيح البخاري",
+  "Sahih Muslim": "صحيح مسلم",
+  "Jami' Al-Tirmidhi": "جامع الترمذي",
+  "Sunan Abu Dawood": "سنن أبي داود",
+  "Sunan Ibn-e-Majah": "سنن ابن ماجه",
+  "Sunan An-Nasa`i": "سنن النسائي",
+  "Mishkat Al-Masabih": "مشكات المصابيح",
+  "رياض الصالحين": "رياض الصالحين",
+  "موطأ مالك": "موطأ مالك",
+  "سنن الدارمي": "سنن الدارمي",
+  "بلوغ المرام": "بلوغ المرام",
+  "الأربعون النووية": "الأربعون النووية",
+  "الأربعون القدسية": "الأربعون القدسية",
+  "أربعون ولي الله الدهلوي": "الأربعون لولي الله الدهلوي",
+  "الأدب المفرد": "الأدب المفرد",
+  "الشمائل المحمدية": "الشمائل المحمدية",
+  "حصن المسلم": "حصن المسلم",
+  "الأربعون الرياضية": "الأربعون الرياضية",
+};
 
-   const Map<String, String> bookImages = {
-    "Sahih Bukhari": "assets/images/book_covers/sahih-bukhari.jpeg",
-    "Sahih Muslim": "assets/images/book_covers/sahih-muslim.jpeg",
-    "Jami' Al-Tirmidhi": "assets/images/book_covers/al-tirmidhi.jpeg",
-    "Sunan Abu Dawood": "assets/images/book_covers/abu-dawood.jpeg",
-    "Sunan Ibn-e-Majah": "assets/images/book_covers/ibn-e-majah.jpeg",
-    "Sunan An-Nasa`i": "assets/images/book_covers/sunan-nasai.jpeg",
-    "Mishkat Al-Masabih": "assets/images/book_covers/mishkat.jpeg",
-    "رياض الصالحين": "assets/images/book_covers/riyad_assalihin.jpeg",
-    "موطأ مالك": "assets/images/book_covers/malik.jpeg",
-    "سنن الدارمي": "assets/images/book_covers/darimi.jpeg",
-    "بلوغ المرام": "assets/images/book_covers/bulugh_al_maram.jpeg",
-    "الأربعون النووية": "assets/images/book_covers/nawawi40.jpeg",
-    "الأربعون القدسية": "assets/images/book_covers/ahadith_qudsi.jpg",
-    "أربعون ولي الله الدهلوي": "assets/images/book_covers/shahwaliullah40.jpeg",
-    "الأدب المفرد": "assets/images/book_covers/aladab_almufrad.jpeg",
-    "الشمائل المحمدية": "assets/images/book_covers/shamail_muhammadiyah.jpeg",
-    "حصن المسلم": "assets/images/book_covers/hisnul_muslim.jpeg",
-  };
+const Map<String, String> bookImages = {
+  "Sahih Bukhari": "assets/images/book_covers/sahih-bukhari.jpeg",
+  "Sahih Muslim": "assets/images/book_covers/sahih-muslim.jpeg",
+  "Jami' Al-Tirmidhi": "assets/images/book_covers/al-tirmidhi.jpeg",
+  "Sunan Abu Dawood": "assets/images/book_covers/abu-dawood.jpeg",
+  "Sunan Ibn-e-Majah": "assets/images/book_covers/ibn-e-majah.jpeg",
+  "Sunan An-Nasa`i": "assets/images/book_covers/sunan-nasai.jpeg",
+  "Mishkat Al-Masabih": "assets/images/book_covers/mishkat.jpeg",
+  "رياض الصالحين": "assets/images/book_covers/riyad_assalihin.jpeg",
+  "موطأ مالك": "assets/images/book_covers/malik.jpeg",
+  "سنن الدارمي": "assets/images/book_covers/darimi.jpeg",
+  "بلوغ المرام": "assets/images/book_covers/bulugh_al_maram.jpeg",
+  "الأربعون النووية": "assets/images/book_covers/nawawi40.jpeg",
+  "الأربعون القدسية": "assets/images/book_covers/ahadith_qudsi.jpg",
+  "أربعون ولي الله الدهلوي": "assets/images/book_covers/shahwaliullah40.jpeg",
+  "الأدب المفرد": "assets/images/book_covers/aladab_almufrad.jpeg",
+  "الشمائل المحمدية": "assets/images/book_covers/shamail_muhammadiyah.jpeg",
+  "حصن المسلم": "assets/images/book_covers/hisnul_muslim.jpeg",
+  "الأربعون الرياضية": "assets/images/book_covers/riyadiah40.jpeg",
+};
+
 class ApiErrors {
   static const String badRequestError = "badRequestError";
   static const String noContent = "noContent";
@@ -161,23 +166,25 @@ class ApiErrors {
   static const String retryAgainMessage = "retry_again_message";
   static const String ok = "Ok";
 }
-  final Map<String, String> booksMap = {
-    'صحيح البخاري': 'sahih-bukhari',
-    'صحيح مسلم': 'sahih-muslim',
-    'سنن أبي داود': 'abu-dawood',
-    'سنن الترمذي': 'al-tirmidhi',
-    'سنن النسائي': 'sunan-nasai',
-    'سنن ابن ماجة': 'ibn-e-majah',
-    'موطأ مالك': 'malik',
-    'مسند أحمد': 'musnad-ahmad',
-    'سنن الدارمي': 'darimi',
-    'بلوغ المرام': 'bulugh_al_maram',
-    'رياض الصالحين': 'riyad_assalihin',
-    'مشكات المصابيح': 'mishkat',
-    'الأربعون النووية': 'nawawi40',
-    'الأربعون القدسية': 'qudsi40',
-    'أربعون ولي الله الدهلوي': 'shahwaliullah40',
-    'الأدب المفرد': 'aladab_almufrad',
-    'الشمائل المحمدية': 'shamail_muhammadiyah',
-    'حصن المسلم': 'hisnul_muslim',
-  };
+
+final Map<String, String> booksMap = {
+  'صحيح البخاري': 'sahih-bukhari',
+  'صحيح مسلم': 'sahih-muslim',
+  'سنن أبي داود': 'abu-dawood',
+  'سنن الترمذي': 'al-tirmidhi',
+  'سنن النسائي': 'sunan-nasai',
+  'سنن ابن ماجة': 'ibn-e-majah',
+  'موطأ مالك': 'malik',
+  'مسند أحمد': 'musnad-ahmad',
+  'سنن الدارمي': 'darimi',
+  'بلوغ المرام': 'bulugh_al_maram',
+  'رياض الصالحين': 'riyad_assalihin',
+  'مشكات المصابيح': 'mishkat',
+  'الأربعون النووية': 'nawawi40',
+  'الأربعون القدسية': 'qudsi40',
+  'أربعون ولي الله الدهلوي': 'shahwaliullah40',
+  'الأدب المفرد': 'aladab_almufrad',
+  'الشمائل المحمدية': 'shamail_muhammadiyah',
+  'حصن المسلم': 'hisnul_muslim',
+  'الاربعون الرياضية': 'riyadiah40',
+};

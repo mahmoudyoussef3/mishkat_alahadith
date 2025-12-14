@@ -31,11 +31,7 @@ class HomeScreenWrapper extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<SearchHistoryCubit>()),
-        BlocProvider(
-          create:
-              (_) =>
-                  getIt<GetLibraryStatisticsCubit>()..emitGetStatisticsCubit(),
-        ),
+        BlocProvider(create: (_) => getIt<GetLibraryStatisticsCubit>()),
       ],
       child: const HomeScreen(),
     );
@@ -117,6 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
         SliverToBoxAdapter(
           child: HadithOfTheDayCard(repo: SaveHadithDailyRepo()),
         ),
+
         _buildDividerSection(),
         _buildBooksSection(),
         _buildDividerSection(),

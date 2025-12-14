@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/hadith_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background_gradient"
+    android:padding="16dp">
+
+    <!-- Header: Icon + Title -->
+    <LinearLayout
+        android:id="@+id/header_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_book"
+            android:contentDescription="@null"
+            android:tint="#F4F1E6"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="حديث اليوم"
+            android:textColor="#F4F1E6"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/cairo_bold"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <!-- Hadith Text -->
+    <TextView
+        android:id="@+id/hadith_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header_container"
+        android:layout_above="@id/footer_container"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="جاري تحميل الحديث..."
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+
+        android:fontFamily="@font/ya_modernpro_bold"
+        android:gravity="center_vertical|start"
+        android:textDirection="rtl"
+        android:maxLines="4"
+        android:ellipsize="end"
+        android:lineSpacingExtra="4dp" />
+
+    <!-- Footer Container -->
+    <RelativeLayout
+        android:id="@+id/footer_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <!-- Read Button -->
+        <LinearLayout
+            android:id="@+id/read_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/read_button_background"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="اقرأ الحديث"
+                android:textColor="#F4F1E6"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/cairo_bold"/>
+        </LinearLayout>
+
+        <!-- Decorative Quote Icon -->
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_quote"
+            android:background="@drawable/quote_background"
+            android:padding="8dp"
+            android:contentDescription="@null"
+            android:tint="#F4F1E6"/>
+    </RelativeLayout>
+
+</RelativeLayout>

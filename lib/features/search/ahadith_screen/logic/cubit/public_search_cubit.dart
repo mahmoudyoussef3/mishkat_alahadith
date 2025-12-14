@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/search/home_screen/data/models/public_search_model.dart';
 import 'package:mishkat_almasabih/features/search/home_screen/data/repos/public_search_repo.dart';
 
@@ -14,7 +15,7 @@ class PublicSearchCubit extends Cubit<PublicSearchState> {
     final result = await _publicSearchRepo.getPublicSearchRepo(query);
     result.fold(
       (error) =>
-          emit(PublicSearchFailure(error.apiErrorModel.msg ?? 'حدث خطأ')),
+          emit(PublicSearchFailure( error.getAllErrorMessages())),
       (searchResult) => emit(PublicSearchSuccess(searchResult)),
     );
   }

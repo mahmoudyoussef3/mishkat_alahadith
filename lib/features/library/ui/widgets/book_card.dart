@@ -85,6 +85,7 @@ class BookCard extends StatelessWidget {
                         color: ColorsManager.accentPurple,
                       ),
                       BookStat(
+                        
                         value: '${book.hadiths_count} حديث',
                         color: ColorsManager.hadithAuthentic,
                       ),

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../../core/networking/api_error_handler.dart';
@@ -14,7 +15,7 @@ class LoginRepo {
 
   LoginRepo(this._apiService);
 
-  Future<Either<ErrorHandler, LoginResponseBody>> login(
+  Future<Either<ApiErrorModel, LoginResponseBody>> login(
     LoginRequestBody loginRequestBody,
   ) async {
     try {
@@ -25,18 +26,15 @@ class LoginRepo {
     }
   }
 
-  Future<Either<ErrorHandler, LoginResponseBody>> googleLogin() async {
+  Future<Either<ApiErrorModel, LoginResponseBody>> googleLogin() async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
-
-
-
         scopes: ['email', 'profile', 'openid'],
-               serverClientId:
-              "479373165372-d9vr3f1c1b2aodv4kjngi5ra1diug1v6.apps.googleusercontent.com",
+        serverClientId:
+            "479373165372-d9vr3f1c1b2aodv4kjngi5ra1diug1v6.apps.googleusercontent.com",
       );
-      
- await googleSignIn.signOut();
+
+      await googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         return Left(ErrorHandler.handle('UnKnown error happened.'));
@@ -54,7 +52,7 @@ class LoginRepo {
 
       return Right(response);
     } catch (error) {
-    log(error.toString());
+      log(error.toString());
       return Left(ErrorHandler.handle(error));
     }
   }

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/data/models/remaining_questions_response_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class RemainingQuestionsRepo {
   final ApiService _apiService;
   RemainingQuestionsRepo(this._apiService);
-  Future<Either<ErrorHandler, RmainingQuestionsResponse>>
+  Future<Either<ApiErrorModel, RmainingQuestionsResponse>>
   getRemainingQuestions() async {
     try {
       final String token = await _getUserToken();

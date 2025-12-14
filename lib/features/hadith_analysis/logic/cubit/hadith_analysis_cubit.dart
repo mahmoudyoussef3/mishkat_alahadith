@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/hadith_analysis/data/models/hadith_analysis_request.dart';
 import 'package:mishkat_almasabih/features/hadith_analysis/data/models/hadith_analysis_response.dart';
 import 'package:mishkat_almasabih/features/hadith_analysis/data/repos/hadith_analysis_repo.dart';
@@ -28,7 +29,7 @@ class HadithAnalysisCubit extends Cubit<HadithAnalysisState> {
     result.fold(
       (error) => emit(
         HadithAnalysisError(
-          error.apiErrorModel.msg ?? "حدث خطأ ما. حاول مرة أخرى",
+          error.getAllErrorMessages(),
         ),
       ),
       (response) {

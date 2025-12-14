@@ -21,5 +21,6 @@ class Routes {
   static const String homeScreen = '/homeScreen';
     static const String   usersSuggestions = '/usersSuggestions';
 
+  static const String aboutUs = '/aboutUs';
 
 }

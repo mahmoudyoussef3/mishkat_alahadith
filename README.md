@@ -345,16 +345,17 @@ We welcome contributions from the community! Please read our contributing guidel
 ```bash
    git push origin feature/amazing-feature
 ```
-6. **Open a Pull Request**
+6. **افتح طلب سحب | Open a Pull Request**
 
-### Code Standards
+### **معايير الكود | Code Standards**
 
-- Follow **Flutter best practices**
-- Use **Clean Architecture** principles
-- Maintain **consistent naming conventions**
-- Write **comprehensive documentation**
+- اتبع **أفضل ممارسات Flutter**
+- استخدم مبادئ **البنية النظيفة**
+- حافظ على **اصطلاحات تسمية متسقة**
+- اكتب **توثيقًا شاملاً**
 
 ---
+
 
 ## 🙏 Acknowledgments
 
@@ -365,10 +366,11 @@ We welcome contributions from the community! Please read our contributing guidel
 
 ---
 
-## 🔗 Important Links
 
-- [📥 Download from Google Play](https://play.google.com/store/apps/details?id=com.mishkat_almasabih.app&hl=ar)
-- [🌐 Official Website](https://hadith-shareef.com/islamic-library)
+## 🔗 روابط مهمة | Important Links
+
+- [📥 تحميل من Google Play](https://play.google.com/store/apps/details?id=com.mishkat_almasabih.app&hl=ar)
+- [🌐 الموقع الرسمي | Official Website](https://hadith-shareef.com/islamic-library)
 
 ---
 

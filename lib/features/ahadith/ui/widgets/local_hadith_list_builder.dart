@@ -29,7 +29,7 @@ class LocalHadithListBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = state.localHadithResponse.hadiths?.data ?? [];
+    final list = state.hadiths ?? [];
 
     if (list.isEmpty) {
       return const SliverToBoxAdapter(child: EmptyState());
@@ -41,24 +41,26 @@ class LocalHadithListBuilder extends StatelessWidget {
       itemBuilder: (context, index) {
         final hadith = list[index];
         return GestureDetector(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => HadithDetailScreen(
-                authorDeath: authorDeath ?? "",
-                grade: grade ?? "",
-                narrator: narrator ?? "",
-                isLocal: true,
-                chapterNumber: hadith.chapterId.toString(),
-                bookSlug: bookSlug,
-                hadithText: hadith.arabic ?? '',
-                bookName: arabicBookName,
-                author: arabicWriterName,
-                chapter: arabicChapterName,
-                hadithNumber: hadith.id.toString(),
+          onTap:
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (_) => HadithDetailScreen(
+                        authorDeath: authorDeath ?? "",
+                        grade: grade ?? "",
+                        narrator: narrator ?? "",
+                        isLocal: true,
+                        chapterNumber: hadith.chapterId.toString(),
+                        bookSlug: bookSlug,
+                        hadithText: hadith.arabic ?? '',
+                        bookName: arabicBookName,
+                        author: arabicWriterName,
+                        chapter: arabicChapterName,
+                        hadithNumber: hadith.id.toString(),
+                      ),
+                ),
               ),
-            ),
-          ),
           child: LocalHadithCard(
             bookName: arabicBookName,
             chapterName: arabicChapterName,

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
 import 'package:mishkat_almasabih/features/book_data/data/repos/book_data_repo.dart';
 
@@ -16,7 +17,7 @@ class BookDataCubit extends Cubit<BookDataState> {
     result.fold((l) {
 
 
-      emit(BookDataFailure(l.apiErrorModel.msg??'حدث خطأ '));
+      emit(BookDataFailure(l.getAllErrorMessages()));
     }, (r) => emit(BookDataSuccess(r)));
   }
 }

@@ -8,12 +8,15 @@ import 'core/routing/routes.dart';
 class MishkatAlmasabih extends StatelessWidget {
   final AppRouter appRouter;
   final bool isFirstTime;
+    final NavigatorObserver analytics;
+
   //  final bool isLoggedIn;
 
   const MishkatAlmasabih({
     super.key,
     required this.appRouter,
     required this.isFirstTime,
+    required this.analytics,  
     //   required this.isLoggedIn,
   });
 
@@ -43,6 +46,7 @@ class MishkatAlmasabih extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp(
+          navigatorObservers: [analytics],
           navigatorKey: navigatorKey,
           title: 'مشكاة الأحاديث',
           theme: ThemeData(

@@ -12,7 +12,6 @@ abstract class NotificationHandler {
 class ProjectStatus implements NotificationHandler {
   @override
   void handleOnTap() {
-    
     navigatorKey.currentState?.push(
       MaterialPageRoute(builder: (context) => const BookmarkScreen()),
     );

@@ -49,7 +49,11 @@ dependencies:
   firebase_messaging: ^16.0.2
   flutter_local_notifications: ^17.2.4
   infinite_scroll_pagination: ^5.1.1
-  custom_snackbar_plus: ^8.0.0
+  home_widget: ^0.8.1
+  firebase_crashlytics: ^5.0.3
+  firebase_analytics: ^12.0.3
+  firebase_performance: ^0.11.1+2
+  firebase_performance_dio: ^0.7.1
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +84,7 @@ flutter:
     - assets/images/book_covers/
     - assets/images/islamic_pattern.jpg
     - assets/images/moon-light-shine-through-window-into-islamic-mosque-interior.jpg
+    - assets/images/book_covers/riyadiah40.jpeg
 
   fonts:
   - family: Amiri

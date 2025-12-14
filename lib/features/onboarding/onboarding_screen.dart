@@ -115,8 +115,7 @@ final List<OnboardingPage> _onboardingPages = [
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top:true,
-      bottom : false,
+    
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(
@@ -136,7 +135,6 @@ final List<OnboardingPage> _onboardingPages = [
           child: Column(
             children: [
               _buildHeader(),
-              
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,

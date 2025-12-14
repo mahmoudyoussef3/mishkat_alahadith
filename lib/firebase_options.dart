@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'mishkat-50a1c.firebasestorage.app',
     measurementId: 'G-6EJYJJ46SF',
   );
+
 }

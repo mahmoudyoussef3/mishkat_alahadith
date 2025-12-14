@@ -48,7 +48,6 @@ SearchHistoryItem _$SearchHistoryItemFromJson(Map<String, dynamic> json) =>
     SearchHistoryItem(
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,
-  
       time: json['time'] as String,
       date: json['date'] as String,
       createdAt: json['created_at'] as String,

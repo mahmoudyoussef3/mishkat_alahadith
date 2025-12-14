@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/features/navigation/data/models/local_hadith_navigation_model.dart';
 import 'package:mishkat_almasabih/features/navigation/data/models/navigation_hadith_model.dart';
@@ -11,7 +12,7 @@ class NavigationRepo {
 
   NavigationRepo(this._apiService);
 
-  Future<Either<ErrorHandler, NavigationHadithResponse>> navigationHadith(
+  Future<Either<ApiErrorModel, NavigationHadithResponse>> navigationHadith(
     String hadithNumber,
     String bookSlug,
     String chapterNumber,
@@ -33,7 +34,7 @@ class NavigationRepo {
 
 
 
-    Future<Either<ErrorHandler, LocalNavigationHadithResponse>> localNavigation(
+    Future<Either<ApiErrorModel, LocalNavigationHadithResponse>> localNavigation(
     String hadithNumber,
     String bookSlug,
   ) async {

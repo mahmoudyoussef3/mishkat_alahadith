@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
@@ -45,6 +44,7 @@ class ResponsiveChapterList extends StatelessWidget {
   bool checkThreeBooks(String bookSlug) {
     if (bookSlug == 'qudsi40' ||
         bookSlug == 'nawawi40' ||
+        bookSlug == 'riyadiah40' ||
         bookSlug == 'shahwaliullah40') {
       return true;
     } else {
@@ -53,6 +53,7 @@ class ResponsiveChapterList extends StatelessWidget {
   }
 
   @override
+
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     const crossAxisCount = 2;
@@ -71,11 +72,7 @@ class ResponsiveChapterList extends StatelessWidget {
         }
         return GestureDetector(
           onTap: () {
-            log(bookSlug);
-            log(bookName);
-            log(writerName);
-            log(items[index].chapterNumber.toString());
-       //     log(items[index].chapterArabic);
+      
 
             Navigator.push(
               context,
@@ -87,6 +84,8 @@ class ResponsiveChapterList extends StatelessWidget {
                           create:
                               (context) =>
                                   getIt<AhadithsCubit>()..emitAhadiths(
+                                    page: 1,
+                                    paginate: 10,
                                     isArbainBooks: checkThreeBooks(bookSlug),
                                     hadithLocal: checkBookSlug(bookSlug),
                                     bookSlug: bookSlug,

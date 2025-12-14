@@ -35,17 +35,16 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
   Widget build(BuildContext context) {
     SaveHadithDailyRepo().getHadith();
     return Directionality(
-        textDirection: TextDirection.rtl,
-        child: SafeArea(
-            top: true,
-        bottom: false,
-          
-          child: Scaffold(
-            backgroundColor: ColorsManager.secondaryBackground,
-            body: _buildBody(),
-          ),
+      textDirection: TextDirection.rtl,
+      child: SafeArea(
+     
+
+        child: Scaffold(
+          backgroundColor: ColorsManager.secondaryBackground,
+          body: _buildBody(),
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildBody() {
@@ -90,10 +89,9 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
       home: false,
       bottomNav: true,
 
- //     title: 'مشكاة المصابيح',
-      title:                       'مشكاة الأحاديث',
+      //     title: 'مشكاة المصابيح',
+      title: 'مشكاة الأحاديث',
       description: 'مصادر الأحاديث النبوية الشريفة',
-
     );
   }
 

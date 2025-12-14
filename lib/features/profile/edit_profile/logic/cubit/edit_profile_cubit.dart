@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
 import 'package:mishkat_almasabih/features/profile/edit_profile/data/repos/edit_profile_repo.dart';
 
@@ -23,7 +24,7 @@ class EditProfileCubit extends Cubit<EditProfileState> {
 
     result.fold(
       (failure) => emit(EditProfileFailure(
-          failure.apiErrorModel.msg ?? "حدث خطأ غير معروف")),
+          failure.getAllErrorMessages())),
       (updatedUser) => emit(EditProfileSuccess(updatedUser)),
     );
   }

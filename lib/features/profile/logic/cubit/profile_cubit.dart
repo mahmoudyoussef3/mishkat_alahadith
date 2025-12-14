@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/features/profile/data/models/stats_model.dart';
 import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
 import 'package:mishkat_almasabih/features/profile/data/repos/user_response_repo.dart';
 
@@ -13,8 +15,10 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(ProfileLoading());
     final result = await userResponseRepo.getUserProfile();
     result.fold(
-      (error) => emit(ProfileError(error.apiErrorModel.msg.toString())),
+      (error) => emit(ProfileError(error.getAllErrorMessages() )),
       (user) => emit(ProfileLoaded(user)),
     );
   }
+
+
 }

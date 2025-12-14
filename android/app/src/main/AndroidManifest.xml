@@ -9,11 +9,28 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
+    
         android:label="مشكاة الأحاديث"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:allowBackup="false"
         android:fullBackupContent="false">
+<meta-data
+        android:name="firebase_performance_logcat_enabled"
+        android:value="true" />
+<receiver
+    android:name=".HadithWidgetProvider"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+    </intent-filter>
+
+    <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/hadith_widget_info" />
+</receiver>
+
+
 
         <!-- Main Activity -->
         <activity

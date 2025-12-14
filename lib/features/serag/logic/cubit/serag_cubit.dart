@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
 import 'package:mishkat_almasabih/features/serag/data/repos/serag_repo.dart';
 import 'package:mishkat_almasabih/features/serag/logic/cubit/serag_state.dart';
@@ -32,7 +33,7 @@ class SeragCubit extends Cubit<SeragState> {
 
     result.fold(
       (failure) => emit(
-        SeragFailure(failure.apiErrorModel.msg ?? "حدث خطأ. حاول مرة أخرى"),
+        SeragFailure(failure.getAllErrorMessages() ),
       ),
       (response) {
         emit(SeragSuccess(response));

@@ -9,7 +9,7 @@ class RandomAhadithRepo {
 
   RandomAhadithRepo(this._customApiService);
 
-  Future<Either<ErrorHandler, RandomAhadithResponse>> getRandom() async {
+  Future<Either<ApiErrorModel, RandomAhadithResponse>> getRandom() async {
     try {
       final reponse = await _customApiService.getRandomAhadith();
       return Right(reponse);

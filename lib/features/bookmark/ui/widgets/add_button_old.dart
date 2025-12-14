@@ -44,11 +44,11 @@ class AddButton extends StatelessWidget {
           );
         } else if (state is AddSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+             SnackBar(
               backgroundColor: ColorsManager.hadithAuthentic,
               behavior: SnackBarBehavior.floating,
               content: Text(
-                'تم اضافة الحديث إلي المحفوظات',
+                state.addBookmarkResponse.message??"تمت إضافة الحديث إلي المحفوظات.",
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -56,11 +56,11 @@ class AddButton extends StatelessWidget {
           context.pop();
         } else if (state is AddFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+             SnackBar(
                             backgroundColor: ColorsManager.error,
 
               content: Text(
-                "حدث خطأ. حاول مرة أخري",
+                state.message,
                 style: TextStyle(color: Colors.white),
               ),
             ),

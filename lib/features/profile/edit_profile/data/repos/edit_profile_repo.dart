@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +13,7 @@ class EditProfileRepo {
   final ApiService apiService;
   EditProfileRepo(this.apiService);
 
-  Future<Either<ErrorHandler, UserResponseModel>> updateProfile({
+  Future<Either<ApiErrorModel, UserResponseModel>> updateProfile({
     required String username,
     File? imageFile,
     

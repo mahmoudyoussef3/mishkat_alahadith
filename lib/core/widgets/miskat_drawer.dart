@@ -139,6 +139,15 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                 ),
                     _buildDrawerItem(
                   context,
+                  icon: Icons.info_rounded,
+                  title: 'من نحن',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.pushNamed(Routes.aboutUs);
+                  },
+                ),
+                    _buildDrawerItem(
+                  context,
                   icon: Icons.person_rounded,
                   title: 'إضافة مقترحات',
                   onTap: () {
@@ -168,7 +177,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                 onTap: () => _showLogoutDialog(context),
               ),
             ),
-          SizedBox(height: 32.h),
+          SizedBox(height: 64.h),
         ],
       ),
     );

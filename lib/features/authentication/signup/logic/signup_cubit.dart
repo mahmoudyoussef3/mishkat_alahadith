@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/models/sign_up_request_body.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/repo/signup_repo.dart';
 
@@ -30,7 +31,7 @@ class SignupCubit extends Cubit<SignupState> {
     );
 
     response.fold(
-      (error) => emit(SignupError(error.apiErrorModel.msg.toString())),
+      (error) => emit(SignupError(error.getAllErrorMessages())),
       (data) => emit(SignupSuccess()),
     );
   }

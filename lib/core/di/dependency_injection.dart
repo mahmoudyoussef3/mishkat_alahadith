@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mishkat_almasabih/features/about_us/data/repos/about_us_repo.dart';
+import 'package:mishkat_almasabih/features/about_us/logic/cubit/about_us_cubit.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/repo/signup_repo.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
 import 'package:mishkat_almasabih/features/book_data/data/repos/book_data_repo.dart';
@@ -26,6 +28,7 @@ import 'package:mishkat_almasabih/features/navigation/logic/local/cubit/local_ha
 import 'package:mishkat_almasabih/features/profile/data/repos/user_response_repo.dart';
 import 'package:mishkat_almasabih/features/profile/edit_profile/data/repos/edit_profile_repo.dart';
 import 'package:mishkat_almasabih/features/profile/edit_profile/logic/cubit/edit_profile_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/profile_cubit.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/data/custom_api_service.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/data/repos/random_ahadith_repo.dart';
@@ -132,6 +135,9 @@ Future<void> setUpGetIt() async {
   getIt.registerLazySingleton<EditProfileRepo>(() => EditProfileRepo(getIt()));
   getIt.registerFactory<EditProfileCubit>(() => EditProfileCubit(getIt()));
 
+//  getIt.registerLazySingleton<UserStatsRepo>(() => UserStatsRepo(getIt()));
+  getIt.registerFactory<UserStatsCubit>(() => UserStatsCubit(getIt()));
+
   getIt.registerLazySingleton<HadithAnalysisRepo>(
     () => HadithAnalysisRepo(getIt()),
   );
@@ -149,6 +155,8 @@ Future<void> setUpGetIt() async {
   getIt.registerLazySingleton<SeragRepo>(() => SeragRepo(getIt()));
   getIt.registerFactory<SeragCubit>(() => SeragCubit(getIt()));
 
+  getIt.registerLazySingleton<AboutUsRepo>(() => AboutUsRepo(getIt()));
+  getIt.registerFactory<AboutUsCubit>(() => AboutUsCubit(getIt()));
 
 
 ///customApi

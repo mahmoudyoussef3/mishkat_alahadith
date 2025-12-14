@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_model.dart';
 import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_response.dart';
@@ -13,12 +14,11 @@ class BookMarkRepo {
   BookMarkRepo(this._apiService);
 
   /// Get all user bookmarks (with caching)
-  Future<Either<ErrorHandler, BookmarksResponse>> getUserBookMarks() async {
+  Future<Either<ApiErrorModel, BookmarksResponse>> getUserBookMarks() async {
     try {
       final token = await _getUserToken();
-   
+
       final response = await _apiService.getUserBookmarks(token);
- 
 
       return Right(response);
     } catch (e) {
@@ -26,11 +26,10 @@ class BookMarkRepo {
     }
   }
 
-  Future<Either<ErrorHandler, CollectionsResponse>>
+  Future<Either<ApiErrorModel, CollectionsResponse>>
   getBookmarkCollectionsRepo() async {
     try {
       final token = await _getUserToken();
-
 
       final response = await _apiService.getBookmarkCollection(token);
 
@@ -40,13 +39,12 @@ class BookMarkRepo {
     }
   }
 
-  Future<Either<ErrorHandler, AddBookmarkResponse>> deleteBookMark(
+  Future<Either<ApiErrorModel, AddBookmarkResponse>> deleteBookMark(
     int bookmarkId,
   ) async {
     try {
       final token = await _getUserToken();
       final response = await _apiService.deleteUserBookmsrk(bookmarkId, token);
-
 
       return Right(response);
     } catch (e) {
@@ -54,14 +52,13 @@ class BookMarkRepo {
     }
   }
 
-  Future<Either<ErrorHandler, AddBookmarkResponse>> addBookmark(
+  Future<Either<ApiErrorModel, AddBookmarkResponse>> addBookmark(
     Bookmark body,
   ) async {
     try {
       final token = await _getUserToken();
-   
-      final response = await _apiService.addBookmark(token, body);
 
+      final response = await _apiService.addBookmark(token, body);
 
       return Right(response);
     } catch (e) {

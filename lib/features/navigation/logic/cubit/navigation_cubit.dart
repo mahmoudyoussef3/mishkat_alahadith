@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/navigation/data/models/local_hadith_navigation_model.dart';
 import 'package:mishkat_almasabih/features/navigation/data/models/navigation_hadith_model.dart';
 import 'package:mishkat_almasabih/features/navigation/data/repos/navigation_repo.dart';
@@ -24,7 +25,7 @@ class NavigationCubit extends Cubit<NavigationState> {
 
     result.fold(
       (l) => emit(
-        NavigationFailure(l.apiErrorModel.msg ?? 'حدث خطأ حاول مرة أخري'),
+        NavigationFailure(l.getAllErrorMessages()),
       ),
       (r) => emit(NavigationSuccess(r)),
     );

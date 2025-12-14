@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/models/sign_up_response_body.dart';
 import '../../../../../core/networking/api_error_handler.dart';
 import '../../../../../core/networking/api_service.dart';
@@ -9,7 +10,7 @@ class SignupRepo {
 
   SignupRepo(this._apiService);
 
-  Future<Either<ErrorHandler, SignUpResponseBody>> signup(
+  Future<Either<ApiErrorModel, SignUpResponseBody>> signup(
     SignupRequestBody signupRequestBody,
   ) async {
     try {

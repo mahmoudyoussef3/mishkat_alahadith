@@ -17,6 +17,7 @@ import 'package:mishkat_almasabih/features/home/data/models/library_statistics_m
 import 'package:mishkat_almasabih/features/home/data/models/search_history_models.dart';
 import 'package:mishkat_almasabih/features/navigation/data/models/local_hadith_navigation_model.dart';
 import 'package:mishkat_almasabih/features/navigation/data/models/navigation_hadith_model.dart';
+import 'package:mishkat_almasabih/features/profile/data/models/stats_model.dart';
 import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/data/models/remaining_questions_response_model.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/models/enhanced_search_response_model.dart';
@@ -53,27 +54,35 @@ abstract class ApiService {
   Future<CategoryResponse> getBookData(@Path("categoryId") String categoryId);
 
   @GET(ApiConstants.getBookChapters)
-  Future<ChaptersModel> getBookChapters(@Path("bookSlug") String bookSlug);
+  Future<ChaptersModel> getBookChapters(
+    @Path("bookSlug") String bookSlug,
+
+  );
 
   @GET(ApiConstants.getChapterAhadiths)
   Future<HadithResponse> getChapterAhadiths(
     @Path("bookSlug") String bookSlug,
     @Path("chapterId") int chapterId,
+    @Query("page") int page,
+    @Query("paginate") int paginate,
   );
 
   @GET(ApiConstants.getChapterAhadiths)
   Future<LocalHadithResponse> getLocalChapterAhadiths(
     @Path("bookSlug") String bookSlug,
     @Path("chapterId") int chapterId,
+
   );
 
   @GET(ApiConstants.getLocalChapterAhadiths)
   Future<LocalHadithResponse> getThreeBooksLocalChapterAhadiths(
     @Path("bookSlug") String bookSlug,
     @Path("chapterId") int chapterId,
+
   );
 
   @GET(ApiConstants.getBookmarks)
+
   Future<BookmarksResponse> getUserBookmarks(
     @Header("x-auth-token") String token,
   );
@@ -103,10 +112,6 @@ abstract class ApiService {
     @Path("chapter") String chapterName,
   );
 
-  /*
-  @GET(ApiConstants.dailyHadith)
-  Future<HadithData> getDailyHadith();
-  */
   @GET(ApiConstants.bookmarkCollection)
   Future<CollectionsResponse> getBookmarkCollection(
     @Header("x-auth-token") String token,
@@ -169,37 +174,40 @@ abstract class ApiService {
     @Header("x-auth-token") String token,
   );
 
-
   // -----------------------------
-// Search History APIs
-// -----------------------------
+  // Search History APIs
+  // -----------------------------
 
-// 1. إضافة بحث جديد
-@POST(ApiConstants.addSearch)
-Future<AddSearchResponse> addSearch(
-  @Header("x-auth-token") String token,
-  @Body() AddSearchRequest body,
-);
+  // 1. إضافة بحث جديد
+  @POST(ApiConstants.addSearch)
+  Future<AddSearchResponse> addSearch(
+    @Header("x-auth-token") String token,
+    @Body() AddSearchRequest body,
+  );
 
-// 2. جلب تاريخ البحث
-@GET(ApiConstants.getSearchHistory)
-Future<GetSearchHistoryResponse> getSearchHistory(
-  @Header("x-auth-token") String token, 
-);
+  // 2. جلب تاريخ البحث
+  @GET(ApiConstants.getSearchHistory)
+  Future<GetSearchHistoryResponse> getSearchHistory(
+    @Header("x-auth-token") String token,
+  );
 
+  // 3. جلب إحصائيات المستخدم
+  @GET(ApiConstants.getUserStats)
+  Future<StatsModel> getUserStats(
+    @Header("x-auth-token") String token,
+  );
 
-// 4. حذف بحث محدد
-@DELETE("${ApiConstants.deleteSearch}/{id}")
-Future<DeleteSearchResponse> deleteSearch(
-  @Header("x-auth-token") String token,
-  @Path("id") int searchId,
-);
+  // 4. حذف بحث محدد
+  @DELETE("${ApiConstants.deleteSearch}/{id}")
+  Future<DeleteSearchResponse> deleteSearch(
+    @Header("x-auth-token") String token,
+    @Path("id") int searchId,
+  );
 
-// 5. حذف كل تاريخ البحث
-@DELETE(ApiConstants.deleteAllSearch)
-Future<DeleteAllSearchResponse> deleteAllSearch(
-  @Header("x-auth-token") String token,
-  @Body() Map<String, dynamic> body,
-);
-
+  // 5. حذف كل تاريخ البحث
+  @DELETE(ApiConstants.deleteAllSearch)
+  Future<DeleteAllSearchResponse> deleteAllSearch(
+    @Header("x-auth-token") String token,
+    @Body() Map<String, dynamic> body,
+  );
 }

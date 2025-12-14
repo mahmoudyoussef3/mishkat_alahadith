@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/search_with_filters/data/models/search_with_filters_model.dart';
 import 'package:mishkat_almasabih/features/search_with_filters/data/repos/search_with_filters_repo.dart';
 
@@ -29,7 +30,7 @@ class SearchWithFiltersCubit extends Cubit<SearchWithFiltersState> {
     result.fold(
       (l) => emit(
         SearchWithFiltersFailure(
-          l.apiErrorModel.msg ?? 'حديث خطأ. حاول مرة أخري',
+          l.getAllErrorMessages() ,
         ),
       ),
       (r) => emit(SearchWithFiltersSuccess(r)),

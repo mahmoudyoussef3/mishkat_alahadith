@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/data/models/remaining_questions_response_model.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/data/repos/remaining_questions_repo.dart';
 
@@ -19,7 +20,7 @@ class RemainingQuestionsCubit extends Cubit<RemainingQuestionsState> {
     result.fold(
       (l) => emit(
         RemainingQuestionsFailure(
-          l.apiErrorModel.msg ?? "حدث خطأ. حاول مرة أخري",
+          l.getAllErrorMessages() ,
         ),
       ),
       (r) {
