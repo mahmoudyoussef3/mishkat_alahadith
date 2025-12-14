@@ -1,4 +1,4 @@
-# 🕌 مشكاة الأحاديث - Mishkat Al-Ahadith
+# 🕌 Mishkat Al-Ahadith
 
 <div align="center">
 
@@ -7,348 +7,341 @@
 ![BLoC](https://img.shields.io/badge/BLoC-8.1.4-00B4AB.svg)
 [![Google Play](https://img.shields.io/badge/Google_Play-Download-414141?logo=google-play)](https://play.google.com/store/apps/details?id=com.mishkat_almasabih.app&hl=ar)
 
-**تطبيق مكتبة الأحاديث الإسلامية المصمم بعناية مع واجهة مستخدم جميلة**
-
 **A beautifully designed Islamic Hadith library application built with Flutter**
 
-[📥 حمّل من Google Play](https://play.google.com/store/apps/details?id=com.mishkat_almasabih.app&hl=ar)
+[📥 Download from Google Play](https://play.google.com/store/apps/details?id=com.mishkat_almasabih.app&hl=ar)
 
 </div>
 
 ---
 
-## 📖 جدول المحتويات | Table of Contents
+## 📖 Table of Contents
 
-- [🌟 نظرة عامة | Overview](#-نظرة-عامة--overview)
-- [✨ المميزات | Features](#-المميزات--features)
-- [🏗️ البنية المعمارية | Architecture](#️-البنية-المعمارية--architecture)
-- [🎨 نظام التصميم | Design System](#-نظام-التصميم--design-system)
-- [📱 لقطات الشاشة | Screenshots](#-لقطات-الشاشة--screenshots)
-- [🛠️ التقنيات المستخدمة | Tech Stack](#️-التقنيات-المستخدمة--tech-stack)
-- [📁 هيكل المشروع | Project Structure](#-هيكل-المشروع--project-structure)
-- [🚀 البدء | Getting Started](#-البدء--getting-started)
-- [📚 التوثيق | Documentation](#-التوثيق--documentation)
-- [🤝 المساهمة | Contributing](#-المساهمة--contributing)
+- [🌟 Overview](#-overview)
+- [✨ Features](#-features)
+- [🏗️ Architecture](#️-architecture)
+- [🎨 Design System](#-design-system)
+- [📱 Screenshots](#-screenshots)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Getting Started](#-getting-started)
+- [🤝 Contributing](#-contributing)
 
 ---
 
-## 🌟 نظرة عامة | Overview
-
-**مشكاة الأحاديث** تطبيق شامل لمكتبة الأحاديث الإسلامية يوفر للمستخدمين الوصول إلى النصوص الإسلامية الأصيلة، والأحاديث اليومية، وتجربة قراءة جميلة. يتبع التطبيق مبادئ هندسة البرمجيات الحديثة ويطبق نظام تصميم إسلامي رائع.
+## 🌟 Overview
 
 **Mishkat Al-Ahadith** is a comprehensive Islamic Hadith library application that provides users with access to authentic Islamic texts, daily hadiths, and a beautiful reading experience. The app follows modern software engineering principles and implements a stunning Islamic-themed design system.
 
-### 🎯 **أبرز النقاط | Key Highlights**
-- 📚 **17 كتابًا إسلاميًا رئيسيًا** مع محتوى شامل
-- 🎨 **تصميم إسلامي جميل** بألوان البنفسجي والذهبي
-- 🏛️ **بنية معمارية نظيفة** تتبع مبادئ SOLID
-- 🔄 **إدارة الحالة** باستخدام نمط BLoC
-- 📱 **تصميم متجاوب** محسّن لجميع الأجهزة
-- 🔤 **دعم اللغة العربية بشكل كامل** مع الاتجاه الصحيح للنص
-- 💾 **إمكانيات غير متصلة بالإنترنت** مع تخزين البيانات محليًا
+### 🎯 Key Highlights
+- 📚 **17 Major Islamic Books** with comprehensive content
+- 🎨 **Beautiful Islamic Design** with purple and gold colors
+- 🏛️ **Clean Architecture** following SOLID principles
+- 🔄 **State Management** using BLoC pattern
+- 📱 **Responsive Design** optimized for all devices
+- 🔤 **Full Arabic Language Support** with proper text direction
+- 💾 **Offline Capabilities** with local data storage
 
 ---
 
-## ✨ المميزات | Features
+## ✨ Features
 
-### 📚 **مميزات المكتبة الأساسية | Core Library Features**
-- **حديث اليوم**: حديث جديد كل يوم مع الشرح
-- **تصنيفات الكتب**: منظمة حسب المواضيع الإسلامية
-- **التنقل بين الأبواب**: تصفح سهل عبر أبواب الكتب
-- **وظيفة البحث**: بحث متقدم عبر جميع المحتويات
-- **نظام الإشارات المرجعية**: حفظ الأحاديث والمقاطع المفضلة
-- **تتبع تقدم القراءة**: تابع رحلتك في القراءة
+### 📚 Core Library Features
+- **Hadith of the Day**: A new hadith every day with explanation
+- **Book Categories**: Organized by Islamic topics
+- **Chapter Navigation**: Easy browsing through book chapters
+- **Search Functionality**: Advanced search across all content
+- **Bookmark System**: Save favorite hadiths and passages
+- **Reading Progress Tracking**: Track your reading journey
 
-### 🔐 **المصادقة وإدارة المستخدم | Authentication & User Management**
-- **تسجيل المستخدم**: إنشاء حساب آمن
-- **نظام تسجيل الدخول**: طرق مصادقة متعددة
-- **تسجيل الدخول بجوجل**: تكامل OAuth
-- **إدارة الملف الشخصي**: تفضيلات وإعدادات المستخدم
-- **مزامنة البيانات**: نسخ احتياطي ومزامنة سحابية
+### 🔐 Authentication & User Management
+- **User Registration**: Create secure accounts
+- **Login System**: Multiple authentication methods
+- **Google Sign-In**: OAuth integration
+- **Profile Management**: User preferences and settings
+- **Data Synchronization**: Cloud backup and sync
 
-### 🎨 **مميزات تجربة المستخدم | User Experience Features**
-- **تصميم إسلامي**: جماليات ثقافية أصيلة
-- **الوضع الداكن/الفاتح**: قراءة مريحة في أي بيئة
-- **تخطيط متجاوب**: محسّن لجميع أحجام الشاشات
-- **رسوم متحركة سلسة**: تفاعلات محسّنة للمستخدم
-- **إمكانية الوصول**: دعم قارئ الشاشة والتباين العالي
+### 🎨 User Experience Features
+- **Islamic Design**: Authentic cultural aesthetics
+- **Dark/Light Mode**: Comfortable reading in any environment
+- **Responsive Layout**: Optimized for all screen sizes
+- **Smooth Animations**: Enhanced user interactions
+- **Accessibility**: Screen reader support and high contrast
 
-### 📱 **المميزات التقنية | Technical Features**
-- **القراءة بدون إنترنت**: تنزيل المحتوى للوصول دون اتصال
-- **إشعارات الدفع**: تذكيرات الحديث اليومي
-- **وظيفة المشاركة**: مشاركة الأحاديث مع الآخرين
-- **دعم متعدد اللغات**: واجهات عربية وإنجليزية
-- **أداء محسّن**: تحميل سريع وتمرير سلس
+### 📱 Technical Features
+- **Offline Reading**: Download content for offline access
+- **Push Notifications**: Daily hadith reminders
+- **Share Functionality**: Share hadiths with others
+- **Multi-Language Support**: Arabic and English interfaces
+- **Optimized Performance**: Fast loading and smooth scrolling
 
 ---
 
-## 🏗️ البنية المعمارية | Architecture
+## 🏗️ Architecture
 
-### **تطبيق البنية النظيفة | Clean Architecture Implementation**
-
-يتبع التطبيق مبادئ **البنية النظيفة** مع تنظيم **يركز على الميزات**، مما يضمن قابلية الصيانة، وقابلية التوسع، والاختبار.
+### Clean Architecture Implementation
 
 The app follows **Clean Architecture** principles with a **Feature-First** organization, ensuring maintainability, scalability, and testability.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    PRESENTATION LAYER                       │
-│                        طبقة العرض                           │
+│                        (UI Layer)                           │
 ├─────────────────────────────────────────────────────────────┤
-│  • Screens (UI) | الشاشات                                  │
-│  • Widgets (Reusable Components) | المكونات القابلة لإعادة الاستخدام │
-│  • BLoC Cubits (State Management) | إدارة الحالة           │
+│  • Screens (UI)                                             │
+│  • Widgets (Reusable Components)                            │
+│  • BLoC Cubits (State Management)                           │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                  BUSINESS LOGIC LAYER                       │
-│                    طبقة منطق الأعمال                        │
+│                   (Domain Layer)                            │
 ├─────────────────────────────────────────────────────────────┤
-│  • Use Cases | حالات الاستخدام                            │
-│  • Business Rules | قواعد الأعمال                          │
-│  • Validation Logic | منطق التحقق                          │
+│  • Use Cases                                                │
+│  • Business Rules                                           │
+│  • Validation Logic                                         │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                       DATA LAYER                            │
-│                       طبقة البيانات                         │
+│                   (Infrastructure Layer)                    │
 ├─────────────────────────────────────────────────────────────┤
-│  • Repositories | المستودعات                               │
-│  • Data Sources (API/Local) | مصادر البيانات               │
-│  • Models | النماذج                                        │
+│  • Repositories                                             │
+│  • Data Sources (API/Local)                                 │
+│  • Models                                                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### **إدارة الحالة باستخدام BLoC | State Management with BLoC**
+### State Management with BLoC
 
-- **تدفق حالة يمكن التنبؤ به**: تدفق واضح من الحدث → الحالة → واجهة المستخدم
-- **فصل الاهتمامات**: منطق الأعمال معزول عن واجهة المستخدم
-- **قابلية الاختبار**: سهولة اختبار منطق الأعمال بشكل مستقل
-- **قابلية التوسع**: سهولة إضافة ميزات وحالات جديدة
+- **Predictable State Flow**: Clear flow from Event → State → UI
+- **Separation of Concerns**: Business logic isolated from UI
+- **Testability**: Easy independent testing of business logic
+- **Scalability**: Easy addition of new features and states
 
-### **حقن التبعية | Dependency Injection**
+### Dependency Injection
 
-- **حاوية GetIt**: إدارة التبعيات المركزية
-- **التحميل الكسول**: تهيئة الخدمات فقط عند الحاجة
-- **قابلية الاختبار**: سهولة محاكاة التبعيات للاختبار
-- **اقتران فضفاض**: يمكن استبدال المكونات بسهولة
+- **GetIt Container**: Centralized dependency management
+- **Lazy Loading**: Services initialized only when needed
+- **Testability**: Easy mocking of dependencies for testing
+- **Loose Coupling**: Components easily replaceable
 
 ---
 
-## 🎨 نظام التصميم | Design System
+## 🎨 Design System
 
-### **لوحة الألوان الإسلامية | Islamic Color Palette**
-
-نظام التصميم الخاص بنا مبني على الجماليات الإسلامية الأصيلة:
+### Islamic Color Palette
 
 Our design system is built around authentic Islamic aesthetics:
-```dart
-// Primary Colors | الألوان الأساسية
-primaryPurple: #7440E9    // اللون الرئيسي للعلامة التجارية
-primaryGold: #FFB300      // لمسات ذهبية إسلامية
-secondaryPurple: #9D7BF0  // تنوعات بنفسجية فاتحة
 
-// Semantic Colors | الألوان الدلالية
-hadithAuthentic: #4CAF50  // صحيح - أخضر
-hadithGood: #9C27B0       // حسن - بنفسجي
-hadithWeak: #FF9800       // ضعيف - برتقالي
+```dart
+// Primary Colors
+primaryPurple: #7440E9    // Main brand color
+primaryGold: #FFB300      // Islamic gold accents
+secondaryPurple: #9D7BF0  // Light purple variations
+
+// Semantic Colors
+hadithAuthentic: #4CAF50  // Authentic (Green)
+hadithGood: #9C27B0       // Good (Purple)
+hadithWeak: #FF9800       // Weak (Orange)
 ```
 
-### **نظام الطباعة | Typography System**
+### Typography System
 
-- **الخط الأساسي**: Amiri (محسّن للعربية)
-- **الخط الاحتياطي**: YaModernPro
-- **الحجم المتجاوب**: استخدام ScreenUtil لطباعة تكيفية
-- **أنماط هرمية**: تسلسل هرمي واضح للنص لقراءة أفضل
+- **Base Font**: Amiri (optimized for Arabic)
+- **Fallback Font**: YaModernPro
+- **Responsive Size**: ScreenUtil for adaptive typography
+- **Hierarchical Styles**: Clear text hierarchy for better readability
 
-### **تصميم المكونات | Component Design**
+### Component Design
 
-- **تخطيط قائم على البطاقات**: عرض معلومات نظيف ومنظم
-- **أنماط إسلامية**: تراكبات هندسية دقيقة
-- **خلفيات متدرجة**: انتقالات ألوان جميلة
-- **ظلال محسّنة**: عمق وتسلسل هرمي بصري
-- **زوايا مستديرة**: مظهر حديث وودود
+- **Card-Based Layout**: Clean and organized information display
+- **Islamic Patterns**: Subtle geometric overlays
+- **Gradient Backgrounds**: Beautiful color transitions
+- **Enhanced Shadows**: Visual depth and hierarchy
+- **Rounded Corners**: Modern and friendly appearance
 
 ---
 
-## 📱 لقطات الشاشة | Screenshots
+## 📱 Screenshots
 
 <div align="center">
 
-### الشاشة الرئيسية | Home Screen
+### Home Screen
 <img src="screenshots/home.webp" width="250" alt="Home Screen"/>
 
-### المكتبة | Library
+### Library
 <img src="screenshots/library.webp" width="250" alt="Library"/>
 
-### الكتب | Books
+### Books
 <img src="screenshots/books.webp" width="250" alt="Books"/>
 
-### الأبواب | Chapters
+### Chapters
 <img src="screenshots/chapters.webp" width="250" alt="Chapters"/>
 
-### الأحاديث | Ahadith
+### Ahadith
 <img src="screenshots/ahadith.webp" width="250" alt="Ahadith"/>
 
-### تفاصيل الحديث | Hadith Details
+### Hadith Details
 <img src="screenshots/hadith_details.webp" width="250" alt="Hadith Details"/>
 
-### نتائج البحث | Search Results
+### Search Results
 <img src="screenshots/search_result.png" width="250" alt="Search Results"/>
 
-### حديث اليوم | Hadith of the Day
+### Hadith of the Day
 <img src="screenshots/hadith_of_th_day.webp" width="250" alt="Hadith of the Day"/>
 
 </div>
 
 ---
 
-## 🛠️ التقنيات المستخدمة | Tech Stack
+## 🛠️ Tech Stack
 
-### **إطار الواجهة الأمامية | Frontend Framework**
-- **Flutter 3.7+**: تطوير تطبيقات متعددة المنصات
-- **Dart 3.7+**: لغة برمجة حديثة وآمنة من حيث النوع
+### Frontend Framework
+- **Flutter 3.7+**: Multi-platform app development
+- **Dart 3.7+**: Modern and type-safe programming language
 
-### **إدارة الحالة | State Management**
-- **flutter_bloc 8.1.4**: إدارة حالة يمكن التنبؤ بها
-- **get_it 7.6.7**: حاوية حقن التبعية
+### State Management
+- **flutter_bloc 8.1.4**: Predictable state management
+- **get_it 7.6.7**: Dependency injection container
 
-### **الشبكات والـ API | Networking & API**
-- **Dio 5.0.0**: عميل HTTP مع اعتراضات
-- **Retrofit 4.0.3**: عميل HTTP آمن من حيث النوع
-- **pretty_dio_logger 1.3.1**: تسجيل API جميل
+### Networking & API
+- **Dio 5.0.0**: HTTP client with interceptors
+- **Retrofit 4.0.3**: Type-safe HTTP client
+- **pretty_dio_logger 1.3.1**: Beautiful API logging
 
-### **واجهة المستخدم والتصميم | UI & Design**
-- **flutter_screenutil 5.9.0**: أدوات تصميم متجاوب
-- **flutter_animate 4.5.2**: رسوم متحركة سلسة
-- **shimmer 3.0.0**: رسوم متحركة لحالة التحميل
-- **flutter_svg 2.2.0**: دعم الرسومات المتجهة
+### UI & Design
+- **flutter_screenutil 5.9.0**: Responsive design utilities
+- **flutter_animate 4.5.2**: Smooth animations
+- **shimmer 3.0.0**: Loading state animations
+- **flutter_svg 2.2.0**: Vector graphics support
 
-### **البيانات والتخزين | Data & Storage**
-- **shared_preferences 2.5.3**: استمرارية البيانات المحلية
-- **dartz 0.10.1**: أدوات البرمجة الوظيفية
+### Data & Storage
+- **shared_preferences 2.5.3**: Local data persistence
+- **dartz 0.10.1**: Functional programming tools
 
-### **المصادقة | Authentication**
-- **google_sign_in 6.2.2**: تكامل OAuth
-- **permission_handler 12.0.1**: أذونات الجهاز
+### Authentication
+- **google_sign_in 6.2.2**: OAuth integration
+- **permission_handler 12.0.1**: Device permissions
 
 ---
 
-## 📁 هيكل المشروع | Project Structure
+## 📁 Project Structure
+
 ```
 lib/
-├── core/                           # طبقة التطبيق الأساسية | Core application layer
-│   ├── di/                        # حقن التبعية | Dependency injection
-│   ├── helpers/                   # وظائف مساعدة | Utility functions
-│   ├── networking/                # طبقة API و HTTP | API and HTTP layer
-│   ├── routing/                   # إدارة التنقل | Navigation management
-│   ├── theming/                   # السمات والأنماط | Themes and styling
-│   └── widgets/                   # مكونات مشتركة | Shared components
-├── features/                      # وحدات الميزات | Feature modules
-│   ├── authentication/            # تدفقات تسجيل الدخول/الاشتراك
-│   ├── home/                     # لوحة التحكم الرئيسية
-│   ├── hadith_daily/             # ميزة حديث اليوم
-│   ├── hadith_details/           # عروض تفاصيل الحديث
-│   ├── library/                  # إدارة مكتبة الكتب
-│   ├── bookmark/                 # نظام الإشارات المرجعية
-│   ├── search/                   # وظيفة البحث
-│   ├── profile/                  # إدارة ملف المستخدم
-│   ├── chapters/                 # التنقل في الأبواب
-│   ├── ahadith/                  # محتوى الأحاديث
-│   ├── book_data/                # معلومات الكتب
-│   ├── navigation/               # منطق التنقل
-│   ├── notification/             # إشعارات الدفع
-│   ├── main_navigation/          # التنقل السفلي
-│   ├── onboarding/               # تأهيل المستخدم
-│   └── splash/                   # شاشة البداية
-├── main_development.dart          # نقطة دخول التطوير
-├── main_production.dart           # نقطة دخول الإنتاج
-└── mishkat_almasabih.dart        # تكوين التطبيق الرئيسي
+├── core/                           # Core application layer
+│   ├── di/                        # Dependency injection
+│   ├── helpers/                   # Utility functions
+│   ├── networking/                # API and HTTP layer
+│   ├── routing/                   # Navigation management
+│   ├── theming/                   # Themes and styling
+│   └── widgets/                   # Shared components
+├── features/                      # Feature modules
+│   ├── authentication/            # Login/signup flows
+│   ├── home/                     # Main dashboard
+│   ├── hadith_daily/             # Daily hadith feature
+│   ├── hadith_details/           # Hadith details views
+│   ├── library/                  # Book library management
+│   ├── bookmark/                 # Bookmark system
+│   ├── search/                   # Search functionality
+│   ├── profile/                  # User profile management
+│   ├── chapters/                 # Chapter navigation
+│   ├── ahadith/                  # Hadith content
+│   ├── book_data/                # Book information
+│   ├── navigation/               # Navigation logic
+│   ├── notification/             # Push notifications
+│   ├── main_navigation/          # Bottom navigation
+│   ├── onboarding/               # User onboarding
+│   └── splash/                   # Splash screen
+├── main_development.dart          # Development entry point
+├── main_production.dart           # Production entry point
+└── mishkat_almasabih.dart        # Main app configuration
 ```
 
-### **هيكل وحدة الميزة | Feature Module Structure**
-
-تتبع كل ميزة هيكلًا متسقًا:
+### Feature Module Structure
 
 Each feature follows a consistent structure:
+
 ```
 feature_name/
-├── data/                          # طبقة البيانات | Data layer
-│   ├── models/                    # نماذج البيانات | Data models
-│   ├── repos/                     # تطبيقات المستودع | Repository implementations
-│   └── datasources/               # مصادر بيانات API والمحلية
-├── logic/                         # طبقة منطق الأعمال | Business logic layer
+├── data/                          # Data layer
+│   ├── models/                    # Data models
+│   ├── repos/                     # Repository implementations
+│   └── datasources/               # API and local data sources
+├── logic/                         # Business logic layer
 │   └── cubit/                     # BLoC cubits
-└── ui/                            # طبقة العرض | Presentation layer
-    ├── screens/                   # الشاشات الرئيسية | Main screens
-    └── widgets/                   # ويدجت خاصة بالميزة | Feature-specific widgets
+└── ui/                            # Presentation layer
+    ├── screens/                   # Main screens
+    └── widgets/                   # Feature-specific widgets
 ```
 
 ---
 
-## 🚀 البدء | Getting Started
+## 🚀 Getting Started
 
-### **المتطلبات الأساسية | Prerequisites**
+### Prerequisites
 
-- Flutter SDK 3.7.0 أو أعلى
-- Dart SDK 3.7.0 أو أعلى
+- Flutter SDK 3.7.0 or higher
+- Dart SDK 3.7.0 or higher
 - Android Studio / VS Code
 - Git
 
-### **التثبيت | Installation**
+### Installation
+
 ```bash
-# 1. استنساخ المستودع | Clone the repository
+# 1. Clone the repository
 git clone https://github.com/mahmoudyoussef3/mishkat_almasabih.git
 cd mishkat-ahadith
 
-# 2. تثبيت التبعيات | Install dependencies
+# 2. Install dependencies
 flutter pub get
 
-# 3. تشغيل التطبيق | Run the app
+# 3. Run the app
 flutter run
 ```
 
-### **إعداد البيئة | Environment Setup**
-
-يدعم التطبيق بيئات متعددة:
+### Environment Setup
 
 The app supports multiple environments:
 
-- **التطوير | Development**: `flutter run --flavor development`
-- **الإنتاج | Production**: `flutter run --flavor production`
+- **Development**: `flutter run --flavor development`
+- **Production**: `flutter run --flavor production`
 
-### **أوامر البناء | Build Commands**
+### Build Commands
+
 ```bash
 # Android APK
 flutter build apk 
 
-# Android App Bundle (للنشر على Google Play)
+# Android App Bundle (for Google Play release)
 flutter build appbundle
 
 # iOS
+flutter build ios
+```
 
+---
 
-
-## 🤝 المساهمة | Contributing
-
-نرحب بالمساهمات من المجتمع! يرجى قراءة إرشادات المساهمة الخاصة بنا:
+## 🤝 Contributing
 
 We welcome contributions from the community! Please read our contributing guidelines:
 
-### **سير عمل التطوير | Development Workflow**
+### Development Workflow
 
-1. **Fork المستودع | Fork the repository**
-2. **إنشاء فرع ميزة | Create a feature branch**
+1. **Fork the repository**
+2. **Create a feature branch**
 ```bash
    git checkout -b feature/amazing-feature
 ```
-3. **قم بإجراء تغييراتك | Make your changes**
-4. **قم بالالتزام بتغييراتك | Commit your changes**
+3. **Make your changes**
+4. **Commit your changes**
 ```bash
    git commit -m 'Add amazing feature'
 ```
-5. **ادفع إلى الفرع | Push to the branch**
+5. **Push to the branch**
 ```bash
    git push origin feature/amazing-feature
 ```
@@ -364,12 +357,12 @@ We welcome contributions from the community! Please read our contributing guidel
 ---
 
 
-## 🙏 شكر وتقدير | Acknowledgments
+## 🙏 Acknowledgments
 
-- **العلماء الإسلاميون**: للمحتوى الأصيل من الأحاديث
-- **مجتمع Flutter**: لأدوات التطوير الممتازة
-- **مصدر إلهام التصميم**: الفن والعمارة الإسلامية التقليدية
-- **المساهمون**: جميع المطورين الذين ساهموا في هذا المشروع
+- **Islamic Scholars**: For authentic hadith content
+- **Flutter Community**: For excellent development tools
+- **Design Inspiration**: Traditional Islamic art and architecture
+- **Contributors**: All developers who contributed to this project
 
 ---
 
@@ -383,15 +376,12 @@ We welcome contributions from the community! Please read our contributing guidel
 
 <div align="center">
 
-**صُنع بـ ❤️ للمجتمع الإسلامي | Made with ❤️ for the Islamic community**
-
-*"طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ"*
+**Made with ❤️ for the Islamic community**
 
 *"Seeking knowledge is obligatory upon every Muslim" - Prophet Muhammad ﷺ*
 
 ---
 
-### ⭐ إذا أعجبك المشروع، لا تنسَ إعطاءه نجمة!
 ### ⭐ If you like this project, don't forget to give it a star!
 
 </div>

@@ -120,7 +120,9 @@ class _BookmarkListState extends State<BookmarkList> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: filteredSearch.length,
-      separatorBuilder: (_, __) => const IslamicSeparator(),
+      separatorBuilder: (_, __) => const IslamicSeparator(
+        
+      ),
       itemBuilder: (context, index) {
         final hadith = filteredSearch[index];
         final createdAt = formatDateArabic(hadith.createdAt);

@@ -9,6 +9,7 @@ import 'package:mishkat_almasabih/core/widgets/double_tap_to_exot.dart';
 import 'package:mishkat_almasabih/core/widgets/miskat_drawer.dart';
 import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 import 'package:mishkat_almasabih/features/home/data/models/search_history_models.dart';
 import 'package:mishkat_almasabih/features/home/logic/cubit/get_library_statistics_cubit.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
@@ -59,36 +60,39 @@ class _HomeScreenState extends State<HomeScreen> {
     return DoubleTapToExitApp(
       myScaffoldScreen: Directionality(
         textDirection: TextDirection.rtl,
-        child: SafeArea(
-          top: true,
-          bottom: false,
-          child: Scaffold(
-            drawer: const MishkatDrawer(),
-            backgroundColor: ColorsManager.secondaryBackground,
-            floatingActionButton: FloatingActionButton.extended(
-              backgroundColor: ColorsManager.primaryGreen,
-              foregroundColor: ColorsManager.secondaryBackground,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (_) => BlocProvider(
-                          create: (_) => getIt<GetLibraryStatisticsCubit>(),
-                          child: const LibraryBooksScreen(),
-                        ),
-                  ),
-                );
-              },
-              label: Row(
-                children: [
-                  Icon(Icons.local_library_sharp),
-                  SizedBox(width: 4.w),
-                  Text('المكتبة', style: TextStyle(fontSize: 16.sp)),
-                ],
+        child: RefreshIndicator(
+          onRefresh: () => SaveHadithDailyRepo().getHadith(),
+          child: SafeArea(
+            top: true,
+            bottom: false,
+            child: Scaffold(
+              drawer: const MishkatDrawer(),
+              backgroundColor: ColorsManager.secondaryBackground,
+              floatingActionButton: FloatingActionButton.extended(
+                backgroundColor: ColorsManager.primaryGreen,
+                foregroundColor: ColorsManager.secondaryBackground,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (_) => BlocProvider(
+                            create: (_) => getIt<GetLibraryStatisticsCubit>(),
+                            child: const LibraryBooksScreen(),
+                          ),
+                    ),
+                  );
+                },
+                label: Row(
+                  children: [
+                    Icon(Icons.local_library_sharp),
+                    SizedBox(width: 4.w),
+                    Text('المكتبة', style: TextStyle(fontSize: 16.sp)),
+                  ],
+                ),
               ),
+              body: _buildBody(),
             ),
-            body: _buildBody(),
           ),
         ),
       ),
