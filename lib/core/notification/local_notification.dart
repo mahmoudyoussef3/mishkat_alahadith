@@ -22,16 +22,17 @@ class LocalNotification {
     // 1. Configure iOS initialization settings
     const DarwinInitializationSettings iOSSettings =
         DarwinInitializationSettings(
-            requestAlertPermission: true,
-            requestBadgePermission: true,
-            requestSoundPermission: true,
-            requestProvisionalPermission: true,
-            requestCriticalPermission: true,
-            defaultPresentAlert: true,
-            defaultPresentSound: true,
-            defaultPresentBadge: true,
-            defaultPresentBanner: true,
-            defaultPresentList: true);
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+          requestProvisionalPermission: true,
+          requestCriticalPermission: true,
+          defaultPresentAlert: true,
+          defaultPresentSound: true,
+          defaultPresentBadge: true,
+          defaultPresentBanner: true,
+          defaultPresentList: true,
+        );
 
     // 2. Initialize settings for both platforms
     InitializationSettings settings = const InitializationSettings(
@@ -50,7 +51,8 @@ class LocalNotification {
       if (Platform.isIOS) {
         final bool? result = await flutterLocalNotificationsPlugin
             .resolvePlatformSpecificImplementation<
-                IOSFlutterLocalNotificationsPlugin>()
+              IOSFlutterLocalNotificationsPlugin
+            >()
             ?.requestPermissions(
               alert: true, // Request alert permission again
               badge: true,
@@ -70,8 +72,9 @@ class LocalNotification {
 
     if (notificationResponse.payload != null) {
       final payloadData = notificationResponse.payload!;
-      final navigatingHandler =
-          NotificationHandlerFactory.getHandler(payloadData);
+      final navigatingHandler = NotificationHandlerFactory.getHandler(
+        payloadData,
+      );
       navigatingHandler?.handleOnTap();
     }
 
@@ -79,7 +82,8 @@ class LocalNotification {
   }
 
   static Future<void> forgroundNotificationHandler(
-      RemoteMessage message) async {
+    RemoteMessage message,
+  ) async {
     log('Handling foreground notification: ${message.messageId}');
 
     // 1. Create iOS-specific notification details
@@ -95,14 +99,14 @@ class LocalNotification {
     // 2. Create Android notification details
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-      'id_1',
-      'Renew Your Order',
-      importance: Importance.max,
-      priority: Priority.high,
-      showWhen: true,
-      enableVibration: true,
-      ticker: 'ticker',
-    );
+          'id_1',
+          'Renew Your Order',
+          importance: Importance.max,
+          priority: Priority.high,
+          showWhen: true,
+          enableVibration: true,
+          ticker: 'ticker',
+        );
 
     // 3. Combine platform-specific details
     const NotificationDetails platformDetails = NotificationDetails(
@@ -126,5 +130,70 @@ class LocalNotification {
     } catch (e) {
       log('Error showing foreground notification: $e');
     }
+  }
+
+  /// Schedule an hourly reminder notification for a specific section.
+  ///
+  /// Uses `periodicallyShow` on Android. On iOS, attempts to use the closest
+  /// available scheduling option; if not supported, will display immediately
+  /// once and rely on push or manual triggers.
+  static Future<void> scheduleHourlyReminder({
+    required int id,
+    required String channelId,
+    required String channelName,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentBanner: true,
+      presentSound: true,
+      sound: 'default',
+    );
+
+    final AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          channelId,
+          channelName,
+          importance: Importance.max,
+          priority: Priority.high,
+          enableVibration: true,
+          ticker: 'ticker',
+        );
+
+    final NotificationDetails platformDetails = NotificationDetails(
+      iOS: iOSDetails,
+      android: androidDetails,
+    );
+
+    try {
+      await flutterLocalNotificationsPlugin.periodicallyShow(
+        id,
+        title,
+        body,
+        RepeatInterval.everyMinute,
+        platformDetails,
+        payload: payload,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    } catch (e) {
+      // Fallback: show once to avoid complete failure (especially iOS)
+      await flutterLocalNotificationsPlugin.show(
+        id,
+        title,
+        body,
+        platformDetails,
+        payload: payload,
+      );
+    }
+  }
+
+  /// Cancel a previously scheduled reminder using its unique ID.
+  static Future<void> cancelReminder(int id) async {
+    try {
+      await flutterLocalNotificationsPlugin.cancel(id);
+    } catch (_) {}
   }
 }

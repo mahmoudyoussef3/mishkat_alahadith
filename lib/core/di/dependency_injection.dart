@@ -49,6 +49,9 @@ import '../../features/authentication/login/logic/cubit/login_cubit.dart';
 import '../networking/api_service.dart';
 import '../networking/dio_factory.dart';
 import '../../features/authentication/login/data/repo/login_repo.dart';
+import 'package:mishkat_almasabih/features/daily_zekr/data/repo/zekr_repository.dart';
+import 'package:mishkat_almasabih/features/daily_zekr/data/repo/shared_prefs_zekr_repository.dart';
+import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
 
 final getIt = GetIt.instance;
 final customGetIt = GetIt.instance;
@@ -135,7 +138,7 @@ Future<void> setUpGetIt() async {
   getIt.registerLazySingleton<EditProfileRepo>(() => EditProfileRepo(getIt()));
   getIt.registerFactory<EditProfileCubit>(() => EditProfileCubit(getIt()));
 
-//  getIt.registerLazySingleton<UserStatsRepo>(() => UserStatsRepo(getIt()));
+  //  getIt.registerLazySingleton<UserStatsRepo>(() => UserStatsRepo(getIt()));
   getIt.registerFactory<UserStatsCubit>(() => UserStatsCubit(getIt()));
 
   getIt.registerLazySingleton<HadithAnalysisRepo>(
@@ -158,14 +161,29 @@ Future<void> setUpGetIt() async {
   getIt.registerLazySingleton<AboutUsRepo>(() => AboutUsRepo(getIt()));
   getIt.registerFactory<AboutUsCubit>(() => AboutUsCubit(getIt()));
 
+  ///customApi
+  customGetIt.registerLazySingleton<CustomApiService>(
+    () => CustomApiService(dio),
+  );
+  customGetIt.registerLazySingleton<RandomAhadithRepo>(
+    () => RandomAhadithRepo(customGetIt()),
+  );
+  customGetIt.registerFactory<RandomAhadithCubit>(
+    () => RandomAhadithCubit(customGetIt()),
+  );
 
-///customApi
-  customGetIt.registerLazySingleton<CustomApiService>(() => CustomApiService(dio));
-  customGetIt.registerLazySingleton<RandomAhadithRepo>(() => RandomAhadithRepo(customGetIt()));
-  customGetIt.registerFactory<RandomAhadithCubit>(() => RandomAhadithCubit(customGetIt()));
+  customGetIt.registerLazySingleton<SearchHistoryRepo>(
+    () => SearchHistoryRepo(getIt()),
+  );
+  customGetIt.registerFactory<SearchHistoryCubit>(
+    () => SearchHistoryCubit(getIt()),
+  );
 
-
-    customGetIt.registerLazySingleton<SearchHistoryRepo>(() => SearchHistoryRepo(getIt()));
-  customGetIt.registerFactory<SearchHistoryCubit>(() => SearchHistoryCubit(getIt()));
-  
+  // Daily Zekr feature
+  getIt.registerLazySingleton<ZekrRepository>(
+    () => const SharedPrefsZekrRepository(),
+  );
+  getIt.registerFactory<DailyZekrCubit>(
+    () => DailyZekrCubit(getIt<ZekrRepository>()),
+  );
 }

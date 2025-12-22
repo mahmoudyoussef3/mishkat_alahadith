@@ -63,8 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: RefreshIndicator(
           onRefresh: () => SaveHadithDailyRepo().getHadith(),
           child: SafeArea(
-            top: true,
-            bottom: false,
+              top: false,
+        bottom: true,
             child: Scaffold(
               drawer: const MishkatDrawer(),
               backgroundColor: ColorsManager.secondaryBackground,

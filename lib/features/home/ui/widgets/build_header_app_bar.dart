@@ -26,7 +26,7 @@ class BuildHeaderAppBar extends StatelessWidget {
     return SliverAppBar(
       leading: const SizedBox.shrink(),
       automaticallyImplyLeading: false,
-      expandedHeight: 120.h,
+      expandedHeight: 100.h,
       floating: true,
       pinned: pinned,
       backgroundColor: ColorsManager.primaryPurple,
@@ -68,7 +68,7 @@ class BuildHeaderAppBar extends StatelessWidget {
 
             // Content
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 12.h),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -90,7 +90,7 @@ class BuildHeaderAppBar extends StatelessWidget {
                           }
                         },
                       ),
-            
+
                       // Actions
                       if (actions != null && actions!.isNotEmpty)
                         Row(
@@ -107,7 +107,7 @@ class BuildHeaderAppBar extends StatelessWidget {
                         SizedBox(width: 40.w),
                     ],
                   ),
-            
+
                   // Title section (centered)
                   Expanded(
                     child: Center(
@@ -115,31 +115,36 @@ class BuildHeaderAppBar extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            title,
-                            style: TextStyles.displaySmall.copyWith(
-                              color: ColorsManager.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 26.sp,
-                              letterSpacing: 0.5,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (description != null &&
-                              description!.isNotEmpty) ...[
-                            //   SizedBox(height: 3.h),
-                            Text(
-                              description!,
-                              style: TextStyles.bodyMedium.copyWith(
-                                color: ColorsManager.white.withOpacity(0.85),
-                                fontSize: 14.sp,
+                          Flexible(
+                            child: Text(
+                              title,
+                              style: TextStyles.displaySmall.copyWith(
+                                color: ColorsManager.white,
                                 fontWeight: FontWeight.w700,
+                                fontSize: 24.sp,
+                                letterSpacing: 0.5,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          if (description != null &&
+                              description!.isNotEmpty) ...[
+                            //   SizedBox(height: 3.h),
+                            Flexible(
+                              child: Text(
+                                description!,
+                                style: TextStyles.bodyMedium.copyWith(
+                                  color: ColorsManager.white.withOpacity(0.85),
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ],
@@ -170,7 +175,10 @@ class BuildHeaderAppBar extends StatelessWidget {
           height: 40.w,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1,
+            ),
           ),
           child: Icon(icon, color: Colors.white, size: 20.sp),
         ),

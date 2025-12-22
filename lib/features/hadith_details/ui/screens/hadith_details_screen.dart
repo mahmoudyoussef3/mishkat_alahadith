@@ -114,9 +114,9 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
       ],
       child: Directionality(
         textDirection: TextDirection.rtl,
-        child: SafeArea(
-          top: true,
-          bottom: false,
+        child:SafeArea(
+              top: false,
+        bottom: true,
           child: Scaffold(
             floatingActionButton: Builder(
               builder: (context) {

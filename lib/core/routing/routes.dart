@@ -17,10 +17,11 @@ class Routes {
   static const String searchScreen = '/searchScreen';
   static const String libraryScreen = '/libraryScreen';
 
-
   static const String homeScreen = '/homeScreen';
-    static const String   usersSuggestions = '/usersSuggestions';
+  static const String usersSuggestions = '/usersSuggestions';
 
   static const String aboutUs = '/aboutUs';
 
+  static const String dailyZekrScreen = '/dailyZekr';
+  static const String prayerTimesScreen = '/prayerTimes';
 }

@@ -12,6 +12,8 @@ class AboutUsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+              top: false,
+        bottom: true,
       child: 
        Directionality(
         textDirection: TextDirection.rtl,
