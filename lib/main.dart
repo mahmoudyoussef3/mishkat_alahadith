@@ -23,9 +23,7 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-  final FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(
-    analytics: analytics,
-  );
+  final FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(analytics: analytics);
   //await Firebase.initializeApp();
 
   // تهيئة الـ FCM (مرة واحدة بس)
@@ -67,7 +65,7 @@ Future<void> main() async {
     return true;
   };
   await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
-  debugRepaintRainbowEnabled = true;
+ // debugRepaintRainbowEnabled = true;
 
   runApp(app);
 }
