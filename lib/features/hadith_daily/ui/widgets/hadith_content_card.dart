@@ -149,6 +149,7 @@ class HadithContentCard extends StatelessWidget {
                       icon: Icons.share_rounded,
                       color: ColorsManager.primaryGreen,
                       tooltip: "مشاركة الحديث",
+                      
                       onTap: () async {
                 await Share.share(data.hadeeth??"", subject: "شارك الحديث");
               },
@@ -216,4 +217,5 @@ class HadithContentCard extends StatelessWidget {
       ),
     );
   }
+  
 }

@@ -17,6 +17,7 @@ import 'package:mishkat_almasabih/features/chapters/ui/screens/chapters_screen.d
 import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/ui/screen/daily_hadith_screen.dart';
+import 'package:mishkat_almasabih/features/hadith_details/ui/screens/hadith_details_screen.dart';
 import 'package:mishkat_almasabih/features/home/logic/cubit/get_all_books_with_categories_cubit.dart';
 import 'package:mishkat_almasabih/features/home/logic/cubit/get_library_statistics_cubit.dart';
 import 'package:mishkat_almasabih/features/home/ui/home_screen.dart';
@@ -56,6 +57,27 @@ class AppRouter {
 
   Route? generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case Routes.hadithDetail:
+        _logScreenView('HadithDetail');
+        final args = (settings.arguments as Map?) ?? {};
+        return MaterialPageRoute(
+          builder:
+              (_) => HadithDetailScreen(
+                hadithText: args['hadithText'] as String?,
+                chapterNumber: (args['chapterNumber'] as String?) ?? '',
+                narrator: args['narrator'] as String?,
+                grade: args['grade'] as String?,
+                bookName: args['bookName'] as String?,
+                author: args['author'] as String?,
+                chapter: args['chapter'] as String?,
+                authorDeath: args['authorDeath'] as String?,
+                hadithNumber: args['hadithNumber'] as String?,
+                bookSlug: args['bookSlug'] as String?,
+                isBookMark: false,
+                isLocal: (args['isLocal'] as bool?) ?? false,
+                showNavigation: true,
+              ),
+        );
       case Routes.splashScreen:
         _logScreenView('SplashScreen');
         return MaterialPageRoute(builder: (_) => const SplashScreen());
@@ -305,7 +327,7 @@ class AppRouter {
                 child: const DailyZekrScreen(),
               ),
         );
-              case Routes.prayerTimesScreen:
+      case Routes.prayerTimesScreen:
         _logScreenView('PrayerTimesScreen');
         return MaterialPageRoute(
           builder:

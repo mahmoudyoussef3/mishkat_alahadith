@@ -21,7 +21,7 @@ class ShareImageEditorBottomSheet extends StatefulWidget {
   final String initialFontFamily;
 
   const ShareImageEditorBottomSheet({
-    Key? key,
+    super.key,
     required this.text,
     this.appName = 'مشكاة المصابيح',
     this.appIconAsset = 'assets/images/app_logo.png',
@@ -29,7 +29,7 @@ class ShareImageEditorBottomSheet extends StatefulWidget {
     this.allowShareTextOnly = true,
     this.initialFontSize = 28,
     this.initialFontFamily = 'Amiri',
-  }) : super(key: key);
+  });
 
   @override
   State<ShareImageEditorBottomSheet> createState() =>
@@ -62,106 +62,109 @@ class _ShareImageEditorBottomSheetState
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    return Container(
-      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
-      decoration: BoxDecoration(
-        color: ColorsManager.secondaryBackground,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                child: Row(
-                  children: [
-                    Text(
-                      'تخصيص صورة المشاركة',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: ColorsManager.primaryText,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+        decoration: BoxDecoration(
+          color: ColorsManager.secondaryBackground,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                  child: Row(
+                    children: [
+                      Text(
+                        'تخصيص صورة المشاركة',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: ColorsManager.primaryText,
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    if (widget.allowShareTextOnly)
-                      TextButton.icon(
-                        onPressed: _shareTextOnly,
-                        icon: const Icon(Icons.text_fields_rounded),
-                        label: const Text('نص فقط'),
+                      const Spacer(),
+                      if (widget.allowShareTextOnly)
+                        TextButton.icon(
+                          onPressed: _shareTextOnly,
+                          icon: const Icon(Icons.text_fields_rounded),
+                          label: const Text('نص فقط'),
+                        ),
+                      IconButton(
+                        tooltip: 'إغلاق',
+                        onPressed: () => Navigator.of(context).maybePop(),
+                        icon: const Icon(Icons.close_rounded),
                       ),
-                    IconButton(
-                      tooltip: 'إغلاق',
-                      onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Preview
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: AspectRatio(
-                  aspectRatio: 4 / 5,
-                  child: RepaintBoundary(
-                    key: _exportKey,
-                    child: _buildCanvas(),
+                    ],
                   ),
                 ),
-              ),
-
-              SizedBox(height: 12.h),
-
-              // Controls
-              _buildControls(),
-
-              SizedBox(height: 8.h),
-
-              // Action row
-              Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _reset,
-                        icon: const Icon(Icons.restart_alt_rounded),
-                        label: const Text('إعادة الضبط'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: ColorsManager.primaryPurple,
-                        ),
-                      ),
+      
+                // Preview
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: AspectRatio(
+                    aspectRatio: 4 / 5,
+                    child: RepaintBoundary(
+                      key: _exportKey,
+                      child: _buildCanvas(),
                     ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: _isExporting ? null : _exportAndShare,
-                        icon:
-                            _isExporting
-                                ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                                : const Icon(Icons.ios_share_rounded),
-                        label: Text(
-                          _isExporting ? 'جارٍ التصدير...' : 'مشاركة الصورة',
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+      
+                SizedBox(height: 12.h),
+      
+                // Controls
+                _buildControls(),
+      
+                SizedBox(height: 8.h),
+      
+                // Action row
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _reset,
+                          icon: const Icon(Icons.restart_alt_rounded),
+                          label: const Text('إعادة الضبط'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: ColorsManager.primaryPurple,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: _isExporting ? null : _exportAndShare,
+                          icon:
+                              _isExporting
+                                  ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Icon(Icons.ios_share_rounded),
+                          label: Text(
+                            _isExporting ? 'جارٍ التصدير...' : 'مشاركة الصورة',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -410,7 +413,7 @@ class _ShareImageEditorBottomSheetState
                 label: const Text('Cairo'),
                 onSelected: (_) => setState(() => _fontFamily = 'Cairo'),
               ),
-              ChoiceChip(
+           /*   ChoiceChip(
                 selected: _fontWeight == FontWeight.w400,
                 label: const Text('رفيع'),
                 onSelected:
@@ -422,6 +425,7 @@ class _ShareImageEditorBottomSheetState
                 onSelected:
                     (_) => setState(() => _fontWeight = FontWeight.w700),
               ),
+              */
             ],
           ),
 
