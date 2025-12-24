@@ -38,6 +38,7 @@ dependencies:
   font_awesome_flutter: ^10.9.1
   url_launcher: ^6.2.5
   image_picker: ^1.0.7
+  flutter_colorpicker: ^1.0.4
   fluttertoast: ^8.2.12
   solid_lints: ^0.3.1
   easy_notify: ^1.0.0
