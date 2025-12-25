@@ -23,9 +23,9 @@ class PublicSearchResult extends StatelessWidget {
       builder: (context) {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: SafeArea(
-              top: true,
-        bottom: false,
+          child:SafeArea(
+              top: false,
+        bottom: true,
             child: Scaffold(
               backgroundColor: ColorsManager.primaryBackground,
               body: CustomScrollView(

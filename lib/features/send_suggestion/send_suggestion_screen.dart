@@ -77,7 +77,9 @@ class _SuggestionFormState extends State<SuggestionForm> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: SafeArea(
+        child:SafeArea(
+              top: false,
+        bottom: true,
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: LayoutBuilder(

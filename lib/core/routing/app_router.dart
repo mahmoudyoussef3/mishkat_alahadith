@@ -2,7 +2,8 @@ import 'dart:developer';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/features/about_us/logic/cubit/about_us_cubit.dart' show AboutUsCubit;
+import 'package:mishkat_almasabih/features/about_us/logic/cubit/about_us_cubit.dart'
+    show AboutUsCubit;
 import 'package:mishkat_almasabih/features/about_us/ui/screens/about_us_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/ui/screens/signup_screen.dart';
@@ -16,10 +17,13 @@ import 'package:mishkat_almasabih/features/chapters/ui/screens/chapters_screen.d
 import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/ui/screen/daily_hadith_screen.dart';
+import 'package:mishkat_almasabih/features/hadith_details/ui/screens/hadith_details_screen.dart';
 import 'package:mishkat_almasabih/features/home/logic/cubit/get_all_books_with_categories_cubit.dart';
 import 'package:mishkat_almasabih/features/home/logic/cubit/get_library_statistics_cubit.dart';
 import 'package:mishkat_almasabih/features/home/ui/home_screen.dart';
 import 'package:mishkat_almasabih/features/library_books_screen.dart';
+import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
+import 'package:mishkat_almasabih/features/prayer_times/ui/prayer_times_screen.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/profile_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/ui/profile_screen.dart';
@@ -42,6 +46,8 @@ import '../../features/authentication/login/logic/cubit/login_cubit.dart';
 import '../../features/authentication/login/ui/screens/login_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/splash/splash_screen.dart';
+import 'package:mishkat_almasabih/features/daily_zekr/ui/screen/daily_zekr_screen.dart';
+import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
 
 class AppRouter {
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -51,6 +57,27 @@ class AppRouter {
 
   Route? generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case Routes.hadithDetail:
+        _logScreenView('HadithDetail');
+        final args = (settings.arguments as Map?) ?? {};
+        return MaterialPageRoute(
+          builder:
+              (_) => HadithDetailScreen(
+                hadithText: args['hadithText'] as String?,
+                chapterNumber: (args['chapterNumber'] as String?) ?? '',
+                narrator: args['narrator'] as String?,
+                grade: args['grade'] as String?,
+                bookName: args['bookName'] as String?,
+                author: args['author'] as String?,
+                chapter: args['chapter'] as String?,
+                authorDeath: args['authorDeath'] as String?,
+                hadithNumber: args['hadithNumber'] as String?,
+                bookSlug: args['bookSlug'] as String?,
+                isBookMark: false,
+                isLocal: (args['isLocal'] as bool?) ?? false,
+                showNavigation: true,
+              ),
+        );
       case Routes.splashScreen:
         _logScreenView('SplashScreen');
         return MaterialPageRoute(builder: (_) => const SplashScreen());
@@ -134,12 +161,8 @@ class AppRouter {
           builder:
               (_) => MultiBlocProvider(
                 providers: [
-                  BlocProvider(
-                    create: (context) => getIt<ProfileCubit>(),
-                  ),
-                  BlocProvider(
-                    create: (context) => getIt<UserStatsCubit>(),
-                  ),
+                  BlocProvider(create: (context) => getIt<ProfileCubit>()),
+                  BlocProvider(create: (context) => getIt<UserStatsCubit>()),
                 ],
                 child: const ProfileScreen(),
               ),
@@ -192,7 +215,8 @@ class AppRouter {
               (_) => BlocProvider(
                 create:
                     (context) =>
-                        getIt<ChaptersCubit>()..emitGetBookChapters(bookSlug: bookSlug),
+                        getIt<ChaptersCubit>()
+                          ..emitGetBookChapters(bookSlug: bookSlug),
                 child: BookChaptersScreen(args: args),
               ),
         );
@@ -240,7 +264,7 @@ class AppRouter {
       case Routes.usersSuggestions:
         _logScreenView('UsersSuggestions');
         return MaterialPageRoute(builder: (_) => SuggestionForm());
-  
+
       case Routes.hadithOfTheDay:
         _logScreenView('HadithOfTheDay');
         final query = settings.arguments as NewDailyHadithModel;
@@ -264,10 +288,11 @@ class AppRouter {
       case Routes.aboutUs:
         _logScreenView('AboutUsScreen');
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(create:
-              (context) => getIt<AboutUsCubit>(), 
-            child: const AboutUsScreen(),
-          ),
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<AboutUsCubit>(),
+                child: const AboutUsScreen(),
+              ),
         );
       case Routes.serag:
         _logScreenView('SeragScreen');
@@ -290,6 +315,25 @@ class AppRouter {
                   ),
                 ],
                 child: SeragChatScreen(model: query),
+              ),
+        );
+
+      case Routes.dailyZekrScreen:
+        _logScreenView('DailyZekrScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<DailyZekrCubit>()..init(),
+                child: const DailyZekrScreen(),
+              ),
+        );
+      case Routes.prayerTimesScreen:
+        _logScreenView('PrayerTimesScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<PrayerTimesCubit>(),
+                child: const PrayerTimesScreen(),
               ),
         );
 

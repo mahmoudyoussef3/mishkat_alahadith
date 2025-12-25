@@ -31,9 +31,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
       create: (context) => getIt<BookDataCubit>()..emitGetBookData(widget.id),
       child: Directionality(
         textDirection: TextDirection.rtl,
-        child: SafeArea(
-            top: true,
-        bottom: false,
+        child:SafeArea(
+              top: false,
+        bottom: true,
           child: Scaffold(
             backgroundColor: ColorsManager.primaryBackground,
             body: CustomScrollView(

@@ -60,5 +60,16 @@
   <key>FirebaseAppDelegateProxyEnabled</key>
   <false/>
 
+	<!-- URL scheme support for custom deep links mishkat://hadith -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>mishkat</string>
+			</array>
+		</dict>
+	</array>
+
 </dict>
 </plist>

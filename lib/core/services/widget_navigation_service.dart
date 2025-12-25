@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
+import 'package:mishkat_almasabih/core/services/dynamic_links_service.dart';
 import 'package:mishkat_almasabih/core/notification/firebase_service/notification_handler.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
@@ -11,6 +12,15 @@ class WidgetNavigationService {
     platform.setMethodCallHandler((call) async {
       if (call.method == 'openHadithOfTheDay') {
         await _navigateToHadithOfTheDay();
+      } else if (call.method == 'openHadithLink') {
+        final String? linkStr = call.arguments as String?;
+        if (linkStr != null) {
+          // Parse and navigate to hadith detail
+          try {
+            // Reuse the dynamic links parsing to keep it centralized
+            DynamicLinksService.handleLinkString(linkStr);
+          } catch (_) {}
+        }
       }
     });
   }

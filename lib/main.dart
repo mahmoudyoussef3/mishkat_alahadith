@@ -4,18 +4,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/notification/local_notification.dart';
 import 'package:mishkat_almasabih/core/notification/push_notification.dart';
 import 'package:mishkat_almasabih/core/routing/app_router.dart';
+import 'package:mishkat_almasabih/core/services/dynamic_links_service.dart';
 import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
 import 'package:mishkat_almasabih/features/onboarding/sava_date_for_first_time.dart';
 import 'package:mishkat_almasabih/mishkat_almasabih.dart';
 import 'package:mishkat_almasabih/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'mishkat_almasabih.dart';
 import 'package:flutter/rendering.dart';
 
 Future<void> main() async {
@@ -29,7 +28,7 @@ Future<void> main() async {
   //await Firebase.initializeApp();
 
   // تهيئة الـ FCM (مرة واحدة بس)
- // await PushNotification.init();
+  // await PushNotification.init();
   // Setup notification tap handlers
   await LocalNotification.init();
   //await PushNotification.getApnsToken();
@@ -45,6 +44,8 @@ Future<void> main() async {
 
   // Initialize widget navigation service to handle widget clicks
   WidgetNavigationService.initialize();
+  // Initialize deep links (custom scheme) handling
+  await DynamicLinksService.init();
 
   //final prefs = await SharedPreferences.getInstance();
   //final token = prefs.getString('token');
@@ -67,7 +68,7 @@ Future<void> main() async {
     return true;
   };
   await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
-  debugRepaintRainbowEnabled = true;
+  // debugRepaintRainbowEnabled = true;
 
   runApp(app);
 }

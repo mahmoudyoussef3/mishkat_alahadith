@@ -111,7 +111,7 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-        top: true,
+              top: false,
         bottom: true,
         child: Scaffold(
           backgroundColor: ColorsManager.primaryBackground,

@@ -29,10 +29,16 @@ class MainActivity : FlutterActivity() {
         intent?.let {
             val openScreen = it.getStringExtra("open_screen")
             val fromWidget = it.getBooleanExtra("from_widget", false)
-            
+
+            // Handle widget tap navigation
             if (fromWidget && openScreen == "hadith_of_the_day") {
-                // Send message to Flutter to navigate to Hadith of the Day screen
                 methodChannel?.invokeMethod("openHadithOfTheDay", null)
+            }
+
+            // Handle deep links like mishkat://hadith?... via intent.data
+            val dataUri = it.data
+            if (dataUri != null && dataUri.scheme == "mishkat" && dataUri.host == "hadith") {
+                methodChannel?.invokeMethod("openHadithLink", dataUri.toString())
             }
         }
     }

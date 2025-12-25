@@ -36,8 +36,8 @@ class _SeragChatScreenState extends State<SeragChatScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-        top: true,
-        bottom: false,
+              top: false,
+        bottom: true,
         child: Scaffold(
           backgroundColor: ColorsManager.secondaryBackground,
           body: Column(
