@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter/services.dart';
-import 'package:mishkat_almasabih/core/ui/widgets/share_image_editor.dart';
-import 'package:mishkat_almasabih/core/services/dynamic_links_service.dart';
-import 'package:share_plus/share_plus.dart';
 
 class HadithTextCard extends StatefulWidget {
   final String hadithText;
@@ -150,27 +147,9 @@ class _HadithTextCardState extends State<HadithTextCard> {
                             icon: Icons.share_rounded,
                             color: ColorsManager.primaryGreen,
                             tooltip: "مشاركة الحديث",
-                            onTap: () => shareHadithAsImage(text: widget.hadithText),
+                            onTap: () => shareHadithAsImage(context, text: widget.hadithText),
                           ),
-                          _buildActionIcon(
-                            context,
-                            icon: Icons.link_rounded,
-                            color: ColorsManager.primaryPurple,
-                            tooltip: "مشاركة كرابط",
-                            onTap: () async {
-                              final uri =
-                                  await DynamicLinksService.buildHadithLink(
-                                    hadithNumber: '',
-                                    bookSlug: '',
-                                    isLocal: false,
-                                    hadithText: widget.hadithText,
-                                  );
-                              await Share.share(
-                                uri.toString(),
-                                subject: "رابط الحديث",
-                              );
-                            },
-                          ),
+                     
                         ],
                       ),
                     ),
@@ -210,18 +189,5 @@ class _HadithTextCardState extends State<HadithTextCard> {
     );
   }
 
-  Future<void> shareHadithAsImage( {required String text }) async {
-    // Open a customization editor to let the user design the shareable image
-    // without changing the in-app card theme.
-    if (!mounted) return;
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) {
-        return ShareImageEditorBottomSheet(text: text);
-      },
-    );
-  }
+
 }

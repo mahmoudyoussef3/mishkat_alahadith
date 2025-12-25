@@ -8,7 +8,6 @@ import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/notification/local_notification.dart';
 import 'package:mishkat_almasabih/core/notification/push_notification.dart';
 import 'package:mishkat_almasabih/core/routing/app_router.dart';
-import 'package:mishkat_almasabih/core/services/dynamic_links_service.dart';
 import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
 import 'package:mishkat_almasabih/features/onboarding/sava_date_for_first_time.dart';
 import 'package:mishkat_almasabih/mishkat_almasabih.dart';
@@ -45,7 +44,6 @@ Future<void> main() async {
   // Initialize widget navigation service to handle widget clicks
   WidgetNavigationService.initialize();
   // Initialize deep links (custom scheme) handling
-  await DynamicLinksService.init();
 
   //final prefs = await SharedPreferences.getInstance();
   //final token = prefs.getString('token');

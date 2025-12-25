@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/ui/widgets/share_image_editor.dart';
 import '../theming/styles.dart';
+
 
 void setupErrorState(BuildContext context, String error) {
   context.pop();
@@ -86,3 +88,17 @@ String convertToArabicNumber(int number) {
 
     return result.trim();
   }
+Future<void> shareHadithAsImage(
+  BuildContext context, {
+  required String text,
+}) async {
+  await showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) {
+      return ShareImageEditorBottomSheet(text: text);
+    },
+  );
+}

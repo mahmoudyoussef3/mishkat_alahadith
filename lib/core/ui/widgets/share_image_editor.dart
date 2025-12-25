@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../theming/colors.dart';
+import '../../theming/styles.dart';
 
 class ShareImageEditorBottomSheet extends StatefulWidget {
   final String text;
@@ -25,7 +26,12 @@ class ShareImageEditorBottomSheet extends StatefulWidget {
     required this.text,
     this.appName = 'مشكاة المصابيح',
     this.appIconAsset = 'assets/images/app_logo.png',
-    this.assetBackgrounds = const [],
+    this.assetBackgrounds = const [
+      'assets/images/islamic_pattern.jpg',
+      'assets/images/moon-light-shine-through-window-into-islamic-mosque-interior.jpg',
+      'assets/images/first_onboardin.jpeg',
+      'assets/images/search_logo.jpg',
+    ],
     this.allowShareTextOnly = true,
     this.initialFontSize = 28,
     this.initialFontFamily = 'Amiri',
@@ -77,58 +83,163 @@ class _ShareImageEditorBottomSheetState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header
+                // Handle
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                  child: Row(
-                    children: [
-                      Text(
-                        'تخصيص صورة المشاركة',
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
-                          color: ColorsManager.primaryText,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (widget.allowShareTextOnly)
-                        TextButton.icon(
-                          onPressed: _shareTextOnly,
-                          icon: const Icon(Icons.text_fields_rounded),
-                          label: const Text('نص فقط'),
-                        ),
-                      IconButton(
-                        tooltip: 'إغلاق',
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                    ],
-                  ),
-                ),
-      
-                // Preview
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: AspectRatio(
-                    aspectRatio: 4 / 5,
-                    child: RepaintBoundary(
-                      key: _exportKey,
-                      child: _buildCanvas(),
+                  padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
+                  child: Container(
+                    width: 42.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: ColorsManager.mediumGray,
+                      borderRadius: BorderRadius.circular(999.r),
                     ),
                   ),
                 ),
-      
+
+                // Header (Islamic pattern + gradient)
+                Padding(
+                  padding: EdgeInsetsDirectional.only(
+                    start: 16.w,
+                    end: 16.w,
+                    bottom: 12.h,
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16.r),
+                      gradient: LinearGradient(
+                        begin: AlignmentDirectional.topStart,
+                        end: AlignmentDirectional.bottomEnd,
+                        colors: [
+                          ColorsManager.primaryPurple.withOpacity(0.12),
+                          ColorsManager.primaryGold.withOpacity(0.10),
+                        ],
+                      ),
+                    ),
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16.r),
+                            child: Opacity(
+                              opacity: 0.06,
+                              child: Image.asset(
+                                'assets/images/islamic_pattern.jpg',
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) {
+                                  return const SizedBox.shrink();
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.symmetric(
+                            horizontal: 12.w,
+                            vertical: 10.h,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'تخصيص صورة المشاركة',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyles.titleLarge.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: ColorsManager.primaryText,
+                                      ),
+                                    ),
+                                    SizedBox(height: 2.h),
+                                    Text(
+                                      'اختر خلفية وخطًا مناسبين للنص',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyles.bodySmall.copyWith(
+                                        color: ColorsManager.secondaryText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (widget.allowShareTextOnly) ...[
+                                TextButton.icon(
+                                  onPressed: _shareTextOnly,
+                                  icon: Icon(
+                                    Icons.text_snippet_outlined,
+                                    size: 18.sp,
+                                    color: ColorsManager.primaryPurple,
+                                  ),
+                                  label: Text(
+                                    'النص فقط',
+                                    style: TextStyles.labelLarge.copyWith(
+                                      color: ColorsManager.primaryPurple,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              IconButton(
+                                tooltip: 'إغلاق',
+                                onPressed:
+                                    () => Navigator.of(context).maybePop(),
+                                icon: const Icon(Icons.close_rounded),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Preview
+                Padding(
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: ColorsManager.cardBackground,
+                      borderRadius: BorderRadius.circular(18.r),
+                      border: Border.all(
+                        color: ColorsManager.primaryGold.withOpacity(0.18),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: ColorsManager.primaryPurple.withOpacity(0.10),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(10.w),
+                      child: AspectRatio(
+                        aspectRatio: 4 / 5,
+                        child: RepaintBoundary(
+                          key: _exportKey,
+                          child: _buildCanvas(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
                 SizedBox(height: 12.h),
-      
+
                 // Controls
                 _buildControls(),
-      
+
                 SizedBox(height: 8.h),
-      
+
                 // Action row
                 Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+                  padding: EdgeInsetsDirectional.only(
+                    start: 16.w,
+                    end: 16.w,
+                    bottom: 16.h,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -136,9 +247,6 @@ class _ShareImageEditorBottomSheetState
                           onPressed: _reset,
                           icon: const Icon(Icons.restart_alt_rounded),
                           label: const Text('إعادة الضبط'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: ColorsManager.primaryPurple,
-                          ),
                         ),
                       ),
                       SizedBox(width: 12.w),
@@ -179,95 +287,188 @@ class _ShareImageEditorBottomSheetState
       bgImage = AssetImage(_backgroundAssetPath!);
     }
 
+    final bool hasImageBackground = bgImage != null;
+
     return Container(
       decoration: BoxDecoration(
         color: _backgroundColor,
-        image:
-            bgImage != null
-                ? DecorationImage(image: bgImage, fit: BoxFit.cover)
-                : null,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: ColorsManager.primaryGold.withOpacity(0.20),
+          width: 1,
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16.r),
-        child: Padding(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Optional header chip
-              Align(
-                alignment: AlignmentDirectional.topStart,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 6.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Text(
-                    'نص الحديث',
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 12.sp,
-                      color: ColorsManager.primaryText,
-                    ),
-                  ),
-                ),
-              ),
+        child: Stack(
+          children: [
+            // Background color/image
+            Positioned.fill(
+              child:
+                  hasImageBackground
+                      ? Image(image: bgImage, fit: BoxFit.cover)
+                      : Container(color: _backgroundColor),
+            ),
 
-              SizedBox(height: 12.h),
-
-              // Hadith text
-              Expanded(
-                child: Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    child: Text(
-                      widget.text,
-                      textAlign: TextAlign.justify,
-                      style: TextStyle(
-                        fontFamily: _fontFamily,
-                        fontWeight: _fontWeight,
-                        color: _textColor,
-                        height: _lineHeight,
-                        fontSize: _fontSize.sp,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 12.h),
-
-              // Branding footer
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    widget.appIconAsset,
-                    width: 20.w,
-                    height: 20.w,
+            // Islamic pattern when no image selected
+            if (!hasImageBackground)
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.10,
+                  child: Image.asset(
+                    'assets/images/islamic_pattern.jpg',
+                    fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) {
                       return const SizedBox.shrink();
                     },
                   ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    widget.appName,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 12.sp,
-                      color: ColorsManager.secondaryText,
+                ),
+              ),
+
+            // Contrast overlay (helps readability on photos)
+            if (hasImageBackground)
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.30),
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.18),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+            // Foreground content
+            Padding(
+              padding: EdgeInsets.all(14.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Title chip
+                  Align(
+                    alignment: AlignmentDirectional.topStart,
+                    child: Container(
+                      padding: EdgeInsetsDirectional.symmetric(
+                        horizontal: 10.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            hasImageBackground
+                                ? Colors.black.withOpacity(0.20)
+                                : ColorsManager.primaryGold.withOpacity(0.14),
+                        borderRadius: BorderRadius.circular(999.r),
+                        border: Border.all(
+                          color: ColorsManager.primaryGold.withOpacity(0.30),
+                        ),
+                      ),
+                      child: Text(
+                        'حديث نبوي شريف',
+                        style: TextStyles.labelLarge.copyWith(
+                          color:
+                              hasImageBackground
+                                  ? ColorsManager.white
+                                  : ColorsManager.primaryText,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 10.h),
+
+                  // Hadith text on a soft card for readability
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color:
+                            hasImageBackground
+                                ? ColorsManager.white.withOpacity(0.82)
+                                : ColorsManager.white.withOpacity(0.90),
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: ColorsManager.primaryPurple.withOpacity(0.10),
+                        ),
+                      ),
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: Text(
+                          widget.text,
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(
+                            fontFamily: _fontFamily,
+                            fontWeight: _fontWeight,
+                            color: _textColor,
+                            height: _lineHeight,
+                            fontSize: _fontSize.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 10.h),
+
+                  // Branding footer
+                  Container(
+                    padding: EdgeInsetsDirectional.symmetric(
+                      horizontal: 12.w,
+                      vertical: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: AlignmentDirectional.centerStart,
+                        end: AlignmentDirectional.centerEnd,
+                        colors: [
+                          ColorsManager.primaryPurple.withOpacity(0.22),
+                          ColorsManager.white.withOpacity(0.92),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: ColorsManager.primaryPurple.withOpacity(0.12),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          widget.appIconAsset,
+                          width: 22.w,
+                          height: 22.w,
+                          errorBuilder: (_, __, ___) {
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            widget.appName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyles.titleSmall.copyWith(
+                              color: ColorsManager.primaryGreen,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.verified_rounded,
+                          size: 18.sp,
+                          color: ColorsManager.primaryGold,
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -275,186 +476,149 @@ class _ShareImageEditorBottomSheetState
 
   Widget _buildControls() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Background section
-          Row(
-            children: [
-              Icon(Icons.wallpaper_rounded, color: ColorsManager.purpleText),
-              SizedBox(width: 8.w),
-              Text(
-                'الخلفية',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
-              _ColorSwatch(color: _backgroundColor),
-              SizedBox(width: 8.w),
-              OutlinedButton.icon(
-                onPressed: () => _openColorPicker(forText: false),
-                icon: const Icon(Icons.color_lens_rounded),
-                label: const Text('اختيار اللون'),
-              ),
-            ],
-          ),
-
-          SizedBox(height: 8.h),
-
-          // Background images: assets + device
-          SizedBox(
-            height: 60.h,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsetsDirectional.only(start: 8.w, end: 8.w),
-              itemCount:
-                  widget.assetBackgrounds.length + 2, // + device pick + clear
-              separatorBuilder: (_, __) => SizedBox(width: 8.w),
-              itemBuilder: (_, index) {
-                if (index == 0) {
-                  // Pick from device
-                  return _ImagePickerTile(onPick: _pickBackgroundImage);
-                }
-                if (index == widget.assetBackgrounds.length + 1) {
-                  // Clear
-                  return _AssetThumb(
-                    label: 'بدون',
-                    child: const Icon(Icons.hide_image_rounded),
-                    selected:
-                        _backgroundAssetPath == null && _backgroundFile == null,
-                    onTap:
-                        () => setState(() {
-                          _backgroundAssetPath = null;
-                          _backgroundFile = null;
-                        }),
-                  );
-                }
-                final assetPath = widget.assetBackgrounds[index - 1];
-                return _AssetThumb(
-                  label: 'صورة',
-                  assetPath: assetPath,
-                  selected: _backgroundAssetPath == assetPath,
-                  onTap:
-                      () => setState(() {
-                        _backgroundAssetPath = assetPath;
-                        _backgroundFile = null;
-                      }),
-                );
-              },
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
+      child: Container(
+        decoration: BoxDecoration(
+          color: ColorsManager.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: ColorsManager.primaryPurple.withOpacity(0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
             ),
-          ),
-
-          SizedBox(height: 10.h),
-
-          Divider(color: ColorsManager.mediumGray, height: 24.h),
-
-          // Font size
-          Row(
+          ],
+          border: Border.all(color: ColorsManager.lightGray),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(14.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'حجم الخط',
-                style: TextStyle(fontFamily: 'Cairo', fontSize: 12.sp),
-              ),
-              Expanded(
-                child: Slider(
-                  min: 18,
-                  max: 50,
-                  value: _fontSize,
-                  onChanged: (v) => setState(() => _fontSize = v),
+              _SectionTitle(
+                icon: Icons.wallpaper_rounded,
+                title: 'الخلفية',
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _ColorSwatch(color: _backgroundColor),
+                    SizedBox(width: 8.w),
+                    OutlinedButton.icon(
+                      onPressed: () => _openColorPicker(forText: false),
+                      icon: const Icon(Icons.color_lens_rounded),
+                      label: const Text('لون'),
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                _fontSize.toInt().toString(),
-                style: TextStyle(fontFamily: 'Cairo', fontSize: 12.sp),
-              ),
-            ],
-          ),
 
-          // Line height
-          Row(
-            children: [
-              Text(
-                'تباعد الأسطر',
-                style: TextStyle(fontFamily: 'Cairo', fontSize: 12.sp),
-              ),
-              Expanded(
-                child: Slider(
-                  min: 1.2,
-                  max: 2.2,
-                  value: _lineHeight,
-                  onChanged: (v) => setState(() => _lineHeight = v),
+              SizedBox(height: 10.h),
+
+              SizedBox(
+                height: 64.h,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsetsDirectional.only(start: 4.w, end: 4.w),
+                  itemCount:
+                      widget.assetBackgrounds.length +
+                      2, // + device pick + clear
+                  separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                  itemBuilder: (_, index) {
+                    if (index == 0) {
+                      return _ImagePickerTile(onPick: _pickBackgroundImage);
+                    }
+                    if (index == widget.assetBackgrounds.length + 1) {
+                      return _AssetThumb(
+                        label: 'بدون',
+                        child: const Icon(Icons.hide_image_rounded),
+                        selected:
+                            _backgroundAssetPath == null &&
+                            _backgroundFile == null,
+                        onTap:
+                            () => setState(() {
+                              _backgroundAssetPath = null;
+                              _backgroundFile = null;
+                            }),
+                      );
+                    }
+                    final assetPath = widget.assetBackgrounds[index - 1];
+                    return _AssetThumb(
+                      label: 'صورة',
+                      assetPath: assetPath,
+                      selected: _backgroundAssetPath == assetPath,
+                      onTap:
+                          () => setState(() {
+                            _backgroundAssetPath = assetPath;
+                            _backgroundFile = null;
+                          }),
+                    );
+                  },
                 ),
               ),
-              Text(
-                _lineHeight.toStringAsFixed(1),
-                style: TextStyle(fontFamily: 'Cairo', fontSize: 12.sp),
-              ),
-            ],
-          ),
 
-          SizedBox(height: 6.h),
+              SizedBox(height: 12.h),
+              Divider(color: ColorsManager.lightGray, height: 20.h),
 
-          // Font family + weight (Amiri/Cairo only)
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
-            children: [
-              ChoiceChip(
-                selected: _fontFamily == 'Amiri',
-                label: const Text('Amiri'),
-                onSelected: (_) => setState(() => _fontFamily = 'Amiri'),
-              ),
-              ChoiceChip(
-                selected: _fontFamily == 'Cairo',
-                label: const Text('Cairo'),
-                onSelected: (_) => setState(() => _fontFamily = 'Cairo'),
-              ),
-           /*   ChoiceChip(
-                selected: _fontWeight == FontWeight.w400,
-                label: const Text('رفيع'),
-                onSelected:
-                    (_) => setState(() => _fontWeight = FontWeight.w400),
-              ),
-              ChoiceChip(
-                selected: _fontWeight == FontWeight.w700,
-                label: const Text('عريض'),
-                onSelected:
-                    (_) => setState(() => _fontWeight = FontWeight.w700),
-              ),
-              */
-            ],
-          ),
-
-          SizedBox(height: 8.h),
-
-          // Text color section (picker only)
-          Row(
-            children: [
-              const Icon(Icons.format_color_text_rounded),
-              SizedBox(width: 8.w),
-              Text(
-                'لون النص',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
+              _SectionTitle(
+                icon: Icons.tune_rounded,
+                title: 'النص',
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _ColorSwatch(color: _textColor),
+                    SizedBox(width: 8.w),
+                    OutlinedButton.icon(
+                      onPressed: () => _openColorPicker(forText: true),
+                      icon: const Icon(Icons.brush_rounded),
+                      label: const Text('لون'),
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              _ColorSwatch(color: _textColor),
-              SizedBox(width: 8.w),
-              OutlinedButton.icon(
-                onPressed: () => _openColorPicker(forText: true),
-                icon: const Icon(Icons.brush_rounded),
-                label: const Text('اختيار اللون'),
+
+              SizedBox(height: 10.h),
+
+              _LabeledSlider(
+                label: 'حجم الخط',
+                valueText: _fontSize.toInt().toString(),
+                value: _fontSize,
+                min: 18,
+                max: 50,
+                onChanged: (v) => setState(() => _fontSize = v),
+              ),
+
+              SizedBox(height: 8.h),
+
+              _LabeledSlider(
+                label: 'تباعد الأسطر',
+                valueText: _lineHeight.toStringAsFixed(1),
+                value: _lineHeight,
+                min: 1.2,
+                max: 2.2,
+                onChanged: (v) => setState(() => _lineHeight = v),
+              ),
+
+              SizedBox(height: 10.h),
+
+              Wrap(
+                spacing: 8.w,
+                runSpacing: 8.h,
+                children: [
+                  ChoiceChip(
+                    selected: _fontFamily == 'Amiri',
+                    label: const Text('خط تراثي (أميري)'),
+                    onSelected: (_) => setState(() => _fontFamily = 'Amiri'),
+                  ),
+                  ChoiceChip(
+                    selected: _fontFamily == 'Cairo',
+                    label: const Text('خط عصري (Cairo)'),
+                    onSelected: (_) => setState(() => _fontFamily = 'Cairo'),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -468,7 +632,7 @@ class _ShareImageEditorBottomSheetState
         return AlertDialog(
           title: Text(
             forText ? 'اختر لون النص' : 'اختر لون الخلفية',
-            style: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp),
+            style: TextStyles.titleMedium.copyWith(fontWeight: FontWeight.w700),
           ),
           content: SingleChildScrollView(
             child: ColorPicker(
@@ -555,9 +719,7 @@ class _ShareImageEditorBottomSheetState
       );
       await file.writeAsBytes(pngBytes);
 
-      await Share.shareXFiles([
-        XFile(file.path),
-      ], text: 'شارك الحديث المبارك 🌿');
+      await Share.shareXFiles([XFile(file.path)], text: 'شارك الحديث المبارك');
     } catch (e) {
       debugPrint('Error exporting: $e');
     } finally {
@@ -588,6 +750,97 @@ class _ColorSwatch extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: Colors.black12),
       ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final Widget? trailing;
+
+  const _SectionTitle({required this.icon, required this.title, this.trailing});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 34.w,
+          height: 34.w,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.r),
+            color: ColorsManager.primaryGold.withOpacity(0.12),
+          ),
+          child: Icon(icon, color: ColorsManager.primaryGold, size: 18.sp),
+        ),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyles.titleMedium.copyWith(
+              fontWeight: FontWeight.w800,
+              color: ColorsManager.primaryText,
+            ),
+          ),
+        ),
+        if (trailing != null) trailing!,
+      ],
+    );
+  }
+}
+
+class _LabeledSlider extends StatelessWidget {
+  final String label;
+  final String valueText;
+  final double value;
+  final double min;
+  final double max;
+  final ValueChanged<double> onChanged;
+
+  const _LabeledSlider({
+    required this.label,
+    required this.valueText,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 92.w,
+          child: Text(
+            label,
+            style: TextStyles.bodySmall.copyWith(
+              color: ColorsManager.secondaryText,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Slider(
+            min: min,
+            max: max,
+            value: value.clamp(min, max),
+            onChanged: onChanged,
+          ),
+        ),
+        SizedBox(
+          width: 42.w,
+          child: Text(
+            valueText,
+            textAlign: TextAlign.end,
+            style: TextStyles.labelLarge.copyWith(
+              color: ColorsManager.primaryText,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

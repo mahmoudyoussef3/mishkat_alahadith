@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/ui/widgets/hadith_rich_text.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/hadith_daily_response.dart';
 import 'package:share_plus/share_plus.dart';
 
 class HadithContentCard extends StatelessWidget {
@@ -150,9 +150,7 @@ class HadithContentCard extends StatelessWidget {
                       color: ColorsManager.primaryGreen,
                       tooltip: "مشاركة الحديث",
                       
-                      onTap: () async {
-                await Share.share(data.hadeeth??"", subject: "شارك الحديث");
-              },
+                      onTap: () => shareHadithAsImage(context, text: data.hadeeth??''),
                     ),
                  
                   ],
