@@ -8,22 +8,36 @@ class ZekrCard extends StatelessWidget {
   final String title;
   final String description;
   final bool checked;
-  final VoidCallback onTap;
-  final ValueChanged<bool?> onChanged;
+  final VoidCallback? onTap;
+  final ValueChanged<bool?>? onChanged;
   final IconData? leadingIcon;
+  final bool enabled;
+  final String? footerText;
+  final IconData? footerIcon;
 
   const ZekrCard({
     super.key,
     required this.title,
     required this.description,
     required this.checked,
-    required this.onTap,
-    required this.onChanged,
+    this.onTap,
+    this.onChanged,
     this.leadingIcon,
+    this.enabled = true,
+    this.footerText,
+    this.footerIcon,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveFooterText =
+        footerText ?? (checked ? 'مكتمل اليوم' : 'سأذكّرك كل دقيقة (تجربة)');
+    final effectiveFooterIcon =
+        footerIcon ??
+        (checked
+            ? Icons.check_circle_rounded
+            : Icons.notifications_active_rounded);
+
     final bgColor =
         checked
             ? ColorsManager.primaryPurple.withOpacity(0.06)
@@ -36,14 +50,14 @@ class ZekrCard extends StatelessWidget {
       checked: checked,
       label: title,
       child: InkWell(
-        onTap: onTap,
+        onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(14.r),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
           padding: EdgeInsets.all(14.r),
           decoration: BoxDecoration(
-            color: bgColor,
+            color: enabled ? bgColor : ColorsManager.cardBackground,
             borderRadius: BorderRadius.circular(14.r),
             border: Border.all(color: borderColor, width: checked ? 1.8 : 1.2),
             boxShadow: [
@@ -59,7 +73,10 @@ class ZekrCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              AnimatedCheckbox(value: checked, onChanged: onChanged),
+              AnimatedCheckbox(
+                value: checked,
+                onChanged: enabled ? onChanged : null,
+              ),
               SizedBox(width: 12.w),
               Expanded(
                 child: Column(
@@ -121,59 +138,62 @@ class ZekrCard extends StatelessWidget {
                     ),
                     SizedBox(height: 8.h),
                     AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
+                      duration: const Duration(milliseconds: 180),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            !enabled
+                                ? ColorsManager.mediumGray.withOpacity(0.08)
+                                : checked
+                                ? ColorsManager.hadithAuthentic.withOpacity(
+                                  0.12,
+                                )
+                                : ColorsManager.primaryGold.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(
                           color:
-                              checked
+                              !enabled
+                                  ? ColorsManager.mediumGray.withOpacity(0.35)
+                                  : checked
                                   ? ColorsManager.hadithAuthentic.withOpacity(
-                                    0.12,
+                                    0.6,
                                   )
-                                  : ColorsManager.primaryGold.withOpacity(0.10),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color:
-                                checked
-                                    ? ColorsManager.hadithAuthentic.withOpacity(
-                                      0.6,
-                                    )
-                                    : ColorsManager.primaryGold.withOpacity(
-                                      0.6,
-                                    ),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              checked
-                                  ? Icons.check_circle_rounded
-                                  : Icons.notifications_active_rounded,
-                              size: 16.sp,
-                              color:
-                                  checked
-                                      ? ColorsManager.hadithAuthentic
-                                      : ColorsManager.primaryGold,
-                            ),
-                            SizedBox(width: 6.w),
-                            Text(
-                              checked ? 'مكتمل اليوم' : 'سأذكّرك كل ساعة',
-                              style: TextStyles.labelMedium.copyWith(
-                                color:
-                                    checked
-                                        ? ColorsManager.hadithAuthentic
-                                        : ColorsManager.primaryGold,
-                                fontFamily: 'Cairo',
-                              ),
-                            ),
-                          ],
+                                  : ColorsManager.primaryGold.withOpacity(0.6),
+                          width: 1,
                         ),
                       ),
-                    
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            effectiveFooterIcon,
+                            size: 16.sp,
+                            color:
+                                !enabled
+                                    ? ColorsManager.secondaryText
+                                    : checked
+                                    ? ColorsManager.hadithAuthentic
+                                    : ColorsManager.primaryGold,
+                          ),
+                          SizedBox(width: 6.w),
+                          Text(
+                            effectiveFooterText,
+                            style: TextStyles.labelMedium.copyWith(
+                              color:
+                                  !enabled
+                                      ? ColorsManager.secondaryText
+                                      : checked
+                                      ? ColorsManager.hadithAuthentic
+                                      : ColorsManager.primaryGold,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

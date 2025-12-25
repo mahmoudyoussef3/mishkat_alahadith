@@ -7,9 +7,18 @@ import 'package:mishkat_almasabih/core/notification/firebase_service/notificatio
 import 'package:permission_handler/permission_handler.dart';
 
 class LocalNotification {
-  static Future<void> requestNotificationPermission() async {
-    if (await Permission.notification.isDenied) {
-      await Permission.notification.request();
+  static Future<void> requestNotificationPermission() async  {
+    final status = await Permission.notification.status;
+
+    if (status.isGranted) return;
+
+    final requestedStatus = await Permission.notification.request();
+    log('Notification permission status: $requestedStatus');
+
+    if (requestedStatus.isPermanentlyDenied) {
+      log(
+        'Notification permission permanently denied; user must enable it from system settings.',
+      );
     }
   }
 
@@ -19,6 +28,7 @@ class LocalNotification {
       StreamController<NotificationResponse>.broadcast();
 
   static Future<void> init() async {
+    await requestNotificationPermission();
     // 1. Configure iOS initialization settings
     const DarwinInitializationSettings iOSSettings =
         DarwinInitializationSettings(
@@ -47,6 +57,16 @@ class LocalNotification {
         onDidReceiveNotificationResponse: onTap,
         onDidReceiveBackgroundNotificationResponse: onTap,
       );
+
+      // Request notification permission on Android 13+ using the plugin API.
+      if (Platform.isAndroid) {
+        await flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.requestNotificationsPermission();
+      }
+
       // 4. Request permissions explicitly for iOS
       if (Platform.isIOS) {
         final bool? result = await flutterLocalNotificationsPlugin
@@ -144,6 +164,7 @@ class LocalNotification {
     required String title,
     required String body,
     String? payload,
+    bool everyMinute = false,
   }) async {
     const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
       presentAlert: true,
@@ -169,17 +190,35 @@ class LocalNotification {
     );
 
     try {
+      // Ensure we don't keep an old schedule with the same id.
+      await cancelReminder(id);
+
+      // In test mode, show immediately once so we can verify permission/channel.
+      if (everyMinute) {
+        await flutterLocalNotificationsPlugin.show(
+          id,
+          title,
+          body,
+          platformDetails,
+          payload: payload,
+        );
+      }
+
       await flutterLocalNotificationsPlugin.periodicallyShow(
         id,
         title,
         body,
-        RepeatInterval.everyMinute,
+        everyMinute ? RepeatInterval.everyMinute : RepeatInterval.hourly,
         platformDetails,
         payload: payload,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        // Android 12+ may restrict exact alarms; for periodic reminders,
+        // prefer inexact scheduling to avoid silent failures (esp. Android 15).
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
     } catch (e) {
-      // Fallback: show once to avoid complete failure (especially iOS)
+      log('Error scheduling periodic reminder (id=$id): $e');
+
+      // Last resort: show once (verifies channel + permission are OK).
       await flutterLocalNotificationsPlugin.show(
         id,
         title,

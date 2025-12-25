@@ -59,6 +59,7 @@ class DailyZekrCubit extends Cubit<DailyZekrState> {
         title: item.section.title,
         body: item.section.reminderBody,
         payload: item.section.name,
+        everyMinute: true,
       );
     }
   }

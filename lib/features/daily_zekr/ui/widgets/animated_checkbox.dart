@@ -4,13 +4,9 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 /// A slightly animated checkbox that feels calm and spiritual.
 class AnimatedCheckbox extends StatelessWidget {
   final bool value;
-  final ValueChanged<bool?> onChanged;
+  final ValueChanged<bool?>? onChanged;
 
-  const AnimatedCheckbox({
-    super.key,
-    required this.value,
-    required this.onChanged,
-  });
+  const AnimatedCheckbox({super.key, required this.value, this.onChanged});
 
   @override
   Widget build(BuildContext context) {

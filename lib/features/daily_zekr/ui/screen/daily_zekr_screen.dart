@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/models/zekr_item.dart';
@@ -11,16 +12,76 @@ import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.
 class DailyZekrScreen extends StatelessWidget {
   const DailyZekrScreen({super.key});
 
+  // Uses same default Cairo settings as PrayerTimesScreen.
+  PrayerCalculator _buildPrayerCalculator() {
+    return PrayerCalculator(
+      latitude: 30.0444,
+      longitude: 31.2357,
+      timezone: 2.0,
+      asrMethod: AsrMethod.hanafi,
+    );
+  }
+
+  ({bool enabled, String? footerText, IconData? footerIcon}) _availabilityFor(
+    ZekrSection section,
+    DateTime now,
+  ) {
+    if (section != ZekrSection.morningAdhkar &&
+        section != ZekrSection.eveningAdhkar) {
+      return (enabled: true, footerText: null, footerIcon: null);
+    }
+
+    final calculator = _buildPrayerCalculator();
+    final dayStart = DateTime(now.year, now.month, now.day);
+    final today = calculator.calculate(dayStart);
+    final yesterday = calculator.calculate(
+      dayStart.subtract(const Duration(days: 1)),
+    );
+    final tomorrow = calculator.calculate(
+      dayStart.add(const Duration(days: 1)),
+    );
+
+    late final DateTime windowStart;
+    late final DateTime windowEnd;
+
+    if (section == ZekrSection.morningAdhkar) {
+      windowStart = today.fajr;
+      windowEnd = today.dhuhr;
+    } else {
+      // Evening adhkar: from Asr until next Fajr.
+      final isAfterMidnightBeforeFajr = now.isBefore(today.fajr);
+      if (isAfterMidnightBeforeFajr) {
+        windowStart = yesterday.asr;
+        windowEnd = today.fajr;
+      } else {
+        windowStart = today.asr;
+        windowEnd = tomorrow.fajr;
+      }
+    }
+
+    final enabled = now.isAfter(windowStart) && now.isBefore(windowEnd);
+
+    if (enabled) {
+      return (enabled: true, footerText: null, footerIcon: null);
+    }
+    return (
+      enabled: false,
+      footerText: 'غير متاح الآن',
+      footerIcon: Icons.lock_clock_rounded,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: ColorsManager.secondaryBackground,
         body: SafeArea(
-              top: false,
-        bottom: true,
-          
+          top: false,
+          bottom: true,
+
           child: CustomScrollView(
             slivers: [
               const BuildHeaderAppBar(
@@ -108,14 +169,39 @@ class DailyZekrScreen extends StatelessWidget {
                                       description: item.section.description,
                                       checked: item.checked,
                                       leadingIcon: icon,
+                                      enabled:
+                                          _availabilityFor(
+                                            item.section,
+                                            now,
+                                          ).enabled,
+                                      footerText:
+                                          _availabilityFor(
+                                            item.section,
+                                            now,
+                                          ).footerText,
+                                      footerIcon:
+                                          _availabilityFor(
+                                            item.section,
+                                            now,
+                                          ).footerIcon,
                                       onTap:
-                                          () => context
-                                              .read<DailyZekrCubit>()
-                                              .toggle(item.section),
+                                          _availabilityFor(
+                                                item.section,
+                                                now,
+                                              ).enabled
+                                              ? () => context
+                                                  .read<DailyZekrCubit>()
+                                                  .toggle(item.section)
+                                              : null,
                                       onChanged:
-                                          (_) => context
-                                              .read<DailyZekrCubit>()
-                                              .toggle(item.section),
+                                          _availabilityFor(
+                                                item.section,
+                                                now,
+                                              ).enabled
+                                              ? (_) => context
+                                                  .read<DailyZekrCubit>()
+                                                  .toggle(item.section)
+                                              : null,
                                     );
                                   },
                                 )
@@ -150,14 +236,39 @@ class DailyZekrScreen extends StatelessWidget {
                                                       .auto_awesome_rounded;
                                               }
                                             }(),
+                                            enabled:
+                                                _availabilityFor(
+                                                  item.section,
+                                                  now,
+                                                ).enabled,
+                                            footerText:
+                                                _availabilityFor(
+                                                  item.section,
+                                                  now,
+                                                ).footerText,
+                                            footerIcon:
+                                                _availabilityFor(
+                                                  item.section,
+                                                  now,
+                                                ).footerIcon,
                                             onTap:
-                                                () => context
-                                                    .read<DailyZekrCubit>()
-                                                    .toggle(item.section),
+                                                _availabilityFor(
+                                                      item.section,
+                                                      now,
+                                                    ).enabled
+                                                    ? () => context
+                                                        .read<DailyZekrCubit>()
+                                                        .toggle(item.section)
+                                                    : null,
                                             onChanged:
-                                                (_) => context
-                                                    .read<DailyZekrCubit>()
-                                                    .toggle(item.section),
+                                                _availabilityFor(
+                                                      item.section,
+                                                      now,
+                                                    ).enabled
+                                                    ? (_) => context
+                                                        .read<DailyZekrCubit>()
+                                                        .toggle(item.section)
+                                                    : null,
                                           ),
                                         ),
                                       ),
@@ -233,7 +344,7 @@ class DailyZekrScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'ضع علامة الصح على البند الذي أنجزته اليوم. عند التفعيل يتوقف إرسال التذكير لهذا القسم. إذا تُرك بدون تفعيل سنذكّرك كل ساعة بإذن الله.',
+                    'ضع علامة الصح على البند الذي أنجزته اليوم. عند التفعيل يتوقف إرسال التذكير لهذا القسم. إذا تُرك بدون تفعيل سنذكّرك كل دقيقة (للتجربة).',
                     style: TextStyles.bodyMedium.copyWith(
                       color: ColorsManager.secondaryText,
                     ),
