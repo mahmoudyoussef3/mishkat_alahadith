@@ -6,7 +6,7 @@ sealed class GetLibraryStatisticsState {}
 final class GetLibraryStatisticsInitial extends GetLibraryStatisticsState {}
 
 final class GetLivraryStatisticsSuccess extends GetLibraryStatisticsState {
-  StatisticsResponse statisticsResponse;
+  final StatisticsResponse statisticsResponse;
   GetLivraryStatisticsSuccess({required this.statisticsResponse});
 }
 

@@ -29,7 +29,7 @@ class LocalHadithListBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = state.hadiths ?? [];
+    final list = state.hadiths;
 
     if (list.isEmpty) {
       return const SliverToBoxAdapter(child: EmptyState());

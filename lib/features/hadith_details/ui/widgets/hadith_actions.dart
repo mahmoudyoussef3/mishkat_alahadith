@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_bookmark_dialogs.dart';
 import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/action_button.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -46,13 +41,13 @@ class HadithActions extends StatelessWidget {
               label: "نسخ",
               onTap: () {
                 Clipboard.setData(ClipboardData(text: hadithText));
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(
-                  
-                                                      behavior: SnackBarBehavior.floating,
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    behavior: SnackBarBehavior.floating,
 
-                  content: Text("تم نسخ الحديث")));
+                    content: Text("تم نسخ الحديث"),
+                  ),
+                );
               },
             ),
             ActionButton(
@@ -63,13 +58,7 @@ class HadithActions extends StatelessWidget {
               },
             ),
             if (!isBookMark)
-              ActionButton(
-                icon: Icons.bookmark,
-                label: "حفظ",
-                onTap: () {
-           
-                },
-              ),
+              ActionButton(icon: Icons.bookmark, label: "حفظ", onTap: () {}),
           ],
         ),
       ),

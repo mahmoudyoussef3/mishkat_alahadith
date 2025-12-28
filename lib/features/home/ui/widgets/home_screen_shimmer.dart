@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_daily_hadith_card_shimmer.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
@@ -13,16 +12,14 @@ class HomeScreenShimmer extends StatelessWidget {
       slivers: [
         _buildHeaderShimmer(),
         SliverToBoxAdapter(child: SizedBox(height: 12.h)),
-        
 
-       // BuildDailyHadithCardShimmer(),
-        
-       // _buildDividerShimmer(),
-        
+        // BuildDailyHadithCardShimmer(),
+
+        // _buildDividerShimmer(),
         _buildStatisticsSectionShimmer(),
-        
+
         _buildDividerShimmer(),
-        
+
         _buildCategoriesSectionShimmer(),
       ],
     );
@@ -52,21 +49,16 @@ class HomeScreenShimmer extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-        
                   SizedBox(height: 60.h),
                   _buildShimmerContainer(160.w, 16.h),
                 ],
               ),
-         
             ],
           ),
         ),
       ),
     );
   }
-
- 
- 
 
   // Statistics Section Shimmer
   Widget _buildStatisticsSectionShimmer() {
@@ -107,7 +99,7 @@ class HomeScreenShimmer extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16.h),
-            
+
             // Statistics Cards Shimmer
             Row(
               children: [
@@ -191,7 +183,7 @@ class HomeScreenShimmer extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24.h),
-            
+
             // Category Cards Shimmer
             Column(
               children: [
@@ -286,7 +278,7 @@ class HomeScreenShimmer extends StatelessWidget {
 
   // Helper method to build shimmer containers
   Widget _buildShimmerContainer(
-    double width, 
+    double width,
     double height, {
     bool circular = false,
     double? borderRadius,
@@ -299,9 +291,10 @@ class HomeScreenShimmer extends StatelessWidget {
         height: height,
         decoration: BoxDecoration(
           color: Colors.grey.shade300,
-          borderRadius: circular 
-            ? BorderRadius.circular(width / 2)
-            : BorderRadius.circular(borderRadius ?? 8.r),
+          borderRadius:
+              circular
+                  ? BorderRadius.circular(width / 2)
+                  : BorderRadius.circular(borderRadius ?? 8.r),
         ),
       ),
     );

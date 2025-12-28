@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/helpers/extensions.dart';
-import 'package:mishkat_almasabih/core/routing/routes.dart';
-import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_bookmark_dialogs.dart';
 import 'package:mishkat_almasabih/features/hadith_analysis/logic/cubit/hadith_analysis_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/ui/widgets/hadith_action_row.dart';
 import 'package:mishkat_almasabih/features/hadith_analysis/ui/widgets/hadith_analysis.dart';
 import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/hadith_books_section.dart';
 import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/hadith_grade_title.dart';
@@ -19,8 +14,12 @@ import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/hadith_text
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
 import 'package:mishkat_almasabih/features/navigation/logic/cubit/navigation_cubit.dart';
 import 'package:mishkat_almasabih/features/navigation/logic/local/cubit/local_hadith_navigation_cubit.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/hadith_header_info.dart';
+import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/divider_section.dart';
+import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/navigation_container.dart';
+import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/bookmark_appbar_action.dart';
+import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/serag_fab_button.dart';
 
 // ignore: must_be_immutable
 class HadithDetailScreen extends StatefulWidget {
@@ -118,73 +117,15 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
           top: false,
           bottom: true,
           child: Scaffold(
-            floatingActionButton: Builder(
-              builder: (context) {
-                return FloatingActionButton.extended(
-                  onPressed: () {
-                    if (token == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
-                                textDirection: TextDirection.rtl,
-                                style: TextStyle(
-                                  color: ColorsManager.secondaryBackground,
-                                ),
-                              ),
-                              IconButton(
-                                onPressed:
-                                    () => context.pushNamed(Routes.loginScreen),
-                                icon: Icon(
-                                  Icons.login,
-                                  color: ColorsManager.secondaryBackground,
-                                ),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: ColorsManager.primaryGreen,
-                        ),
-                      );
-                    } else {
-                      context.pushNamed(
-                        Routes.serag,
-                        arguments: SeragRequestModel(
-                          hadith: Hadith(
-                            hadeeth: widget.hadithText ?? '',
-                            grade_ar: widget.grade ?? '',
-                            source: widget.bookName ?? '',
-                            takhrij_ar: widget.narrator ?? '',
-                          ),
-                          messages: [Message(role: 'user', content: '')],
-                        ),
-                      );
-                    }
-                  },
-                  backgroundColor: ColorsManager.primaryPurple,
-                  elevation: 10,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  icon: CircleAvatar(
-                    radius: 20.r,
-                    backgroundImage: const AssetImage(
-                      'assets/images/serag_logo.jpg',
-                    ),
-                    backgroundColor: Colors.transparent,
-                  ),
-                  label: Text(
-                    "اسأل سراج",
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: ColorsManager.secondaryBackground,
-                    ),
-                  ),
-                );
-              },
+            floatingActionButton: SeragFabButton(
+              token: token,
+              hadithText:
+                  (isNavigated && newTextOfHadith.isNotEmpty)
+                      ? newTextOfHadith
+                      : (widget.hadithText ?? ''),
+              grade: widget.grade ?? '',
+              bookName: widget.bookName ?? '',
+              narrator: widget.narrator ?? '',
             ),
             backgroundColor: ColorsManager.secondaryBackground,
             body: CustomScrollView(
@@ -195,72 +136,16 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
                       widget.isBookMark
                           ? []
                           : [
-                            AppBarActionButton(
-                              icon: Icons.bookmark_border_rounded,
-                              onPressed: () {
-                                if (token == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      backgroundColor:
-                                          ColorsManager.primaryGreen,
-                                      content: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text(
-                                            'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
-                                            textDirection: TextDirection.rtl,
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed:
-                                                () => context.pushNamed(
-                                                  Routes.loginScreen,
-                                                ),
-                                            icon: const Icon(
-                                              Icons.login,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  showDialog(
-                                    context: context,
-                                    builder: (dialogContext) {
-                                      return MultiBlocProvider(
-                                        providers: [
-                                          BlocProvider.value(
-                                            value:
-                                                context.read<AddCubitCubit>(),
-                                          ),
-                                          BlocProvider.value(
-                                            value:
-                                                context
-                                                    .read<
-                                                      GetCollectionsBookmarkCubit
-                                                    >()
-                                                  ..getBookMarkCollections(),
-                                          ),
-                                        ],
-                                        child: AddToFavoritesDialog(
-                                          bookName: widget.bookName ?? "",
-                                          bookSlug: widget.bookSlug ?? '',
-                                          chapter: widget.chapter ?? '',
-                                          hadithNumber:
-                                              widget.hadithNumber ?? "",
-                                          hadithText: widget.hadithText ?? '',
-                                          id: widget.hadithNumber ?? ' ',
-                                        ),
-                                      );
-                                    },
-                                  );
-                                }
-                              },
+                            BookmarkAppBarAction(
+                              token: token,
+                              bookName: widget.bookName ?? '',
+                              bookSlug: widget.bookSlug ?? '',
+                              chapter: widget.chapter ?? '',
+                              hadithNumber: widget.hadithNumber ?? '',
+                              hadithText:
+                                  (isNavigated && newTextOfHadith.isNotEmpty)
+                                      ? newTextOfHadith
+                                      : (widget.hadithText ?? ''),
                             ),
                           ],
                 ),
@@ -272,7 +157,13 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
                         horizontal: 22.w,
                         vertical: 16.h,
                       ),
-                      child: _buildHadithHeader(),
+                      child: HadithHeaderInfo(
+                        hadithId:
+                            newHadithId.isNotEmpty
+                                ? newHadithId
+                                : _currentHadithId,
+                        bookName: widget.bookName,
+                      ),
                     ),
                   ),
 
@@ -311,7 +202,7 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
                   reference: widget.bookName ?? '',
                 ),
 
-                if (_isValid(widget.grade)) _buildDividerSection(),
+                if (_isValid(widget.grade)) const DividerSection(),
 
                 if (_isValid(widget.grade))
                   SliverToBoxAdapter(
@@ -357,7 +248,7 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
                 if (_isValid(widget.bookName) ||
                     _isValid(widget.author) ||
                     _isValid(widget.chapter))
-                  _buildDividerSection(),
+                  const DividerSection(),
 
                 if (_isValid(widget.bookName) ||
                     _isValid(widget.author) ||
@@ -374,89 +265,13 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
                     ),
                   ),
 
-                _buildDividerSection(),
+                const DividerSection(),
 
                 SliverToBoxAdapter(child: SizedBox(height: 120.h)),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHadithHeader() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12),
-      decoration: BoxDecoration(
-        color: ColorsManager.primaryGreen.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: ColorsManager.primaryGreen.withOpacity(0.2)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.format_quote,
-            color: ColorsManager.primaryGreen,
-            size: 28.sp,
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (_isValid(widget.hadithNumber) || isNavigated)
-                  Text(
-                    "حديث رقم ${newHadithId.isNotEmpty ? newHadithId : _currentHadithId}",
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: ColorsManager.primaryText,
-                    ),
-                  ),
-                if (_isValid(widget.bookName))
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Divider(endIndent: 60.w),
-                      Text(
-                        'من ${widget.bookName}',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: ColorsManager.secondaryText,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIslamicSeparator() {
-    return Container(
-      height: 2.h,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ColorsManager.primaryPurple.withOpacity(0.3),
-            ColorsManager.primaryGold.withOpacity(0.6),
-            ColorsManager.primaryPurple.withOpacity(0.3),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(1.r),
-      ),
-    );
-  }
-
-  Widget _buildDividerSection() {
-    return SliverToBoxAdapter(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
-        child: _buildIslamicSeparator(),
       ),
     );
   }
@@ -496,7 +311,7 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
         }
       },
       builder: (context, state) {
-        return _buildNavigationContainer(
+        return NavigationContainer(
           isLoading: state is NavigationLoading,
           hadithId: newHadithId.isNotEmpty ? newHadithId : _currentHadithId,
           onPrev:
@@ -563,7 +378,7 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
         }
       },
       builder: (context, state) {
-        return _buildNavigationContainer(
+        return NavigationContainer(
           isLoading: state is NavigationLoading,
           hadithId: newHadithId.isNotEmpty ? newHadithId : _currentHadithId,
           onPrev:
@@ -590,59 +405,6 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
                   : null,
         );
       },
-    );
-  }
-
-  Widget _buildNavigationContainer({
-    required bool isLoading,
-    required String hadithId,
-    required VoidCallback? onPrev,
-    required VoidCallback? onNext,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: ColorsManager.primaryPurple.withOpacity(0.1),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: onPrev,
-            color: onPrev == null ? Colors.grey : ColorsManager.primaryPurple,
-          ),
-          isLoading
-              ? Row(
-                children: [
-                  loadingProgressIndicator(size: 16),
-                  SizedBox(width: 8.w),
-                  Text(
-                    "جاري التحميل...",
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: ColorsManager.primaryPurple,
-                    ),
-                  ),
-                ],
-              )
-              : Text(
-                "الحديث رقم $hadithId",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: ColorsManager.primaryPurple,
-                ),
-              ),
-          IconButton(
-            icon: const Icon(Icons.arrow_forward_ios),
-            onPressed: onNext,
-            color: onNext == null ? Colors.grey : ColorsManager.primaryPurple,
-          ),
-        ],
-      ),
     );
   }
 }

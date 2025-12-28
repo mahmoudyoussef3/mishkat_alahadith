@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:share_plus/share_plus.dart';
@@ -25,7 +24,7 @@ class HadithActionsRow extends StatefulWidget {
   final String? author;
   final String? authorDeath;
   final String? grade;
-  bool isBookmarked;
+  final bool isBookmarked;
   HadithActionsRow({
     super.key,
     required this.hadith,
@@ -199,8 +198,6 @@ class _HadithActionsRowState extends State<HadithActionsRow> {
                   );
                 },
               ),
-
-  
           ],
         ),
       ),

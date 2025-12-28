@@ -49,8 +49,8 @@ class _HadithDailyScreenState extends State<HadithDailyScreen> {
 
     return Directionality(
       textDirection: TextDirection.rtl,
-      child:SafeArea(
-              top: false,
+      child: SafeArea(
+        top: false,
         bottom: true,
         child: Scaffold(
           floatingActionButton: Builder(
@@ -94,11 +94,11 @@ class _HadithDailyScreenState extends State<HadithDailyScreen> {
                             Routes.serag,
                             arguments: SeragRequestModel(
                               hadith: Hadith(
-                                hadeeth: widget.dailyHadithModel?.hadeeth ?? '',
-                                grade_ar: widget.dailyHadithModel?.grade ?? '',
+                                hadeeth: widget.dailyHadithModel.hadeeth ?? '',
+                                grade_ar: widget.dailyHadithModel.grade ?? '',
                                 source: '',
                                 takhrij_ar:
-                                    widget.dailyHadithModel?.attribution ?? '',
+                                    widget.dailyHadithModel.attribution ?? '',
                               ),
                               messages: [Message(role: 'user', content: '')],
                             ),
@@ -185,7 +185,7 @@ class _HadithDailyScreenState extends State<HadithDailyScreen> {
                                 id: (Random().nextInt(10000000) + 1).toString(),
                                 bookName: '',
                                 hadithText:
-                                    widget.dailyHadithModel?.hadeeth ?? "",
+                                    widget.dailyHadithModel.hadeeth ?? "",
                               ),
                             );
                           },

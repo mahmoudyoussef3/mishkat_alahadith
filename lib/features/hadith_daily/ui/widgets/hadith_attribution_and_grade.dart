@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/hadith_daily_response.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
 
 class HadithAttributionAndGrade extends StatelessWidget {
@@ -29,10 +28,10 @@ class HadithAttributionAndGrade extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        if (data?.attribution != null)
+        if (data.attribution != null)
           Flexible(
             child: Text(
-              "📖 ${data?.attribution!}",
+              "📖 ${data.attribution!}",
               style: const TextStyle(
                 fontSize: 16,
                 color: ColorsManager.accentPurple,
@@ -41,13 +40,13 @@ class HadithAttributionAndGrade extends StatelessWidget {
               textAlign: TextAlign.start,
             ),
           ),
-        if (data?.grade != null)
+        if (data.grade != null)
           Chip(
-            backgroundColor: gradeColor(data?.grade).withOpacity(0.1),
+            backgroundColor: gradeColor(data.grade).withOpacity(0.1),
             label: Text(
-            data?.grade??"",
+              data.grade ?? "",
               style: TextStyle(
-                color: gradeColor(data?.grade),
+                color: gradeColor(data.grade),
                 fontWeight: FontWeight.bold,
               ),
             ),

@@ -52,6 +52,9 @@ import '../../features/authentication/login/data/repo/login_repo.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/repo/zekr_repository.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/repo/shared_prefs_zekr_repository.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
+import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 
 final getIt = GetIt.instance;
 final customGetIt = GetIt.instance;
@@ -94,7 +97,7 @@ Future<void> setUpGetIt() async {
 
   getIt.registerLazySingleton<BookMarkRepo>(() => BookMarkRepo(getIt()));
   getIt.registerFactory<GetBookmarksCubit>(() => GetBookmarksCubit(getIt()));
-  
+
   getIt.registerFactory<GetCollectionsBookmarkCubit>(
     () => GetCollectionsBookmarkCubit(getIt()),
   );
@@ -107,8 +110,11 @@ Future<void> setUpGetIt() async {
   );
   getIt.registerFactory<PublicSearchCubit>(() => PublicSearchCubit(getIt()));
 
-  //getIt.registerLazySingleton<SaveHadithDailyRepo>(() => SaveHadithDailyRepo(getIt()));
-  //getIt.registerFactory<DailyHadithCubit>(() => DailyHadithCubit(getIt()));
+  // Hadith of the day feature
+  getIt.registerLazySingleton<SaveHadithDailyRepo>(() => SaveHadithDailyRepo());
+  getIt.registerFactory<DailyHadithCubit>(
+    () => DailyHadithCubit(getIt<SaveHadithDailyRepo>()),
+  );
 
   getIt.registerLazySingleton<NavigationRepo>(() => NavigationRepo(getIt()));
   getIt.registerFactory<NavigationCubit>(() => NavigationCubit(getIt()));
@@ -187,4 +193,7 @@ Future<void> setUpGetIt() async {
   getIt.registerFactory<DailyZekrCubit>(
     () => DailyZekrCubit(getIt<ZekrRepository>()),
   );
+
+  // Prayer Times feature
+  getIt.registerFactory<PrayerTimesCubit>(() => PrayerTimesCubit());
 }

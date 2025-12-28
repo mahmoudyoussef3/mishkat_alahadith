@@ -5,7 +5,6 @@ import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/ui/widgets/hadith_rich_text.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/models/enhanced_search_response_model.dart';
-import 'package:share_plus/share_plus.dart';
 
 class ResultHadithContentCard extends StatelessWidget {
   final EnhancedHadithModel data;
@@ -15,7 +14,7 @@ class ResultHadithContentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-       gradient: LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
           colors: [
@@ -119,48 +118,52 @@ class ResultHadithContentCard extends StatelessWidget {
                 SizedBox(height: 20.h),
 
                 // Hadith content
-                HadithRichText(
-                  hadith: data.hadeeth ?? "",                ),
-                        SizedBox(height: 10.h),
+                HadithRichText(hadith: data.hadeeth ?? ""),
+                SizedBox(height: 10.h),
 
-              /// أيقونات النسخ والمشاركة والإضافة للمفضلة
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: Wrap(
-                  spacing: 10.w,
-                  children: [
-                    _buildActionIcon(
-                      context,
-                      icon: Icons.copy_rounded,
-                      color: ColorsManager.primaryPurple,
-                      tooltip: "نسخ الحديث",
-                     onTap: () {
-                Clipboard.setData(ClipboardData(text: data.hadeeth??""));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    behavior: SnackBarBehavior.floating,
-                    content: Text("تم نسخ الحديث"),
+                /// أيقونات النسخ والمشاركة والإضافة للمفضلة
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Wrap(
+                    spacing: 10.w,
+                    children: [
+                      _buildActionIcon(
+                        context,
+                        icon: Icons.copy_rounded,
+                        color: ColorsManager.primaryPurple,
+                        tooltip: "نسخ الحديث",
+                        onTap: () {
+                          Clipboard.setData(
+                            ClipboardData(text: data.hadeeth ?? ""),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              content: Text("تم نسخ الحديث"),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildActionIcon(
+                        context,
+                        icon: Icons.share_rounded,
+                        color: ColorsManager.primaryGreen,
+                        tooltip: "مشاركة الحديث",
+                        onTap:
+                            () => shareHadithAsImage(
+                              context,
+                              text: data.hadeeth ?? "",
+                            ),
+                      ),
+                    ],
                   ),
-                );
-              },
-                    ),
-                    _buildActionIcon(
-                      context,
-                      icon: Icons.share_rounded,
-                      color: ColorsManager.primaryGreen,
-                      tooltip: "مشاركة الحديث",
-                      onTap: () => shareHadithAsImage(context, text: data.hadeeth??"")
-                    ),
-                 
-                  ],
                 ),
-              ),
               ],
             ),
           ),
 
           // Bottom decorative element
-    /*      Positioned(
+          /*      Positioned(
             bottom: 0,
             left: 0,
             child: Container(
@@ -185,7 +188,7 @@ class ResultHadithContentCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildActionIcon(
     BuildContext context, {
     required IconData icon,
@@ -206,11 +209,7 @@ class ResultHadithContentCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: color.withOpacity(0.2)),
           ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 20.sp,
-          ),
+          child: Icon(icon, color: color, size: 20.sp),
         ),
       ),
     );

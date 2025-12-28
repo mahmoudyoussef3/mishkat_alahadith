@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/hadith_daily_response.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
 
@@ -25,8 +24,9 @@ class HadithTabContent extends StatelessWidget {
               TextSpan(
                 text: data?.explanation ?? "لا يوجد شرح",
                 style: const TextStyle(
-  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w500,                  color: ColorsManager.black,
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w500,
+                  color: ColorsManager.black,
                   height: 1.6,
                 ),
               ),
@@ -55,12 +55,13 @@ class HadithTabContent extends StatelessWidget {
                               ),
                               TextSpan(
                                 text: hint,
-                                
+
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontWeight: FontWeight.w500,
 
-                                  color: ColorsManager.black),
+                                  color: ColorsManager.black,
+                                ),
                               ),
                             ],
                           ),
@@ -73,8 +74,7 @@ class HadithTabContent extends StatelessWidget {
         return const Text("لا توجد فوائد");
 
       case "معاني الكلمات":
-        if (data?.words_meanings != null &&
-            data!.words_meanings!.isNotEmpty) {
+        if (data?.words_meanings != null && data!.words_meanings!.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children:
@@ -88,8 +88,9 @@ class HadithTabContent extends StatelessWidget {
                               TextSpan(
                                 text: wm.word ?? "",
                                 style: const TextStyle(
-  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w700,                                  color: ColorsManager.darkPurple,
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.w700,
+                                  color: ColorsManager.darkPurple,
                                 ),
                               ),
                               const TextSpan(
@@ -103,7 +104,7 @@ class HadithTabContent extends StatelessWidget {
                                 text: wm.meaning ?? "",
                                 style: const TextStyle(
                                   fontSize: 15,
-  fontFamily: 'Cairo',
+                                  fontFamily: 'Cairo',
                                   fontWeight: FontWeight.w500,
                                   color: Colors.black87,
                                 ),

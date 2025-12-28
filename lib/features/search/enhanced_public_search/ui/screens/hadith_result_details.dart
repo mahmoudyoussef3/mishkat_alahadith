@@ -54,8 +54,8 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
       child: Builder(
         builder: (context) {
           return SafeArea(
-              top: false,
-        bottom: true,
+            top: false,
+            bottom: true,
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Scaffold(
@@ -77,7 +77,8 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                           textDirection: TextDirection.rtl,
                                           style: TextStyle(
                                             color:
-                                                ColorsManager.secondaryBackground,
+                                                ColorsManager
+                                                    .secondaryBackground,
                                           ),
                                         ),
                                         IconButton(
@@ -88,7 +89,8 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                           icon: Icon(
                                             Icons.login,
                                             color:
-                                                ColorsManager.secondaryBackground,
+                                                ColorsManager
+                                                    .secondaryBackground,
                                           ),
                                         ),
                                       ],
@@ -106,9 +108,12 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                           widget.enhancedHadithModel.hadeeth ??
                                           '',
                                       grade_ar:
-                                          widget.enhancedHadithModel.grade ?? '',
+                                          widget.enhancedHadithModel.grade ??
+                                          '',
                                       source:
-                                          widget.enhancedHadithModel.reference ??
+                                          widget
+                                              .enhancedHadithModel
+                                              .reference ??
                                           "",
                                       takhrij_ar:
                                           widget
@@ -150,7 +155,7 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                   slivers: [
                     BuildHeaderAppBar(
                       title: 'معلومات عن الحديث',
-            
+
                       actions: [
                         AppBarActionButton(
                           icon: Icons.bookmark_border_rounded,
@@ -209,7 +214,9 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                           (Random().nextInt(10000000) + 1)
                                               .toString(),
                                       bookName:
-                                          widget.enhancedHadithModel.reference ??
+                                          widget
+                                              .enhancedHadithModel
+                                              .reference ??
                                           "",
                                       hadithText:
                                           widget.enhancedHadithModel.hadeeth ??
@@ -223,9 +230,9 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                         ),
                       ],
                     ),
-            
+
                     SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-            
+
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -264,13 +271,13 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                 SizedBox(height: 5.h),
                               ],
                             ),
-            
+
                             // Enhanced tabs section
                             Container(
                               margin: EdgeInsets.only(bottom: 20.h),
                               child: _buildEnhancedTabsSection(),
                             ),
-            
+
                             Container(
                               padding: EdgeInsets.symmetric(
                                 horizontal: 16.w,
@@ -289,19 +296,17 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                         ),
                       ),
                     ),
-            
-                    /*
-                      SliverToBoxAdapter(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(
-                            horizontal: 20.w,
-                            vertical: 20.h,
-                          ),
-                          child: _buildEnhancedActionsSection(),
+
+                    //
+                    SliverToBoxAdapter(
+                      child: Container(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 20.w,
+                          vertical: 20.h,
                         ),
+                        child: _buildEnhancedActionsSection(),
                       ),
-                      */
-                    SliverToBoxAdapter(child: SizedBox(height: 120.h)),
+                    ),
                   ],
                 ),
               ),

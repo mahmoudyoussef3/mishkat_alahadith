@@ -28,14 +28,13 @@ class LoginCubit extends Cubit<LoginState> {
       ),
     );
 
-    response.fold(
-      (error) => emit(LoginError(error.getAllErrorMessages())),
-      (data) async {
-        await sharedPreferences.setString("token", data.token!);
-        log("📌 Saved token: ${data.token}");
-        emit(LoginSuccess(data));
-      },
-    );
+    response.fold((error) => emit(LoginError(error.getAllErrorMessages())), (
+      data,
+    ) async {
+      await sharedPreferences.setString("token", data.token!);
+      log("📌 Saved token: ${data.token}");
+      emit(LoginSuccess(data));
+    });
   }
 
   /// Google login
@@ -45,13 +44,15 @@ class LoginCubit extends Cubit<LoginState> {
     emit(LoginLoading());
     final response = await _loginRepo.googleLogin();
 
-    response.fold(
-      (error) => emit(LoginError(error.getAllErrorMessages())),
-      (data) async {
-        log("📌 Google login token: ${data.token}");
-        emit(LoginSuccess(data));
-      },
-    );
+    response.fold((error) => emit(LoginError(error.getAllErrorMessages())), (
+      data,
+    ) async {
+      if (data.token != null) {
+        await sharedPreferences.setString("token", data.token!);
+      }
+      log("📌 Google login token: ${data.token}");
+      emit(LoginSuccess(data));
+    });
   }
 
   Future<String?> getSavedToken() async {

@@ -53,13 +53,24 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
     _scrollController.addListener(() {
       final cubit = context.read<AhadithsCubit>();
       if (_scrollController.position.pixels >=
-                  _scrollController.position.maxScrollExtent - 200 &&
-              !_isLoadingMore &&
-              cubit.state is AhadithsSuccess ||
-          cubit.state is LocalAhadithsSuccess) {
+              _scrollController.position.maxScrollExtent - 200 &&
+          !_isLoadingMore &&
+          (cubit.state is AhadithsSuccess ||
+              cubit.state is LocalAhadithsSuccess)) {
         _loadMore();
       }
     });
+
+    // Trigger initial load for page 1 on screen open
+    final cubit = context.read<AhadithsCubit>();
+    cubit.emitAhadiths(
+      page: _page,
+      paginate: 10,
+      bookSlug: widget.bookSlug,
+      chapterId: widget.chapterNumber ?? 1,
+      isArbainBooks: checkThreeBooks(widget.bookSlug),
+      hadithLocal: checkBookSlug(widget.bookSlug),
+    );
   }
 
   final _controller = TextEditingController();
@@ -111,7 +122,7 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-              top: false,
+        top: false,
         bottom: true,
         child: Scaffold(
           backgroundColor: ColorsManager.primaryBackground,
@@ -184,5 +195,12 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 }

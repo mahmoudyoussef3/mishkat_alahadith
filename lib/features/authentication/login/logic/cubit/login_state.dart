@@ -1,4 +1,3 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/features/authentication/login/data/models/login_response_body.dart';
 
 abstract class LoginState {}
@@ -16,6 +15,7 @@ class LoginError extends LoginState {
   final String message;
   LoginError(this.message);
 }
+
 class LogoutLoading extends LoginState {}
 
 class LogoutSuccess extends LoginState {}
@@ -24,6 +24,7 @@ class LogoutError extends LoginState {
   final String message;
   LogoutError(this.message);
 }
+
 class GoogleLoginInitial extends LoginState {}
 
 class GoogleLoginLoading extends LoginState {}

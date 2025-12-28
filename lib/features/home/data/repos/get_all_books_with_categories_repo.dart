@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dartz/dartz.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
@@ -12,14 +10,10 @@ class GetAllBooksWithCategoriesRepo {
 
   GetAllBooksWithCategoriesRepo(this._apiService);
 
-
   Future<Either<ApiErrorModel, BooksResponse>>
   getAllBooksWithCategoriesRepo() async {
     try {
-
-
-      
-         final cacheKey = CacheKeys.booksWithCategories;
+      final cacheKey = CacheKeys.booksWithCategories;
 
       final cachedData = await GenericCacheService.instance
           .getData<BooksResponse>(
@@ -30,8 +24,8 @@ class GetAllBooksWithCategoriesRepo {
       if (cachedData != null) {
         return Right(cachedData);
       }
-            final response = await _apiService.getAllBooksWithCategories();
-      
+      final response = await _apiService.getAllBooksWithCategories();
+
       await GenericCacheService.instance.saveData<BooksResponse>(
         key: cacheKey,
         data: response,

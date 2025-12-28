@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -53,7 +52,6 @@ class ResponsiveChapterList extends StatelessWidget {
   }
 
   @override
-
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     const crossAxisCount = 2;
@@ -72,8 +70,6 @@ class ResponsiveChapterList extends StatelessWidget {
         }
         return GestureDetector(
           onTap: () {
-      
-
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -92,7 +88,9 @@ class ResponsiveChapterList extends StatelessWidget {
                                     chapterId: items[index].chapterNumber,
                                   ),
                         ),
-                        BlocProvider(create: (context) => getIt<AddCubitCubit>()),
+                        BlocProvider(
+                          create: (context) => getIt<AddCubitCubit>(),
+                        ),
                       ],
                       child: ChapterAhadithScreen(
                         chapterNumber: items[index].chapterNumber,
@@ -103,11 +101,10 @@ class ResponsiveChapterList extends StatelessWidget {
                         bookId: items[index].chapterNumber,
                         arabicBookName: bookName,
                         arabicWriterName: writerName,
-                        arabicChapterName: 
-                        items is List<Bookmark> ? items[index].chapterName:
-                        
-                        items[index].chapterArabic 
-                           
+                        arabicChapterName:
+                            items is List<Bookmark>
+                                ? items[index].chapterName
+                                : items[index].chapterArabic,
                       ),
                     ),
               ),
@@ -118,10 +115,12 @@ class ResponsiveChapterList extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: ChapterCard(
               chapterNumber: items[index].chapterNumber,
-              ar: items is List<Bookmark>? items[index].chapterName ??'jhjkjnk' : items[index].chapterArabic,
+              ar:
+                  items is List<Bookmark>
+                      ? items[index].chapterName ?? 'jhjkjnk'
+                      : items[index].chapterArabic,
               primaryPurple: primaryPurple,
             ),
-          
           ),
         );
       }, childCount: isLoading ? 12 : items.length),

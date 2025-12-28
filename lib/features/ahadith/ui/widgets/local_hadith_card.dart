@@ -156,9 +156,10 @@ class LocalHadithCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 12.w),
+                    // TODO: replace with chapter name when available
                     Flexible(
                       child: _buildGradientPill(
-                        text: bookName ?? '',
+                        text: bookName,
                         colors: [
                           Colors.green.withOpacity(0.8),
                           Colors.green.withOpacity(0.6),

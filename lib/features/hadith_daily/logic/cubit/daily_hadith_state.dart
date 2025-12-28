@@ -5,10 +5,10 @@ sealed class DailyHadithState {}
 
 final class DailyHadithInitial extends DailyHadithState {}
 
-final class DailyHaditLoading extends DailyHadithState {}
+final class DailyHadithLoading extends DailyHadithState {}
 
 final class DailyHadithSuccess extends DailyHadithState {
-  final HadithData? dailyHadithModel;
+  final NewDailyHadithModel dailyHadithModel;
   DailyHadithSuccess(this.dailyHadithModel);
 }
 
