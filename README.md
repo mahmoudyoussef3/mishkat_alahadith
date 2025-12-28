@@ -188,7 +188,7 @@ hadithWeak: #FF9800       // Weak (Orange)
 <img src="screenshots/hadith_details.webp" width="250" alt="Hadith Details"/>
 
 ### Search Results
-<img src="screenshots/search_result.png" width="250" alt="Search Results"/>
+<img src="screenshots/search_result.webp" width="250" alt="Search Results"/>
 
 ### Hadith of the Day
 <img src="screenshots/hadith_of_th_day.webp" width="250" alt="Hadith of the Day"/>

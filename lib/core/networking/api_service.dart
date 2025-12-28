@@ -90,7 +90,6 @@ abstract class ApiService {
   @DELETE(ApiConstants.deleteBookmark)
   Future<AddBookmarkResponse> deleteUserBookmsrk(
     @Path("bookmarkId") int bookmarkId,
-
     @Header("x-auth-token") String token,
   );
 

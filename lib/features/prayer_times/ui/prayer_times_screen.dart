@@ -12,7 +12,9 @@ class PrayerTimesScreen extends StatefulWidget {
   @override
   State<PrayerTimesScreen> createState() => _PrayerTimesScreenState();
 }
-
+  String _formatDate(DateTime d) {
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
 class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   late final PrayerCalculator _calculator;
   PrayerTimes? _times;
@@ -47,20 +49,21 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: ColorsManager.secondaryBackground,
-        body:SafeArea(
-              top: false,
-        bottom: true,
+        body: SafeArea(
+          top: false,
+          bottom: true,
           child: CustomScrollView(
             slivers: [
-              const BuildHeaderAppBar(
+               BuildHeaderAppBar(
                 title: 'مواقيت الصلاة',
-              
-                description: 'مواقيت اليوم في القاهرة – حسب الهيئة المصرية',
+
+                description:
+                    'مواقيت اليوم في القاهرة –   ${_formatDate(_date)}',
                 pinned: true,
               ),
               SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-              SliverToBoxAdapter(child: _buildCityDateCard()),
-              SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+             // SliverToBoxAdapter(child: _buildCityDateCard()),
+              //SliverToBoxAdapter(child: SizedBox(height: 12.h)),
               SliverToBoxAdapter(child: _buildNextPrayerCard()),
               SliverToBoxAdapter(child: SizedBox(height: 16.h)),
               SliverToBoxAdapter(child: _buildDivider()),
@@ -129,9 +132,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     return '$h:$m';
   }
 
-  String _formatDate(DateTime d) {
-    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-  }
+
 
   Widget _buildCityDateCard() {
     return Padding(

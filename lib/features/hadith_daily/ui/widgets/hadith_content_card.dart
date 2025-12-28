@@ -105,7 +105,7 @@ class HadithContentCard extends StatelessWidget {
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        "متن الحديث",
+                        "نص الحديث",
                         style: TextStyle(
                           color: ColorsManager.primaryPurple,
                           fontSize: 12.sp,

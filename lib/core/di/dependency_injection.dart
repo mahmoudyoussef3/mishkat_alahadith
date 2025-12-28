@@ -94,6 +94,7 @@ Future<void> setUpGetIt() async {
 
   getIt.registerLazySingleton<BookMarkRepo>(() => BookMarkRepo(getIt()));
   getIt.registerFactory<GetBookmarksCubit>(() => GetBookmarksCubit(getIt()));
+  
   getIt.registerFactory<GetCollectionsBookmarkCubit>(
     () => GetCollectionsBookmarkCubit(getIt()),
   );

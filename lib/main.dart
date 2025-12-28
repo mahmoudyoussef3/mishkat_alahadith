@@ -10,6 +10,7 @@ import 'package:mishkat_almasabih/core/notification/push_notification.dart';
 import 'package:mishkat_almasabih/core/routing/app_router.dart';
 import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
 import 'package:mishkat_almasabih/features/onboarding/sava_date_for_first_time.dart';
+import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
 import 'package:mishkat_almasabih/mishkat_almasabih.dart';
 import 'package:mishkat_almasabih/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -39,6 +40,13 @@ Future<void> main() async {
   PushNotification.handleTerminatedNotification();
 
   await setUpGetIt();
+  // Ensure Daily Zekr reminders are synced at app startup so they work in
+  // foreground, background, and terminated states (periodic scheduling persists).
+  try {
+    // Create a transient cubit instance to sync notifications based on stored state.
+    // This avoids needing to open the screen to start reminders.
+    await DailyZekrCubit(getIt()).init();
+  } catch (_) {}
   await initializeDateFormatting('ar', null);
 
   // Initialize widget navigation service to handle widget clicks

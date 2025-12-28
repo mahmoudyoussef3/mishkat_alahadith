@@ -10,6 +10,7 @@ import 'package:mishkat_almasabih/features/authentication/signup/ui/screens/sign
 import 'package:mishkat_almasabih/features/book_data/logic/cubit/book_data_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/logic/delete_cubit/cubit/delete_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/get_cubit/user_bookmarks_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/screens/bookmark_screen.dart';
 import 'package:mishkat_almasabih/features/chapters/logic/cubit/chapters_cubit.dart';
@@ -183,6 +184,12 @@ class AppRouter {
                         (_) =>
                             getIt<GetCollectionsBookmarkCubit>()
                               ..getBookMarkCollections(),
+                  ),
+                    BlocProvider(
+                    create:
+                        (_) =>
+                            getIt<DeleteCubitCubit>()
+                              ,
                   ),
                 ],
                 child: const BookmarkScreen(),
