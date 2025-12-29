@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mishkat_almasabih/features/about_us/data/repos/about_us_repo.dart';
-import 'package:mishkat_almasabih/features/about_us/logic/cubit/about_us_cubit.dart';
+
 import 'package:mishkat_almasabih/features/authentication/signup/data/repo/signup_repo.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
 import 'package:mishkat_almasabih/features/book_data/data/repos/book_data_repo.dart';
@@ -165,8 +164,6 @@ Future<void> setUpGetIt() async {
   getIt.registerLazySingleton<SeragRepo>(() => SeragRepo(getIt()));
   getIt.registerFactory<SeragCubit>(() => SeragCubit(getIt()));
 
-  getIt.registerLazySingleton<AboutUsRepo>(() => AboutUsRepo(getIt()));
-  getIt.registerFactory<AboutUsCubit>(() => AboutUsCubit(getIt()));
 
   ///customApi
   customGetIt.registerLazySingleton<CustomApiService>(

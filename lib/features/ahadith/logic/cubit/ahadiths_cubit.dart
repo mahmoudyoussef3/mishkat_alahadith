@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
@@ -23,10 +24,8 @@ class AhadithsCubit extends Cubit<AhadithsState> {
     required int page,
     int paginate = 10,
   }) async {
-    // نحدد نوع المصدر الحالي
     final currentSourceKey = '$bookSlug-$chapterId-$hadithLocal-$isArbainBooks';
 
-    // لو غيرنا المصدر، نعمل reset للصفحات
     if (_lastSourceKey != currentSourceKey) {
       _hasMore = true;
       _isLoadingMore = false;
@@ -34,10 +33,8 @@ class AhadithsCubit extends Cubit<AhadithsState> {
       _lastSourceKey = currentSourceKey;
     }
 
-    // أول صفحة => تحميل عادي
     if (page == 1) emit(AhadithsLoading());
 
-    // لو بالفعل بيحمل بيانات إضافية، متحملش تاني
     if (_isLoadingMore || !_hasMore) return;
     _isLoadingMore = true;
 

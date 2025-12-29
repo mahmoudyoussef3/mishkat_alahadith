@@ -102,3 +102,27 @@ Future<void> shareHadithAsImage(
     },
   );
 }
+  bool checkBookSlug(String bookSlug) {
+    if (bookSlug == 'sahih-bukhari' ||
+        bookSlug == 'sahih-muslim' ||
+        bookSlug == 'al-tirmidhi' ||
+        bookSlug == 'abu-dawood' ||
+        bookSlug == 'ibn-e-majah' ||
+        bookSlug == 'sunan-nasai' ||
+        bookSlug == 'mishkat') {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  bool checkThreeBooks(String bookSlug) {
+    if (bookSlug == 'qudsi40' ||
+        bookSlug == 'nawawi40' ||
+        bookSlug == 'riyadiah40' ||
+        bookSlug == 'shahwaliullah40') {
+      return true;
+    } else {
+      return false;
+    }
+  }

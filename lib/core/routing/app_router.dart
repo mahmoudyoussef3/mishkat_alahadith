@@ -2,8 +2,6 @@ import 'dart:developer';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/features/about_us/logic/cubit/about_us_cubit.dart'
-    show AboutUsCubit;
 import 'package:mishkat_almasabih/features/about_us/ui/screens/about_us_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/ui/screens/signup_screen.dart';
@@ -296,10 +294,7 @@ class AppRouter {
         _logScreenView('AboutUsScreen');
         return MaterialPageRoute(
           builder:
-              (_) => BlocProvider(
-                create: (context) => getIt<AboutUsCubit>(),
-                child: const AboutUsScreen(),
-              ),
+              (_) => const AboutUsScreen(),
         );
       case Routes.serag:
         _logScreenView('SeragScreen');
