@@ -26,6 +26,8 @@ import 'package:mishkat_almasabih/features/prayer_times/ui/prayer_times_screen.d
 import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/profile_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/ui/profile_screen.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/logic/cubit/qiblah_cubit.dart' show QiblahCubit;
+import 'package:mishkat_almasabih/features/qiblah_finder/ui/qiblah_finder_screen.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/logic/cubit/random_ahadith_cubit.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/logic/cubit/remaining_questions_cubit.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/logic/cubit/enhanced_search_cubit.dart';
@@ -183,12 +185,7 @@ class AppRouter {
                             getIt<GetCollectionsBookmarkCubit>()
                               ..getBookMarkCollections(),
                   ),
-                    BlocProvider(
-                    create:
-                        (_) =>
-                            getIt<DeleteCubitCubit>()
-                              ,
-                  ),
+                  BlocProvider(create: (_) => getIt<DeleteCubitCubit>()),
                 ],
                 child: const BookmarkScreen(),
               ),
@@ -292,10 +289,7 @@ class AppRouter {
         );
       case Routes.aboutUs:
         _logScreenView('AboutUsScreen');
-        return MaterialPageRoute(
-          builder:
-              (_) => const AboutUsScreen(),
-        );
+        return MaterialPageRoute(builder: (_) => const AboutUsScreen());
       case Routes.serag:
         _logScreenView('SeragScreen');
         final query = settings.arguments as SeragRequestModel;
@@ -336,6 +330,15 @@ class AppRouter {
               (_) => BlocProvider(
                 create: (context) => getIt<PrayerTimesCubit>(),
                 child: const PrayerTimesScreen(),
+              ),
+        );
+      case Routes.qiblahFinder:
+        _logScreenView('QiblahFinderScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<QiblahCubit>(),
+                child: const QiblahFinderScreen(),
               ),
         );
 

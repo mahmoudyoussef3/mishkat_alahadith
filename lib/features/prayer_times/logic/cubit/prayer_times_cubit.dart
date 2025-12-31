@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
 import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_reminder_service.dart';
 
 part 'prayer_times_state.dart';
 
 class PrayerTimesCubit extends Cubit<PrayerTimesState> {
-  PrayerTimesCubit() : super(PrayerTimesInitial());
+  final PrayerTimesReminderService _reminderService;
+
+  PrayerTimesCubit(this._reminderService) : super(PrayerTimesInitial());
 
   late final PrayerCalculator _calculator;
   Timer? _ticker;
@@ -26,6 +29,17 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
       final loaded = _buildLoaded(date, times);
       emit(loaded);
 
+      final tomorrowTimes = _calculator.calculate(
+        DateTime(date.year, date.month, date.day).add(const Duration(days: 1)),
+      );
+      unawaited(
+        _reminderService.syncPrayerReminders(
+          todayTimes: times,
+          tomorrowTimes: tomorrowTimes,
+          now: date,
+        ),
+      );
+
       _ticker?.cancel();
       _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
         final current = state;
@@ -36,6 +50,20 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
         if (!_isSameDay(now, current.date)) {
           final newTimes = _calculator.calculate(now);
           emit(_buildLoaded(now, newTimes));
+
+          final tomorrow = DateTime(
+            now.year,
+            now.month,
+            now.day,
+          ).add(const Duration(days: 1));
+          final tomorrowTimes = _calculator.calculate(tomorrow);
+          unawaited(
+            _reminderService.syncPrayerReminders(
+              todayTimes: newTimes,
+              tomorrowTimes: tomorrowTimes,
+              now: now,
+            ),
+          );
           return;
         }
 

@@ -147,6 +147,17 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.prayerTimesScreen);
                   },
                 ),
+
+                   _buildDrawerItem(
+                  context,
+
+                  icon: Icons.explore_rounded,
+                  title: 'القبلة',
+  onTap: () {
+                    Navigator.pop(context);
+                    context.pushNamed(Routes.qiblahFinder);
+                  },
+                ),
                 _buildDrawerItem(
                   context,
                   icon: Icons.person_rounded,

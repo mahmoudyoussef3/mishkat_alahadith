@@ -2,12 +2,17 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mishkat_almasabih/core/notification/firebase_service/notification_factories.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotification {
-  static Future<void> requestNotificationPermission() async  {
+  static bool _timeZoneConfigured = false;
+
+  static Future<void> requestNotificationPermission() async {
     final status = await Permission.notification.status;
 
     if (status.isGranted) return;
@@ -29,6 +34,7 @@ class LocalNotification {
 
   static Future<void> init() async {
     await requestNotificationPermission();
+    await _configureLocalTimeZone();
     // 1. Configure iOS initialization settings
     const DarwinInitializationSettings iOSSettings =
         DarwinInitializationSettings(
@@ -84,6 +90,19 @@ class LocalNotification {
       log('Local notifications initialized successfully');
     } catch (e) {
       log('Error initializing local notifications: $e');
+    }
+  }
+
+  static Future<void> _configureLocalTimeZone() async {
+    if (_timeZoneConfigured) return;
+    try {
+      tz.initializeTimeZones();
+      final timeZoneName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      _timeZoneConfigured = true;
+    } catch (e) {
+      // Fallback: keep default timezone configuration.
+      log('Error configuring local timezone: $e');
     }
   }
 
@@ -226,6 +245,66 @@ class LocalNotification {
         platformDetails,
         payload: payload,
       );
+    }
+  }
+
+  /// Schedule a one-time notification at an exact date/time.
+  static Future<void> scheduleOneTimeNotification({
+    required int id,
+    required String channelId,
+    required String channelName,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    String? payload,
+  }) async {
+    await _configureLocalTimeZone();
+
+    const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentBanner: true,
+      presentSound: true,
+      sound: 'default',
+    );
+
+    final AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          channelId,
+          channelName,
+          importance: Importance.max,
+          priority: Priority.high,
+          enableVibration: true,
+          ticker: 'ticker',
+        );
+
+    final NotificationDetails platformDetails = NotificationDetails(
+      iOS: iOSDetails,
+      android: androidDetails,
+    );
+
+    try {
+      await cancelReminder(id);
+      final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tzDate,
+        platformDetails,
+        payload: payload,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    } catch (e) {
+      log('Error scheduling one-time notification (id=$id): $e');
+    }
+  }
+
+  static Future<void> cancelReminders(Iterable<int> ids) async {
+    for (final id in ids) {
+      await cancelReminder(id);
     }
   }
 

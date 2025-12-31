@@ -29,6 +29,7 @@ import 'package:mishkat_almasabih/features/profile/edit_profile/data/repos/edit_
 import 'package:mishkat_almasabih/features/profile/edit_profile/logic/cubit/edit_profile_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/profile_cubit.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/logic/cubit/qiblah_cubit.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/data/custom_api_service.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/data/repos/random_ahadith_repo.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/logic/cubit/random_ahadith_cubit.dart';
@@ -52,6 +53,7 @@ import 'package:mishkat_almasabih/features/daily_zekr/data/repo/zekr_repository.
 import 'package:mishkat_almasabih/features/daily_zekr/data/repo/shared_prefs_zekr_repository.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_reminder_service.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 
@@ -192,5 +194,16 @@ Future<void> setUpGetIt() async {
   );
 
   // Prayer Times feature
-  getIt.registerFactory<PrayerTimesCubit>(() => PrayerTimesCubit());
+  getIt.registerLazySingleton<PrayerTimesReminderService>(
+    () => PrayerTimesReminderService(),
+  );
+  getIt.registerFactory<PrayerTimesCubit>(
+    () => PrayerTimesCubit(getIt<PrayerTimesReminderService>()),
+  );
+
+
+  
+  getIt.registerFactory<QiblahCubit>(
+    () => QiblahCubit(),
+  );
 }
