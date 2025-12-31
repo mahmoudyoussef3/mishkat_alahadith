@@ -166,7 +166,6 @@ Future<void> setUpGetIt() async {
   getIt.registerLazySingleton<SeragRepo>(() => SeragRepo(getIt()));
   getIt.registerFactory<SeragCubit>(() => SeragCubit(getIt()));
 
-
   ///customApi
   customGetIt.registerLazySingleton<CustomApiService>(
     () => CustomApiService(dio),
@@ -201,9 +200,5 @@ Future<void> setUpGetIt() async {
     () => PrayerTimesCubit(getIt<PrayerTimesReminderService>()),
   );
 
-
-  
-  getIt.registerFactory<QiblahCubit>(
-    () => QiblahCubit(),
-  );
+  getIt.registerFactory<QiblahCubit>(() => QiblahCubit());
 }

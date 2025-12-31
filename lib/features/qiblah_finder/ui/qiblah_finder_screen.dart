@@ -143,9 +143,8 @@ class _QiblahCompassCard extends StatelessWidget {
           SizedBox(height: 12.h),
           LayoutBuilder(
             builder: (context, constraints) {
-              final size = (constraints.maxWidth < 360)
-                  ? constraints.maxWidth
-                  : 360.0;
+              final size =
+                  (constraints.maxWidth < 360) ? constraints.maxWidth : 360.0;
               final dialSize = size.clamp(260.0, 380.0).r;
 
               return Center(
@@ -155,8 +154,7 @@ class _QiblahCompassCard extends StatelessWidget {
                   child: StreamBuilder<QiblahDirection>(
                     stream: FlutterQiblah.qiblahStream,
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState ==
-                          ConnectionState.waiting) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(
                           child: CircularProgressIndicator.adaptive(),
                         );
@@ -267,10 +265,7 @@ class _QiblahDial extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: ColorsManager.cardBackground,
-              border: Border.all(
-                color: ColorsManager.mediumGray,
-                width: 1,
-              ),
+              border: Border.all(color: ColorsManager.mediumGray, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: ColorsManager.mediumGray.withOpacity(0.22),
@@ -348,24 +343,27 @@ class _CompassDialPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.shortestSide / 2;
 
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.06
-      ..color = ColorsManager.primaryPurple.withOpacity(0.18);
+    final ringPaint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = radius * 0.06
+          ..color = ColorsManager.primaryPurple.withOpacity(0.18);
 
     canvas.drawCircle(center, radius * 0.98, ringPaint);
 
-    final minorPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.012
-      ..strokeCap = StrokeCap.round
-      ..color = ColorsManager.mediumGray.withOpacity(0.75);
+    final minorPaint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = radius * 0.012
+          ..strokeCap = StrokeCap.round
+          ..color = ColorsManager.mediumGray.withOpacity(0.75);
 
-    final majorPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.02
-      ..strokeCap = StrokeCap.round
-      ..color = ColorsManager.primaryPurple.withOpacity(0.55);
+    final majorPaint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = radius * 0.02
+          ..strokeCap = StrokeCap.round
+          ..color = ColorsManager.primaryPurple.withOpacity(0.55);
 
     for (int deg = 0; deg < 360; deg += 10) {
       final isMajor = deg % 30 == 0;
@@ -464,23 +462,26 @@ class _NeedlePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.shortestSide / 2;
 
-    final needlePaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = ColorsManager.primaryGold;
+    final needlePaint =
+        Paint()
+          ..style = PaintingStyle.fill
+          ..color = ColorsManager.primaryGold;
 
-    final shadowPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = ColorsManager.black.withOpacity(0.10);
+    final shadowPaint =
+        Paint()
+          ..style = PaintingStyle.fill
+          ..color = ColorsManager.black.withOpacity(0.10);
 
     final needleLength = radius * 0.88;
     final needleWidth = radius * 0.09;
 
-    final path = Path()
-      ..moveTo(center.dx, center.dy - needleLength)
-      ..lineTo(center.dx + needleWidth / 2, center.dy)
-      ..lineTo(center.dx, center.dy + needleLength * 0.12)
-      ..lineTo(center.dx - needleWidth / 2, center.dy)
-      ..close();
+    final path =
+        Path()
+          ..moveTo(center.dx, center.dy - needleLength)
+          ..lineTo(center.dx + needleWidth / 2, center.dy)
+          ..lineTo(center.dx, center.dy + needleLength * 0.12)
+          ..lineTo(center.dx - needleWidth / 2, center.dy)
+          ..close();
 
     canvas.save();
     canvas.translate(2, 3);
