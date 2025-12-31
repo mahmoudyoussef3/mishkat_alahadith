@@ -147,38 +147,48 @@ class _QiblahCompassCard extends StatelessWidget {
                   (constraints.maxWidth < 360) ? constraints.maxWidth : 360.0;
               final dialSize = size.clamp(260.0, 380.0).r;
 
-              return Center(
-                child: SizedBox(
-                  width: dialSize,
-                  height: dialSize,
-                  child: StreamBuilder<QiblahDirection>(
-                    stream: FlutterQiblah.qiblahStream,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator.adaptive(),
-                        );
-                      }
-                      if (!snapshot.hasData) {
-                        return Center(
-                          child: Text(
-                            'جاري قراءة المستشعرات...',
-                            style: TextStyles.bodyMedium.copyWith(
-                              color: ColorsManager.secondaryText,
-                            ),
-                          ),
-                        );
-                      }
+              return StreamBuilder<QiblahDirection>(
+                stream: FlutterQiblah.qiblahStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    );
+                  }
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: Text(
+                        'جاري قراءة المستشعرات...',
+                        style: TextStyles.bodyMedium.copyWith(
+                          color: ColorsManager.secondaryText,
+                        ),
+                      ),
+                    );
+                  }
 
-                      final data = snapshot.data!;
-                      return _QiblahDial(
-                        directionDegrees: data.direction,
+                  final data = snapshot.data!;
+                  return Column(
+                    children: [
+                      Center(
+                        child: SizedBox(
+                          width: dialSize,
+                          height: dialSize,
+                          child: _QiblahDial(
+                            directionDegrees: data.direction,
+                            qiblahDegrees: data.qiblah,
+                            offsetDegrees: data.offset,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      _QiblahInfoRow(
                         qiblahDegrees: data.qiblah,
+                        directionDegrees: data.direction,
                         offsetDegrees: data.offset,
-                      );
-                    },
-                  ),
-                ),
+                      ),
+                    ],
+                  );
+                },
               );
             },
           ),
@@ -203,22 +213,171 @@ class _QiblahCompassCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: const Icon(
-                    Icons.explore_rounded,
+                    Icons.tips_and_updates_rounded,
                     color: ColorsManager.primaryGold,
                   ),
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
-                  child: Text(
-                    'لأفضل دقة: حرّك الهاتف على شكل رقم 8 ثم وجّهه للأمام.',
-                    style: TextStyles.bodyMedium.copyWith(
-                      color: ColorsManager.secondaryText,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.right,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'نصائح لنتيجة أدق',
+                        style: TextStyles.titleSmall.copyWith(
+                          color: ColorsManager.primaryText,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                      SizedBox(height: 6.h),
+                      _TipLine(text: 'حرّك الهاتف على شكل رقم 8 للمعايرة.'),
+                      _TipLine(text: 'أبعد الهاتف عن المعادن/المغناطيس.'),
+                      _TipLine(text: 'أمسك الهاتف بشكل مسطّح قدر الإمكان.'),
+                    ],
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QiblahInfoRow extends StatelessWidget {
+  final double qiblahDegrees;
+  final double directionDegrees;
+  final double offsetDegrees;
+
+  const _QiblahInfoRow({
+    required this.qiblahDegrees,
+    required this.directionDegrees,
+    required this.offsetDegrees,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _InfoChip(
+            icon: Icons.mosque,
+            label: 'زاوية القبلة',
+            value: '${qiblahDegrees.toStringAsFixed(1)}°',
+          ),
+        ),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: _InfoChip(
+            icon: Icons.explore_rounded,
+            label: 'اتجاه الشمال',
+            value: '${directionDegrees.toStringAsFixed(1)}°',
+          ),
+        ),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: _InfoChip(
+            icon: Icons.tune_rounded,
+            label: 'الانحراف',
+            value: '${offsetDegrees.toStringAsFixed(1)}°',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsetsDirectional.only(
+        start: 10.w,
+        end: 10.w,
+        top: 10.h,
+        bottom: 10.h,
+      ),
+      decoration: BoxDecoration(
+        color: ColorsManager.secondaryBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: ColorsManager.mediumGray, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: ColorsManager.primaryPurple, size: 18.sp),
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyles.bodySmall.copyWith(
+                    color: ColorsManager.secondaryText,
+                    fontWeight: FontWeight.w700,
+                    height: 1.1,
+                  ),
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            value,
+            style: TextStyles.titleMedium.copyWith(
+              color: ColorsManager.primaryText,
+              fontWeight: FontWeight.w900,
+            ),
+            textAlign: TextAlign.right,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TipLine extends StatelessWidget {
+  final String text;
+
+  const _TipLine({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 4.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.check_circle_rounded,
+            size: 16.sp,
+            color: ColorsManager.primaryPurple,
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyles.bodyMedium.copyWith(
+                color: ColorsManager.secondaryText,
+                fontWeight: FontWeight.w600,
+                height: 1.25,
+              ),
+              textAlign: TextAlign.right,
             ),
           ),
         ],
@@ -309,6 +468,71 @@ class _QiblahDial extends StatelessWidget {
             shape: BoxShape.circle,
             color: ColorsManager.primaryPurple,
             border: Border.all(color: ColorsManager.white, width: 2),
+          ),
+        ),
+
+        // Qiblah badge
+        PositionedDirectional(
+          top: 14.h,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: ColorsManager.secondaryBackground,
+              borderRadius: BorderRadius.circular(999.r),
+              border: Border.all(color: ColorsManager.mediumGray, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: ColorsManager.mediumGray.withOpacity(0.16),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 28.r,
+                  height: 28.r,
+                  decoration: BoxDecoration(
+                    color: ColorsManager.primaryGold.withOpacity(0.14),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.mosque,
+                    color: ColorsManager.primaryGold,
+                    size: 18,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  'القبلة',
+                  style: TextStyles.bodyMedium.copyWith(
+                    color: ColorsManager.primaryText,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: ColorsManager.primaryPurple.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(999.r),
+                    border: Border.all(
+                      color: ColorsManager.primaryPurple.withOpacity(0.16),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    '${qiblahDegrees.toStringAsFixed(0)}°',
+                    style: TextStyles.bodySmall.copyWith(
+                      color: ColorsManager.primaryPurple,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
 
