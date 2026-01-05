@@ -27,6 +27,24 @@ class LocalNotification {
     }
   }
 
+  static Future<bool> _ensureExactAlarmPermissionIfNeeded() async {
+    if (!Platform.isAndroid) return true;
+
+    // On Android 12+ exact alarms may require user approval.
+    // If the permission is not supported on this OS/device, treat it as granted.
+    try {
+      final status = await Permission.scheduleExactAlarm.status;
+      if (status.isGranted) return true;
+
+      final requested = await Permission.scheduleExactAlarm.request();
+      log('Exact alarm permission status: $requested');
+      return requested.isGranted;
+    } catch (e) {
+      log('Exact alarm permission check failed: $e');
+      return true;
+    }
+  }
+
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   static StreamController<NotificationResponse> streamController =
@@ -71,6 +89,10 @@ class LocalNotification {
               AndroidFlutterLocalNotificationsPlugin
             >()
             ?.requestNotificationsPermission();
+
+        // Best-effort: request exact alarm permission so scheduled reminders
+        // (like prayer times) can fire reliably on Android 12+.
+        await _ensureExactAlarmPermissionIfNeeded();
       }
 
       // 4. Request permissions explicitly for iOS
@@ -212,17 +234,6 @@ class LocalNotification {
       // Ensure we don't keep an old schedule with the same id.
       await cancelReminder(id);
 
-      // In test mode, show immediately once so we can verify permission/channel.
-      if (everyMinute) {
-        await flutterLocalNotificationsPlugin.show(
-          id,
-          title,
-          body,
-          platformDetails,
-          payload: payload,
-        );
-      }
-
       await flutterLocalNotificationsPlugin.periodicallyShow(
         id,
         title,
@@ -286,6 +297,8 @@ class LocalNotification {
     try {
       await cancelReminder(id);
       final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
+
+      final canUseExactAlarms = await _ensureExactAlarmPermissionIfNeeded();
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         title,
@@ -295,7 +308,12 @@ class LocalNotification {
         payload: payload,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        // If exact alarms aren't allowed, fall back to inexact scheduling
+        // rather than silently failing.
+        androidScheduleMode:
+            canUseExactAlarms
+                ? AndroidScheduleMode.exactAllowWhileIdle
+                : AndroidScheduleMode.inexactAllowWhileIdle,
       );
     } catch (e) {
       log('Error scheduling one-time notification (id=$id): $e');

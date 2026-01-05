@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/features/daily_zekr/data/models/personal_task.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/models/zekr_item.dart';
+import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/ui/widgets/zekr_card.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
@@ -78,6 +80,7 @@ class DailyZekrScreen extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: ColorsManager.secondaryBackground,
+        bottomNavigationBar: _buildAddTaskButton(context),
         body: SafeArea(
           top: false,
           bottom: true,
@@ -293,6 +296,9 @@ class DailyZekrScreen extends StatelessWidget {
                   },
                 ),
               ),
+              SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+              SliverToBoxAdapter(child: _buildPersonalTasksSection()),
+              SliverToBoxAdapter(child: SizedBox(height: 16.h)),
             ],
           ),
         ),
@@ -386,4 +392,277 @@ class DailyZekrScreen extends StatelessWidget {
     style: TextStyles.bodySmall.copyWith(color: ColorsManager.gray),
     textAlign: TextAlign.center,
   );
+
+  Widget _buildPersonalTasksSection() {
+    return Padding(
+      padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
+      child: Container(
+        padding: EdgeInsets.all(14.r),
+        decoration: BoxDecoration(
+          color: ColorsManager.cardBackground,
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+            color: ColorsManager.primaryGold.withOpacity(0.35),
+            width: 1,
+          ),
+        ),
+        child: BlocBuilder<PersonalTasksCubit, PersonalTasksState>(
+          builder: (context, state) {
+            Widget content;
+            if (state is PersonalTasksLoading ||
+                state is PersonalTasksInitial) {
+              content = const Center(child: CircularProgressIndicator());
+            } else if (state is PersonalTasksError) {
+              content = Text(
+                state.message,
+                style: TextStyles.bodyMedium.copyWith(
+                  color: ColorsManager.secondaryText,
+                ),
+                textAlign: TextAlign.right,
+              );
+            } else {
+              final tasks = (state as PersonalTasksLoaded).tasks;
+              if (tasks.isEmpty) {
+                content = Text(
+                  'لم تضف مهامًا بعد. اضغط زر "إضافة مهمة" بالأسفل.',
+                  style: TextStyles.bodyMedium.copyWith(
+                    color: ColorsManager.secondaryText,
+                  ),
+                  textAlign: TextAlign.right,
+                );
+              } else {
+                content = Column(
+                  children: [
+                    for (final t in tasks) ...[
+                      _buildPersonalTaskTile(context, t),
+                      SizedBox(height: 10.h),
+                    ],
+                  ],
+                );
+              }
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'مهامي اليومية:',
+                  style: TextStyles.titleLarge.copyWith(
+                    color: ColorsManager.primaryText,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+                SizedBox(height: 10.h),
+                content,
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPersonalTaskTile(BuildContext context, PersonalTask task) {
+    final isDone = task.isDone;
+    final title = task.title;
+    final id = task.id;
+
+    return InkWell(
+      onTap: () => context.read<PersonalTasksCubit>().toggleDone(id),
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: 12.w,
+          vertical: 12.h,
+        ),
+        decoration: BoxDecoration(
+          color:
+              isDone
+                  ? ColorsManager.primaryPurple.withOpacity(0.06)
+                  : ColorsManager.secondaryBackground,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color:
+                isDone
+                    ? ColorsManager.primaryPurple.withOpacity(0.65)
+                    : ColorsManager.mediumGray,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Checkbox(
+              value: isDone,
+              activeColor: ColorsManager.primaryPurple,
+              onChanged:
+                  (_) => context.read<PersonalTasksCubit>().toggleDone(id),
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyles.bodyLarge.copyWith(
+                  color: ColorsManager.primaryText,
+                  decoration: isDone ? TextDecoration.lineThrough : null,
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddTaskButton(BuildContext context) {
+    return SafeArea(
+      top: true,
+      bottom: true,
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: 16.w,
+          end: 16.w,
+          bottom: 12.h,
+          top: 8.h,
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 50.h,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorsManager.primaryPurple,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14.r),
+              ),
+            ),
+            onPressed: () => _showAddTaskSheet(context),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.add_circle_outline,
+                  size: 20.sp,
+                  color: Colors.white,
+                ),
+                SizedBox(width: 10.w),
+                Text(
+                  'إضافة مهمة',
+                  style: TextStyles.titleMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAddTaskSheet(BuildContext context) async {
+    final personalTasksCubit = context.read<PersonalTasksCubit>();
+    final controller = TextEditingController();
+    await showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: false,
+      isScrollControlled: true,
+      backgroundColor: ColorsManager.cardBackground,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18.r)),
+      ),
+      builder: (sheetContext) {
+        return BlocProvider.value(
+          value: personalTasksCubit,
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+                ),
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(
+                    start: 16.w,
+                    end: 16.w,
+                    top: 16.h,
+                    bottom: 16.h,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'إضافة مهمة يومية',
+                        style: TextStyles.titleLarge.copyWith(
+                          color: ColorsManager.primaryText,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                      SizedBox(height: 12.h),
+                      TextField(
+                        controller: controller,
+                        textDirection: TextDirection.rtl,
+                        decoration: InputDecoration(
+                          hintText: 'اكتب المهمة هنا…',
+                          filled: true,
+                          fillColor: ColorsManager.secondaryBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: BorderSide(
+                              color: ColorsManager.mediumGray.withOpacity(0.6),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: BorderSide(
+                              color: ColorsManager.mediumGray.withOpacity(0.6),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: BorderSide(
+                              color: ColorsManager.primaryGold.withOpacity(0.8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48.h,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorsManager.primaryPurple,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.r),
+                            ),
+                          ),
+                          onPressed: () {
+                            sheetContext.read<PersonalTasksCubit>().addTask(
+                              controller.text,
+                            );
+                            Navigator.of(sheetContext).pop();
+                          },
+                          child: Text(
+                            'إضافة',
+                            style: TextStyles.titleMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

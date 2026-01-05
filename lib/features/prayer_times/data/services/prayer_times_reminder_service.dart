@@ -1,16 +1,23 @@
 import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
+import 'dart:developer';
 import 'package:mishkat_almasabih/core/notification/local_notification.dart';
 
 class PrayerTimesReminderService {
   static const _channelId = 'prayer_times_reminders';
   static const _channelName = 'Prayer Times Reminders';
 
-  // Stable IDs so re-scheduling overwrites previous day.
   static const int _fajrId = 9001;
   static const int _dhuhrId = 9002;
   static const int _asrId = 9003;
   static const int _maghribId = 9004;
   static const int _ishaId = 9005;
+
+  // Reserve a second set of stable IDs for tomorrow's reminders.
+  static const int _fajrTomorrowId = _fajrId + 100;
+  static const int _dhuhrTomorrowId = _dhuhrId + 100;
+  static const int _asrTomorrowId = _asrId + 100;
+  static const int _maghribTomorrowId = _maghribId + 100;
+  static const int _ishaTomorrowId = _ishaId + 100;
 
   static const _offset = Duration(minutes: 2);
 
@@ -21,43 +28,48 @@ class PrayerTimesReminderService {
   }) async {
     final current = now ?? DateTime.now();
 
-    final schedules = <_PrayerSchedule?>[
-      _buildSchedule(
-        id: _fajrId,
+    final schedules = <_PrayerSchedule>[
+      ..._buildSchedulesForPrayer(
+        todayId: _fajrId,
+        tomorrowId: _fajrTomorrowId,
         prayerName: PrayerName.fajr,
         todayPrayerTime: todayTimes.fajr,
         tomorrowPrayerTime: tomorrowTimes.fajr,
         now: current,
       ),
-      _buildSchedule(
-        id: _dhuhrId,
+      ..._buildSchedulesForPrayer(
+        todayId: _dhuhrId,
+        tomorrowId: _dhuhrTomorrowId,
         prayerName: PrayerName.dhuhr,
         todayPrayerTime: todayTimes.dhuhr,
         tomorrowPrayerTime: tomorrowTimes.dhuhr,
         now: current,
       ),
-      _buildSchedule(
-        id: _asrId,
+      ..._buildSchedulesForPrayer(
+        todayId: _asrId,
+        tomorrowId: _asrTomorrowId,
         prayerName: PrayerName.asr,
         todayPrayerTime: todayTimes.asr,
         tomorrowPrayerTime: tomorrowTimes.asr,
         now: current,
       ),
-      _buildSchedule(
-        id: _maghribId,
+      ..._buildSchedulesForPrayer(
+        todayId: _maghribId,
+        tomorrowId: _maghribTomorrowId,
         prayerName: PrayerName.maghrib,
         todayPrayerTime: todayTimes.maghrib,
         tomorrowPrayerTime: tomorrowTimes.maghrib,
         now: current,
       ),
-      _buildSchedule(
-        id: _ishaId,
+      ..._buildSchedulesForPrayer(
+        todayId: _ishaId,
+        tomorrowId: _ishaTomorrowId,
         prayerName: PrayerName.isha,
         todayPrayerTime: todayTimes.isha,
         tomorrowPrayerTime: tomorrowTimes.isha,
         now: current,
       ),
-    ].whereType<_PrayerSchedule>().toList(growable: false);
+    ];
 
     // Cancel then reschedule using stable IDs.
     try {
@@ -67,6 +79,11 @@ class PrayerTimesReminderService {
         _asrId,
         _maghribId,
         _ishaId,
+        _fajrTomorrowId,
+        _dhuhrTomorrowId,
+        _asrTomorrowId,
+        _maghribTomorrowId,
+        _ishaTomorrowId,
       ]);
 
       for (final schedule in schedules) {
@@ -80,33 +97,48 @@ class PrayerTimesReminderService {
           payload: 'prayer_times:${schedule.prayerName.name}',
         );
       }
-    } catch (_) {
-      // Intentionally swallow errors to avoid crashing UI.
+    } catch (e) {
+      // Don't crash UI, but log so we can diagnose permission/scheduling issues.
+      log('Failed to sync prayer reminders: $e');
     }
   }
 
-  _PrayerSchedule? _buildSchedule({
-    required int id,
+  List<_PrayerSchedule> _buildSchedulesForPrayer({
+    required int todayId,
+    required int tomorrowId,
     required PrayerName prayerName,
     required DateTime todayPrayerTime,
     required DateTime tomorrowPrayerTime,
     required DateTime now,
   }) {
+    final arabicName = _arabicLabel(prayerName) ?? prayerName.name;
+    final result = <_PrayerSchedule>[];
+
     final todayReminder = todayPrayerTime.subtract(_offset);
-    final reminderTime =
-        todayReminder.isAfter(now)
-            ? todayReminder
-            : tomorrowPrayerTime.subtract(_offset);
+    if (todayReminder.isAfter(now)) {
+      result.add(
+        _PrayerSchedule(
+          id: todayId,
+          prayerName: prayerName,
+          arabicName: arabicName,
+          reminderTime: todayReminder,
+        ),
+      );
+    }
 
-    // If it still ended up in the past (device clock issues), skip.
-    if (!reminderTime.isAfter(now)) return null;
+    final tomorrowReminder = tomorrowPrayerTime.subtract(_offset);
+    if (tomorrowReminder.isAfter(now)) {
+      result.add(
+        _PrayerSchedule(
+          id: tomorrowId,
+          prayerName: prayerName,
+          arabicName: arabicName,
+          reminderTime: tomorrowReminder,
+        ),
+      );
+    }
 
-    return _PrayerSchedule(
-      id: id,
-      prayerName: prayerName,
-      arabicName: _arabicLabel(prayerName) ?? prayerName.name,
-      reminderTime: reminderTime,
-    );
+    return result;
   }
 
   String? _arabicLabel(PrayerName? name) {

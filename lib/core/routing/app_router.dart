@@ -26,7 +26,8 @@ import 'package:mishkat_almasabih/features/prayer_times/ui/prayer_times_screen.d
 import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/profile_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/ui/profile_screen.dart';
-import 'package:mishkat_almasabih/features/qiblah_finder/logic/cubit/qiblah_cubit.dart' show QiblahCubit;
+import 'package:mishkat_almasabih/features/qiblah_finder/logic/cubit/qiblah_cubit.dart'
+    show QiblahCubit;
 import 'package:mishkat_almasabih/features/qiblah_finder/ui/qiblah_finder_screen.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/logic/cubit/random_ahadith_cubit.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/logic/cubit/remaining_questions_cubit.dart';
@@ -49,6 +50,7 @@ import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/ui/screen/daily_zekr_screen.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
+import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
 
 class AppRouter {
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -318,8 +320,15 @@ class AppRouter {
         _logScreenView('DailyZekrScreen');
         return MaterialPageRoute(
           builder:
-              (_) => BlocProvider(
-                create: (context) => getIt<DailyZekrCubit>()..init(),
+              (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (context) => getIt<DailyZekrCubit>()..init(),
+                  ),
+                  BlocProvider(
+                    create: (context) => getIt<PersonalTasksCubit>()..init(),
+                  ),
+                ],
                 child: const DailyZekrScreen(),
               ),
         );

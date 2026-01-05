@@ -1,5 +1,5 @@
-import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/notification/local_notification.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/models/zekr_item.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/repo/zekr_repository.dart';
@@ -80,7 +80,7 @@ class DailyZekrCubit extends Cubit<DailyZekrState> {
       title: item.section.title,
       body: item.section.reminderBody,
       payload: item.section.name,
-      everyMinute: true,
+      everyMinute: true, // For testing purposes
     );
   }
 

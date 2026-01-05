@@ -51,10 +51,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                     pinned: true,
                   ),
                   SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-                  SliverToBoxAdapter(child: _buildCityDateCard(currentDate)),
-                  SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
-                  // Next prayer card
                   if (state is PrayerTimesLoaded &&
                       state.nextPrayerLabel != null &&
                       state.nextPrayerTime != null &&
@@ -100,60 +97,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               );
             },
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCityDateCard(DateTime? date) {
-    return Padding(
-      padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
-      child: Container(
-        padding: EdgeInsets.all(14.r),
-        decoration: BoxDecoration(
-          color: ColorsManager.cardBackground,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: ColorsManager.mediumGray, width: 1),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36.r,
-              height: 36.r,
-              decoration: BoxDecoration(
-                color: ColorsManager.primaryPurple.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: const Icon(
-                Icons.location_on_rounded,
-                color: ColorsManager.primaryPurple,
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _city,
-                    style: TextStyles.titleLarge.copyWith(
-                      color: ColorsManager.primaryText,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    'تاريخ اليوم: ${_formatDate(date ?? DateTime.now())}',
-                    style: TextStyles.bodyMedium.copyWith(
-                      color: ColorsManager.secondaryText,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
