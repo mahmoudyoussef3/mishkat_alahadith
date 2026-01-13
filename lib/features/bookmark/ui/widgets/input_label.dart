@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class InputLabel extends StatelessWidget {
   final String label;
@@ -11,10 +11,7 @@ class InputLabel extends StatelessWidget {
       alignment: Alignment.centerRight,
       child: Text(
         label,
-        style: const TextStyle(
-          color: ColorsManager.secondaryText,
-          fontWeight: FontWeight.w500,
-        ),
+        style: BookmarkTextStyles.inputLabel,
       ),
     );
   }

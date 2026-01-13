@@ -6,6 +6,9 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/delete_cubit/cubit/delete_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/get_cubit/user_bookmarks_cubit.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_styles.dart';
 
 class BookmarkHadithCard extends StatelessWidget {
   const BookmarkHadithCard({
@@ -33,21 +36,7 @@ class BookmarkHadithCard extends StatelessWidget {
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
         margin: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [ColorsManager.secondaryBackground, ColorsManager.offWhite],
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-          ),
-          borderRadius: BorderRadius.circular(22.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        decoration: BookmarkDecorations.hadithCard(),
         child: Padding(
           padding: EdgeInsets.all(16.w),
           child: Column(
@@ -66,11 +55,7 @@ class BookmarkHadithCard extends StatelessWidget {
                       SizedBox(width: 6.w),
                       Text(
                         'حديث رقم $hadithNumber',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: ColorsManager.primaryText,
-                        ),
+                        style: BookmarkTextStyles.headerLabel,
                       ),
                     ],
                   ),
@@ -133,11 +118,7 @@ class BookmarkHadithCard extends StatelessWidget {
                             SizedBox(width: 6.w),
                             Text(
                               'حذف الحديث',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                                color: ColorsManager.error,
-                              ),
+                              style: BookmarkTextStyles.deleteAction,
                             ),
                           ],
                         ),
@@ -152,12 +133,7 @@ class BookmarkHadithCard extends StatelessWidget {
                 maxLines: 4,
                 hadithText,
                 textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontFamily: 'Amiri',
-                  color: ColorsManager.primaryText,
-                  fontSize: 16.sp,
-                  height: 1.8,
-                ),
+                style: HadithTextStyles.hadithArabic,
               ),
 
               SizedBox(height: 12.h),
@@ -191,10 +167,9 @@ class BookmarkHadithCard extends StatelessWidget {
                 Text(
                   "ملاحظة: ${notes!}",
                   textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: ColorsManager.primaryGreen,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
+                  style: BookmarkTextStyles.pillLabel(
+                    ColorsManager.primaryGreen,
+                    size: 13.sp,
                   ),
                 ),
               ],
@@ -212,21 +187,10 @@ class BookmarkHadithCard extends StatelessWidget {
   }) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: colors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
+      decoration: BookmarkDecorations.pill(colors),
       child: Text(
         text,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-          fontSize: 13.sp,
-        ),
+        style: BookmarkTextStyles.pillLabel(textColor),
       ),
     );
   }

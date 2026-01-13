@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theming/styles.dart';
+// Global styles not directly used; relying on AuthTextStyles
+import '../../../../../core/theming/auth_styles.dart';
 
 class TermsAndConditionsText extends StatelessWidget {
   const TermsAndConditionsText({super.key});
@@ -13,19 +14,19 @@ class TermsAndConditionsText extends StatelessWidget {
         children: [
           TextSpan(
             text: 'By logging, you agree to our',
-            style: TextStyles.font13GrayRegular,
+            style: AuthTextStyles.termsGray,
           ),
           TextSpan(
             text: ' Terms & Conditions',
-            style: TextStyles.font13DarkBlueMedium,
+            style: AuthTextStyles.termsLink,
           ),
           TextSpan(
             text: ' and',
-            style: TextStyles.font13GrayRegular.copyWith(height: 1.5),
+            style: AuthTextStyles.termsGray,
           ),
           TextSpan(
             text: ' Privacy Policy',
-            style: TextStyles.font13DarkBlueMedium,
+            style: AuthTextStyles.termsLink,
           ),
         ],
       ),

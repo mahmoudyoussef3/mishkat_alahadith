@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_styles.dart';
 
 class ChapterAhadithCard extends StatelessWidget {
   const ChapterAhadithCard({
@@ -33,32 +35,7 @@ class ChapterAhadithCard extends StatelessWidget {
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOut,
       margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ColorsManager.secondaryBackground,
-            ColorsManager.offWhite,
-            ColorsManager.lightGray.withOpacity(0.3),
-          ],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-        ),
-        borderRadius: BorderRadius.circular(26.r),
-        border: Border.all(color: gradeColor.withOpacity(0.15), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: gradeColor.withOpacity(0.08),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
-            spreadRadius: 1,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: HadithDecorations.chapterCard(gradeColor),
       child: Stack(
         children: [
           // Islamic pattern overlay
@@ -68,10 +45,7 @@ class ChapterAhadithCard extends StatelessWidget {
             child: Container(
               width: 80.w,
               height: 80.h,
-              decoration: BoxDecoration(
-                color: gradeColor.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(40.r),
-              ),
+              decoration: HadithDecorations.patternOverlay(gradeColor, 40),
             ),
           ),
 
@@ -91,15 +65,7 @@ class ChapterAhadithCard extends StatelessWidget {
                         children: [
                           Container(
                             padding: EdgeInsets.all(8.w),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  gradeColor.withOpacity(0.1),
-                                  gradeColor.withOpacity(0.05),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
+                            decoration: HadithDecorations.headerIcon(gradeColor),
                             child: Icon(
                               Icons.menu_book,
                               color: gradeColor,
@@ -114,12 +80,7 @@ class ChapterAhadithCard extends StatelessWidget {
                                   : hadithCategory!,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w700,
-                                color: ColorsManager.primaryText,
-                                fontFamily: 'Amiri',
-                              ),
+                              style: HadithTextStyles.headerCategoryTitle,
                             ),
                           ),
                         ],
@@ -131,29 +92,10 @@ class ChapterAhadithCard extends StatelessWidget {
                           horizontal: 16.w,
                           vertical: 8.h,
                         ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              gradeColor.withOpacity(0.15),
-                              gradeColor.withOpacity(0.08),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: gradeColor.withOpacity(0.2),
-                            width: 1,
-                          ),
-                        ),
+                        decoration: HadithDecorations.gradeBadge(gradeColor),
                         child: Text(
                           grade!,
-                          style: TextStyle(
-                            color: gradeColor,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16.sp,
-                            fontFamily: 'Amiri',
-                          ),
+                          style: HadithTextStyles.gradeLabel(gradeColor),
                         ),
                       ),
                   ],
@@ -165,31 +107,13 @@ class ChapterAhadithCard extends StatelessWidget {
                 if (text.isNotEmpty)
                   Container(
                     padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          ColorsManager.white.withOpacity(0.8),
-                          ColorsManager.offWhite.withOpacity(0.6),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(18.r),
-                      border: Border.all(
-                        color: gradeColor.withOpacity(0.1),
-                        width: 1,
-                      ),
-                    ),
+                    decoration: HadithDecorations.hadithTextContainer(gradeColor),
                     child: Text(
                       text,
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontFamily: 'Amiri',
-                        color: ColorsManager.primaryText,
-                        fontSize: 17.sp,
-                        height: 1.8,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: HadithTextStyles.hadithArabic,
                     ),
                   ),
 
@@ -229,15 +153,7 @@ class ChapterAhadithCard extends StatelessWidget {
                 SizedBox(height: 16.h),
                 Container(
                   height: 2.h,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        gradeColor.withOpacity(0.4),
-                        gradeColor.withOpacity(0.1),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(1.r),
-                  ),
+                  decoration: HadithDecorations.bottomLine(gradeColor),
                 ),
               ],
             ),
@@ -254,31 +170,12 @@ class ChapterAhadithCard extends StatelessWidget {
   }) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: colors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: colors.first.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+      decoration: HadithDecorations.pill(colors),
       child: Text(
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-          fontSize: 12.sp,
-          fontFamily: 'Amiri',
-        ),
+        style: HadithTextStyles.pillLabel(textColor),
         textAlign: TextAlign.center,
       ),
     );

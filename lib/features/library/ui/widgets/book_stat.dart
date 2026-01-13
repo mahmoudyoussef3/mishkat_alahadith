@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/library_styles.dart';
 
 class BookStat extends StatelessWidget {
   final String value;
@@ -16,11 +16,7 @@ class BookStat extends StatelessWidget {
         SizedBox(width: 3.w),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: ColorsManager.secondaryText,
-          ),
+          style: LibraryTextStyles.statText,
         ),
       ],
     );

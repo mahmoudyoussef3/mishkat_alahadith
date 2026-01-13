@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
 
 class BuildHeaderAppBar extends StatelessWidget {
   const BuildHeaderAppBar({
@@ -53,16 +54,7 @@ class BuildHeaderAppBar extends StatelessWidget {
             // Gradient overlay for better contrast
             Positioned.fill(
               child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      ColorsManager.primaryPurple.withOpacity(0.3),
-                      ColorsManager.primaryPurple,
-                    ],
-                  ),
-                ),
+                decoration: HomeDecorations.appBarGradientOverlay(),
               ),
             ),
 
@@ -165,7 +157,7 @@ class BuildHeaderAppBar extends StatelessWidget {
     required VoidCallback onPressed,
   }) {
     return Material(
-      color: Colors.white.withOpacity(0.15),
+      color: HomeDecorations.appBarIconButtonBg(),
       borderRadius: BorderRadius.circular(12.r),
       child: InkWell(
         onTap: onPressed,
@@ -173,13 +165,7 @@ class BuildHeaderAppBar extends StatelessWidget {
         child: Container(
           width: 40.w,
           height: 40.w,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1,
-            ),
-          ),
+          decoration: HomeDecorations.appBarIconButtonBorder(),
           child: Icon(icon, color: Colors.white, size: 20.sp),
         ),
       ),
@@ -201,7 +187,7 @@ class AppBarActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withOpacity(0.15),
+      color: HomeDecorations.appBarIconButtonBg(),
       borderRadius: BorderRadius.circular(12.r),
       child: InkWell(
         onTap: onPressed,
@@ -209,10 +195,7 @@ class AppBarActionButton extends StatelessWidget {
         child: Container(
           width: 40.w,
           height: 40.w,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
-          ),
+          decoration: HomeDecorations.appBarIconButtonBorder(),
           child: Icon(icon, color: Colors.white, size: 20.sp),
         ),
       ),

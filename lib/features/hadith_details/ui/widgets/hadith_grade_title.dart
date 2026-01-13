@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_decorations.dart';
 
 class HadithGradeTile extends StatelessWidget {
   final String grade;
@@ -43,16 +45,12 @@ class HadithGradeTile extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
-              color: gradeColor(grade).withOpacity(0.1),
+              color: HadithDetailsDecorations.gradeChipBg(gradeColor(grade)),
               borderRadius: BorderRadius.circular(20.r),
             ),
             child: Text(
               gradeArabic(grade),
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-                color: gradeColor(grade),
-              ),
+              style: HadithDetailsTextStyles.gradeLabel(gradeColor(grade)),
             ),
           ),
           Container(

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+// ScreenUtil not used directly in this file after refactor
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
 import '../../../../../core/helpers/functions.dart';
 import '../../../../../core/routing/routes.dart';
 import '../../../../../core/theming/colors.dart';
+import '../../../../../core/theming/auth_styles.dart';
 import '../../../../../core/widgets/app_text_button.dart';
 import '../../logic/cubit/login_cubit.dart';
 import '../../logic/cubit/login_state.dart';
@@ -44,12 +45,7 @@ class LoginBlocListener extends StatelessWidget {
           validateThenDoLogin(context);
         },
         backgroundColor: ColorsManager.primaryGreen,
-        textStyle: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w600,
-          color: ColorsManager.white,
-          letterSpacing: 0.5,
-        ),
+        textStyle: AuthTextStyles.primaryButtonText,
       )
           .animate()
           .fadeIn(delay: 900.ms, duration: 300.ms)

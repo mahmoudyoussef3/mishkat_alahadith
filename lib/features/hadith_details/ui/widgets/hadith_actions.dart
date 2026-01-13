@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/action_button.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 class HadithActions extends StatelessWidget {
   final String hadithText;
@@ -29,10 +30,7 @@ class HadithActions extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: ColorsManager.primaryPurple.withOpacity(0.1),
-        ),
+        decoration: HadithDetailsDecorations.actionRow(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -42,10 +40,12 @@ class HadithActions extends StatelessWidget {
               onTap: () {
                 Clipboard.setData(ClipboardData(text: hadithText));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     behavior: SnackBarBehavior.floating,
-
-                    content: Text("تم نسخ الحديث"),
+                    content: Text(
+                      "تم نسخ الحديث",
+                      style: HadithDetailsTextStyles.snackText,
+                    ),
                   ),
                 );
               },

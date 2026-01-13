@@ -6,6 +6,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
 import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_model.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class AddCreationButton extends StatelessWidget {
   final String bookName;
@@ -93,9 +94,9 @@ class AddCreationButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 14),
           ),
           icon: const Icon(Icons.bookmark_add_outlined),
-          label: const Text(
+          label: Text(
             "حفظ",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: BookmarkTextStyles.primaryButtonLabel,
           ),
         );
       },

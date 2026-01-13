@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/book_collections_row.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/bookmark_list.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
@@ -117,19 +119,11 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           padding: EdgeInsets.symmetric(vertical: 12.h),
-          decoration: BoxDecoration(
-            color: isActive
-                ? ColorsManager.primaryGreen
-                : ColorsManager.lightGray.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(12.r),
-          ),
+          decoration: BookmarkDecorations.tabContainer(isActive: isActive),
           alignment: Alignment.center,
           child: Text(
             title,
-            style: TextStyles.bodyLarge.copyWith(
-              color: isActive ? ColorsManager.white : ColorsManager.darkGray,
-              fontWeight: FontWeight.bold,
-            ),
+            style: BookmarkTextStyles.tabLabel(isActive: isActive),
           ),
         ),
       ),
@@ -142,25 +136,13 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
       margin: EdgeInsets.zero,
       elevation: 0,
       child: Container(
-        decoration: BoxDecoration(
-          color: ColorsManager.white,
-          borderRadius: BorderRadius.circular(Spacing.cardRadius),
-          boxShadow: [
-            BoxShadow(
-              color: ColorsManager.black.withOpacity(0.08),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+        decoration: BookmarkDecorations.searchCard(),
         child: TextField(
           controller: _searchController,
           onChanged: (value) => setState(() => _query = value),
           decoration: InputDecoration(
             hintText: 'ابحث بنص الحديث أو الملاحظات...',
-            hintStyle: TextStyles.bodyMedium.copyWith(
-              color: ColorsManager.secondaryText,
-            ),
+            hintStyle: BookmarkTextStyles.searchHint,
             prefixIcon: Icon(Icons.search, color: ColorsManager.primaryPurple, size: 24),
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(

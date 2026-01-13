@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter/services.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 class HadithTextCard extends StatefulWidget {
   final String hadithText;
@@ -24,28 +26,7 @@ class _HadithTextCardState extends State<HadithTextCard> {
           key: _repaintKey,
           child: Container(
             padding: EdgeInsets.all(24.w),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                colors: [
-                  ColorsManager.secondaryBackground,
-                  ColorsManager.primaryPurple.withOpacity(0.1),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(24.r),
-              border: Border.all(
-                color: ColorsManager.primaryPurple.withOpacity(0.15),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: ColorsManager.primaryPurple.withOpacity(0.08),
-                  blurRadius: 20.r,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
+            decoration: HadithDetailsDecorations.contentCard(),
             child: Stack(
               children: [
                 /// الخلفية الزخرفية
@@ -72,14 +53,7 @@ class _HadithTextCardState extends State<HadithTextCard> {
                         horizontal: 12.w,
                         vertical: 6.h,
                       ),
-                      decoration: BoxDecoration(
-                        color: ColorsManager.primaryPurple.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(
-                          color: ColorsManager.primaryPurple.withOpacity(0.2),
-                          width: 1,
-                        ),
-                      ),
+                      decoration: HadithDetailsDecorations.labelChip(),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -91,11 +65,7 @@ class _HadithTextCardState extends State<HadithTextCard> {
                           SizedBox(width: 6.w),
                           Text(
                             "نص الحديث",
-                            style: TextStyle(
-                              color: ColorsManager.primaryPurple,
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: HadithDetailsTextStyles.labelChip,
                           ),
                         ],
                       ),
@@ -107,13 +77,7 @@ class _HadithTextCardState extends State<HadithTextCard> {
                     Text(
                       widget.hadithText,
                       textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        height: 1.8,
-                        color: ColorsManager.primaryText,
-                        fontFamily: 'Amiri',
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: HadithDetailsTextStyles.hadithText,
                     ),
 
                     SizedBox(height: 20.h),
@@ -178,11 +142,7 @@ class _HadithTextCardState extends State<HadithTextCard> {
         child: Container(
           width: 36.w,
           height: 36.h,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: color.withOpacity(0.2)),
-          ),
+          decoration: HadithDetailsDecorations.actionIcon(color),
           child: Icon(icon, color: color, size: 20.sp),
         ),
       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_styles.dart';
 
 class HadithTabContent extends StatelessWidget {
   final String selectedTab;
@@ -23,12 +23,7 @@ class HadithTabContent extends StatelessWidget {
             children: [
               TextSpan(
                 text: data?.explanation ?? "لا يوجد شرح",
-                style: const TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w500,
-                  color: ColorsManager.black,
-                  height: 1.6,
-                ),
+                style: DailyHadithTextStyles.explanation,
               ),
             ],
           ),
@@ -48,20 +43,11 @@ class HadithTabContent extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: "${count++}- ".toString(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: ColorsManager.black,
-                                ),
+                                style: DailyHadithTextStyles.hintNumber,
                               ),
                               TextSpan(
                                 text: hint,
-
-                                style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w500,
-
-                                  color: ColorsManager.black,
-                                ),
+                                style: DailyHadithTextStyles.hintText,
                               ),
                             ],
                           ),
@@ -87,27 +73,15 @@ class HadithTabContent extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: wm.word ?? "",
-                                style: const TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w700,
-                                  color: ColorsManager.darkPurple,
-                                ),
+                                style: DailyHadithTextStyles.wordStyle,
                               ),
                               const TextSpan(
                                 text: ": ",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: ColorsManager.darkPurple,
-                                ),
+                                style: DailyHadithTextStyles.colonStyle,
                               ),
                               TextSpan(
                                 text: wm.meaning ?? "",
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black87,
-                                ),
+                                style: DailyHadithTextStyles.meaningStyle,
                               ),
                             ],
                           ),

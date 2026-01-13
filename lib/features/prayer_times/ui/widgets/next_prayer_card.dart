@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/prayer_times_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/prayer_times_styles.dart';
 
 class NextPrayerCard extends StatelessWidget {
   final String nextPrayerLabel;
@@ -35,11 +36,7 @@ class NextPrayerCard extends StatelessWidget {
       padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
       child: Container(
         padding: EdgeInsets.all(16.r),
-        decoration: BoxDecoration(
-          color: ColorsManager.cardBackground,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: ColorsManager.mediumGray, width: 1),
-        ),
+        decoration: PrayerTimesDecorations.nextPrayerContainer(),
         child: Row(
           children: [
             Expanded(
@@ -48,18 +45,12 @@ class NextPrayerCard extends StatelessWidget {
                 children: [
                   Text(
                     'الصلاة القادمة',
-                    style: TextStyles.bodyMedium.copyWith(
-                      color: ColorsManager.secondaryText,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: PrayerTimesTextStyles.nextPrayerSectionLabel,
                   ),
                   SizedBox(height: 6.h),
                   Text(
                     nextPrayerLabel,
-                    style: TextStyles.headlineSmall.copyWith(
-                      color: ColorsManager.primaryText,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: PrayerTimesTextStyles.nextPrayerNameLabel,
                   ),
                   SizedBox(height: 8.h),
                   Row(
@@ -71,10 +62,7 @@ class NextPrayerCard extends StatelessWidget {
                       SizedBox(width: 6.w),
                       Text(
                         _formatTime(nextPrayerTime),
-                        style: TextStyles.titleLarge.copyWith(
-                          color: ColorsManager.primaryPurple,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: PrayerTimesTextStyles.nextPrayerTimeValue,
                       ),
                     ],
                   ),
@@ -83,10 +71,7 @@ class NextPrayerCard extends StatelessWidget {
             ),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: ColorsManager.primaryPurple.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
+              decoration: PrayerTimesDecorations.countdownPill(),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -97,10 +82,7 @@ class NextPrayerCard extends StatelessWidget {
                   SizedBox(width: 6.w),
                   Text(
                     _formatDuration(remaining),
-                    style: TextStyles.titleMedium.copyWith(
-                      color: ColorsManager.primaryPurple,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: PrayerTimesTextStyles.countdownValue,
                   ),
                 ],
               ),

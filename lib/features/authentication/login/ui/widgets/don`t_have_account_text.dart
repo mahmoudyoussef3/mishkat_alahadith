@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+// ScreenUtil not used directly in this file
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart' show Routes;
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/auth_styles.dart';
 
 class DontHaveAccountText extends StatelessWidget {
   const DontHaveAccountText({super.key});
@@ -15,11 +16,7 @@ class DontHaveAccountText extends StatelessWidget {
       children: [
         Text(
           'ليس لديك حساب ؟ ',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-            color: ColorsManager.secondaryText,
-          ),
+          style: AuthTextStyles.prompt14,
         ),
         TextButton(
           onPressed: () {
@@ -27,12 +24,7 @@ class DontHaveAccountText extends StatelessWidget {
           },
           child: Text(
             'أنشئ حساب',
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-              color: ColorsManager.primaryGreen,
-          
-            ),
+            style: AuthTextStyles.actionLink14(ColorsManager.primaryGreen),
           ),
         ),
       ],

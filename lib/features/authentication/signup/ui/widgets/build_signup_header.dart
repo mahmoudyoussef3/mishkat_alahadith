@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theming/colors.dart';
+import '../../../../../core/theming/auth_decorations.dart';
 class BuildSignupHeader extends StatelessWidget {
   const BuildSignupHeader({super.key});
 
@@ -13,18 +14,7 @@ class BuildSignupHeader extends StatelessWidget {
         Container(
           width: 80.w,
           height: 80.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: ColorsManager.primaryGreen,
-            boxShadow: [
-              BoxShadow(
-                color: ColorsManager.primaryGreen.withOpacity(0.3),
-                blurRadius: 20,
-                spreadRadius: 5,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
+          decoration: AuthDecorations.logoCircle(),
           child: Padding(
             padding: EdgeInsets.all(16.w),
             child: Image.asset(

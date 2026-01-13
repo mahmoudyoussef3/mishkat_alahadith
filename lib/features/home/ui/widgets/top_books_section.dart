@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/networking/api_constants.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
 import 'package:mishkat_almasabih/features/home/logic/cubit/get_library_statistics_cubit.dart';
 import 'package:mishkat_almasabih/features/library/ui/widgets/book_card.dart';
@@ -44,10 +43,7 @@ class TopBooksSection extends StatelessWidget {
                 children: [
                   Text(
                     'الكتب الأكثر رواجا',
-                    style: TextStyles.headlineMedium.copyWith(
-                      color: ColorsManager.primaryText,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: HomeTextStyles.sectionHeader,
                   ),
                   SizedBox(height: 12.h),
                   SizedBox(

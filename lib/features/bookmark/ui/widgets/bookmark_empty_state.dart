@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class BookmarkEmptyState extends StatelessWidget {
   const BookmarkEmptyState({super.key});
@@ -17,11 +18,7 @@ class BookmarkEmptyState extends StatelessWidget {
           SizedBox(height: 12.h),
           Text(
             "لا توجد علامات مرجعية في هذه المجموعة",
-            style: TextStyle(
-              color: ColorsManager.secondaryText,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-            ),
+            style: BookmarkTextStyles.emptyStateText,
           ),
         ],
       ),

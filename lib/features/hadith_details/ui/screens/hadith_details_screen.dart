@@ -20,6 +20,7 @@ import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/divider_sec
 import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/navigation_container.dart';
 import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/bookmark_appbar_action.dart';
 import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/serag_fab_button.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 // ignore: must_be_immutable
 class HadithDetailScreen extends StatefulWidget {
@@ -228,8 +229,7 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
                                   SizedBox(width: 12.w),
                                   Text(
                                     "تم نسخ الحديث بنجاح",
-                                    style: TextStyle(
-                                      color: Colors.white,
+                                    style: HadithDetailsTextStyles.snackText.copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -287,7 +287,7 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
               behavior: SnackBarBehavior.floating,
               content: Text(
                 state.errMessage,
-                style: TextStyle(color: ColorsManager.secondaryBackground),
+                style: HadithDetailsTextStyles.snackText,
               ),
             ),
           );
@@ -354,7 +354,7 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
               behavior: SnackBarBehavior.floating,
               content: Text(
                 state.errMessage,
-                style: TextStyle(color: ColorsManager.secondaryBackground),
+                style: HadithDetailsTextStyles.snackText,
               ),
             ),
           );

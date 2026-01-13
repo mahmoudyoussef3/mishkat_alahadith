@@ -5,6 +5,8 @@ import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/ui/widgets/hadith_rich_text.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_styles.dart';
 
 class HadithContentCard extends StatelessWidget {
   final NewDailyHadithModel data;
@@ -13,29 +15,7 @@ class HadithContentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            ColorsManager.secondaryBackground,
-            ColorsManager.primaryPurple.withOpacity(0.2),
-            //   ColorsManager.primaryGold.withOpacity(0.02),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: ColorsManager.primaryPurple.withOpacity(0.15),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: ColorsManager.primaryPurple.withOpacity(0.08),
-            blurRadius: 20.r,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      decoration: DailyHadithDecorations.contentCard(),
       child: Stack(
         children: [
           // Islamic pattern overlay
@@ -59,13 +39,7 @@ class HadithContentCard extends StatelessWidget {
             child: Container(
               width: 50.w,
               height: 50.h,
-              decoration: BoxDecoration(
-                color: ColorsManager.primaryPurple.withOpacity(0.1),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20.r),
-                  bottomLeft: Radius.circular(20.r),
-                ),
-              ),
+              decoration: DailyHadithDecorations.cornerQuote(),
               child: Icon(
                 Icons.format_quote,
                 color: ColorsManager.primaryPurple.withOpacity(0.6),
@@ -86,14 +60,7 @@ class HadithContentCard extends StatelessWidget {
                     horizontal: 12.w,
                     vertical: 6.h,
                   ),
-                  decoration: BoxDecoration(
-                    color: ColorsManager.primaryPurple.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: ColorsManager.primaryPurple.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
+                  decoration: DailyHadithDecorations.labelChip(),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -105,11 +72,7 @@ class HadithContentCard extends StatelessWidget {
                       SizedBox(width: 6.w),
                       Text(
                         "نص الحديث",
-                        style: TextStyle(
-                          color: ColorsManager.primaryPurple,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: DailyHadithTextStyles.labelChip,
                       ),
                     ],
                   ),
@@ -204,11 +167,7 @@ class HadithContentCard extends StatelessWidget {
         child: Container(
           width: 36.w,
           height: 36.h,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: color.withOpacity(0.2)),
-          ),
+          decoration: DailyHadithDecorations.actionIcon(color),
           child: Icon(icon, color: color, size: 20.sp),
         ),
       ),

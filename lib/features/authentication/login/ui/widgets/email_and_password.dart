@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/theming/colors.dart';
+import '../../../../../core/theming/auth_styles.dart';
 import '../../../../../core/widgets/app_text_form_field.dart';
 import '../../logic/cubit/login_cubit.dart';
 
@@ -31,7 +32,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
       child: Column(
         children: [
           // Email Field
-          AppTextFormField(
+              AppTextFormField(
                 backgroundColor: ColorsManager.lightGray,
                 suffixIcon: Icon(
                   Icons.email,
@@ -39,7 +40,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
                 ),
                 controller: context.read<LoginCubit>().emailController,
                 hintText: 'البريد الإلكتروني',
-                hintStyle: TextStyle(color: Colors.black),
+                hintStyle: AuthTextStyles.inputHint,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'يرجى إدخال البريد الإلكتروني';
@@ -59,9 +60,9 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
           SizedBox(height: 20.h),
 
           // Password Field
-          AppTextFormField(
+              AppTextFormField(
                 backgroundColor: ColorsManager.lightGray,
-                hintStyle: TextStyle(color: Colors.black),
+                hintStyle: AuthTextStyles.inputHint,
 
                 controller: context.read<LoginCubit>().passwordController,
                 hintText: 'كلمة المرور',

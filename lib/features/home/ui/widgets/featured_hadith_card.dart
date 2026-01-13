@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+// Removed unused flutter_screenutil import after centralizing styles
 
 import '../../../../core/theming/colors.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/helpers/spacing.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 
 class FeaturedHadithCard extends StatelessWidget {
   final String hadithNumber;
@@ -41,20 +43,7 @@ class FeaturedHadithCard extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(Spacing.md),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  ColorsManager.primaryPurple,
-                  ColorsManager.secondaryPurple,
-                ],
-              ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
+            decoration: HomeDecorations.featuredHeaderGradient,
             child: Row(
               children: [
                 Container(
@@ -113,10 +102,7 @@ class FeaturedHadithCard extends StatelessWidget {
                 children: [
                   Text(
                     hadithText,
-                    style: TextStyles.hadithText.copyWith(
-                      fontSize: 14.sp,
-                      height: 1.5,
-                    ),
+                    style: HomeTextStyles.featuredHadithText,
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -125,10 +111,7 @@ class FeaturedHadithCard extends StatelessWidget {
                   // Footer with narrator info
                   Container(
                     padding: EdgeInsets.all(Spacing.sm),
-                    decoration: BoxDecoration(
-                      color: ColorsManager.lightGray,
-                      borderRadius: BorderRadius.circular(Spacing.sm),
-                    ),
+                    decoration: HomeDecorations.featuredFooter(),
                     child: Row(
                       children: [
                         Icon(
@@ -140,10 +123,7 @@ class FeaturedHadithCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             'Narrated by $narrator',
-                            style: TextStyles.labelMedium.copyWith(
-                              color: ColorsManager.primaryText,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: HomeTextStyles.featuredNarrator,
                           ),
                         ),
                         IconButton(

@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/daily_zekr_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/daily_zekr_styles.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/models/personal_task.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/models/zekr_item.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
@@ -102,10 +104,7 @@ class DailyZekrScreen extends StatelessWidget {
                   padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
                   child: Text(
                     'اختر ما أنجزته اليوم:',
-                    style: TextStyles.headlineMedium.copyWith(
-                      color: ColorsManager.primaryText,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: DailyZekrTextStyles.sectionHeaderTitle,
                   ),
                 ),
               ),
@@ -311,14 +310,7 @@ class DailyZekrScreen extends StatelessWidget {
       padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
       child: Container(
         padding: EdgeInsets.all(14.r),
-        decoration: BoxDecoration(
-          color: ColorsManager.primaryGold.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: ColorsManager.primaryGold.withOpacity(0.4),
-            width: 1,
-          ),
-        ),
+        decoration: DailyZekrDecorations.infoCard(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,10 +318,7 @@ class DailyZekrScreen extends StatelessWidget {
             Container(
               width: 40.r,
               height: 40.r,
-              decoration: BoxDecoration(
-                color: ColorsManager.primaryGold.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
+              decoration: DailyZekrDecorations.infoIconTile(),
               child: const Icon(
                 Icons.notifications_active_rounded,
                 color: ColorsManager.primaryGold,
@@ -342,18 +331,13 @@ class DailyZekrScreen extends StatelessWidget {
                 children: [
                   Text(
                     'كيف تعمل هذه الصفحة؟',
-                    style: TextStyles.titleLarge.copyWith(
-                      color: ColorsManager.primaryText,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: DailyZekrTextStyles.infoTitle,
                     textAlign: TextAlign.right,
                   ),
                   SizedBox(height: 4.h),
                   Text(
                     'ضع علامة الصح على البند الذي أنجزته اليوم. عند التفعيل يتوقف إرسال التذكير لهذا القسم. إذا تُرك بدون تفعيل سنذكّرك كل دقيقة (للتجربة).',
-                    style: TextStyles.bodyMedium.copyWith(
-                      color: ColorsManager.secondaryText,
-                    ),
+                    style: DailyZekrTextStyles.infoBody,
                     textAlign: TextAlign.right,
                   ),
                 ],
@@ -374,22 +358,13 @@ class DailyZekrScreen extends StatelessWidget {
     ),
     child: Container(
       height: 2.h,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ColorsManager.primaryPurple.withOpacity(0.3),
-            ColorsManager.primaryGold.withOpacity(0.6),
-            ColorsManager.primaryPurple.withOpacity(0.3),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(1.r),
-      ),
+      decoration: DailyZekrDecorations.dividerGradient(),
     ),
   );
 
   Widget _buildHintText() => Text(
     'تلميح: يمكنك تعديل الحالة في أي وقت، ولن تُرسل التنبيهات للأقسام المكتملة.',
-    style: TextStyles.bodySmall.copyWith(color: ColorsManager.gray),
+    style: DailyZekrTextStyles.hintText,
     textAlign: TextAlign.center,
   );
 
@@ -398,14 +373,7 @@ class DailyZekrScreen extends StatelessWidget {
       padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
       child: Container(
         padding: EdgeInsets.all(14.r),
-        decoration: BoxDecoration(
-          color: ColorsManager.cardBackground,
-          borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(
-            color: ColorsManager.primaryGold.withOpacity(0.35),
-            width: 1,
-          ),
-        ),
+        decoration: DailyZekrDecorations.personalTasksSection(),
         child: BlocBuilder<PersonalTasksCubit, PersonalTasksState>(
           builder: (context, state) {
             Widget content;
@@ -425,9 +393,7 @@ class DailyZekrScreen extends StatelessWidget {
               if (tasks.isEmpty) {
                 content = Text(
                   'لم تضف مهامًا بعد. اضغط زر "إضافة مهمة" بالأسفل.',
-                  style: TextStyles.bodyMedium.copyWith(
-                    color: ColorsManager.secondaryText,
-                  ),
+                  style: DailyZekrTextStyles.inputHint,
                   textAlign: TextAlign.right,
                 );
               } else {
@@ -447,10 +413,7 @@ class DailyZekrScreen extends StatelessWidget {
               children: [
                 Text(
                   'مهامي اليومية:',
-                  style: TextStyles.titleLarge.copyWith(
-                    color: ColorsManager.primaryText,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: DailyZekrTextStyles.personalTasksTitle,
                   textAlign: TextAlign.right,
                 ),
                 SizedBox(height: 10.h),
@@ -476,20 +439,7 @@ class DailyZekrScreen extends StatelessWidget {
           horizontal: 12.w,
           vertical: 12.h,
         ),
-        decoration: BoxDecoration(
-          color:
-              isDone
-                  ? ColorsManager.primaryPurple.withOpacity(0.06)
-                  : ColorsManager.secondaryBackground,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color:
-                isDone
-                    ? ColorsManager.primaryPurple.withOpacity(0.65)
-                    : ColorsManager.mediumGray,
-            width: 1,
-          ),
-        ),
+        decoration: DailyZekrDecorations.personalTaskTile(isDone: isDone),
         child: Row(
           children: [
             Checkbox(
@@ -502,10 +452,7 @@ class DailyZekrScreen extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: TextStyles.bodyLarge.copyWith(
-                  color: ColorsManager.primaryText,
-                  decoration: isDone ? TextDecoration.lineThrough : null,
-                ),
+                style: DailyZekrTextStyles.personalTaskText(isDone: isDone),
                 textAlign: TextAlign.right,
               ),
             ),
@@ -548,10 +495,7 @@ class DailyZekrScreen extends StatelessWidget {
                 SizedBox(width: 10.w),
                 Text(
                   'إضافة مهمة',
-                  style: TextStyles.titleMedium.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: DailyZekrTextStyles.primaryButtonLabel,
                 ),
               ],
             ),
@@ -569,9 +513,7 @@ class DailyZekrScreen extends StatelessWidget {
       useRootNavigator: false,
       isScrollControlled: true,
       backgroundColor: ColorsManager.cardBackground,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18.r)),
-      ),
+      shape: DailyZekrDecorations.bottomSheetShape(),
       builder: (sheetContext) {
         return BlocProvider.value(
           value: personalTasksCubit,
@@ -595,10 +537,7 @@ class DailyZekrScreen extends StatelessWidget {
                     children: [
                       Text(
                         'إضافة مهمة يومية',
-                        style: TextStyles.titleLarge.copyWith(
-                          color: ColorsManager.primaryText,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: DailyZekrTextStyles.sheetTitle,
                         textAlign: TextAlign.right,
                       ),
                       SizedBox(height: 12.h),
@@ -609,24 +548,9 @@ class DailyZekrScreen extends StatelessWidget {
                           hintText: 'اكتب المهمة هنا…',
                           filled: true,
                           fillColor: ColorsManager.secondaryBackground,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            borderSide: BorderSide(
-                              color: ColorsManager.mediumGray.withOpacity(0.6),
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            borderSide: BorderSide(
-                              color: ColorsManager.mediumGray.withOpacity(0.6),
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            borderSide: BorderSide(
-                              color: ColorsManager.primaryGold.withOpacity(0.8),
-                            ),
-                          ),
+                          border: DailyZekrDecorations.inputBorder(ColorsManager.mediumGray.withOpacity(0.6)),
+                          enabledBorder: DailyZekrDecorations.inputBorder(ColorsManager.mediumGray.withOpacity(0.6)),
+                          focusedBorder: DailyZekrDecorations.inputBorder(ColorsManager.primaryGold.withOpacity(0.8)),
                         ),
                       ),
                       SizedBox(height: 12.h),
@@ -648,10 +572,7 @@ class DailyZekrScreen extends StatelessWidget {
                           },
                           child: Text(
                             'إضافة',
-                            style: TextStyles.titleMedium.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: DailyZekrTextStyles.primaryButtonLabel,
                           ),
                         ),
                       ),

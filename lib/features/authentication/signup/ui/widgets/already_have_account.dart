@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+// ScreenUtil no longer needed directly; sizes resolved via AuthTextStyles
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 
 import '../../../../../core/routing/routes.dart';
 import '../../../../../core/theming/colors.dart';
+import '../../../../../core/theming/auth_styles.dart';
 
 class AlreadyHaveAccount extends StatelessWidget {
   const AlreadyHaveAccount({super.key});
@@ -16,11 +17,7 @@ class AlreadyHaveAccount extends StatelessWidget {
       children: [
         Text(
           'لديك حساب بالفعل؟ ',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-            color: ColorsManager.secondaryText,
-          ),
+          style: AuthTextStyles.prompt14,
         ),
         TextButton(
           onPressed: () {
@@ -28,12 +25,7 @@ class AlreadyHaveAccount extends StatelessWidget {
           },
           child: Text(
             'تسجيل الدخول',
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-              color: ColorsManager.primaryGreen,
-       
-            ),
+            style: AuthTextStyles.actionLink14(ColorsManager.primaryGreen),
           ),
         ),
       ],

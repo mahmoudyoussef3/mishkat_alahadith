@@ -29,7 +29,7 @@ class AddToFavoritesDialog extends StatefulWidget {
 
 class _AddToFavoritesDialogState extends State<AddToFavoritesDialog> {
   bool showCreateNew = false;
-  String? selectedCollection; // ❌ شيل القيمة الافتراضية وخليها nullable
+  String? selectedCollection; 
   final TextEditingController notesController = TextEditingController();
 
   @override

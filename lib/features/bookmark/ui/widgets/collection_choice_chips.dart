@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class CollectionsChoiceChips extends StatelessWidget {
   final List<String> collections;
@@ -17,10 +19,7 @@ class CollectionsChoiceChips extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: ColorsManager.lightGray,
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: BookmarkDecorations.collectionsContainer(),
       child: Wrap(
         spacing: 10,
         runSpacing: 10,
@@ -31,12 +30,7 @@ class CollectionsChoiceChips extends StatelessWidget {
             showCheckmark: false,
             label: Text(
               c.isEmpty ? "بدون اسم" : c,
-              style: TextStyle(
-                color: isSelected
-                    ? ColorsManager.inverseText
-                    : ColorsManager.primaryText,
-                fontWeight: FontWeight.w600,
-              ),
+              style: BookmarkTextStyles.collectionChipText(isSelected: isSelected),
             ),
             selected: isSelected,
             selectedColor: ColorsManager.primaryPurple,

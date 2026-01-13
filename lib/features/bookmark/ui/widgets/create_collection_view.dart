@@ -5,6 +5,7 @@ import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_button.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/dialog_header.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/input_label.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/styled_text_field.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class CreateCollectionView extends StatefulWidget {
   final String bookName;
@@ -61,14 +62,10 @@ class _CreateCollectionViewState extends State<CreateCollectionView> {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             "قم بإنشاء مجموعة جديدة لتنظيم إشاراتك المرجعية",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: ColorsManager.secondaryText,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: BookmarkTextStyles.sectionDescription,
           ),
           const SizedBox(height: 24),
 

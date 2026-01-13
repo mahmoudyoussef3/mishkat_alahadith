@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:mishkat_almasabih/core/theming/library_decorations.dart';
 
 class BookCardShimmer extends StatelessWidget {
   const BookCardShimmer({super.key});
@@ -8,17 +9,7 @@ class BookCardShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8.r,
-            offset: Offset(0, 4.h),
-          ),
-        ],
-      ),
+      decoration: LibraryDecorations.shimmerCard(),
       child: Shimmer.fromColors(
         baseColor: Colors.grey[300]!,
         highlightColor: Colors.grey[100]!,
@@ -26,11 +17,8 @@ class BookCardShimmer extends StatelessWidget {
           children: [
             Expanded(
               child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(20.r),
-                  ),
+                decoration: LibraryDecorations.shimmerBox(
+                  radius: 20.r,
                 ),
               ),
             ),
@@ -42,10 +30,14 @@ class BookCardShimmer extends StatelessWidget {
                   Container(
                     height: 14.h,
                     width: double.infinity,
-                    color: Colors.grey[300],
+                    decoration: LibraryDecorations.shimmerBox(),
                   ),
                   SizedBox(height: 8.h),
-                  Container(height: 12.h, width: 80.w, color: Colors.grey[300]),
+                  Container(
+                    height: 12.h,
+                    width: 80.w,
+                    decoration: LibraryDecorations.shimmerBox(),
+                  ),
                   SizedBox(height: 12.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -53,12 +45,12 @@ class BookCardShimmer extends StatelessWidget {
                       Container(
                         height: 14.h,
                         width: 50.w,
-                        color: Colors.grey[300],
+                        decoration: LibraryDecorations.shimmerBox(),
                       ),
                       Container(
                         height: 14.h,
                         width: 50.w,
-                        color: Colors.grey[300],
+                        decoration: LibraryDecorations.shimmerBox(),
                       ),
                     ],
                   ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 class NavigationContainer extends StatelessWidget {
   final bool isLoading;
@@ -21,10 +23,7 @@ class NavigationContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: ColorsManager.primaryPurple.withOpacity(0.1),
-      ),
+      decoration: HadithDetailsDecorations.actionRow(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -40,21 +39,13 @@ class NavigationContainer extends StatelessWidget {
                   SizedBox(width: 8.w),
                   Text(
                     "جاري التحميل...",
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: ColorsManager.primaryPurple,
-                    ),
+                    style: HadithDetailsTextStyles.navigationLabel,
                   ),
                 ],
               )
               : Text(
                 "الحديث رقم $hadithId",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: ColorsManager.primaryPurple,
-                ),
+                style: HadithDetailsTextStyles.navigationLabel,
               ),
           IconButton(
             icon: const Icon(Icons.arrow_forward_ios),

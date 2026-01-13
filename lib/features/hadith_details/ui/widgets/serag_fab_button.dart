@@ -4,6 +4,7 @@ import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 class SeragFabButton extends StatelessWidget {
   final String? token;
@@ -34,7 +35,7 @@ class SeragFabButton extends StatelessWidget {
                   Text(
                     'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
                     textDirection: TextDirection.rtl,
-                    style: TextStyle(color: ColorsManager.secondaryBackground),
+                    style: HadithDetailsTextStyles.snackText,
                   ),
                   IconButton(
                     onPressed: () => context.pushNamed(Routes.loginScreen),
@@ -73,11 +74,7 @@ class SeragFabButton extends StatelessWidget {
       ),
       label: Text(
         'اسأل سراج',
-        style: TextStyle(
-          fontSize: 18.sp,
-          fontWeight: FontWeight.bold,
-          color: ColorsManager.secondaryBackground,
-        ),
+        style: HadithDetailsTextStyles.fabLabel,
       ),
     );
   }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/navigation/logic/cubit/navigation_cubit.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 class HadithNavigation extends StatefulWidget {
   final String hadithNumber;
@@ -57,10 +58,7 @@ class _HadithNavigationState extends State<HadithNavigation> {
                     horizontal: 16.w,
                     vertical: 16.h,
                   ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: ColorsManager.primaryPurple.withOpacity(0.1),
-                  ),
+                  decoration: HadithDetailsDecorations.actionRow(),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -85,11 +83,7 @@ class _HadithNavigationState extends State<HadithNavigation> {
                       ),
                       Text(
                         "الحديث رقم ${data.currentHadithNumber} / ${data.totalHadiths}",
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: ColorsManager.primaryPurple,
-                        ),
+                        style: HadithDetailsTextStyles.navigationLabel,
                       ),
                       IconButton(
                         icon: const Icon(Icons.arrow_forward_ios),

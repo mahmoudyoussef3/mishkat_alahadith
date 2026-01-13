@@ -14,6 +14,8 @@ import 'package:mishkat_almasabih/features/bookmark/logic/get_cubit/user_bookmar
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/bookmark_empty_state.dart';
 import 'package:mishkat_almasabih/features/chapters/ui/widgets/chapters_grid_view.dart';
 import 'package:mishkat_almasabih/features/hadith_details/ui/screens/hadith_details_screen.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class BookmarkList extends StatefulWidget {
   final String selectedCollection;
@@ -195,17 +197,10 @@ class _BookmarkListState extends State<BookmarkList> {
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: ColorsManager.mediumGray.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(12.r),
-        ),
+        decoration: BookmarkDecorations.notesContainer(),
         child: Text(
           "📝 الملاحظات: $notes",
-          style: TextStyle(
-            fontSize: 13.sp,
-            color: ColorsManager.secondaryText,
-            fontStyle: FontStyle.italic,
-          ),
+          style: BookmarkTextStyles.notesText,
         ),
       ),
     );

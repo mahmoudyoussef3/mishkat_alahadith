@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class DialogHeader extends StatelessWidget {
   final String title;
@@ -11,25 +12,13 @@ class DialogHeader extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [
-                ColorsManager.primaryPurple,
-                ColorsManager.secondaryPurple,
-              ],
-            ),
-          ),
+          decoration: BookmarkDecorations.iconCircleGradient(),
           child: const Icon(Icons.bookmark, color: Colors.white, size: 20),
         ),
         const SizedBox(width: 8),
         Text(
           title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: ColorsManager.primaryText,
-          ),
+          style: BookmarkTextStyles.dialogTitle,
         ),
       ],
     );

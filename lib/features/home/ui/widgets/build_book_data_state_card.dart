@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/helpers/spacing.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 
 class BuildBookDataStateCard extends StatelessWidget {
   const BuildBookDataStateCard({
@@ -21,24 +21,7 @@ class BuildBookDataStateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(Spacing.md),
-  decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.withOpacity(0.95),
-            ColorsManager.primaryPurple.withOpacity(0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+      decoration: HomeDecorations.statsCard(color),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -46,16 +29,11 @@ class BuildBookDataStateCard extends StatelessWidget {
           SizedBox(height: Spacing.sm),
           Text(
             value,
-            style: TextStyles.headlineMedium.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: HomeTextStyles.statsValue,
           ),
           Text(
             title,
-            style: TextStyles.bodySmall.copyWith(
-              color: Colors.white.withOpacity(0.9),
-            ),
+            style: HomeTextStyles.statsTitle,
             textAlign: TextAlign.center,
           ),
         ],

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/auth_styles.dart';
+import 'package:mishkat_almasabih/core/theming/auth_decorations.dart';
 
 class LoginAsGuestButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -13,11 +15,9 @@ class LoginAsGuestButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        color: Colors.white,
+        color: ColorsManager.white,
         elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
+        shape: (AuthDecorations.socialCardShape().shape as RoundedRectangleBorder?),
         child: Padding(
           padding: EdgeInsets.all(16.w),
           child: Row(
@@ -25,11 +25,7 @@ class LoginAsGuestButton extends StatelessWidget {
             children: [
               Text(
                 'الدخول كزائر',
-                style: TextStyle(
-                  color: ColorsManager.darkGray,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AuthTextStyles.cardLabel,
               ),
               SizedBox(width: 12.w),
               const FaIcon(

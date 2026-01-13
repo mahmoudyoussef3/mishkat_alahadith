@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_styles.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_bookmark_dialogs.dart';
@@ -69,9 +71,7 @@ class _HadithDailyScreenState extends State<HadithDailyScreen> {
                                   Text(
                                     'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
                                     textDirection: TextDirection.rtl,
-                                    style: TextStyle(
-                                      color: ColorsManager.secondaryBackground,
-                                    ),
+                                    style: DailyHadithTextStyles.snackText,
                                   ),
                                   IconButton(
                                     onPressed:
@@ -118,11 +118,7 @@ class _HadithDailyScreenState extends State<HadithDailyScreen> {
                 ),
                 label: Text(
                   "اسأل سراج",
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: ColorsManager.secondaryBackground,
-                  ),
+                  style: DailyHadithTextStyles.fabLabel,
                 ),
               );
             },
@@ -246,10 +242,7 @@ class _HadithDailyScreenState extends State<HadithDailyScreen> {
                           horizontal: 16.w,
                           vertical: 8.h,
                         ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(color: ColorsManager.gray),
-                        ),
+                        decoration: DailyHadithDecorations.tabContentContainer(),
                         child: HadithTabContent(
                           selectedTab: selectedTab,
                           data: widget.dailyHadithModel,
@@ -271,18 +264,7 @@ class _HadithDailyScreenState extends State<HadithDailyScreen> {
   Widget _buildEnhancedTabsSection() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-      decoration: BoxDecoration(
-        color: ColorsManager.white,
-
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: ColorsManager.primaryPurple.withOpacity(0.08),
-            blurRadius: 20.r,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: DailyHadithDecorations.tabsContainer(),
       child: HadithTabs(
         selectedTab: selectedTab,
         onTabSelected: (tab) {

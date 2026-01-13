@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
 
 class HomeScreenShimmer extends StatelessWidget {
   const HomeScreenShimmer({super.key});
@@ -70,17 +71,7 @@ class HomeScreenShimmer extends StatelessWidget {
             // Statistics Header Shimmer
             Container(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              decoration: BoxDecoration(
-                color: ColorsManager.white,
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: ColorsManager.primaryPurple.withOpacity(0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+              decoration: HomeDecorations.shimmerCardContainer(),
               child: Row(
                 children: [
                   _buildShimmerContainer(48.w, 48.h, circular: true),
@@ -120,17 +111,7 @@ class HomeScreenShimmer extends StatelessWidget {
   Widget _buildStatisticsCardShimmer() {
     return Container(
       padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: ColorsManager.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: HomeDecorations.shimmerCardContainer(),
       child: Column(
         children: [
           _buildShimmerContainer(32.w, 32.h, circular: true),
@@ -154,17 +135,7 @@ class HomeScreenShimmer extends StatelessWidget {
             // Categories Header Shimmer
             Container(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              decoration: BoxDecoration(
-                color: ColorsManager.white,
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: ColorsManager.primaryPurple.withOpacity(0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+              decoration: HomeDecorations.shimmerCardContainer(),
               child: Row(
                 children: [
                   _buildShimmerContainer(40.w, 40.h, circular: true),
@@ -205,17 +176,7 @@ class HomeScreenShimmer extends StatelessWidget {
     return Container(
       height: 140.h,
       padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: ColorsManager.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
+      decoration: HomeDecorations.shimmerCardContainer(),
       child: Row(
         children: [
           Expanded(
@@ -266,10 +227,7 @@ class HomeScreenShimmer extends StatelessWidget {
           highlightColor: Colors.grey.shade100,
           child: Container(
             height: 2.h,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(1.r),
-            ),
+            decoration: HomeDecorations.sectionDivider(),
           ),
         ),
       ),
@@ -289,12 +247,9 @@ class HomeScreenShimmer extends StatelessWidget {
       child: Container(
         width: width,
         height: height,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade300,
-          borderRadius:
-              circular
-                  ? BorderRadius.circular(width / 2)
-                  : BorderRadius.circular(borderRadius ?? 8.r),
+        decoration: HomeDecorations.shimmerBox(
+          circle: circular,
+          radius: borderRadius,
         ),
       ),
     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 class HadithHeaderInfo extends StatelessWidget {
   final String hadithId;
@@ -16,11 +18,7 @@ class HadithHeaderInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12),
-      decoration: BoxDecoration(
-        color: ColorsManager.primaryGreen.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: ColorsManager.primaryGreen.withOpacity(0.2)),
-      ),
+      decoration: HadithDetailsDecorations.headerInfo(),
       child: Row(
         children: [
           Icon(
@@ -35,11 +33,7 @@ class HadithHeaderInfo extends StatelessWidget {
               children: [
                 Text(
                   'حديث رقم $hadithId',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: ColorsManager.primaryText,
-                  ),
+                  style: HadithDetailsTextStyles.headerMain,
                 ),
                 if (bookName != null && bookName!.trim().isNotEmpty)
                   Column(
@@ -48,10 +42,7 @@ class HadithHeaderInfo extends StatelessWidget {
                       Divider(endIndent: 60.w),
                       Text(
                         'من ${bookName!}',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: ColorsManager.secondaryText,
-                        ),
+                        style: HadithDetailsTextStyles.headerSub,
                       ),
                     ],
                   ),

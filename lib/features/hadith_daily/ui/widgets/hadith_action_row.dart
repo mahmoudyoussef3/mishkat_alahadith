@@ -11,6 +11,8 @@ import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_
 import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_bookmark_dialogs.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_styles.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferences;
 
@@ -72,10 +74,7 @@ class _HadithActionsRowState extends State<HadithActionsRow> {
           horizontal: 16.w,
           vertical: 16.h,
         ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: ColorsManager.primaryPurple.withOpacity(0.1),
-        ),
+        decoration: DailyHadithDecorations.actionRow(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -175,9 +174,7 @@ class _HadithActionsRowState extends State<HadithActionsRow> {
                                   Text(
                                     'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
                                     textDirection: TextDirection.rtl,
-                                    style: TextStyle(
-                                      color: ColorsManager.secondaryBackground,
-                                    ),
+                                    style: DailyHadithTextStyles.snackText,
                                   ),
                                   IconButton(
                                     onPressed:
@@ -215,13 +212,13 @@ class _HadithActionsRowState extends State<HadithActionsRow> {
       child: Column(
         children: [
           CircleAvatar(
-            backgroundColor: ColorsManager.primaryPurple.withOpacity(0.1),
+            backgroundColor: DailyHadithDecorations.circleActionAvatarBg(),
             child: Icon(icon, color: ColorsManager.primaryPurple),
           ),
           SizedBox(height: 6.h),
           Text(
             label,
-            style: TextStyle(fontSize: 13.sp, color: ColorsManager.darkGray),
+            style: DailyHadithTextStyles.actionLabel,
           ),
         ],
       ),

@@ -10,6 +10,8 @@ import 'package:mishkat_almasabih/features/home/ui/widgets/search_bar_widget.dar
 import '../../../../core/theming/colors.dart';
 import '../../../home/ui/widgets/build_header_app_bar.dart';
 import '../../logic/cubit/chapters_cubit.dart';
+import 'package:mishkat_almasabih/core/theming/chapters_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/chapters_styles.dart';
 
 class GetBookChaptersBlocBuilder extends StatelessWidget {
   const GetBookChaptersBlocBuilder({
@@ -91,48 +93,39 @@ class GetBookChaptersBlocBuilder extends StatelessWidget {
                 SliverToBoxAdapter(child: SizedBox(height: 22.h)),
                 state.filteredChapters.isEmpty
                     ? SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: Card(
-                          color: Colors.white,
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.search_off,
-                                  size: 60,
-                                  color: ColorsManager.primaryNavy,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'لا توجد نتائج',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Card(
+                            color: Colors.white,
+                            elevation: 5,
+                            shape: ChaptersDecorations.emptyCardShape(),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.search_off,
+                                    size: 60,
                                     color: ColorsManager.primaryNavy,
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'حاول بكلمة أبسط أو مختلفة',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade600,
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'لا توجد نتائج',
+                                    style: ChaptersTextStyles.emptyTitle,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'حاول بكلمة أبسط أو مختلفة',
+                                    style: ChaptersTextStyles.emptySubtitle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    )
+                      )
                     : ResponsiveChapterList(
                       items: state.filteredChapters,
                       primaryPurple: ColorsManager.primaryGreen,

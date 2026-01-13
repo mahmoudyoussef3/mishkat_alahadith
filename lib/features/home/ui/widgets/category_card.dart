@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theming/colors.dart';
-import '../../../../core/theming/styles.dart';
 import '../../../../core/helpers/spacing.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 
 class CategoryCard extends StatelessWidget {
   final String name;
@@ -23,17 +23,7 @@ class CategoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(
-          color: ColorsManager.white,
-          borderRadius: BorderRadius.circular(Spacing.cardRadius),
-          boxShadow: [
-            BoxShadow(
-              color: ColorsManager.black.withOpacity(0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        decoration: HomeDecorations.categoryCard(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -41,25 +31,14 @@ class CategoryCard extends StatelessWidget {
             Container(
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [color.withOpacity(0.2), color.withOpacity(0.1)],
-                ),
-                borderRadius: BorderRadius.circular(Spacing.md),
-                border: Border.all(color: color.withOpacity(0.3), width: 1),
-              ),
+              decoration: HomeDecorations.categoryIconContainer(color),
               child: Icon(icon, color: color, size: 28),
             ),
             SizedBox(height: Spacing.md),
             // Category name
             Text(
               name,
-              style: TextStyles.titleMedium.copyWith(
-                color: ColorsManager.primaryText,
-                fontWeight: FontWeight.w600,
-              ),
+              style: HomeTextStyles.categoryName,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -69,10 +48,7 @@ class CategoryCard extends StatelessWidget {
             Container(
               width: 20,
               height: 3,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(2),
-              ),
+              decoration: HomeDecorations.categoryIndicatorBar(color),
             ),
           ],
         ),

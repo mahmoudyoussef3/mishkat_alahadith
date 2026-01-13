@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 
 class BuildMainCategoryCard extends StatelessWidget {
   const BuildMainCategoryCard({
@@ -63,13 +64,7 @@ class BuildMainCategoryCard extends StatelessWidget {
               child: Container(
                 width: 50.w,
                 height: 50.h,
-                decoration: BoxDecoration(
-                  color: ColorsManager.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(24.r),
-                    bottomLeft: Radius.circular(24.r),
-                  ),
-                ),
+                decoration: HomeDecorations.mainCategoryCorner(),
                 child: Icon(
                   Icons.star,
                   color: ColorsManager.white.withOpacity(0.8),
@@ -91,11 +86,7 @@ class BuildMainCategoryCard extends StatelessWidget {
                         // Title with enhanced styling
                         Text(
                           title,
-                          style: TextStyles.headlineSmall.copyWith(
-                            color: ColorsManager.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.sp,
-                          ),
+                          style: HomeTextStyles.mainCategoryTitle,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -130,11 +121,7 @@ class BuildMainCategoryCard extends StatelessWidget {
                         Flexible(
                           child: Text(
                             description,
-                            style: TextStyles.bodySmall.copyWith(
-                              fontSize: 18.sp,
-                              color: ColorsManager.white.withOpacity(0.85),
-                            //  height: 1.5,
-                            ),
+                            style: HomeTextStyles.mainCategoryDescription,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -149,38 +136,17 @@ class BuildMainCategoryCard extends StatelessWidget {
                       horizontal: Spacing.md,
                       vertical: Spacing.sm,
                     ),
-                    decoration: BoxDecoration(
-                      color: ColorsManager.white.withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(20.r),
-                      border: Border.all(
-                        color: ColorsManager.white.withOpacity(0.4),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8.r,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
+                    decoration: HomeDecorations.mainCategoryCountPill(),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           '$bookCount',
-                          style: TextStyles.titleMedium.copyWith(
-                            color: ColorsManager.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.sp,
-                          ),
+                          style: HomeTextStyles.categoryCountNumber,
                         ),
                         Text(
                           'كتاب',
-                          style: TextStyles.bodySmall.copyWith(
-                            color: ColorsManager.white.withOpacity(0.9),
-                            fontSize: 10.sp,
-                          ),
+                          style: HomeTextStyles.categoryCountLabel,
                         ),
                       ],
                     ),
@@ -195,14 +161,7 @@ class BuildMainCategoryCard extends StatelessWidget {
               left: 16.w,
               child: Container(
                 padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: ColorsManager.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(
-                    color: ColorsManager.white.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
+                decoration: HomeDecorations.mainCategoryIconOverlay(),
                 child: Icon(icon, color: ColorsManager.white, size: 24.sp),
               ),
             ),

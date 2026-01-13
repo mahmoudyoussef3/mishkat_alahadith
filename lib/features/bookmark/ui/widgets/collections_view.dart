@@ -7,6 +7,8 @@ import 'package:mishkat_almasabih/features/bookmark/ui/widgets/collection_choice
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/dialog_header.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/input_label.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/styled_text_field.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
 
 class CollectionsView extends StatelessWidget {
   final String bookName;
@@ -65,11 +67,7 @@ class CollectionsView extends StatelessWidget {
                 Text(
                   "اختر مجموعة من الإشارات المرجعية",
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: ColorsManager.secondaryText,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: BookmarkTextStyles.sectionDescription,
                 ),
                 const SizedBox(height: 20),
                 CollectionsChoiceChips(
@@ -81,14 +79,7 @@ class CollectionsView extends StatelessWidget {
                 Container(
                   width: double.infinity,
                   height: 45,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: ColorsManager.primaryPurple.withOpacity(0.3),
-                      width: 1.5,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.transparent,
-                  ),
+                  decoration: BookmarkDecorations.outlinedButtonContainer(),
                   child: Material(
                     color: Colors.transparent,
                     child: GestureDetector(
@@ -104,11 +95,7 @@ class CollectionsView extends StatelessWidget {
                           const SizedBox(width: 8),
                           Text(
                             "إنشاء مجموعة جديدة",
-                            style: TextStyle(
-                              color: ColorsManager.primaryPurple,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: BookmarkTextStyles.createNewLabel,
                           ),
                         ],
                       ),

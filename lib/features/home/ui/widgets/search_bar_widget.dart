@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theming/colors.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/helpers/spacing.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 
 class SearchBarWidget extends StatelessWidget {
   final TextEditingController controller;
@@ -20,11 +22,7 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: ColorsManager.white,
-        borderRadius: BorderRadius.circular(Spacing.cardRadius),
-    
-      ),
+      decoration: HomeDecorations.searchOuter(),
       child: Card(
         margin: EdgeInsets.zero,
         color: ColorsManager.secondaryBackground,
@@ -35,9 +33,7 @@ class SearchBarWidget extends StatelessWidget {
           onSubmitted: onSearch,
           decoration: InputDecoration(
             hintText: hintText ?? 'ابحث في الأحاديث...',
-            hintStyle: TextStyles.bodyMedium.copyWith(
-              color: ColorsManager.secondaryText,
-            ),
+            hintStyle: HomeTextStyles.searchHint,
             prefixIcon: Icon(
               Icons.search,
               color: ColorsManager.primaryPurple,

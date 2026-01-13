@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theming/colors.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/helpers/spacing.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
@@ -70,26 +72,13 @@ class QuickActions extends StatelessWidget {
                                 : 0,
                       ),
                       padding: EdgeInsets.all(Spacing.md),
-                      decoration: BoxDecoration(
-                        color: ColorsManager.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: ColorsManager.primaryPurple.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
+                      decoration: HomeDecorations.quickActionCard(),
                       child: Column(
                         children: [
                           Container(
                             padding: EdgeInsets.all(Spacing.sm),
-                            decoration: BoxDecoration(
-                              color: (action['color'] as Color).withOpacity(
-                                0.1,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
+                            decoration: HomeDecorations.quickActionIconBg(
+                              action['color'] as Color,
                             ),
                             child: Icon(
                               action['icon'] as IconData,
@@ -100,10 +89,7 @@ class QuickActions extends StatelessWidget {
                           SizedBox(height: Spacing.sm),
                           Text(
                             action['title'] as String,
-                            style: TextStyles.labelMedium.copyWith(
-                              color: ColorsManager.primaryText,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: HomeTextStyles.quickActionsTitle,
                             textAlign: TextAlign.center,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -111,10 +97,7 @@ class QuickActions extends StatelessWidget {
                           SizedBox(height: Spacing.xs),
                           Text(
                             action['subtitle'] as String,
-                            style: TextStyles.bodySmall.copyWith(
-                              color: ColorsManager.secondaryText,
-                              fontSize: 10,
-                            ),
+                            style: HomeTextStyles.quickActionsSubtitle,
                             textAlign: TextAlign.center,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

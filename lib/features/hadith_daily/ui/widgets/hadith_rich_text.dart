@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_styles.dart';
 
 class HadithRichText extends StatelessWidget {
   final String hadith;
@@ -13,13 +14,7 @@ class HadithRichText extends StatelessWidget {
         children: [
           TextSpan(
             text: hadith,
-            style: const TextStyle(
-              fontSize: 20,
-              fontFamily: "Amiri",
-              height: 1.8,
-              color: Colors.black87,
-              fontWeight: FontWeight.w400,
-            ),
+            style: DailyHadithTextStyles.hadithText,
           ),
         ],
       ),

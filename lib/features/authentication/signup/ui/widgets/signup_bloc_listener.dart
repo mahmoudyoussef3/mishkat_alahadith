@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+// ScreenUtil not used directly after refactor
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
 
@@ -10,6 +10,7 @@ import '../../../../../core/routing/routes.dart';
 import '../../../../../core/theming/colors.dart';
 import '../../../../../core/widgets/app_text_button.dart';
 import '../../logic/signup_cubit.dart';
+import '../../../../../core/theming/auth_styles.dart';
 
 class SignupBlocListener extends StatelessWidget {
   const SignupBlocListener({super.key});
@@ -50,12 +51,7 @@ class SignupBlocListener extends StatelessWidget {
               }
             },
 
-            textStyle: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-              color: ColorsManager.white,
-            ),
+            textStyle: AuthTextStyles.primaryButtonText,
           )
           .animate()
           .fadeIn(delay: 900.ms, duration: 300.ms)

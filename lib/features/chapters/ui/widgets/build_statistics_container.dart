@@ -2,8 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/chapters_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/chapters_styles.dart';
 
 class BuildStatisticsContainer extends StatelessWidget {
   const BuildStatisticsContainer({
@@ -23,24 +24,7 @@ class BuildStatisticsContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.withOpacity(0.95),
-            ColorsManager.primaryPurple.withOpacity(0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+      decoration: ChaptersDecorations.statsCard(color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -54,19 +38,13 @@ class BuildStatisticsContainer extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyles.titleMedium.copyWith(
-                  color: ColorsManager.white.withOpacity(0.9),
-                  fontWeight: FontWeight.w600,
-                ),
+                style: ChaptersTextStyles.statsTitle,
                 overflow: TextOverflow.ellipsis,
               ),
               SizedBox(width: 8.w),
               Text(
                 value,
-                style: TextStyles.headlineLarge.copyWith(
-                  color: ColorsManager.white,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: ChaptersTextStyles.statsValue,
               ),
             ],
           ),

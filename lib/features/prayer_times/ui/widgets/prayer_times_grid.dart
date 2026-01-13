@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/prayer_times_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/prayer_times_styles.dart';
 
 class PrayerTimesGrid extends StatelessWidget {
   final PrayerTimes times;
@@ -83,11 +84,7 @@ class _PrayerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(12.r),
-      decoration: BoxDecoration(
-        color: ColorsManager.cardBackground,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: ColorsManager.mediumGray, width: 1),
-      ),
+      decoration: PrayerTimesDecorations.gridRowContainer(),
       child: Row(
         children: [
           Expanded(
@@ -96,18 +93,13 @@ class _PrayerRow extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyles.titleLarge.copyWith(
-                    color: ColorsManager.primaryText,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: PrayerTimesTextStyles.prayerRowTitle,
                   textAlign: TextAlign.right,
                 ),
                 SizedBox(height: 4.h),
                 Text(
                   time,
-                  style: TextStyles.bodyMedium.copyWith(
-                    color: ColorsManager.secondaryText,
-                  ),
+                  style: PrayerTimesTextStyles.prayerRowTime,
                   textAlign: TextAlign.right,
                 ),
               ],
@@ -117,10 +109,7 @@ class _PrayerRow extends StatelessWidget {
           Container(
             width: 36.r,
             height: 36.r,
-            decoration: BoxDecoration(
-              color: ColorsManager.primaryPurple.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
+            decoration: PrayerTimesDecorations.gridRowIconBg(),
             child: Icon(icon, color: ColorsManager.primaryPurple, size: 20.sp),
           ),
         ],

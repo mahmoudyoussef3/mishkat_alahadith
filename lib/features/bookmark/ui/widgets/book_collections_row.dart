@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class BookmarkCollectionsRow extends StatelessWidget {
   final String selectedCollection;
@@ -46,10 +48,7 @@ class BookmarkCollectionsRow extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 6.h),
-              decoration: BoxDecoration(
-                color: ColorsManager.secondaryBackground,
-                borderRadius: BorderRadius.circular(16.r),
-              ),
+              decoration: BookmarkDecorations.collectionsContainer(),
               child: SizedBox(
                 height: 40.h,
                 child: ListView.separated(
@@ -71,36 +70,11 @@ class BookmarkCollectionsRow extends StatelessWidget {
                           horizontal: 20.w,
                           vertical: 10.h,
                         ),
-                        decoration: BoxDecoration(
-                          color:
-                              isSelected
-                                  ? ColorsManager.primaryPurple
-                                  : Colors.transparent,
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color:
-                                isSelected
-                                    ? ColorsManager.primaryPurple
-                                    : ColorsManager.mediumGray.withOpacity(
-                                      0.35,
-                                    ),
-                            width: 1,
-                          ),
-                        ),
+                        decoration: BookmarkDecorations.collectionChip(isSelected: isSelected),
                         child: Center(
                           child: Text(
                             c,
-                            style: TextStyle(
-                              color:
-                                  isSelected
-                                      ? Colors.white
-                                      : ColorsManager.primaryText,
-                              fontWeight:
-                                  isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.w500,
-                              fontSize: 12.sp,
-                            ),
+                            style: BookmarkTextStyles.collectionChipText(isSelected: isSelected),
                           ),
                         ),
                       ),
@@ -139,14 +113,11 @@ class BookmarkCollectionsRow extends StatelessWidget {
                 (_, __) => Shimmer.fromColors(
                   baseColor: Colors.grey.shade300,
                   highlightColor: Colors.grey.shade100,
-                  child: Container(
-                    width: 90.w,
-                    height: 34.h,
-                    decoration: BoxDecoration(
-                      color: ColorsManager.lightGray,
-                      borderRadius: BorderRadius.circular(16.r),
+                    child: Container(
+                      width: 90.w,
+                      height: 34.h,
+                      decoration: BookmarkDecorations.shimmerItem(),
                     ),
-                  ),
                 ),
           ),
         ),

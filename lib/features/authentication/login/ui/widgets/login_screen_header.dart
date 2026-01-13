@@ -3,6 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theming/colors.dart';
+import '../../../../../core/theming/auth_decorations.dart';
+import '../../../../../core/theming/auth_styles.dart';
 
 class LoginScreenHeader extends StatelessWidget {
   const LoginScreenHeader({super.key});
@@ -15,18 +17,7 @@ class LoginScreenHeader extends StatelessWidget {
         Container(
               width: 100.w,
               height: 100.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: ColorsManager.primaryGreen,
-                boxShadow: [
-                  BoxShadow(
-                    color: ColorsManager.primaryGreen.withOpacity(0.3),
-                    blurRadius: 20,
-                    spreadRadius: 5,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
+              decoration: AuthDecorations.logoCircle(),
               child: Padding(
                 padding: EdgeInsets.all(20.w),
                 child: Image.asset(
@@ -48,23 +39,14 @@ class LoginScreenHeader extends StatelessWidget {
         // App Name
         Text(
           'مرحباً بك مرة أخرى',
-          style: TextStyle(
-            fontSize: 24.sp,
-            fontWeight: FontWeight.bold,
-            color: ColorsManager.primaryText,
-          ),
+          style: AuthTextStyles.headerTitle,
         ).animate().fadeIn(delay: 300.ms, duration: 400.ms).slideY(begin: 0.3),
 
         SizedBox(height: 8.h),
 
         Text(
           "سجل دخولك وابدء رحلتك مع الأحاديث والعلوم الإسلامية",
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: ColorsManager.secondaryText,
-            height: 1.4,
-          ),
+          style: AuthTextStyles.headerSubtitle,
         ).animate().fadeIn(delay: 400.ms, duration: 400.ms).slideY(begin: 0.3),
       ],
     );

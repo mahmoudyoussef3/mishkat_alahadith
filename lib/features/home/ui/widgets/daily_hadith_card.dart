@@ -12,6 +12,8 @@ import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
 
 class HadithOfTheDayCard extends StatefulWidget {
   const HadithOfTheDayCard({super.key});
@@ -161,11 +163,7 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
                           SizedBox(width: 6.w),
                           Text(
                             "حديث اليوم",
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: ColorsManager.secondaryBackground,
-                            ),
+                            style: HomeTextStyles.dailyHadithHeaderLabel,
                           ),
                         ],
                       ),
@@ -175,11 +173,7 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.start,
-                          style: TextStyle(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w600,
-                            color: ColorsManager.secondaryBackground,
-                          ),
+                          style: HomeTextStyles.dailyHadithText,
                         ),
                       ),
                       Align(
@@ -189,18 +183,10 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
                             horizontal: 12.w,
                             vertical: 8.h,
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(14.r),
-                            border: Border.all(color: Colors.white70),
-                          ),
+                          decoration: HomeDecorations.readButton(),
                           child: Text(
                             "اقرأ الحديث",
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: ColorsManager.secondaryBackground,
-                            ),
+                            style: HomeTextStyles.readButtonLabel,
                           ),
                         ),
                       ),
@@ -213,13 +199,7 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
                   child: Container(
                     width: 50.w,
                     height: 50.h,
-                    decoration: BoxDecoration(
-                      color: ColorsManager.primaryGreen.withOpacity(0.1),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(24.r),
-                        bottomLeft: Radius.circular(24.r),
-                      ),
-                    ),
+                    decoration: HomeDecorations.dailyHadithCornerQuote(),
                     child: Icon(
                       Icons.format_quote,
                       color: ColorsManager.secondaryBackground,

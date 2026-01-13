@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
 
 class BuildDailyHadithCardShimmer extends StatelessWidget {
   const BuildDailyHadithCardShimmer({super.key});
@@ -16,10 +17,7 @@ class BuildDailyHadithCardShimmer extends StatelessWidget {
           baseColor: Colors.grey.shade300,
           highlightColor: Colors.grey.shade100,
           child: Container(
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(24.r),
-            ),
+            decoration: HomeDecorations.shimmerCardContainer(),
           ),
         ),
       ),

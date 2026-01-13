@@ -22,6 +22,7 @@ import 'package:mishkat_almasabih/features/home/ui/widgets/top_books_section.dar
 import 'package:mishkat_almasabih/features/home/ui/widgets/home_search_bar_section.dart';
 import '../../../core/theming/colors.dart';
 import '../../../core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 
 class HomeScreenWrapper extends StatelessWidget {
   const HomeScreenWrapper({super.key});
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Icon(Icons.local_library_sharp),
                     SizedBox(width: 4.w),
-                    Text('المكتبة', style: TextStyle(fontSize: 16.sp)),
+                    Text('المكتبة', style: HomeTextStyles.fabLibraryLabel),
                   ],
                 ),
               ),

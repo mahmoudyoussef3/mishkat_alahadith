@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_styles.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_decorations.dart';
 
 class HadithAttributionAndGrade extends StatelessWidget {
   final NewDailyHadithModel data;
@@ -32,22 +34,18 @@ class HadithAttributionAndGrade extends StatelessWidget {
           Flexible(
             child: Text(
               "📖 ${data.attribution!}",
-              style: const TextStyle(
-                fontSize: 16,
-                color: ColorsManager.accentPurple,
-                fontStyle: FontStyle.italic,
-              ),
+              style: DailyHadithTextStyles.attribution,
               textAlign: TextAlign.start,
             ),
           ),
         if (data.grade != null)
           Chip(
-            backgroundColor: gradeColor(data.grade).withOpacity(0.1),
+            backgroundColor:
+                DailyHadithDecorations.gradeChipBg(gradeColor(data.grade)),
             label: Text(
               data.grade ?? "",
-              style: TextStyle(
-                color: gradeColor(data.grade),
-                fontWeight: FontWeight.bold,
+              style: DailyHadithTextStyles.gradeLabel(
+                gradeColor(data.grade),
               ),
             ),
           ),

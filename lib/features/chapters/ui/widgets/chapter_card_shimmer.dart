@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:mishkat_almasabih/core/theming/chapters_decorations.dart';
 
 class ChapterCardShimmer extends StatelessWidget {
   const ChapterCardShimmer({super.key});
@@ -11,20 +12,14 @@ class ChapterCardShimmer extends StatelessWidget {
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
-        ),
+        decoration: ChaptersDecorations.shimmerCard(),
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
             Container(
               width: 48.w,
               height: 48.h,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade400,
-                borderRadius: BorderRadius.circular(14),
-              ),
+              decoration: ChaptersDecorations.shimmerBox(),
             ),
             SizedBox(width: 14.w),
             Expanded(
@@ -34,19 +29,13 @@ class ChapterCardShimmer extends StatelessWidget {
                   Container(
                     height: 16.h,
                     width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade400,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    decoration: ChaptersDecorations.shimmerLine(),
                   ),
                   SizedBox(height: 8.h),
                   Container(
                     height: 14.h,
                     width: 100.w,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade400,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    decoration: ChaptersDecorations.shimmerLine(),
                   ),
                 ],
               ),

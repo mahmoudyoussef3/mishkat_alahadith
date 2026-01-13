@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/section_card.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 class HadithBookSection extends StatelessWidget {
   final String bookName;
@@ -51,22 +51,14 @@ class HadithBookSection extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: ColorsManager.darkGray,
-              fontWeight: FontWeight.w600,
-            ),
+            style: HadithDetailsTextStyles.bookLabel,
           ),
         ),
         Expanded(
           flex: 2,
           child: Text(
             value,
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.bold,
-              color: ColorsManager.primaryText,
-            ),
+            style: HadithDetailsTextStyles.bookValue,
           ),
         ),
       ],

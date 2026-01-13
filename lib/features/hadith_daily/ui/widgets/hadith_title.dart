@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/daily_hadith_styles.dart';
 
 class HadithTitle extends StatelessWidget {
   final String title;
@@ -17,11 +18,7 @@ class HadithTitle extends StatelessWidget {
         ),
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: ColorsManager.primaryPurple,
-          ),
+          style: DailyHadithTextStyles.hadithTitle,
           textAlign: TextAlign.center,
         ),
       ],

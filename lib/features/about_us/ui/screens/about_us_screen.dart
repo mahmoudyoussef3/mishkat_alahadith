@@ -9,14 +9,14 @@ class AboutUsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top: false,
+      top: true,
       bottom: true,
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
           backgroundColor: ColorsManager.secondaryBackground,
           body: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+
             slivers: [
               SliverToBoxAdapter(child: WhoAreWe()),
               BuildMishkatInfSection(),

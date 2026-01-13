@@ -9,48 +9,32 @@ class WidgetNavigationService {
 
   static void initialize() {
     platform.setMethodCallHandler((call) async {
-      if (call.method == 'openHadithOfTheDay') {
         await _navigateToHadithOfTheDay();
-      } else if (call.method == 'openHadithLink') {
-        final String? linkStr = call.arguments as String?;
-        if (linkStr != null) {
-          // Parse and navigate to hadith detail
-          try {
-            // Reuse the dynamic links parsing to keep it centralized
-          } catch (_) {}
-        }
-      }
+    
     });
   }
 
   static Future<void> _navigateToHadithOfTheDay() async {
-    // Wait a bit to ensure the app is fully initialized
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // Use the global navigator key to navigate
     if (navigatorKey.currentContext != null) {
       try {
-        // Get the hadith repository
         final repo = getIt<SaveHadithDailyRepo>();
 
-        // Fetch the current hadith
         final hadith = await repo.getHadith();
 
         if (hadith != null) {
-          // Navigate to the hadith of the day screen with the hadith data
           navigatorKey.currentState?.pushNamed(
             Routes.hadithOfTheDay,
             arguments: hadith,
           );
         } else {
-          // If no hadith is available, navigate to home screen
           navigatorKey.currentState?.pushNamedAndRemoveUntil(
             Routes.homeScreen,
             (route) => false,
           );
         }
       } catch (e) {
-        // On error, just navigate to home screen
         navigatorKey.currentState?.pushNamedAndRemoveUntil(
           Routes.homeScreen,
           (route) => false,

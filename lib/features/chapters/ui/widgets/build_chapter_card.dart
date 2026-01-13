@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/chapters_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/chapters_styles.dart';
 
 class ChapterCard extends StatelessWidget {
   const ChapterCard({super.key, 
@@ -16,25 +17,7 @@ class ChapterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: [
-              Colors.white.withOpacity(0.95),
-              Colors.white.withOpacity(0.85),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          border: Border.all(color: Colors.black.withOpacity(0.07)),
-          boxShadow: [
-            BoxShadow(
-              color: primaryPurple.withOpacity(0.08),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
+        decoration: ChaptersDecorations.chapterCard(primaryPurple),
         padding: const EdgeInsets.all(8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -43,28 +26,11 @@ class ChapterCard extends StatelessWidget {
             Container(
               width: 48.w,
               height: 48.h,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [primaryPurple, primaryPurple.withOpacity(0.7)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryPurple.withOpacity(0.35),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
+              decoration: ChaptersDecorations.numberChip(primaryPurple),
               child: Center(
                 child: Text(
                   ("$chapterNumber").toString(),
-                  style: const TextStyle(
-                    color: ColorsManager.secondaryBackground,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: ChaptersTextStyles.numberLabel,
                 ),
               ),
             ),
@@ -80,12 +46,7 @@ class ChapterCard extends StatelessWidget {
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       textDirection: TextDirection.rtl,
-                      style: TextStyle(
-                        color: ColorsManager.black,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        height: 1.1,
-                      ),
+                      style: ChaptersTextStyles.chapterTitle,
                     ),
                   ),
                 ],

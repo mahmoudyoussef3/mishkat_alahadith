@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_bookmark_dialogs.dart';
@@ -38,10 +39,10 @@ class BookmarkAppBarAction extends StatelessWidget {
               content: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
                     textDirection: TextDirection.rtl,
-                    style: TextStyle(color: Colors.white),
+                    style: HadithDetailsTextStyles.snackText,
                   ),
                   IconButton(
                     onPressed: () => context.pushNamed(Routes.loginScreen),

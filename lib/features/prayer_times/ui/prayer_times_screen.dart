@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
 import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/ui/widgets/next_prayer_card.dart';
 import 'package:mishkat_almasabih/features/prayer_times/ui/widgets/prayer_times_grid.dart';
+import 'package:mishkat_almasabih/core/theming/prayer_times_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/prayer_times_styles.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key});
@@ -77,10 +78,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                       ),
                       child: Text(
                         'مواقيت اليوم',
-                        style: TextStyles.headlineMedium.copyWith(
-                          color: ColorsManager.primaryText,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: PrayerTimesTextStyles.sectionHeaderLabel,
                       ),
                     ),
                   ),
@@ -111,16 +109,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     ),
     child: Container(
       height: 2.h,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ColorsManager.primaryPurple.withOpacity(0.3),
-            ColorsManager.primaryGold.withOpacity(0.6),
-            ColorsManager.primaryPurple.withOpacity(0.3),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(1.r),
-      ),
+      decoration: PrayerTimesDecorations.sectionDivider(),
     ),
   );
 }

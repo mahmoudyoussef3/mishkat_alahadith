@@ -5,6 +5,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_analysis_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/hadith_analysis_styles.dart';
 import 'package:mishkat_almasabih/features/hadith_analysis/logic/cubit/hadith_analysis_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -66,9 +68,7 @@ class _HadithAnalysisState extends State<HadithAnalysis> {
                                 Text(
                                   'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
                                   textDirection: TextDirection.rtl,
-                                  style: TextStyle(
-                                    color: ColorsManager.secondaryBackground,
-                                  ),
+                                  style: HadithAnalysisTextStyles.snackText,
                                 ),
                                 IconButton(
                                   onPressed:
@@ -182,20 +182,7 @@ class _AnalyzeButtonState extends State<_AnalyzeButton> {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
         padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 20.w),
-        decoration: BoxDecoration(
-          color:
-              _pressed
-                  ? ColorsManager.primaryGreen.withOpacity(0.85)
-                  : ColorsManager.primaryGreen,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: ColorsManager.primaryGreen.withOpacity(0.4),
-              blurRadius: _pressed ? 2 : 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        decoration: HadithAnalysisDecorations.analyzeButton(pressed: _pressed),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -207,11 +194,7 @@ class _AnalyzeButtonState extends State<_AnalyzeButton> {
             SizedBox(width: 12.w),
             Text(
               "تحليل سريع للحديث",
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                color: ColorsManager.secondaryBackground,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-              ),
+              style: HadithAnalysisTextStyles.analyzeButtonLabel,
             ),
           ],
         ),
@@ -238,10 +221,7 @@ class _ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12.r),
-        color: ColorsManager.primaryGreen.withOpacity(0.05),
-      ),
+      decoration: HadithAnalysisDecorations.resultCard(background: color),
       child: Padding(
         padding: EdgeInsets.all(18.w),
         child: Column(
@@ -253,22 +233,14 @@ class _ResultCard extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                    color: textColor ?? ColorsManager.primaryGreen,
-                  ),
+                  style: HadithAnalysisTextStyles.resultTitle(textColor: textColor),
                 ),
               ],
             ),
             SizedBox(height: 12.h),
             Text(
               text,
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontSize: 16.sp,
-                height: 1.5,
-                color: textColor ?? Colors.black87,
-              ),
+              style: HadithAnalysisTextStyles.resultBody(textColor: textColor),
             ),
           ],
         ),
@@ -286,10 +258,7 @@ class _ShimmerResultCard extends StatelessWidget {
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.r),
-          color: Colors.white,
-        ),
+        decoration: HadithAnalysisDecorations.shimmerContainer(),
         child: Padding(
           padding: EdgeInsets.all(18.w),
           child: Column(
@@ -300,16 +269,13 @@ class _ShimmerResultCard extends StatelessWidget {
                   Container(
                     width: 20.sp,
                     height: 20.sp,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
+                    decoration: HadithAnalysisDecorations.shimmerIconSquare(),
                   ),
                   SizedBox(width: 8.w),
                   Container(
                     width: 120.w,
                     height: 18.h,
-                    color: Colors.grey.shade300,
+                    decoration: HadithAnalysisDecorations.shimmerLine(),
                   ),
                 ],
               ),
@@ -317,19 +283,19 @@ class _ShimmerResultCard extends StatelessWidget {
               Container(
                 width: double.infinity,
                 height: 14.h,
-                color: Colors.grey.shade300,
+                decoration: HadithAnalysisDecorations.shimmerLine(),
               ),
               SizedBox(height: 8.h),
               Container(
                 width: double.infinity,
                 height: 14.h,
-                color: Colors.grey.shade300,
+                decoration: HadithAnalysisDecorations.shimmerLine(),
               ),
               SizedBox(height: 8.h),
               Container(
                 width: 200.w,
                 height: 14.h,
-                color: Colors.grey.shade300,
+                decoration: HadithAnalysisDecorations.shimmerLine(),
               ),
             ],
           ),

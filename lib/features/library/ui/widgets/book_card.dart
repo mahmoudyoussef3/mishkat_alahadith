@@ -6,6 +6,8 @@ import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
 import 'package:mishkat_almasabih/features/library/ui/widgets/book_stat.dart';
+import 'package:mishkat_almasabih/core/theming/library_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/library_styles.dart';
 
 class BookCard extends StatelessWidget {
   final Book book;
@@ -30,24 +32,15 @@ class BookCard extends StatelessWidget {
           ),
       child: Card(
         color: ColorsManager.secondaryBackground,
-        elevation: 2,child:  Container(
-        decoration: BoxDecoration(
-          color: ColorsManager.white,
-          borderRadius: BorderRadius.circular(20.r),
-  
-        ),
+        elevation: 2,
+        child: Container(
+        decoration: LibraryDecorations.bookCardContainer(),
         child: Column(
           children: [
             Expanded(
               child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(20.r),
-                  ),
-                  image: DecorationImage(
-                    image: AssetImage(bookImages[book.bookName!] ?? ''),
-                    fit: BoxFit.cover,
-                  ),
+                decoration: LibraryDecorations.bookImageBox(
+                  bookImages[book.bookName!] ?? '',
                 ),
               ),
             ),
@@ -58,21 +51,14 @@ class BookCard extends StatelessWidget {
                 children: [
                   Text(
                     bookNamesArabic[book.bookName] ?? '',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: ColorsManager.primaryText,
-                    ),
+                    style: LibraryTextStyles.bookTitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4.h),
                   Text(
                     bookWriters[book.bookName] ?? '',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: ColorsManager.secondaryText,
-                    ),
+                    style: LibraryTextStyles.bookWriter,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -96,7 +82,8 @@ class BookCard extends StatelessWidget {
             ),
           ],
         ),
-         )   ),
+         ),
+        ),
     );
   }
 }

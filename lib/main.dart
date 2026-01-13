@@ -25,56 +25,38 @@ Future<void> main() async {
   final FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(
     analytics: analytics,
   );
-  //await Firebase.initializeApp();
 
-  // تهيئة الـ FCM (مرة واحدة بس)
-  // await PushNotification.init();
-  // Setup notification tap handlers
   await LocalNotification.init();
-  //await PushNotification.getApnsToken();
 
-  // إعداد tap على النوتيفيكيشن
   PushNotification.setupOnTapNotification();
 
-  // معالجة لو الأبلكيشن فتح من نوتيفيكيشن (terminated state)
   PushNotification.handleTerminatedNotification();
 
   await setUpGetIt();
-  // Ensure Daily Zekr reminders are synced at app startup so they work in
-  // foreground, background, and terminated states (periodic scheduling persists).
+
   try {
-    // Create a transient cubit instance to sync notifications based on stored state.
-    // This avoids needing to open the screen to start reminders.
+ 
     await DailyZekrCubit(getIt()).init();
   } catch (_) {}
   await initializeDateFormatting('ar', null);
 
-  // Initialize widget navigation service to handle widget clicks
   WidgetNavigationService.initialize();
-  // Initialize deep links (custom scheme) handling
 
-  //final prefs = await SharedPreferences.getInstance();
-  //final token = prefs.getString('token');
-  // final isLoggedIn = token != null;
   final isFirstTime = await SaveDataForFirstTime.isFirstTime();
 
   final app = MishkatAlmasabih(
     analytics: observer,
     appRouter: AppRouter(),
     isFirstTime: isFirstTime,
-    // isLoggedIn: isLoggedIn,
   );
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  // ربط Flutter errors بـ Crashlytics
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  // التعامل مع الأخطاء الغير متوقعة (خارج Flutter)
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
   await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
-  // debugRepaintRainbowEnabled = true;
 
   runApp(app);
 }

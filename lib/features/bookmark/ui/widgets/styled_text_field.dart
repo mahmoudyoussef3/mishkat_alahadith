@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class StyledTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -19,6 +20,7 @@ class StyledTextField extends StatelessWidget {
       maxLines: maxLines,
       decoration: InputDecoration(
         hintText: hint,
+        hintStyle: BookmarkTextStyles.searchHint,
         filled: true,
         fillColor: ColorsManager.lightGray,
         contentPadding: const EdgeInsets.symmetric(

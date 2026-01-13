@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
@@ -28,46 +30,44 @@ class SuggestionService {
           headers: {
             'Content-Type': 'application/json',
           },
-          // السماح بالتحويل التلقائي في حالة 302
           followRedirects: false,
           validateStatus: (status) =>
-              status != null && status < 400, // لا تعتبر 302 خطأ
+              status != null && status < 400,
           responseType: ResponseType.json,
         ),
       );
 
-      print('🔹 Status Code: ${response.statusCode}');
-      print('🔹 Response Data: ${response.data}');
-      print('🔹 Redirect URL: ${response.headers['location']}');
+      log('🔹 Status Code: ${response.statusCode}');
+      log('🔹 Response Data: ${response.data}');
+      log('🔹 Redirect URL: ${response.headers['location']}');
 
-      // التعامل مع حالة التحويل 302 يدويًا
       if (response.statusCode == 302) {
         final redirectUrl = response.headers['location']?.first;
         if (redirectUrl != null) {
-          print('➡️ Redirecting to: $redirectUrl');
+          log('➡️ Redirecting to: $redirectUrl');
           final redirectedResponse = await _dio.get(redirectUrl);
-          print('🔁 Redirected response: ${redirectedResponse.data}');
+          log('🔁 Redirected response: ${redirectedResponse.data}');
           return true;
         }
       }
 
       if (response.statusCode == 200) {
         if (response.data is Map && response.data['result'] == 'success') {
-          print('✅ Suggestion sent successfully');
+          log('✅ Suggestion sent successfully');
           return true;
         } else if (response.data is String &&
             response.data.contains('success')) {
-          print('✅ Suggestion sent (HTML response)');
+          log('✅ Suggestion sent (HTML response)');
           return true;
         }
       }
 
-      print('❌ Failed to send suggestion: ${response.statusCode}');
+      log('❌ Failed to send suggestion: ${response.statusCode}');
       return false;
     } catch (e) {
-      print('⚠️ Error sending suggestion: $e');
+      log('⚠️ Error sending suggestion: $e');
       if (e is DioException) {
-        print('Response: ${e.response?.data}');
+        log ('Response: ${e.response?.data}');
       }
       return false;
     }
