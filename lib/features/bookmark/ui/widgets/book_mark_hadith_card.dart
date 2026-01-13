@@ -63,7 +63,7 @@ class BookmarkHadithCard extends StatelessWidget {
                   BlocConsumer<DeleteCubitCubit, DeleteCubitState>(
                     listener: (context, state) {
                       if (state is DeleteLoading) {
-                                                ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).clearSnackBars();
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -78,7 +78,6 @@ class BookmarkHadithCard extends StatelessWidget {
                         ScaffoldMessenger.of(context).clearSnackBars();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-
                             backgroundColor: ColorsManager.primaryGreen,
                             content: const Text(
                               'تم حذف الحديث من المحفوظات',
@@ -88,11 +87,10 @@ class BookmarkHadithCard extends StatelessWidget {
                         );
                         context.read<GetBookmarksCubit>().getUserBookmarks();
                       } else if (state is DeleteFaliure) {
-                                                ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).clearSnackBars();
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-
                             backgroundColor: ColorsManager.primaryGreen,
                             content: const Text(
                               'حدث خطأ. حاول مرة اخري',
@@ -188,10 +186,7 @@ class BookmarkHadithCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
       decoration: BookmarkDecorations.pill(colors),
-      child: Text(
-        text,
-        style: BookmarkTextStyles.pillLabel(textColor),
-      ),
+      child: Text(text, style: BookmarkTextStyles.pillLabel(textColor)),
     );
   }
 }

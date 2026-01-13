@@ -16,10 +16,7 @@ class DialogHeader extends StatelessWidget {
           child: const Icon(Icons.bookmark, color: Colors.white, size: 20),
         ),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: BookmarkTextStyles.dialogTitle,
-        ),
+        Text(title, style: BookmarkTextStyles.dialogTitle),
       ],
     );
   }

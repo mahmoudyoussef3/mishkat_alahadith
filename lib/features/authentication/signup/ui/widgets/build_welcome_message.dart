@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 // ColorsManager not used directly; using AuthTextStyles instead
 import '../../../../../core/theming/auth_styles.dart';
+
 class BuildWelcomeMessage extends StatelessWidget {
   const BuildWelcomeMessage({super.key});
 

@@ -9,12 +9,7 @@ class InputLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
-      child: Text(
-        label,
-        style: BookmarkTextStyles.inputLabel,
-      ),
+      child: Text(label, style: BookmarkTextStyles.inputLabel),
     );
   }
 }
-
-

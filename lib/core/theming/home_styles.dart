@@ -38,50 +38,40 @@ class HomeTextStyles {
   );
 
   // Category count number & label
-  static TextStyle categoryCountNumber = BaseStyles.TextStyles.titleMedium.copyWith(
-    color: ColorsManager.white,
-    fontWeight: FontWeight.bold,
-    fontSize: 18.sp,
-  );
+  static TextStyle categoryCountNumber = BaseStyles.TextStyles.titleMedium
+      .copyWith(
+        color: ColorsManager.white,
+        fontWeight: FontWeight.bold,
+        fontSize: 18.sp,
+      );
 
-  static TextStyle categoryCountLabel = BaseStyles.TextStyles.bodySmall.copyWith(
-    color: ColorsManager.white.withOpacity(0.9),
-    fontSize: 10.sp,
-  );
+  static TextStyle categoryCountLabel = BaseStyles.TextStyles.bodySmall
+      .copyWith(color: ColorsManager.white.withOpacity(0.9), fontSize: 10.sp);
 
   // Main category title & description
-  static TextStyle mainCategoryTitle = BaseStyles.TextStyles.headlineSmall.copyWith(
-    color: ColorsManager.white,
-    fontWeight: FontWeight.bold,
-    fontSize: 18.sp,
-  );
+  static TextStyle mainCategoryTitle = BaseStyles.TextStyles.headlineSmall
+      .copyWith(
+        color: ColorsManager.white,
+        fontWeight: FontWeight.bold,
+        fontSize: 18.sp,
+      );
 
-  static TextStyle mainCategoryDescription = BaseStyles.TextStyles.bodySmall.copyWith(
-    fontSize: 18.sp,
-    color: ColorsManager.white.withOpacity(0.85),
-  );
+  static TextStyle mainCategoryDescription = BaseStyles.TextStyles.bodySmall
+      .copyWith(fontSize: 18.sp, color: ColorsManager.white.withOpacity(0.85));
 
   // Featured hadith content text and narrator row
-  static TextStyle featuredHadithText = BaseStyles.TextStyles.hadithText.copyWith(
-    fontSize: 14.sp,
-    height: 1.5,
-  );
+  static TextStyle featuredHadithText = BaseStyles.TextStyles.hadithText
+      .copyWith(fontSize: 14.sp, height: 1.5);
 
-  static TextStyle featuredNarrator = BaseStyles.TextStyles.labelMedium.copyWith(
-    color: ColorsManager.primaryText,
-    fontWeight: FontWeight.w500,
-  );
+  static TextStyle featuredNarrator = BaseStyles.TextStyles.labelMedium
+      .copyWith(color: ColorsManager.primaryText, fontWeight: FontWeight.w500);
 
   // Quick actions title & subtitle
-  static TextStyle quickActionsTitle = BaseStyles.TextStyles.headlineMedium.copyWith(
-    color: ColorsManager.primaryText,
-    fontWeight: FontWeight.bold,
-  );
+  static TextStyle quickActionsTitle = BaseStyles.TextStyles.headlineMedium
+      .copyWith(color: ColorsManager.primaryText, fontWeight: FontWeight.bold);
 
-  static TextStyle quickActionsSubtitle = BaseStyles.TextStyles.bodySmall.copyWith(
-    color: ColorsManager.secondaryText,
-    fontSize: 10,
-  );
+  static TextStyle quickActionsSubtitle = BaseStyles.TextStyles.bodySmall
+      .copyWith(color: ColorsManager.secondaryText, fontSize: 10);
 
   // Search hint style
   static TextStyle searchHint = BaseStyles.TextStyles.bodyMedium.copyWith(
@@ -89,10 +79,8 @@ class HomeTextStyles {
   );
 
   // Section header (e.g., Top Books)
-  static TextStyle sectionHeader = BaseStyles.TextStyles.headlineMedium.copyWith(
-    color: ColorsManager.primaryText,
-    fontWeight: FontWeight.bold,
-  );
+  static TextStyle sectionHeader = BaseStyles.TextStyles.headlineMedium
+      .copyWith(color: ColorsManager.primaryText, fontWeight: FontWeight.bold);
 
   // Statistics card values and titles
   static TextStyle statsValue = BaseStyles.TextStyles.headlineMedium.copyWith(

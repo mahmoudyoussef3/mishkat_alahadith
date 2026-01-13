@@ -8,7 +8,8 @@ class ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const ActionButton({super.key, 
+  const ActionButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,
@@ -18,7 +19,7 @@ class ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-   //   borderRadius: BorderRadius.circular(12.r),
+      //   borderRadius: BorderRadius.circular(12.r),
       child: Column(
         children: [
           CircleAvatar(
@@ -26,10 +27,7 @@ class ActionButton extends StatelessWidget {
             child: Icon(icon, color: ColorsManager.primaryPurple),
           ),
           SizedBox(height: 6.h),
-          Text(
-            label,
-            style: HadithDetailsTextStyles.actionLabel,
-          ),
+          Text(label, style: HadithDetailsTextStyles.actionLabel),
         ],
       ),
     );

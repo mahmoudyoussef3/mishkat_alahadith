@@ -56,11 +56,11 @@ class AuthTextStyles {
 
   /// Action link style for login/signup navigation.
   static TextStyle actionLink14(Color color) => TextStyle(
-        fontSize: 14.sp,
-        fontWeight: FontWeight.w600,
-        color: color,
-        fontFamily: 'Amiri',
-      );
+    fontSize: 14.sp,
+    fontWeight: FontWeight.w600,
+    color: color,
+    fontFamily: 'Amiri',
+  );
 
   /// Input hint style for auth forms.
   static TextStyle inputHint = TextStyle(
@@ -81,8 +81,8 @@ class AuthTextStyles {
 
   /// Password validation item style.
   static TextStyle validationText({required bool validated}) => TextStyle(
-        fontSize: 13.sp,
-        color: validated ? ColorsManager.gray : ColorsManager.darkPurple,
-        fontFamily: 'Amiri',
-      );
+    fontSize: 13.sp,
+    color: validated ? ColorsManager.gray : ColorsManager.darkPurple,
+    fontFamily: 'Amiri',
+  );
 }

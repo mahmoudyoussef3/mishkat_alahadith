@@ -52,16 +52,18 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-              top: false,
+        top: false,
         bottom: true,
-        child:Scaffold(
-        backgroundColor: ColorsManager.secondaryBackground,
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _isLoggedIn
-                ? _buildBookmarkContent()
-                : _buildLoginPrompt(context),
-      ),)
+        child: Scaffold(
+          backgroundColor: ColorsManager.secondaryBackground,
+          body:
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _isLoggedIn
+                  ? _buildBookmarkContent()
+                  : _buildLoginPrompt(context),
+        ),
+      ),
     );
   }
 
@@ -77,9 +79,17 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             child: Row(
               children: [
-                _buildTabButton("الأحاديث", isActive: showHadith, isHadith: true),
+                _buildTabButton(
+                  "الأحاديث",
+                  isActive: showHadith,
+                  isHadith: true,
+                ),
                 SizedBox(width: 12.w),
-                _buildTabButton("الأبواب", isActive: !showHadith, isHadith: false),
+                _buildTabButton(
+                  "الأبواب",
+                  isActive: !showHadith,
+                  isHadith: false,
+                ),
               ],
             ),
           ),
@@ -112,7 +122,11 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
     );
   }
 
-  Widget _buildTabButton(String title, {required bool isActive, required bool isHadith}) {
+  Widget _buildTabButton(
+    String title, {
+    required bool isActive,
+    required bool isHadith,
+  }) {
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => showHadith = isHadith),
@@ -143,7 +157,11 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           decoration: InputDecoration(
             hintText: 'ابحث بنص الحديث أو الملاحظات...',
             hintStyle: BookmarkTextStyles.searchHint,
-            prefixIcon: Icon(Icons.search, color: ColorsManager.primaryPurple, size: 24),
+            prefixIcon: Icon(
+              Icons.search,
+              color: ColorsManager.primaryPurple,
+              size: 24,
+            ),
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(
               horizontal: Spacing.md,
@@ -164,7 +182,11 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lock_outline, size: 90.r, color: ColorsManager.primaryGreen),
+            Icon(
+              Icons.lock_outline,
+              size: 90.r,
+              color: ColorsManager.primaryGreen,
+            ),
             SizedBox(height: 20.h),
             Text(
               "يجب تسجيل الدخول للوصول إلى العلامات المرجعية",

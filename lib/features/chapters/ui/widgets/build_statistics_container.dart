@@ -42,10 +42,7 @@ class BuildStatisticsContainer extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               SizedBox(width: 8.w),
-              Text(
-                value,
-                style: ChaptersTextStyles.statsValue,
-              ),
+              Text(value, style: ChaptersTextStyles.statsValue),
             ],
           ),
         ],

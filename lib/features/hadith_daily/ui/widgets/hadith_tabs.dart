@@ -22,23 +22,31 @@ class HadithTabs extends StatelessWidget {
       decoration: DailyHadithDecorations.tabsContainer(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: tabs.map((tab) {
-          final isSelected = selectedTab == tab;
-          return GestureDetector(
-            onTap: () => onTabSelected(tab),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOut,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              decoration: DailyHadithDecorations.tabPill(isSelected: isSelected),
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 250),
-                style: DailyHadithTextStyles.tabLabel(isSelected: isSelected),
-                child: Text(tab),
-              ),
-            ),
-          );
-        }).toList(),
+        children:
+            tabs.map((tab) {
+              final isSelected = selectedTab == tab;
+              return GestureDetector(
+                onTap: () => onTabSelected(tab),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
+                  decoration: DailyHadithDecorations.tabPill(
+                    isSelected: isSelected,
+                  ),
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 250),
+                    style: DailyHadithTextStyles.tabLabel(
+                      isSelected: isSelected,
+                    ),
+                    child: Text(tab),
+                  ),
+                ),
+              );
+            }).toList(),
       ),
     );
   }

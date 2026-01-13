@@ -40,7 +40,7 @@ class BuildMishkatInfSection extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 8.h),
-SocialIconsRow(),
+            SocialIconsRow(),
             SizedBox(height: 10.h),
             Divider(color: ColorsManager.gray, endIndent: 50.w, indent: 50.w),
             SizedBox(height: 10.h),

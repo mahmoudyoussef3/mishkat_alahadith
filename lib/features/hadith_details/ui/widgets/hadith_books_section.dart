@@ -23,8 +23,7 @@ class HadithBookSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (bookName.isNotEmpty)
-            _buildBookRow("📖 اسم الكتاب", bookName),
+          if (bookName.isNotEmpty) _buildBookRow("📖 اسم الكتاب", bookName),
 
           if ((author ?? "").isNotEmpty) ...[
             SizedBox(height: 8.h),
@@ -48,18 +47,10 @@ class HadithBookSection extends StatelessWidget {
   Widget _buildBookRow(String label, String value) {
     return Row(
       children: [
-        Expanded(
-          child: Text(
-            label,
-            style: HadithDetailsTextStyles.bookLabel,
-          ),
-        ),
+        Expanded(child: Text(label, style: HadithDetailsTextStyles.bookLabel)),
         Expanded(
           flex: 2,
-          child: Text(
-            value,
-            style: HadithDetailsTextStyles.bookValue,
-          ),
+          child: Text(value, style: HadithDetailsTextStyles.bookValue),
         ),
       ],
     );

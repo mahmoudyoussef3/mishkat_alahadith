@@ -28,7 +28,7 @@ class SearchBarWidget extends StatelessWidget {
         color: ColorsManager.secondaryBackground,
         elevation: 2,
         child: TextField(
-          onTap:onTap,
+          onTap: onTap,
           controller: controller,
           onSubmitted: onSearch,
           decoration: InputDecoration(

@@ -12,10 +12,7 @@ class HadithRichText extends StatelessWidget {
       textAlign: TextAlign.center,
       text: TextSpan(
         children: [
-          TextSpan(
-            text: hadith,
-            style: DailyHadithTextStyles.hadithText,
-          ),
+          TextSpan(text: hadith, style: DailyHadithTextStyles.hadithText),
         ],
       ),
     );

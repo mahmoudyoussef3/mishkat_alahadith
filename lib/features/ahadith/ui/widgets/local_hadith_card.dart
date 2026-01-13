@@ -33,8 +33,10 @@ class LocalHadithCard extends StatelessWidget {
             child: Container(
               width: 80.w,
               height: 80.h,
-              decoration:
-                  HadithDecorations.patternOverlay(ColorsManager.hadithAuthentic, 40),
+              decoration: HadithDecorations.patternOverlay(
+                ColorsManager.hadithAuthentic,
+                40,
+              ),
             ),
           ),
 
@@ -52,8 +54,9 @@ class LocalHadithCard extends StatelessWidget {
                       children: [
                         Container(
                           padding: EdgeInsets.all(8.w),
-                          decoration:
-                              HadithDecorations.headerIcon(ColorsManager.hadithAuthentic),
+                          decoration: HadithDecorations.headerIcon(
+                            ColorsManager.hadithAuthentic,
+                          ),
                           child: Icon(
                             Icons.menu_book,
                             color: ColorsManager.hadithAuthentic,
@@ -75,8 +78,9 @@ class LocalHadithCard extends StatelessWidget {
                 // Enhanced hadith text
                 Container(
                   padding: EdgeInsets.all(8.w),
-                  decoration:
-                      HadithDecorations.hadithTextContainer(ColorsManager.hadithAuthentic),
+                  decoration: HadithDecorations.hadithTextContainer(
+                    ColorsManager.hadithAuthentic,
+                  ),
                   child: Text(
                     hadith.arabic ?? '',
                     maxLines: 4,
@@ -120,8 +124,9 @@ class LocalHadithCard extends StatelessWidget {
                 SizedBox(height: 16.h),
                 Container(
                   height: 2.h,
-                  decoration:
-                      HadithDecorations.bottomLine(ColorsManager.hadithAuthentic),
+                  decoration: HadithDecorations.bottomLine(
+                    ColorsManager.hadithAuthentic,
+                  ),
                 ),
               ],
             ),

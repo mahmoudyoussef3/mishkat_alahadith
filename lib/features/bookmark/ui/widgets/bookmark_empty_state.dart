@@ -13,8 +13,11 @@ class BookmarkEmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.bookmark_border,
-              size: 60.r, color: ColorsManager.secondaryText),
+          Icon(
+            Icons.bookmark_border,
+            size: 60.r,
+            color: ColorsManager.secondaryText,
+          ),
           SizedBox(height: 12.h),
           Text(
             "لا توجد علامات مرجعية في هذه المجموعة",

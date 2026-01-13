@@ -24,30 +24,34 @@ class CollectionsChoiceChips extends StatelessWidget {
         spacing: 10,
         runSpacing: 10,
         alignment: WrapAlignment.center,
-        children: collections.map((c) {
-          final isSelected = selectedCollection == c;
-          return ChoiceChip(
-            showCheckmark: false,
-            label: Text(
-              c.isEmpty ? "بدون اسم" : c,
-              style: BookmarkTextStyles.collectionChipText(isSelected: isSelected),
-            ),
-            selected: isSelected,
-            selectedColor: ColorsManager.primaryPurple,
-            backgroundColor: ColorsManager.secondaryBackground,
-            elevation: isSelected ? 3 : 0,
-            pressElevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(
-                color: isSelected
-                    ? ColorsManager.primaryPurple
-                    : ColorsManager.mediumGray,
-              ),
-            ),
-            onSelected: (_) => onSelected(c),
-          );
-        }).toList(),
+        children:
+            collections.map((c) {
+              final isSelected = selectedCollection == c;
+              return ChoiceChip(
+                showCheckmark: false,
+                label: Text(
+                  c.isEmpty ? "بدون اسم" : c,
+                  style: BookmarkTextStyles.collectionChipText(
+                    isSelected: isSelected,
+                  ),
+                ),
+                selected: isSelected,
+                selectedColor: ColorsManager.primaryPurple,
+                backgroundColor: ColorsManager.secondaryBackground,
+                elevation: isSelected ? 3 : 0,
+                pressElevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color:
+                        isSelected
+                            ? ColorsManager.primaryPurple
+                            : ColorsManager.mediumGray,
+                  ),
+                ),
+                onSelected: (_) => onSelected(c),
+              );
+            }).toList(),
       ),
     );
   }

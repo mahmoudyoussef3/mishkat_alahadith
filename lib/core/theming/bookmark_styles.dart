@@ -8,10 +8,10 @@ class BookmarkTextStyles {
 
   /// Tab label text depending on active state.
   static TextStyle tabLabel({required bool isActive}) => TextStyle(
-        color: isActive ? ColorsManager.white : ColorsManager.darkGray,
-        fontWeight: FontWeight.bold,
-        fontSize: 14.sp,
-      );
+    color: isActive ? ColorsManager.white : ColorsManager.darkGray,
+    fontWeight: FontWeight.bold,
+    fontSize: 14.sp,
+  );
 
   /// Search field hint.
   static TextStyle searchHint = TextStyle(
@@ -49,17 +49,17 @@ class BookmarkTextStyles {
 
   /// Pill label style.
   static TextStyle pillLabel(Color textColor, {double? size}) => TextStyle(
-        color: textColor,
-        fontWeight: FontWeight.w600,
-        fontSize: (size ?? 13.sp),
-      );
+    color: textColor,
+    fontWeight: FontWeight.w600,
+    fontSize: (size ?? 13.sp),
+  );
 
   /// Collection chip label.
   static TextStyle collectionChipText({required bool isSelected}) => TextStyle(
-        color: isSelected ? ColorsManager.white : ColorsManager.primaryText,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-        fontSize: 12.sp,
-      );
+    color: isSelected ? ColorsManager.white : ColorsManager.primaryText,
+    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+    fontSize: 12.sp,
+  );
 
   /// Small section description text (e.g., dialog info).
   static TextStyle sectionDescription = const TextStyle(

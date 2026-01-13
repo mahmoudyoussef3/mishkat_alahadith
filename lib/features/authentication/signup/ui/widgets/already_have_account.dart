@@ -15,10 +15,7 @@ class AlreadyHaveAccount extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          'لديك حساب بالفعل؟ ',
-          style: AuthTextStyles.prompt14,
-        ),
+        Text('لديك حساب بالفعل؟ ', style: AuthTextStyles.prompt14),
         TextButton(
           onPressed: () {
             context.pushNamed(Routes.loginScreen);

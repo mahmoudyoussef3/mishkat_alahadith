@@ -58,7 +58,7 @@ class AddCreationButton extends StatelessWidget {
         } else if (state is AddFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-                            backgroundColor: ColorsManager.error,
+              backgroundColor: ColorsManager.error,
 
               content: Text(
                 "حدث خطأ. حاول مرة أخري",
@@ -94,10 +94,7 @@ class AddCreationButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 14),
           ),
           icon: const Icon(Icons.bookmark_add_outlined),
-          label: Text(
-            "حفظ",
-            style: BookmarkTextStyles.primaryButtonLabel,
-          ),
+          label: Text("حفظ", style: BookmarkTextStyles.primaryButtonLabel),
         );
       },
     );

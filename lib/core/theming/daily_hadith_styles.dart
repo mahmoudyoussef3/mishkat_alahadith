@@ -55,10 +55,7 @@ class DailyHadithTextStyles {
 
   // Grade chip label style
   static TextStyle gradeLabel(Color color) {
-    return TextStyle(
-      color: color,
-      fontWeight: FontWeight.bold,
-    );
+    return TextStyle(color: color, fontWeight: FontWeight.bold);
   }
 
   // Tab content text styles

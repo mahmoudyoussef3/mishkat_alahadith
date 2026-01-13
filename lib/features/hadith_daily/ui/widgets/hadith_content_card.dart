@@ -70,10 +70,7 @@ class HadithContentCard extends StatelessWidget {
                         size: 16.sp,
                       ),
                       SizedBox(width: 6.w),
-                      Text(
-                        "نص الحديث",
-                        style: DailyHadithTextStyles.labelChip,
-                      ),
+                      Text("نص الحديث", style: DailyHadithTextStyles.labelChip),
                     ],
                   ),
                 ),

@@ -133,10 +133,7 @@ class HomeDecorations {
     return BoxDecoration(
       color: ColorsManager.white.withOpacity(0.2),
       borderRadius: BorderRadius.circular(16.r),
-      border: Border.all(
-        color: ColorsManager.white.withOpacity(0.3),
-        width: 1,
-      ),
+      border: Border.all(color: ColorsManager.white.withOpacity(0.3), width: 1),
     );
   }
 
@@ -145,10 +142,7 @@ class HomeDecorations {
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [
-        ColorsManager.primaryPurple,
-        ColorsManager.secondaryPurple,
-      ],
+      colors: [ColorsManager.primaryPurple, ColorsManager.secondaryPurple],
     ),
     borderRadius: BorderRadius.only(
       topLeft: Radius.circular(12),
@@ -214,9 +208,10 @@ class HomeDecorations {
   static BoxDecoration shimmerBox({bool circle = false, double? radius}) {
     return BoxDecoration(
       color: Colors.grey.shade300,
-      borderRadius: circle
-          ? BorderRadius.circular(50)
-          : BorderRadius.circular(radius ?? 8.r),
+      borderRadius:
+          circle
+              ? BorderRadius.circular(50)
+              : BorderRadius.circular(radius ?? 8.r),
     );
   }
 

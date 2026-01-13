@@ -27,9 +27,10 @@ class DailyZekrTextStyles {
   );
 
   // Zekr card title/description
-  static TextStyle zekrTitle({required bool checked}) => TextStyles.titleLarge
-      .copyWith(
-        color: checked ? ColorsManager.primaryPurple : ColorsManager.primaryText,
+  static TextStyle zekrTitle({required bool checked}) =>
+      TextStyles.titleLarge.copyWith(
+        color:
+            checked ? ColorsManager.primaryPurple : ColorsManager.primaryText,
         fontFamily: 'Cairo',
       );
 
@@ -39,15 +40,18 @@ class DailyZekrTextStyles {
   );
 
   // Footer pill label
-  static TextStyle footerLabel({required bool enabled, required bool checked}) =>
-      TextStyles.labelMedium.copyWith(
-        color: !enabled
+  static TextStyle footerLabel({
+    required bool enabled,
+    required bool checked,
+  }) => TextStyles.labelMedium.copyWith(
+    color:
+        !enabled
             ? ColorsManager.secondaryText
             : checked
-                ? ColorsManager.hadithAuthentic
-                : ColorsManager.primaryGold,
-        fontFamily: 'Cairo',
-      );
+            ? ColorsManager.hadithAuthentic
+            : ColorsManager.primaryGold,
+    fontFamily: 'Cairo',
+  );
 
   // Personal tasks title and item text
   static TextStyle personalTasksTitle = TextStyles.titleLarge.copyWith(
@@ -55,8 +59,8 @@ class DailyZekrTextStyles {
     fontWeight: FontWeight.bold,
   );
 
-  static TextStyle personalTaskText({required bool isDone}) => TextStyles.bodyLarge
-      .copyWith(
+  static TextStyle personalTaskText({required bool isDone}) =>
+      TextStyles.bodyLarge.copyWith(
         color: ColorsManager.primaryText,
         decoration: isDone ? TextDecoration.lineThrough : null,
       );

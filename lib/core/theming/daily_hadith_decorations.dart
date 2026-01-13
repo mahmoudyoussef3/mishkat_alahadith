@@ -81,15 +81,16 @@ class DailyHadithDecorations {
     return BoxDecoration(
       color: isSelected ? ColorsManager.primaryPurple : ColorsManager.white,
       borderRadius: BorderRadius.circular(14.r),
-      boxShadow: isSelected
-          ? [
-              BoxShadow(
-                color: ColorsManager.primaryPurple.withOpacity(0.3),
-                blurRadius: 10.r,
-                offset: const Offset(0, 4),
-              ),
-            ]
-          : [],
+      boxShadow:
+          isSelected
+              ? [
+                BoxShadow(
+                  color: ColorsManager.primaryPurple.withOpacity(0.3),
+                  blurRadius: 10.r,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+              : [],
       border: Border.all(
         color:
             isSelected ? ColorsManager.primaryPurple : ColorsManager.lightGray,

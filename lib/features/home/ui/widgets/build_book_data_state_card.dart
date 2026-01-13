@@ -27,10 +27,7 @@ class BuildBookDataStateCard extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white, size: 28),
           SizedBox(height: Spacing.sm),
-          Text(
-            value,
-            style: HomeTextStyles.statsValue,
-          ),
+          Text(value, style: HomeTextStyles.statsValue),
           Text(
             title,
             style: HomeTextStyles.statsTitle,

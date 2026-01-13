@@ -111,9 +111,12 @@ class _HadithTextCardState extends State<HadithTextCard> {
                             icon: Icons.share_rounded,
                             color: ColorsManager.primaryGreen,
                             tooltip: "مشاركة الحديث",
-                            onTap: () => shareHadithAsImage(context, text: widget.hadithText),
+                            onTap:
+                                () => shareHadithAsImage(
+                                  context,
+                                  text: widget.hadithText,
+                                ),
                           ),
-                     
                         ],
                       ),
                     ),
@@ -148,6 +151,4 @@ class _HadithTextCardState extends State<HadithTextCard> {
       ),
     );
   }
-
-
 }

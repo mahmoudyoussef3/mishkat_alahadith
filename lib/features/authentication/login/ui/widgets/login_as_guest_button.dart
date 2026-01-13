@@ -17,16 +17,15 @@ class LoginAsGuestButton extends StatelessWidget {
       child: Card(
         color: ColorsManager.white,
         elevation: 5,
-        shape: (AuthDecorations.socialCardShape().shape as RoundedRectangleBorder?),
+        shape:
+            (AuthDecorations.socialCardShape().shape
+                as RoundedRectangleBorder?),
         child: Padding(
           padding: EdgeInsets.all(16.w),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'الدخول كزائر',
-                style: AuthTextStyles.cardLabel,
-              ),
+              Text('الدخول كزائر', style: AuthTextStyles.cardLabel),
               SizedBox(width: 12.w),
               const FaIcon(
                 FontAwesomeIcons.userSecret,

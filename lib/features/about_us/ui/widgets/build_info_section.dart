@@ -7,7 +7,7 @@ import 'package:mishkat_almasabih/core/theming/styles.dart';
 class BuildInfoSection extends StatelessWidget {
   const BuildInfoSection({super.key, required this.icon, required this.text});
   final IconData icon;
-  final String text;  
+  final String text;
 
   @override
   Widget build(BuildContext context) {

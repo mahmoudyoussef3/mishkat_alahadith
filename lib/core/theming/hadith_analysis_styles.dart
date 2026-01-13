@@ -12,11 +12,19 @@ class HadithAnalysisTextStyles {
   );
 
   // Result title and body
-  static TextStyle resultTitle({Color? textColor}) => TextStyles.titleMedium
-      .copyWith(fontSize: 18.sp, fontWeight: FontWeight.w600, color: textColor ?? ColorsManager.primaryGreen);
+  static TextStyle resultTitle({Color? textColor}) =>
+      TextStyles.titleMedium.copyWith(
+        fontSize: 18.sp,
+        fontWeight: FontWeight.w600,
+        color: textColor ?? ColorsManager.primaryGreen,
+      );
 
-  static TextStyle resultBody({Color? textColor}) => TextStyles.bodyMedium
-      .copyWith(fontSize: 16.sp, height: 1.5, color: textColor ?? Colors.black87);
+  static TextStyle resultBody({Color? textColor}) =>
+      TextStyles.bodyMedium.copyWith(
+        fontSize: 16.sp,
+        height: 1.5,
+        color: textColor ?? Colors.black87,
+      );
 
   // Snack bar text
   static const TextStyle snackText = TextStyle(

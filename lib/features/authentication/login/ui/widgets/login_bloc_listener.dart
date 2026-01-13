@@ -27,36 +27,35 @@ class LoginBlocListener extends StatelessWidget {
         if (state is LoginLoading) {
           showDialog(
             context: context,
-            builder:
-                (context) =>loadingProgressIndicator()
+            builder: (context) => loadingProgressIndicator(),
           );
         } else if (state is LoginSuccess) {
           context.pop();
-          context.pushNamedAndRemoveUntil(Routes.homeScreen, predicate: (route) => false );
+          context.pushNamedAndRemoveUntil(
+            Routes.homeScreen,
+            predicate: (route) => false,
+          );
         } else if (state is LoginError) {
           setupErrorState(context, state.message);
         }
       },
-      child:
-
-      AppTextButton(
-        buttonText: 'تسجيل الدخول',
-        onPressed: () {
-          validateThenDoLogin(context);
-        },
-        backgroundColor: ColorsManager.primaryGreen,
-        textStyle: AuthTextStyles.primaryButtonText,
-      )
+      child: AppTextButton(
+            buttonText: 'تسجيل الدخول',
+            onPressed: () {
+              validateThenDoLogin(context);
+            },
+            backgroundColor: ColorsManager.primaryGreen,
+            textStyle: AuthTextStyles.primaryButtonText,
+          )
           .animate()
           .fadeIn(delay: 900.ms, duration: 300.ms)
-          .scale(begin: const Offset(0.9, 0.9))
-
+          .scale(begin: const Offset(0.9, 0.9)),
     );
   }
+
   void validateThenDoLogin(BuildContext context) {
     if (context.read<LoginCubit>().formKey.currentState!.validate()) {
-      context.read<LoginCubit>().emitLoginStates(
-      );
+      context.read<LoginCubit>().emitLoginStates();
     }
   }
 }

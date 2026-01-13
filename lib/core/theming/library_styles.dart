@@ -25,8 +25,6 @@ class LibraryTextStyles {
   );
 
   // Screen header in Library sections (optional reuse)
-  static TextStyle sectionHeader = BaseStyles.TextStyles.headlineMedium.copyWith(
-    color: ColorsManager.primaryText,
-    fontWeight: FontWeight.bold,
-  );
+  static TextStyle sectionHeader = BaseStyles.TextStyles.headlineMedium
+      .copyWith(color: ColorsManager.primaryText, fontWeight: FontWeight.bold);
 }

@@ -16,9 +16,7 @@ class BuildDailyHadithCardShimmer extends StatelessWidget {
         child: Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
           highlightColor: Colors.grey.shade100,
-          child: Container(
-            decoration: HomeDecorations.shimmerCardContainer(),
-          ),
+          child: Container(decoration: HomeDecorations.shimmerCardContainer()),
         ),
       ),
     );

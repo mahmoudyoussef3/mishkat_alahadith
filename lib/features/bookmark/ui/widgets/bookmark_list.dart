@@ -73,24 +73,26 @@ class _BookmarkListState extends State<BookmarkList> {
           final chapters = bookmarks.where((b) => b.type == 'chapter').toList();
 
           // ✅ فلترة حسب المجموعة
-          final filteredCollection = widget.selectedCollection == "الكل"
-              ? ahadith
-              : ahadith
-                  .where((b) => b.collection == widget.selectedCollection)
-                  .toList();
+          final filteredCollection =
+              widget.selectedCollection == "الكل"
+                  ? ahadith
+                  : ahadith
+                      .where((b) => b.collection == widget.selectedCollection)
+                      .toList();
 
           // ✅ فلترة حسب البحث
-          final filteredSearch = widget.query.isEmpty
-              ? filteredCollection
-              : filteredCollection.where((b) {
-                  final normalizedText =
-                      normalizeArabic(b.hadithText ?? '').toLowerCase();
-                  final normalizedNotes =
-                      normalizeArabic(b.notes ?? '').toLowerCase();
-                  final query = widget.query.toLowerCase();
-                  return normalizedText.contains(query) ||
-                      normalizedNotes.contains(query);
-                }).toList();
+          final filteredSearch =
+              widget.query.isEmpty
+                  ? filteredCollection
+                  : filteredCollection.where((b) {
+                    final normalizedText =
+                        normalizeArabic(b.hadithText ?? '').toLowerCase();
+                    final normalizedNotes =
+                        normalizeArabic(b.notes ?? '').toLowerCase();
+                    final query = widget.query.toLowerCase();
+                    return normalizedText.contains(query) ||
+                        normalizedNotes.contains(query);
+                  }).toList();
 
           log("✅ Chapters loaded: ${chapters.length}");
 
@@ -122,34 +124,34 @@ class _BookmarkListState extends State<BookmarkList> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: filteredSearch.length,
-      separatorBuilder: (_, __) => const IslamicSeparator(
-        
-      ),
+      separatorBuilder: (_, __) => const IslamicSeparator(),
       itemBuilder: (context, index) {
         final hadith = filteredSearch[index];
         final createdAt = formatDateArabic(hadith.createdAt);
 
         return GestureDetector(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => HadithDetailScreen(
-                isLocal: false,
-                showNavigation: false,
-                chapterNumber: hadith.chapterNumber.toString(),
-                bookName: hadith.bookName,
-                isBookMark: true,
-                hadithText: hadith.hadithText,
-                chapter: hadith.chapterName,
-                hadithNumber: hadith.id.toString(),
-                bookSlug: hadith.bookSlug,
-                narrator: '',
-                grade: '',
-                author: '',
-                authorDeath: '',
+          onTap:
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (_) => HadithDetailScreen(
+                        isLocal: false,
+                        showNavigation: false,
+                        chapterNumber: hadith.chapterNumber.toString(),
+                        bookName: hadith.bookName,
+                        isBookMark: true,
+                        hadithText: hadith.hadithText,
+                        chapter: hadith.chapterName,
+                        hadithNumber: hadith.id.toString(),
+                        bookSlug: hadith.bookSlug,
+                        narrator: '',
+                        grade: '',
+                        author: '',
+                        authorDeath: '',
+                      ),
+                ),
               ),
-            ),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -175,7 +177,7 @@ class _BookmarkListState extends State<BookmarkList> {
       height: 600.h,
       child: CustomScrollView(
         physics: const NeverScrollableScrollPhysics(),
-        
+
         slivers: [
           SliverToBoxAdapter(child: SizedBox(height: 18.h)),
           ResponsiveChapterList(

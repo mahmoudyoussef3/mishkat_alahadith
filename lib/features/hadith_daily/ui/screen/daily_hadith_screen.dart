@@ -116,10 +116,7 @@ class _HadithDailyScreenState extends State<HadithDailyScreen> {
                   ),
                   backgroundColor: Colors.transparent,
                 ),
-                label: Text(
-                  "اسأل سراج",
-                  style: DailyHadithTextStyles.fabLabel,
-                ),
+                label: Text("اسأل سراج", style: DailyHadithTextStyles.fabLabel),
               );
             },
           ),
@@ -242,7 +239,8 @@ class _HadithDailyScreenState extends State<HadithDailyScreen> {
                           horizontal: 16.w,
                           vertical: 8.h,
                         ),
-                        decoration: DailyHadithDecorations.tabContentContainer(),
+                        decoration:
+                            DailyHadithDecorations.tabContentContainer(),
                         child: HadithTabContent(
                           selectedTab: selectedTab,
                           data: widget.dailyHadithModel,

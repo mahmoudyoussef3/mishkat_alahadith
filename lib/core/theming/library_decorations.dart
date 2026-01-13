@@ -14,13 +14,8 @@ class LibraryDecorations {
   // Book image box with rounded top corners
   static BoxDecoration bookImageBox(String assetPath) {
     return BoxDecoration(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20.r),
-      ),
-      image: DecorationImage(
-        image: AssetImage(assetPath),
-        fit: BoxFit.cover,
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      image: DecorationImage(image: AssetImage(assetPath), fit: BoxFit.cover),
     );
   }
 
@@ -44,7 +39,9 @@ class LibraryDecorations {
     return BoxDecoration(
       color: Colors.grey[300],
       borderRadius:
-          circular ? BorderRadius.circular(50) : BorderRadius.circular(radius ?? 8.r),
+          circular
+              ? BorderRadius.circular(50)
+              : BorderRadius.circular(radius ?? 8.r),
     );
   }
 }

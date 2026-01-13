@@ -45,11 +45,12 @@ class AddButton extends StatelessWidget {
           );
         } else if (state is AddSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
+            SnackBar(
               backgroundColor: ColorsManager.hadithAuthentic,
               behavior: SnackBarBehavior.floating,
               content: Text(
-                state.addBookmarkResponse.message??"تمت إضافة الحديث إلي المحفوظات.",
+                state.addBookmarkResponse.message ??
+                    "تمت إضافة الحديث إلي المحفوظات.",
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -57,8 +58,8 @@ class AddButton extends StatelessWidget {
           context.pop();
         } else if (state is AddFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-                            backgroundColor: ColorsManager.error,
+            SnackBar(
+              backgroundColor: ColorsManager.error,
 
               content: Text(
                 state.message,
@@ -94,10 +95,7 @@ class AddButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 14),
           ),
           icon: const Icon(Icons.bookmark_add_outlined),
-          label: Text(
-            "حفظ",
-            style: BookmarkTextStyles.primaryButtonLabel,
-          ),
+          label: Text("حفظ", style: BookmarkTextStyles.primaryButtonLabel),
         );
       },
     );

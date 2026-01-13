@@ -41,7 +41,6 @@ class GetBookChaptersBlocBuilder extends StatelessWidget {
               _buildSearchBar(context, controller),
               SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
-        
               ResponsiveChapterList(
                 isLoading: true,
                 items: [],
@@ -57,11 +56,9 @@ class GetBookChaptersBlocBuilder extends StatelessWidget {
         if (state is ChaptersFailure) {
           return Center(
             child: ErrorState(
-            
-              error: state.errorMessage??'حدث خطأ. حاول مرة أخري'),
+              error: state.errorMessage ?? 'حدث خطأ. حاول مرة أخري',
+            ),
           );
-
-        
         }
 
         if (state is ChaptersSuccess) {
@@ -69,8 +66,8 @@ class GetBookChaptersBlocBuilder extends StatelessWidget {
             color: ColorsManager.primaryGreen,
             onRefresh: () async {
               context.read<ChaptersCubit>().emitGetBookChapters(
-         
-                bookSlug:  bookSlug);
+                bookSlug: bookSlug,
+              );
             },
             child: CustomScrollView(
               slivers: [
@@ -93,39 +90,39 @@ class GetBookChaptersBlocBuilder extends StatelessWidget {
                 SliverToBoxAdapter(child: SizedBox(height: 22.h)),
                 state.filteredChapters.isEmpty
                     ? SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(
-                          child: Card(
-                            color: Colors.white,
-                            elevation: 5,
-                            shape: ChaptersDecorations.emptyCardShape(),
-                            child: Padding(
-                              padding: const EdgeInsets.all(20.0),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.search_off,
-                                    size: 60,
-                                    color: ColorsManager.primaryNavy,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'لا توجد نتائج',
-                                    style: ChaptersTextStyles.emptyTitle,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'حاول بكلمة أبسط أو مختلفة',
-                                    style: ChaptersTextStyles.emptySubtitle,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Card(
+                          color: Colors.white,
+                          elevation: 5,
+                          shape: ChaptersDecorations.emptyCardShape(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.search_off,
+                                  size: 60,
+                                  color: ColorsManager.primaryNavy,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'لا توجد نتائج',
+                                  style: ChaptersTextStyles.emptyTitle,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'حاول بكلمة أبسط أو مختلفة',
+                                  style: ChaptersTextStyles.emptySubtitle,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      )
+                      ),
+                    )
                     : ResponsiveChapterList(
                       items: state.filteredChapters,
                       primaryPurple: ColorsManager.primaryGreen,
@@ -181,13 +178,10 @@ class GetBookChaptersBlocBuilder extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 12.w),
         padding: EdgeInsets.all(0.w),
-        decoration: BoxDecoration(
-       
-          borderRadius: BorderRadius.circular(20.r),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.r)),
         child: Card(
           elevation: 0,
-                  margin: EdgeInsets.zero,
+          margin: EdgeInsets.zero,
 
           color: ColorsManager.secondaryBackground,
           child: SearchBarWidget(

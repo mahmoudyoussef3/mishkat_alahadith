@@ -72,10 +72,7 @@ class SeragFabButton extends StatelessWidget {
         backgroundImage: const AssetImage('assets/images/serag_logo.jpg'),
         backgroundColor: Colors.transparent,
       ),
-      label: Text(
-        'اسأل سراج',
-        style: HadithDetailsTextStyles.fabLabel,
-      ),
+      label: Text('اسأل سراج', style: HadithDetailsTextStyles.fabLabel),
     );
   }
 }

@@ -17,11 +17,11 @@ class HadithTextStyles {
 
   /// Grade label text (color varies by grade).
   static TextStyle gradeLabel(Color gradeColor) => TextStyle(
-        color: gradeColor,
-        fontWeight: FontWeight.w800,
-        fontSize: 16.sp,
-        fontFamily: 'Amiri',
-      );
+    color: gradeColor,
+    fontWeight: FontWeight.w800,
+    fontSize: 16.sp,
+    fontFamily: 'Amiri',
+  );
 
   /// Main hadith Arabic text.
   static TextStyle hadithArabic = TextStyle(
@@ -34,11 +34,11 @@ class HadithTextStyles {
 
   /// Gradient pill text (default 12sp).
   static TextStyle pillLabel(Color textColor, {double? fontSize}) => TextStyle(
-        color: textColor,
-        fontWeight: FontWeight.w600,
-        fontSize: (fontSize ?? 12.sp),
-        fontFamily: 'Amiri',
-      );
+    color: textColor,
+    fontWeight: FontWeight.w600,
+    fontSize: (fontSize ?? 12.sp),
+    fontFamily: 'Amiri',
+  );
 
   /// Empty state title.
   static TextStyle emptyTitle = TextStyle(

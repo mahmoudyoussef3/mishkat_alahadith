@@ -34,56 +34,55 @@ class BookCard extends StatelessWidget {
         color: ColorsManager.secondaryBackground,
         elevation: 2,
         child: Container(
-        decoration: LibraryDecorations.bookCardContainer(),
-        child: Column(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: LibraryDecorations.bookImageBox(
-                  bookImages[book.bookName!] ?? '',
+          decoration: LibraryDecorations.bookCardContainer(),
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: LibraryDecorations.bookImageBox(
+                    bookImages[book.bookName!] ?? '',
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(10.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    bookNamesArabic[book.bookName] ?? '',
-                    style: LibraryTextStyles.bookTitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    bookWriters[book.bookName] ?? '',
-                    style: LibraryTextStyles.bookWriter,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 6.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      BookStat(
-                        value: '${book.chapters_count} باب',
-                        color: ColorsManager.accentPurple,
-                      ),
-                      BookStat(
-                        
-                        value: '${book.hadiths_count} حديث',
-                        color: ColorsManager.hadithAuthentic,
-                      ),
-                    ],
-                  ),
-                ],
+              Padding(
+                padding: EdgeInsets.all(10.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      bookNamesArabic[book.bookName] ?? '',
+                      style: LibraryTextStyles.bookTitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      bookWriters[book.bookName] ?? '',
+                      style: LibraryTextStyles.bookWriter,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 6.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        BookStat(
+                          value: '${book.chapters_count} باب',
+                          color: ColorsManager.accentPurple,
+                        ),
+                        BookStat(
+                          value: '${book.hadiths_count} حديث',
+                          color: ColorsManager.hadithAuthentic,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-         ),
-        ),
+      ),
     );
   }
 }

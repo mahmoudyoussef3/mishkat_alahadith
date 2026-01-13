@@ -75,7 +75,10 @@ class BuildMainCategoryCard extends StatelessWidget {
 
             // Main content
             Padding(
-              padding: EdgeInsets.symmetric(vertical:  Spacing.md2,horizontal: Spacing.lg),
+              padding: EdgeInsets.symmetric(
+                vertical: Spacing.md2,
+                horizontal: Spacing.lg,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -93,7 +96,7 @@ class BuildMainCategoryCard extends StatelessWidget {
                         SizedBox(height: Spacing.xs),
 
                         // Subtitle with enhanced styling
-                  /*      Container(
+                        /*      Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 8.w,
                             vertical: 4.h,
@@ -144,10 +147,7 @@ class BuildMainCategoryCard extends StatelessWidget {
                           '$bookCount',
                           style: HomeTextStyles.categoryCountNumber,
                         ),
-                        Text(
-                          'كتاب',
-                          style: HomeTextStyles.categoryCountLabel,
-                        ),
+                        Text('كتاب', style: HomeTextStyles.categoryCountLabel),
                       ],
                     ),
                   ),

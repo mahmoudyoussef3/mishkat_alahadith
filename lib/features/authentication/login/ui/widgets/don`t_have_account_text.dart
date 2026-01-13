@@ -14,10 +14,7 @@ class DontHaveAccountText extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          'ليس لديك حساب ؟ ',
-          style: AuthTextStyles.prompt14,
-        ),
+        Text('ليس لديك حساب ؟ ', style: AuthTextStyles.prompt14),
         TextButton(
           onPressed: () {
             context.pushNamed(Routes.signupScreen);

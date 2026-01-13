@@ -229,9 +229,8 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
                                   SizedBox(width: 12.w),
                                   Text(
                                     "تم نسخ الحديث بنجاح",
-                                    style: HadithDetailsTextStyles.snackText.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: HadithDetailsTextStyles.snackText
+                                        .copyWith(fontWeight: FontWeight.w600),
                                   ),
                                 ],
                               ),

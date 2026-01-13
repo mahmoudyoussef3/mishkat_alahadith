@@ -19,22 +19,18 @@ class LoginWithGoogle extends StatelessWidget {
       child: Card(
         color: ColorsManager.white,
         elevation: 5,
-        shape: (AuthDecorations.socialCardShape().shape as RoundedRectangleBorder?),
+        shape:
+            (AuthDecorations.socialCardShape().shape
+                as RoundedRectangleBorder?),
         child: Padding(
           padding: EdgeInsets.all(16.w),
           child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'تسجيل الدخول عبر جوجل',
-                  style: AuthTextStyles.cardLabel,
-                ),
+                Text('تسجيل الدخول عبر جوجل', style: AuthTextStyles.cardLabel),
                 SizedBox(width: 12.w),
-                FaIcon(
-                  FontAwesomeIcons.google,
-                  color: ColorsManager.darkGray,
-                ),
+                FaIcon(FontAwesomeIcons.google, color: ColorsManager.darkGray),
               ],
             ),
           ),

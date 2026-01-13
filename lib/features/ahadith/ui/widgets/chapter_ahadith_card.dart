@@ -15,7 +15,7 @@ class ChapterAhadithCard extends StatelessWidget {
     this.narrator,
     this.grade,
     this.reference,
-     this.bookName,
+    this.bookName,
     this.hadithCategory,
   });
 
@@ -65,7 +65,9 @@ class ChapterAhadithCard extends StatelessWidget {
                         children: [
                           Container(
                             padding: EdgeInsets.all(8.w),
-                            decoration: HadithDecorations.headerIcon(gradeColor),
+                            decoration: HadithDecorations.headerIcon(
+                              gradeColor,
+                            ),
                             child: Icon(
                               Icons.menu_book,
                               color: gradeColor,
@@ -107,7 +109,9 @@ class ChapterAhadithCard extends StatelessWidget {
                 if (text.isNotEmpty)
                   Container(
                     padding: EdgeInsets.all(8.w),
-                    decoration: HadithDecorations.hadithTextContainer(gradeColor),
+                    decoration: HadithDecorations.hadithTextContainer(
+                      gradeColor,
+                    ),
                     child: Text(
                       text,
                       maxLines: 4,
@@ -122,30 +126,29 @@ class ChapterAhadithCard extends StatelessWidget {
                 // Enhanced book and chapter pills
                 Row(
                   children: [
-                      if (reference != null && reference!.isNotEmpty)
-                        Flexible(
-                          child: _buildGradientPill(
-                            text: reference!,
-                            colors: [
-                              gradeColor.withOpacity(0.8),
-                              gradeColor.withOpacity(0.6),
-                            ],
-                            textColor: ColorsManager.white,
-                          ),
+                    if (reference != null && reference!.isNotEmpty)
+                      Flexible(
+                        child: _buildGradientPill(
+                          text: reference!,
+                          colors: [
+                            gradeColor.withOpacity(0.8),
+                            gradeColor.withOpacity(0.6),
+                          ],
+                          textColor: ColorsManager.white,
                         ),
-                    SizedBox(width: 12.w),
-                    if (bookName!=null &&bookName!.isNotEmpty)
-
-                    Flexible(
-                      child: _buildGradientPill(
-                        text: bookName!,
-                        colors: [
-                          ColorsManager.primaryPurple.withOpacity(0.8),
-                          ColorsManager.primaryPurple.withOpacity(0.6),
-                        ],
-                        textColor: ColorsManager.white,
                       ),
-                    ),
+                    SizedBox(width: 12.w),
+                    if (bookName != null && bookName!.isNotEmpty)
+                      Flexible(
+                        child: _buildGradientPill(
+                          text: bookName!,
+                          colors: [
+                            ColorsManager.primaryPurple.withOpacity(0.8),
+                            ColorsManager.primaryPurple.withOpacity(0.6),
+                          ],
+                          textColor: ColorsManager.white,
+                        ),
+                      ),
                   ],
                 ),
 

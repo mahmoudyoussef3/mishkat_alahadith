@@ -40,13 +40,12 @@ class HadithAttributionAndGrade extends StatelessWidget {
           ),
         if (data.grade != null)
           Chip(
-            backgroundColor:
-                DailyHadithDecorations.gradeChipBg(gradeColor(data.grade)),
+            backgroundColor: DailyHadithDecorations.gradeChipBg(
+              gradeColor(data.grade),
+            ),
             label: Text(
               data.grade ?? "",
-              style: DailyHadithTextStyles.gradeLabel(
-                gradeColor(data.grade),
-              ),
+              style: DailyHadithTextStyles.gradeLabel(gradeColor(data.grade)),
             ),
           ),
       ],

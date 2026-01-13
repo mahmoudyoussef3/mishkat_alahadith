@@ -50,7 +50,10 @@ class ZekrCard extends StatelessWidget {
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
           padding: EdgeInsets.all(14.r),
-          decoration: DailyZekrDecorations.zekrCard(enabled: enabled, checked: checked),
+          decoration: DailyZekrDecorations.zekrCard(
+            enabled: enabled,
+            checked: checked,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -81,7 +84,9 @@ class ZekrCard extends StatelessWidget {
                         Flexible(
                           child: Text(
                             title,
-                            style: DailyZekrTextStyles.zekrTitle(checked: checked),
+                            style: DailyZekrTextStyles.zekrTitle(
+                              checked: checked,
+                            ),
                             textAlign: TextAlign.right,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -104,23 +109,30 @@ class ZekrCard extends StatelessWidget {
                         horizontal: 10.w,
                         vertical: 6.h,
                       ),
-                      decoration: DailyZekrDecorations.footerPill(enabled: enabled, checked: checked),
+                      decoration: DailyZekrDecorations.footerPill(
+                        enabled: enabled,
+                        checked: checked,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             effectiveFooterIcon,
                             size: 16.sp,
-                            color: !enabled
-                                ? ColorsManager.secondaryText
-                                : checked
+                            color:
+                                !enabled
+                                    ? ColorsManager.secondaryText
+                                    : checked
                                     ? ColorsManager.hadithAuthentic
                                     : ColorsManager.primaryGold,
                           ),
                           SizedBox(width: 6.w),
                           Text(
                             effectiveFooterText,
-                            style: DailyZekrTextStyles.footerLabel(enabled: enabled, checked: checked),
+                            style: DailyZekrTextStyles.footerLabel(
+                              enabled: enabled,
+                              checked: checked,
+                            ),
                           ),
                         ],
                       ),
@@ -140,7 +152,4 @@ class ZekrCard extends StatelessWidget {
       ),
     );
   }
-  
-
-
 }

@@ -548,9 +548,15 @@ class DailyZekrScreen extends StatelessWidget {
                           hintText: 'اكتب المهمة هنا…',
                           filled: true,
                           fillColor: ColorsManager.secondaryBackground,
-                          border: DailyZekrDecorations.inputBorder(ColorsManager.mediumGray.withOpacity(0.6)),
-                          enabledBorder: DailyZekrDecorations.inputBorder(ColorsManager.mediumGray.withOpacity(0.6)),
-                          focusedBorder: DailyZekrDecorations.inputBorder(ColorsManager.primaryGold.withOpacity(0.8)),
+                          border: DailyZekrDecorations.inputBorder(
+                            ColorsManager.mediumGray.withOpacity(0.6),
+                          ),
+                          enabledBorder: DailyZekrDecorations.inputBorder(
+                            ColorsManager.mediumGray.withOpacity(0.6),
+                          ),
+                          focusedBorder: DailyZekrDecorations.inputBorder(
+                            ColorsManager.primaryGold.withOpacity(0.8),
+                          ),
                         ),
                       ),
                       SizedBox(height: 12.h),

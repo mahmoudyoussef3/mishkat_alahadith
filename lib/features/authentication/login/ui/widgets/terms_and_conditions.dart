@@ -20,14 +20,8 @@ class TermsAndConditionsText extends StatelessWidget {
             text: ' Terms & Conditions',
             style: AuthTextStyles.termsLink,
           ),
-          TextSpan(
-            text: ' and',
-            style: AuthTextStyles.termsGray,
-          ),
-          TextSpan(
-            text: ' Privacy Policy',
-            style: AuthTextStyles.termsLink,
-          ),
+          TextSpan(text: ' and', style: AuthTextStyles.termsGray),
+          TextSpan(text: ' Privacy Policy', style: AuthTextStyles.termsLink),
         ],
       ),
     );

@@ -233,7 +233,9 @@ class _ResultCard extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Text(
                   title,
-                  style: HadithAnalysisTextStyles.resultTitle(textColor: textColor),
+                  style: HadithAnalysisTextStyles.resultTitle(
+                    textColor: textColor,
+                  ),
                 ),
               ],
             ),

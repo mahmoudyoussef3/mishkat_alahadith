@@ -216,10 +216,7 @@ class _HadithActionsRowState extends State<HadithActionsRow> {
             child: Icon(icon, color: ColorsManager.primaryPurple),
           ),
           SizedBox(height: 6.h),
-          Text(
-            label,
-            style: DailyHadithTextStyles.actionLabel,
-          ),
+          Text(label, style: DailyHadithTextStyles.actionLabel),
         ],
       ),
     );

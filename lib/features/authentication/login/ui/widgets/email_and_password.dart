@@ -32,7 +32,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
       child: Column(
         children: [
           // Email Field
-              AppTextFormField(
+          AppTextFormField(
                 backgroundColor: ColorsManager.lightGray,
                 suffixIcon: Icon(
                   Icons.email,
@@ -60,7 +60,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
           SizedBox(height: 20.h),
 
           // Password Field
-              AppTextFormField(
+          AppTextFormField(
                 backgroundColor: ColorsManager.lightGray,
                 hintStyle: AuthTextStyles.inputHint,
 

@@ -33,10 +33,7 @@ class EmptyState extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24.h),
-              Text(
-                'لا توجد نتائج',
-                style: HadithTextStyles.emptyTitle,
-              ),
+              Text('لا توجد نتائج', style: HadithTextStyles.emptyTitle),
               SizedBox(height: 12.h),
               Text(
                 'حاول بكلمة أبسط أو مختلفة',

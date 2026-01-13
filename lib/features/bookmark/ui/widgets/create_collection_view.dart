@@ -93,7 +93,7 @@ class _CreateCollectionViewState extends State<CreateCollectionView> {
             hadithNumber: widget.hadithNumber,
             hadithText: widget.hadithText,
             notesController: notesController,
-            collection: collectionNameController
+            collection: collectionNameController,
           ),
         ],
       ),

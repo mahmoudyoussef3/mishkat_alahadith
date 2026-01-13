@@ -70,11 +70,15 @@ class BookmarkCollectionsRow extends StatelessWidget {
                           horizontal: 20.w,
                           vertical: 10.h,
                         ),
-                        decoration: BookmarkDecorations.collectionChip(isSelected: isSelected),
+                        decoration: BookmarkDecorations.collectionChip(
+                          isSelected: isSelected,
+                        ),
                         child: Center(
                           child: Text(
                             c,
-                            style: BookmarkTextStyles.collectionChipText(isSelected: isSelected),
+                            style: BookmarkTextStyles.collectionChipText(
+                              isSelected: isSelected,
+                            ),
                           ),
                         ),
                       ),
@@ -113,11 +117,11 @@ class BookmarkCollectionsRow extends StatelessWidget {
                 (_, __) => Shimmer.fromColors(
                   baseColor: Colors.grey.shade300,
                   highlightColor: Colors.grey.shade100,
-                    child: Container(
-                      width: 90.w,
-                      height: 34.h,
-                      decoration: BookmarkDecorations.shimmerItem(),
-                    ),
+                  child: Container(
+                    width: 90.w,
+                    height: 34.h,
+                    decoration: BookmarkDecorations.shimmerItem(),
+                  ),
                 ),
           ),
         ),

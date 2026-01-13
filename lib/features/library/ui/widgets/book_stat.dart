@@ -14,10 +14,7 @@ class BookStat extends StatelessWidget {
       children: [
         CircleAvatar(radius: 5.r, backgroundColor: color),
         SizedBox(width: 3.w),
-        Text(
-          value,
-          style: LibraryTextStyles.statText,
-        ),
+        Text(value, style: LibraryTextStyles.statText),
       ],
     );
   }

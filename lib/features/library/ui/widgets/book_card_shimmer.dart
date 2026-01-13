@@ -17,9 +17,7 @@ class BookCardShimmer extends StatelessWidget {
           children: [
             Expanded(
               child: Container(
-                decoration: LibraryDecorations.shimmerBox(
-                  radius: 20.r,
-                ),
+                decoration: LibraryDecorations.shimmerBox(radius: 20.r),
               ),
             ),
             Padding(
