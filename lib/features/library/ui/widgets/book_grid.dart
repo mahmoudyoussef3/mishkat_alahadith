@@ -31,11 +31,9 @@ class BookGrid extends StatelessWidget {
     return SliverPadding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
       sliver: SliverGrid(
-
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 12.w,
-          
           mainAxisSpacing: 12.h,
           childAspectRatio: aspectRatio,
         ),

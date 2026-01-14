@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/library_decorations.dart';
 import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
 import 'package:mishkat_almasabih/features/book_data/logic/cubit/book_data_cubit.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
@@ -31,15 +31,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
       create: (context) => getIt<BookDataCubit>()..emitGetBookData(widget.id),
       child: Directionality(
         textDirection: TextDirection.rtl,
-        child:SafeArea(
-              top: false,
-        bottom: true,
+        child: SafeArea(
+          top: false,
+          bottom: true,
           child: Scaffold(
-            backgroundColor: ColorsManager.primaryBackground,
+            backgroundColor: LibraryDecorations.libraryScreenBackground,
             body: CustomScrollView(
               slivers: [
                 BuildHeaderAppBar(title: widget.name),
-          
+
                 BlocBuilder<BookDataCubit, BookDataState>(
                   builder: (context, state) {
                     if (state is BookDataLoading) {
@@ -51,8 +51,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         aspectRatio: aspectRatio,
                       );
                     } else if (state is BookDataFailure) {
-                      return  SliverToBoxAdapter(
-                        child: Center(child:ErrorState(error: state.errorMessage)),
+                      return SliverToBoxAdapter(
+                        child: Center(
+                          child: ErrorState(error: state.errorMessage),
+                        ),
                       );
                     }
                     return const SliverToBoxAdapter(child: SizedBox.shrink());

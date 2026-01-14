@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_decorations.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/models/enhanced_search_response_model.dart';
 
 class searchHadithAttributionAndGrade extends StatelessWidget {
   final EnhancedHadithModel enhancedHadithModel;
-  const searchHadithAttributionAndGrade({super.key, required this.enhancedHadithModel});
-
+  const searchHadithAttributionAndGrade({
+    super.key,
+    required this.enhancedHadithModel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,22 +21,19 @@ class searchHadithAttributionAndGrade extends StatelessWidget {
           Flexible(
             child: Text(
               "📖 ${enhancedHadithModel.attribution!}",
-              style: const TextStyle(
-                fontSize: 16,
-                color: ColorsManager.accentPurple,
-                fontStyle: FontStyle.italic,
-              ),
+              style: EnhancedSearchTextStyles.attribution,
               textAlign: TextAlign.start,
             ),
           ),
         if (enhancedHadithModel.grade != null)
           Chip(
-            backgroundColor: getGradeColor(enhancedHadithModel.grade).withOpacity(0.1),
+            backgroundColor: EnhancedSearchDecorations.gradeChipBackground(
+              getGradeColor(enhancedHadithModel.grade),
+            ),
             label: Text(
-            enhancedHadithModel.grade??"",
-              style: TextStyle(
-                color: getGradeColor(enhancedHadithModel.grade),
-                fontWeight: FontWeight.bold,
+              enhancedHadithModel.grade ?? "",
+              style: EnhancedSearchTextStyles.gradeChipText(
+                getGradeColor(enhancedHadithModel.grade),
               ),
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/send_suggestion_styles.dart';
+import 'package:mishkat_almasabih/core/theming/send_suggestion_decorations.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/send_suggestion_repo.dart';
 
 class SuggestionForm extends StatefulWidget {
@@ -33,18 +34,15 @@ class _SuggestionFormState extends State<SuggestionForm> {
       _ctrl.clear();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: ColorsManager.success,
+          backgroundColor: SendSuggestionDecorations.successSnackbarBackground,
           content: const Text('تم إرسال الاقتراح بنجاح ✓'),
         ),
       );
-  Navigator.of(context).pop();
+      Navigator.of(context).pop();
     } else {
-
-
-      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: ColorsManager.error,
+          backgroundColor: SendSuggestionDecorations.errorSnackbarBackground,
           content: const Text('فشل إرسال الاقتراح — حاول مرة أخرى'),
         ),
       );
@@ -63,23 +61,15 @@ class _SuggestionFormState extends State<SuggestionForm> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: SendSuggestionDecorations.scaffoldBackground,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              ColorsManager.secondaryBackground,
-              ColorsManager.lightGray.withOpacity(0.2),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child:SafeArea(
-              top: false,
-        bottom: true,
+        decoration: SendSuggestionDecorations.backgroundGradient(),
+
+        child: SafeArea(
+          top: false,
+          bottom: true,
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: LayoutBuilder(
@@ -90,7 +80,9 @@ class _SuggestionFormState extends State<SuggestionForm> {
                     vertical: 20.h,
                   ),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
                     child: IntrinsicHeight(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -104,45 +96,57 @@ class _SuggestionFormState extends State<SuggestionForm> {
                                 maxWidth: isTablet ? 550 : double.infinity,
                               ),
                               child: Card(
-                                elevation: 10,
-                                shadowColor: ColorsManager.primaryPurple.withOpacity(0.15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24.r),
-                                ),
+                                elevation:
+                                    SendSuggestionDecorations.cardElevation,
+                                shadowColor:
+                                    SendSuggestionDecorations.cardShadowColor,
+                                shape: SendSuggestionDecorations.cardShape,
                                 child: Container(
-                                  padding: EdgeInsets.all(isTablet ? 32.w : 24.w),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(24.r),
+                                  padding: EdgeInsets.all(
+                                    isTablet ? 32.w : 24.w,
                                   ),
+                                  decoration:
+                                      SendSuggestionDecorations.cardContainer(),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       // Animated Icon
                                       TweenAnimationBuilder<double>(
                                         tween: Tween(begin: 0.0, end: 1.0),
-                                        duration: const Duration(milliseconds: 600),
-                                        curve: Curves.elasticOut,
+                                        duration:
+                                            SendSuggestionDecorations
+                                                .iconAnimationDuration,
+                                        curve:
+                                            SendSuggestionDecorations
+                                                .iconAnimationCurve,
                                         builder: (context, value, child) {
-                                          return Transform.scale(scale: value, child: child);
+                                          return Transform.scale(
+                                            scale: value,
+                                            child: child,
+                                          );
                                         },
                                         child: Container(
-                                          width: isTablet ? 90.w : 70.w,
-                                          height: isTablet ? 90.w : 70.w,
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              colors: [
-                                                ColorsManager.primaryPurple.withOpacity(0.15),
-                                                ColorsManager.primaryPurple.withOpacity(0.05),
-                                              ],
-                                            ),
-                                            shape: BoxShape.circle,
-                                          ),
+                                          width:
+                                              SendSuggestionDecorations.iconContainerSize(
+                                                isTablet,
+                                              ),
+                                          height:
+                                              SendSuggestionDecorations.iconContainerSize(
+                                                isTablet,
+                                              ),
+                                          decoration:
+                                              SendSuggestionDecorations.iconContainer(),
                                           child: Icon(
                                             Icons.lightbulb_outline_rounded,
-                                            color: ColorsManager.primaryPurple,
-                                            size: isTablet ? 45.sp : 35.sp,
+                                            color:
+                                                SendSuggestionDecorations
+                                                    .iconColor,
+                                            size:
+                                                SendSuggestionDecorations.iconSize(
+                                                  isTablet,
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -152,11 +156,8 @@ class _SuggestionFormState extends State<SuggestionForm> {
                                       Text(
                                         'شاركنا اقتراحاتك',
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: isTablet ? 26.sp : 22.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: ColorsManager.primaryPurple,
-                                          height: 1.3,
+                                        style: SendSuggestionTextStyles.title(
+                                          isTablet,
                                         ),
                                       ),
                                       SizedBox(height: 8.h),
@@ -165,12 +166,10 @@ class _SuggestionFormState extends State<SuggestionForm> {
                                       Text(
                                         'لتطوير التطبيق 🌿',
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: isTablet ? 20.sp : 18.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: ColorsManager.primaryPurple.withOpacity(0.7),
-                                          height: 1.3,
-                                        ),
+                                        style:
+                                            SendSuggestionTextStyles.subtitle(
+                                              isTablet,
+                                            ),
                                       ),
                                       SizedBox(height: 12.h),
 
@@ -178,80 +177,62 @@ class _SuggestionFormState extends State<SuggestionForm> {
                                       Text(
                                         'اقتراحك يساعدنا في تحسين التجربة وتقديم أفضل محتوى',
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: isTablet ? 15.sp : 14.sp,
-                                          color: ColorsManager.gray,
-                                          height: 1.5,
-                                        ),
+                                        style:
+                                            SendSuggestionTextStyles.description(
+                                              isTablet,
+                                            ),
                                       ),
                                       SizedBox(height: isTablet ? 28.h : 24.h),
 
                                       // TextField + Privacy Note
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
                                         children: [
                                           Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(16.r),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: ColorsManager.white.withOpacity(0.08),
-                                                  blurRadius: 10,
-                                                  offset: const Offset(0, 4),
-                                                ),
-                                              ],
-                                            ),
+                                            decoration:
+                                                SendSuggestionDecorations.textFieldShadowContainer(),
                                             child: TextField(
                                               controller: _ctrl,
-                                              maxLines: screenHeight > 700 ? 6 : 4,
+                                              maxLines:
+                                                  screenHeight > 700 ? 6 : 4,
                                               maxLength: 500,
                                               textAlign: TextAlign.right,
                                               decoration: InputDecoration(
                                                 hintText: 'اكتب اقتراحك هنا...',
-                                                hintStyle: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: isTablet ? 15.sp : 14.sp,
-                                                ),
+                                                hintStyle:
+                                                    SendSuggestionTextStyles.textFieldHint(
+                                                      isTablet,
+                                                    ),
                                                 filled: true,
-                                                fillColor: ColorsManager.lightGray.withOpacity(0.1),
-                                                enabledBorder: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(16.r),
-                                                  borderSide: BorderSide(
-                                                    color: ColorsManager.primaryPurple,
-                                                    width: 1.5,
-                                                  ),
-                                                ),
-                                                focusedBorder: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(16.r),
-                                                  borderSide: const BorderSide(
-                                                    color: ColorsManager.primaryPurple,
-                                                    width: 2,
-                                                  ),
-                                                ),
-                                                contentPadding: EdgeInsets.symmetric(
-                                                  horizontal: 16.w,
-                                                  vertical: 14.h,
-                                                ),
-                                                counterStyle: TextStyle(
-                                                  fontSize: 12.sp,
-                                                  color: ColorsManager.gray,
-                                                ),
+                                                fillColor:
+                                                    SendSuggestionDecorations
+                                                        .textFieldFillColor,
+                                                enabledBorder:
+                                                    SendSuggestionDecorations.textFieldEnabledBorder(),
+                                                focusedBorder:
+                                                    SendSuggestionDecorations.textFieldFocusedBorder(),
+                                                contentPadding:
+                                                    SendSuggestionDecorations
+                                                        .textFieldPadding,
+                                                counterStyle:
+                                                    SendSuggestionTextStyles
+                                                        .textFieldCounter,
                                               ),
-                                              style: TextStyle(
-                                                fontSize: isTablet ? 16.sp : 15.sp,
-                                                height: 1.6,
-                                              ),
+                                              style:
+                                                  SendSuggestionTextStyles.textFieldInput(
+                                                    isTablet,
+                                                  ),
                                             ),
                                           ),
                                           SizedBox(height: 6.h),
                                           Text(
                                             'لن يتم إرسال بريدك الإلكتروني أو اسم المستخدم، مجرد اقتراحك فقط.',
                                             textAlign: TextAlign.right,
-                                            style: TextStyle(
-                                              fontSize: isTablet ? 12.sp : 11.sp,
-                                              color: ColorsManager.gray.withOpacity(0.8),
-                                              fontWeight: FontWeight.w500,
-                                            ),
+                                            style:
+                                                SendSuggestionTextStyles.privacyNote(
+                                                  isTablet,
+                                                ),
                                           ),
                                         ],
                                       ),
@@ -259,60 +240,90 @@ class _SuggestionFormState extends State<SuggestionForm> {
 
                                       // Send Button
                                       SizedBox(
-                                        height: isTablet ? 56.h : 52.h,
+                                        height:
+                                            SendSuggestionDecorations.sendButtonHeight(
+                                              isTablet,
+                                            ),
                                         child: ElevatedButton(
                                           onPressed: _loading ? null : _onSend,
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: ColorsManager.primaryPurple,
-                                            foregroundColor: Colors.white,
-                                            disabledBackgroundColor: ColorsManager.primaryPurple.withOpacity(0.6),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(14.r),
-                                            ),
-                                            elevation: 3,
-                                            shadowColor: ColorsManager.primaryPurple.withOpacity(0.3),
+                                            backgroundColor:
+                                                SendSuggestionDecorations
+                                                    .sendButtonBackground,
+                                            foregroundColor:
+                                                SendSuggestionDecorations
+                                                    .sendButtonForeground,
+                                            disabledBackgroundColor:
+                                                SendSuggestionDecorations
+                                                    .sendButtonDisabledBackground,
+                                            shape:
+                                                SendSuggestionDecorations
+                                                    .sendButtonShape,
+                                            elevation:
+                                                SendSuggestionDecorations
+                                                    .sendButtonElevation,
+                                            shadowColor:
+                                                SendSuggestionDecorations
+                                                    .sendButtonShadowColor,
                                           ),
-                                          child: _loading
-                                              ? Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 20.w,
-                                                      height: 20.w,
-                                                      child: const CircularProgressIndicator(
-                                                        strokeWidth: 2.5,
-                                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                                          Colors.white,
+                                          child:
+                                              _loading
+                                                  ? Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      SizedBox(
+                                                        width:
+                                                            SendSuggestionDecorations
+                                                                .loadingIndicatorSize,
+                                                        height:
+                                                            SendSuggestionDecorations
+                                                                .loadingIndicatorSize,
+                                                        child: CircularProgressIndicator(
+                                                          strokeWidth:
+                                                              SendSuggestionDecorations
+                                                                  .loadingIndicatorStrokeWidth,
+                                                          valueColor: AlwaysStoppedAnimation<
+                                                            Color
+                                                          >(
+                                                            SendSuggestionDecorations
+                                                                .loadingIndicatorColor,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    SizedBox(width: 12.w),
-                                                    Text(
-                                                      'جارٍ الإرسال...',
-                                                      style: TextStyle(
-                                                        fontSize: isTablet ? 17.sp : 16.sp,
-                                                        fontWeight: FontWeight.bold,
+                                                      SizedBox(width: 12.w),
+                                                      Text(
+                                                        'جارٍ الإرسال...',
+                                                        style:
+                                                            SendSuggestionTextStyles.sendButtonLoadingText(
+                                                              isTablet,
+                                                            ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                )
-                                              : Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.send_rounded,
-                                                      size: isTablet ? 22.sp : 20.sp,
-                                                    ),
-                                                    SizedBox(width: 10.w),
-                                                    Text(
-                                                      'إرسال الاقتراح',
-                                                      style: TextStyle(
-                                                        fontSize: isTablet ? 17.sp : 16.sp,
-                                                        fontWeight: FontWeight.bold,
+                                                    ],
+                                                  )
+                                                  : Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.send_rounded,
+                                                        size:
+                                                            SendSuggestionDecorations.sendButtonIconSize(
+                                                              isTablet,
+                                                            ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
+                                                      SizedBox(width: 10.w),
+                                                      Text(
+                                                        'إرسال الاقتراح',
+                                                        style:
+                                                            SendSuggestionTextStyles.sendButtonText(
+                                                              isTablet,
+                                                            ),
+                                                      ),
+                                                    ],
+                                                  ),
                                         ),
                                       ),
                                     ],
@@ -330,10 +341,7 @@ class _SuggestionFormState extends State<SuggestionForm> {
                             child: Text(
                               'آراؤكم تهمنا وتساعدنا على التطور',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: ColorsManager.gray.withOpacity(0.7),
-                              ),
+                              style: SendSuggestionTextStyles.footerNote,
                             ),
                           ),
                         ],

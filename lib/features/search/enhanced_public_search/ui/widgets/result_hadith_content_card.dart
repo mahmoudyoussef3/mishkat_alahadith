@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/ui/widgets/hadith_rich_text.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/models/enhanced_search_response_model.dart';
 
@@ -13,29 +15,7 @@ class ResultHadithContentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            ColorsManager.secondaryBackground,
-            ColorsManager.primaryPurple.withOpacity(0.1),
-            //   ColorsManager.primaryGold.withOpacity(0.02),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: ColorsManager.primaryPurple.withOpacity(0.15),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: ColorsManager.primaryPurple.withOpacity(0.08),
-            blurRadius: 20.r,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      decoration: EnhancedSearchDecorations.hadithContentCard(),
       child: Stack(
         children: [
           // Islamic pattern overlay
@@ -86,30 +66,19 @@ class ResultHadithContentCard extends StatelessWidget {
                     horizontal: 12.w,
                     vertical: 6.h,
                   ),
-                  decoration: BoxDecoration(
-                    color: ColorsManager.primaryPurple.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: ColorsManager.primaryPurple.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
+                  decoration: EnhancedSearchDecorations.hadithLabel(),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.auto_stories,
-                        color: ColorsManager.primaryPurple,
+                        color: EnhancedSearchDecorations.labelIconColor,
                         size: 16.sp,
                       ),
                       SizedBox(width: 6.w),
                       Text(
                         "نص الحديث",
-                        style: TextStyle(
-                          color: ColorsManager.primaryPurple,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: EnhancedSearchTextStyles.hadithLabelText,
                       ),
                     ],
                   ),
@@ -130,7 +99,7 @@ class ResultHadithContentCard extends StatelessWidget {
                       _buildActionIcon(
                         context,
                         icon: Icons.copy_rounded,
-                        color: ColorsManager.primaryPurple,
+                        color: EnhancedSearchDecorations.copyIconColor,
                         tooltip: "نسخ الحديث",
                         onTap: () {
                           Clipboard.setData(
@@ -147,7 +116,7 @@ class ResultHadithContentCard extends StatelessWidget {
                       _buildActionIcon(
                         context,
                         icon: Icons.share_rounded,
-                        color: ColorsManager.primaryGreen,
+                        color: EnhancedSearchDecorations.shareIconColor,
                         tooltip: "مشاركة الحديث",
                         onTap:
                             () => shareHadithAsImage(
@@ -204,11 +173,7 @@ class ResultHadithContentCard extends StatelessWidget {
         child: Container(
           width: 36.w,
           height: 36.h,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: color.withOpacity(0.2)),
-          ),
+          decoration: EnhancedSearchDecorations.actionIconContainer(color),
           child: Icon(icon, color: color, size: 20.sp),
         ),
       ),

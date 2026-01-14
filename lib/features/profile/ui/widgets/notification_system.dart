@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
 import 'notification_toggle_card.dart';
 
 class NotificationSection extends StatelessWidget {
@@ -72,14 +73,7 @@ class NotificationSection extends StatelessWidget {
           color: ColorsManager.primaryPurple,
         ),
         SizedBox(width: 8.w),
-        Text(
-          "الإشعارات",
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+        Text("الإشعارات", style: ProfileTextStyles.sectionHeaderText),
       ],
     );
   }

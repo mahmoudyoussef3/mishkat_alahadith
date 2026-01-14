@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfileOptionTile extends StatelessWidget {
@@ -26,11 +27,7 @@ class ProfileOptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: ColorsManager.cardBackground,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: ColorsManager.mediumGray, width: 1),
-      ),
+      decoration: ProfileDecorations.profileOptionTile(),
       child: ListTile(
         leading: Icon(icon, color: ColorsManager.primaryGreen),
         title: Text(title),

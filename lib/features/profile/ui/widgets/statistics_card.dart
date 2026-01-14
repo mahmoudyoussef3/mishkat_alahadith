@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/ui/widgets/stats_card.dart';
-import '../../logic/cubit/profile_cubit.dart';
 import 'last_activity_card.dart';
 
 class StatisticsSection extends StatelessWidget {
@@ -20,7 +20,7 @@ class StatisticsSection extends StatelessWidget {
             return _buildLoading();
           } else if (state is UserStatsError) {
             return _buildError(state.message);
-          } else if (state is UserStatsLoaded ) {
+          } else if (state is UserStatsLoaded) {
             return _buildContent(state);
           }
           return const SizedBox.shrink();
@@ -32,9 +32,7 @@ class StatisticsSection extends StatelessWidget {
   Widget _buildLoading() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 40.h),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -44,10 +42,7 @@ class StatisticsSection extends StatelessWidget {
       child: Center(
         child: Text(
           message,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: Colors.red,
-          ),
+          style: ProfileTextStyles.statsErrorMessage,
           textAlign: TextAlign.center,
         ),
       ),
@@ -81,14 +76,7 @@ class StatisticsSection extends StatelessWidget {
           color: ColorsManager.primaryPurple,
         ),
         SizedBox(width: 8.w),
-        Text(
-          "الإحصائيات",
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+        Text("الإحصائيات", style: ProfileTextStyles.sectionHeaderText),
       ],
     );
   }

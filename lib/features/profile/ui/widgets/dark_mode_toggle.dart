@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
+import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
 
 class DarkModeToggle extends StatelessWidget {
   const DarkModeToggle({super.key});
@@ -10,18 +12,7 @@ class DarkModeToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: ColorsManager.cardBackground,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: ColorsManager.mediumGray, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: ColorsManager.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: ProfileDecorations.darkModeCard(),
       child: Row(
         children: [
           Icon(FontAwesomeIcons.sun, color: ColorsManager.primaryGreen),
@@ -30,20 +21,16 @@ class DarkModeToggle extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("الوضع الليلي",
-                    style: TextStyle(
-                        fontSize: 16.sp, fontWeight: FontWeight.w600)),
+                Text("الوضع الليلي", style: ProfileTextStyles.darkModeTitle),
                 SizedBox(height: 2.h),
-                Text("معطل",
-                    style: TextStyle(
-                        fontSize: 14.sp, color: ColorsManager.secondaryText)),
+                Text("معطل", style: ProfileTextStyles.darkModeStatus),
               ],
             ),
           ),
           Switch(
             value: true,
             onChanged: (value) {},
-            activeColor: ColorsManager.primaryPurple,
+            activeColor: ProfileDecorations.darkModeSwitchActiveColor,
           ),
         ],
       ),

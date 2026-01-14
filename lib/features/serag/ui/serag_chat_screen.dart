@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
 import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
 import 'package:mishkat_almasabih/features/serag/ui/widgets/remaining_questions_card.dart';
@@ -36,28 +37,31 @@ class _SeragChatScreenState extends State<SeragChatScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-              top: false,
+        top: false,
         bottom: true,
         child: Scaffold(
-          backgroundColor: ColorsManager.secondaryBackground,
+          backgroundColor: SeragDecorations.scaffoldBackground,
           body: Column(
             children: [
               Expanded(
                 child: CustomScrollView(
                   controller: _scrollController,
                   slivers: [
-                    BuildHeaderAppBar(title: "سراج", description: "مساعد الحديث"),
+                    BuildHeaderAppBar(
+                      title: SeragTextStyles.headerTitle,
+                      description: SeragTextStyles.headerDescription,
+                    ),
                     SliverToBoxAdapter(child: RemainingQuestionsCard()),
                     const ChatMessagesList(),
                     SliverToBoxAdapter(child: SizedBox(height: 10.h)),
                   ],
                 ),
               ),
-             ChatInputSection(
-                    controller: _controller,
-                    scrollToBottom: _scrollToBottom,
-                    model: widget.model,
-                  ),
+              ChatInputSection(
+                controller: _controller,
+                scrollToBottom: _scrollToBottom,
+                model: widget.model,
+              ),
             ],
           ),
         ),

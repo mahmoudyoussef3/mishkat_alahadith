@@ -4,6 +4,8 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart' as BaseStyles;
 
 class LibraryTextStyles {
+  // ==================== BOOK CARD ====================
+
   // Book title text
   static TextStyle bookTitle = TextStyle(
     fontSize: 14.sp,
@@ -24,7 +26,17 @@ class LibraryTextStyles {
     color: ColorsManager.secondaryText,
   );
 
-  // Screen header in Library sections (optional reuse)
+  // ==================== LIBRARY BOOKS SCREEN ====================
+
+  // Screen header in Library sections
   static TextStyle sectionHeader = BaseStyles.TextStyles.headlineMedium
       .copyWith(color: ColorsManager.primaryText, fontWeight: FontWeight.bold);
+
+  // Section header title style for statistics and categories
+  static TextStyle headerTitleStyle = BaseStyles.TextStyles.headlineMedium
+      .copyWith(color: ColorsManager.primaryText, fontWeight: FontWeight.bold);
+
+  // Section header description style
+  static TextStyle headerDescriptionStyle = BaseStyles.TextStyles.bodyMedium
+      .copyWith(color: ColorsManager.secondaryText);
 }

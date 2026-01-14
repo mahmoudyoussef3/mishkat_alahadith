@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/logic/cubit/remaining_questions_cubit.dart';
 
 class RemainingQuestionsCard extends StatelessWidget {
@@ -14,46 +15,30 @@ class RemainingQuestionsCard extends StatelessWidget {
         if (state is RemainingQuestionsSuccess) {
           return Container(
             width: double.infinity,
-            margin: EdgeInsets.all(16.w),
-            padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  ColorsManager.primaryPurple.withOpacity(0.1),
-                  ColorsManager.primaryPurple.withOpacity(0.05),
-                ],
-                begin: Alignment.centerRight,
-                end: Alignment.centerLeft,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: ColorsManager.primaryPurple.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
+            margin: SeragDecorations.remainingQuestionsCardMargin,
+            padding: SeragDecorations.remainingQuestionsCardPadding,
+            decoration: SeragDecorations.remainingQuestionsCard(),
             child: Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(8.w),
+                  padding: SeragDecorations.iconContainerPadding,
                   decoration: BoxDecoration(
-                    color: ColorsManager.primaryPurple,
-                    borderRadius: BorderRadius.circular(8),
+                    color: SeragDecorations.iconContainerBackground,
+                    borderRadius: BorderRadius.circular(
+                      SeragDecorations.iconContainerBorderRadius,
+                    ),
                   ),
                   child: Icon(
                     Icons.lightbulb_outline,
-                    color: Colors.white,
-                    size: 18.sp,
+                    color: SeragDecorations.iconColor,
+                    size: SeragDecorations.iconSize,
                   ),
                 ),
                 SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
                     'لديك ${state.remainigQuestionsResponse.remaining} محاولات متبقية اليوم',
-                    style: TextStyle(
-                      color: ColorsManager.primaryPurple,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14.sp,
-                    ),
+                    style: SeragTextStyles.remainingQuestionsText,
                   ),
                 ),
               ],
@@ -62,16 +47,9 @@ class RemainingQuestionsCard extends StatelessWidget {
         } else if (state is RemainingQuestionsLoading) {
           return Container(
             width: double.infinity,
-            margin: EdgeInsets.all(16.w),
-            padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-            decoration: BoxDecoration(
-              color: ColorsManager.primaryPurple.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: ColorsManager.primaryPurple.withOpacity(0.2),
-                width: 1,
-              ),
-            ),
+            margin: SeragDecorations.remainingQuestionsCardMargin,
+            padding: SeragDecorations.remainingQuestionsCardPadding,
+            decoration: SeragDecorations.shimmerLoadingCard(),
             child: Row(
               children: [
                 _ShimmerBox(width: 34.w, height: 34.w, borderRadius: 8),
@@ -124,7 +102,7 @@ class _ShimmerBoxState extends State<_ShimmerBox>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: SeragDecorations.shimmerAnimationDuration,
       vsync: this,
     );
     _animation = Tween<double>(begin: -1.0, end: 1.0).animate(
@@ -158,9 +136,9 @@ class _ShimmerBoxState extends State<_ShimmerBox>
                 (_animation.value + 0.3).clamp(0.0, 1.0),
               ],
               colors: [
-                ColorsManager.primaryPurple.withOpacity(0.1),
-                ColorsManager.primaryPurple.withOpacity(0.3),
-                ColorsManager.primaryPurple.withOpacity(0.1),
+                SeragDecorations.shimmerGradientColors[0],
+                SeragDecorations.shimmerGradientColors[1],
+                SeragDecorations.shimmerGradientColors[2],
               ],
             ),
           ),

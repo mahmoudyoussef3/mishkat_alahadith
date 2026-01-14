@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_decorations.dart';
 
 class ResultHadithTitle extends StatelessWidget {
   final String title;
@@ -11,17 +11,13 @@ class ResultHadithTitle extends StatelessWidget {
     return Column(
       children: [
         Icon(
-          Icons.auto_stories,
-          color: ColorsManager.primaryPurple,
-          size: 24.sp,
+          EnhancedSearchDecorations.titleIcon,
+          color: EnhancedSearchDecorations.titleIconColor,
+          size: EnhancedSearchDecorations.titleIconSize,
         ),
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: ColorsManager.primaryPurple,
-          ),
+          style: EnhancedSearchTextStyles.hadithTitle,
           textAlign: TextAlign.center,
         ),
       ],

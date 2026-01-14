@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
+import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
 import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
 import 'package:mishkat_almasabih/features/profile/edit_profile/logic/cubit/edit_profile_cubit.dart';
 
@@ -66,35 +68,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         body: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                ColorsManager.primaryPurple.withOpacity(0.85),
-                ColorsManager.primaryBackground,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
+          decoration: ProfileDecorations.editProfileBackground,
           child: BlocConsumer<EditProfileCubit, EditProfileState>(
             listener: (context, state) {
               if (state is EditProfileSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                
                   SnackBar(
-                    
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: ColorsManager.hadithAuthentic,
-                    content: Text("تم تحديث الملف الشخصي بنجاح ",style: TextStyle(
-                      color: ColorsManager.secondaryBackground
-                    ),)),
+                    behavior: ProfileDecorations.successSnackbarBehavior,
+                    backgroundColor:
+                        ProfileDecorations.successSnackbarBackground,
+                    content: Text(
+                      "تم تحديث الملف الشخصي بنجاح",
+                      style: ProfileTextStyles.successSnackbarText,
+                    ),
+                  ),
                 );
                 Navigator.pop(context, state.updatedUser);
               } else if (state is EditProfileFailure) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text("فشل التحديث: ${state.errorMessage}"),
-                    backgroundColor: Colors.red,
+                    backgroundColor: ProfileDecorations.errorSnackbarBackground,
                   ),
                 );
               }
@@ -108,47 +102,44 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       children: [
                         IconButton(
                           onPressed: () => Navigator.pop(context),
-                          icon: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 24.sp),
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                            size: 24.sp,
+                          ),
                         ),
                         Expanded(
                           child: Text(
                             "تعديل الملف الشخصي",
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'YaModernPro',
-                              color: Colors.white,
-                            ),
+                            style: ProfileTextStyles.editProfileTitle,
                           ),
                         ),
                         SizedBox(width: 48.w), // space balance
                       ],
                     ),
                     SizedBox(height: 30.h),
-                
+
                     // ===== Avatar Section =====
                     AvatarSection(
                       selectedImageFile: _selectedImageFile,
-                      avatarUrl:getAvatarUrl(widget.userData),
+                      avatarUrl: getAvatarUrl(widget.userData),
                       onPickImage: _pickImage,
                     ),
                     SizedBox(height: 32.h),
-                
+
                     // ===== Username =====
                     UsernameSection(controller: _usernameController),
                     SizedBox(height: 24.h),
-                
+
                     // ===== InfoCard =====
                     InfoCard(
                       email: widget.userData.email,
                       createdAt: _formatDate(widget.userData.createdAt),
-                      achievements:
-                          widget.userData.weeklyAchievementCount ?? 0,
+                      achievements: widget.userData.weeklyAchievementCount ?? 0,
                     ),
                     SizedBox(height: 40.h),
-                
+
                     // ===== Save Button =====
                     SizedBox(
                       width: double.infinity,
@@ -161,33 +152,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                           elevation: 6,
                         ),
-                        onPressed: state is EditProfileLoading
-                            ? null
-                            : () {
-                                context.read<EditProfileCubit>().updateProfile(
-                                      username:
-                                          _usernameController.text.trim(),
-                                      avatarFile: _selectedImageFile,
-                                    );
-                              },
-                        child: state is EditProfileLoading
-                            ? SizedBox(
-                                width: 20.w,
-                                height: 20.w,
-                                child: const CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
+                        onPressed:
+                            state is EditProfileLoading
+                                ? null
+                                : () {
+                                  context
+                                      .read<EditProfileCubit>()
+                                      .updateProfile(
+                                        username:
+                                            _usernameController.text.trim(),
+                                        avatarFile: _selectedImageFile,
+                                      );
+                                },
+                        child:
+                            state is EditProfileLoading
+                                ? SizedBox(
+                                  width: 20.w,
+                                  height: 20.w,
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : Text(
+                                  "حفظ",
+                                  style: ProfileTextStyles.saveButtonText,
                                 ),
-                              )
-                            : Text(
-                                "حفظ",
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  fontFamily: 'YaModernPro',
-                                ),
-                              ),
                       ),
                     ),
                   ],
@@ -199,25 +189,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
     );
   }
-      String getAvatarUrl(UserResponseModel? user) {
-  const String defaultAvatar = "https://api.hadith-shareef.com/api/uploads/avatars/default-avatar.jpg"; 
-  if (user == null) {
+
+  String getAvatarUrl(UserResponseModel? user) {
+    const String defaultAvatar =
+        "https://api.hadith-shareef.com/api/uploads/avatars/default-avatar.jpg";
+    if (user == null) {
+      return defaultAvatar;
+    }
+
+    final String? url = user.avatarUrl;
+
+    if (url != null && url.isNotEmpty) {
+      if (url.startsWith("http")) {
+        return url;
+      } else if (url.startsWith("/uploads/avatars")) {
+        final String baseUrl = "https://api.hadith-shareef.com/";
+        return '$baseUrl/api$url';
+      }
+    }
+
     return defaultAvatar;
   }
-
-  final String? url = user.avatarUrl; 
-
-  if (url != null && url.isNotEmpty) {
-    if (url.startsWith("http")) {
-      return url; 
-    } else if (url.startsWith("/uploads/avatars")) {
-      final String baseUrl = "https://api.hadith-shareef.com/";
-      return '$baseUrl/api$url';
-    }
-  }
-
-  return defaultAvatar;
-}
 }
 
 class AvatarSection extends StatelessWidget {
@@ -254,21 +246,16 @@ class AvatarSection extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10.r,
-                spreadRadius: 2.r,
-              )
-            ],
+            boxShadow: ProfileDecorations.avatarShadow(),
           ),
           child: CircleAvatar(
             radius: 60.r,
             backgroundImage: imageProvider,
             backgroundColor: Colors.grey[200],
-            child: imageProvider == null
-                ? Icon(Icons.person, size: 60.r, color: Colors.grey)
-                : null,
+            child:
+                imageProvider == null
+                    ? Icon(Icons.person, size: 60.r, color: Colors.grey)
+                    : null,
           ),
         ),
         SizedBox(height: 12.h),
@@ -292,10 +279,7 @@ class AvatarPickerSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: ColorsManager.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
+      decoration: ProfileDecorations.avatarPickerSheet(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -317,7 +301,11 @@ class AvatarPickerSheet extends StatelessWidget {
   }
 
   Widget _buildOption(
-      BuildContext context, IconData icon, String text, VoidCallback onTap) {
+    BuildContext context,
+    IconData icon,
+    String text,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);
@@ -328,13 +316,7 @@ class AvatarPickerSheet extends StatelessWidget {
         children: [
           Icon(icon, color: ColorsManager.primaryPurple, size: 28.sp),
           SizedBox(height: 8.h),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontFamily: 'YaModernPro',
-            ),
-          ),
+          Text(text, style: ProfileTextStyles.avatarPickerOption),
         ],
       ),
     );
@@ -350,18 +332,8 @@ class UsernameSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      style: TextStyle(fontSize: 15.sp),
-      decoration: InputDecoration(
-        prefixIcon: Icon(Icons.person, color: ColorsManager.primaryPurple),
-        hintText: "أدخل اسم المستخدم",
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 12.w),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide.none,
-        ),
-      ),
+      style: ProfileTextStyles.usernameFieldText,
+      decoration: ProfileDecorations.usernameFieldDecoration(),
     );
   }
 }
@@ -405,13 +377,9 @@ class InfoCard extends StatelessWidget {
         Icon(Icons.info, size: 18.sp, color: ColorsManager.primaryPurple),
         SizedBox(width: 8.w),
         Expanded(
-          child: Text(
-            "$title: $value",
-            style: TextStyle(fontSize: 14.sp, fontFamily: 'YaModernPro'),
-          ),
+          child: Text("$title: $value", style: ProfileTextStyles.infoCardText),
         ),
       ],
     );
   }
-
 }

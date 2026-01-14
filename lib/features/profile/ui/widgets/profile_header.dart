@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
+import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
 import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
 import 'package:mishkat_almasabih/features/profile/edit_profile/logic/cubit/edit_profile_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/edit_profile/ui/edit_profile_screen.dart';
@@ -20,16 +22,7 @@ class ProfileHeader extends StatelessWidget {
       backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                ColorsManager.primaryPurple,
-                ColorsManager.secondaryPurple,
-              ],
-            ),
-          ),
+          decoration: ProfileDecorations.profileHeaderGradient,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -46,20 +39,13 @@ class ProfileHeader extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(
                     user.username ?? "المستخدم",
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w500,
-                      color: ColorsManager.white,
-                    ),
+                    style: ProfileTextStyles.profileHeaderUsername,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   user.email ?? "user@example.com",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: ColorsManager.white.withOpacity(0.85),
-                  ),
+                  style: ProfileTextStyles.profileHeaderEmail,
                 ),
               ],
             ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
-import '../../core/theming/colors.dart';
+import '../../core/theming/splash_styles.dart';
+import '../../core/theming/splash_decorations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -27,31 +27,31 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _initializeControllers() {
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: SplashDecorations.fadeAnimationDuration,
       vsync: this,
     );
     _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+      duration: SplashDecorations.scaleAnimationDuration,
       vsync: this,
     );
     _slideController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: SplashDecorations.slideAnimationDuration,
       vsync: this,
     );
   }
 
   void _startAnimations() {
     _fadeController.forward();
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(SplashDecorations.scaleAnimationDelay, () {
       _scaleController.forward();
     });
-    Future.delayed(const Duration(milliseconds: 600), () {
+    Future.delayed(SplashDecorations.slideAnimationDelay, () {
       _slideController.forward();
     });
   }
 
   void _navigateToNextScreen() {
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(SplashDecorations.navigationDelay, () {
       Navigator.pushReplacementNamed(context, Routes.homeScreen);
     });
   }
@@ -67,20 +67,9 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorsManager.primaryGreen,
+      backgroundColor: SplashDecorations.scaffoldBackground,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              ColorsManager.primaryGreen,
-              ColorsManager.primaryGreen.withOpacity(0.9),
-              ColorsManager.primaryGreen.withOpacity(0.8),
-            ],
-            stops: const [0.0, 0.9, 1.5],
-          ),
-        ),
+        decoration: SplashDecorations.backgroundGradient(),
         child: Column(
           children: [
             Expanded(
@@ -88,19 +77,19 @@ class _SplashScreenState extends State<SplashScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildLogoSection(),
-        
-                  SizedBox(height: 22.h),
-        
+
+                  SizedBox(height: SplashDecorations.spacingAfterLogo),
+
                   _buildAppNameSection(),
-        
-                  SizedBox(height: 60.h),
-        
+
+                  SizedBox(height: SplashDecorations.spacingAfterAppName),
+
                   _buildLoadingIndicator(),
                 ],
               ),
             ),
-        
-            SizedBox(height: 60.h),
+
+            SizedBox(height: SplashDecorations.bottomSpacing),
           ],
         ),
       ),
@@ -109,39 +98,28 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildLogoSection() {
     return Container(
-          width: 140.w,
-          height: 140.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: ColorsManager.white,
-            boxShadow: [
-              BoxShadow(
-                color: ColorsManager.black.withOpacity(0.2),
-                blurRadius: 30,
-                spreadRadius: 5,
-                offset: const Offset(0, 15),
-              ),
-            ],
-          ),
+          width: SplashDecorations.logoContainerSize,
+          height: SplashDecorations.logoContainerSize,
+          decoration: SplashDecorations.logoContainer(),
           child: Padding(
-            padding: EdgeInsets.all(25.w),
+            padding: SplashDecorations.logoPadding,
             child: Image.asset(
-              'assets/images/app_logo.png',
+              SplashDecorations.logoAssetPath,
               fit: BoxFit.contain,
             ),
           ),
         )
         .animate(controller: _scaleController)
         .scale(
-          begin: const Offset(0.0, 0.0),
-          end: const Offset(1.0, 1.0),
+          begin: SplashDecorations.logoScaleBegin,
+          end: SplashDecorations.logoScaleEnd,
           curve: Curves.elasticOut,
         )
         .then()
         .animate(onPlay: (controller) => controller.repeat())
         .shimmer(
-          duration: 2000.ms,
-          color: ColorsManager.white.withOpacity(0.3),
+          duration: SplashDecorations.logoShimmerDuration.ms,
+          color: SplashDecorations.logoShimmerColor,
         );
   }
 
@@ -150,45 +128,35 @@ class _SplashScreenState extends State<SplashScreen>
       children: [
         // Arabic app name
         Text(
-                      'مشكاة الأحاديث',
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 32.sp,
-                fontWeight: FontWeight.bold,
-                color: ColorsManager.white,
-                letterSpacing: 1.0,
-                shadows: [
-                  Shadow(
-                    color: ColorsManager.black.withOpacity(0.3),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
+              SplashTextStyles.appNameText,
+              style: SplashTextStyles.appNameArabic,
             )
             .animate(controller: _fadeController)
-            .fadeIn(duration: 1000.ms)
-            .slideY(begin: 0.3, curve: Curves.easeOut),
+            .fadeIn(duration: SplashDecorations.appNameFadeInDuration.ms)
+            .slideY(
+              begin: SplashDecorations.appNameSlideYBegin,
+              curve: Curves.easeOut,
+            ),
 
-        SizedBox(height: 12.h),
+        SizedBox(height: SplashDecorations.spacingAfterDescription),
 
         Container(
-              padding: EdgeInsets.symmetric(horizontal: 40.w),
+              padding: SplashDecorations.appDescriptionPadding,
               child: Text(
-                'اكتشف آلاف الأحاديث الموثوقة مع ميزات بحث ذكية وحفظ المفضلة. ابدأ رحلتك في التعلم الإسلامي الآن',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: ColorsManager.white.withOpacity(0.9),
-                  height: 1.6,
-                  fontFamily: 'Amiri',
-                ),
+                SplashTextStyles.appDescriptionText,
+                style: SplashTextStyles.appDescription,
                 textAlign: TextAlign.center,
               ),
             )
             .animate(controller: _fadeController)
-            .fadeIn(delay: 600.ms, duration: 1000.ms)
-            .slideY(begin: 0.3, curve: Curves.easeOut),
+            .fadeIn(
+              delay: SplashDecorations.appDescriptionFadeInDelay.ms,
+              duration: SplashDecorations.appDescriptionFadeInDuration.ms,
+            )
+            .slideY(
+              begin: SplashDecorations.appDescriptionSlideYBegin,
+              curve: Curves.easeOut,
+            ),
       ],
     );
   }
@@ -201,31 +169,31 @@ class _SplashScreenState extends State<SplashScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(3, (index) {
             return Container(
-              margin: EdgeInsets.symmetric(horizontal: 6.w),
+              margin: SplashDecorations.loadingDotMargin,
               child: Container(
-                    width: 8.w,
-                    height: 8.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: ColorsManager.white,
-                    ),
+                    width: SplashDecorations.loadingDotSize,
+                    height: SplashDecorations.loadingDotSize,
+                    decoration: SplashDecorations.loadingDotDecoration(),
                   )
                   .animate(controller: _slideController)
-                  .fadeIn(delay: (index * 100).ms, duration: 600.ms)
-                  .scale(begin: const Offset(0.0, 0.0))
+                  .fadeIn(
+                    delay: (index * 100).ms,
+                    duration: SplashDecorations.loadingDotFadeInDuration.ms,
+                  )
+                  .scale(begin: SplashDecorations.loadingDotScaleBegin)
                   .then()
                   .animate(onPlay: (controller) => controller.repeat())
                   .scale(
-                    begin: const Offset(1.0, 1.0),
-                    end: const Offset(1.3, 1.3),
-                    duration: 800.ms,
+                    begin: SplashDecorations.loadingDotScaleEnd1,
+                    end: SplashDecorations.loadingDotScaleEnd2,
+                    duration: SplashDecorations.loadingDotScaleDuration.ms,
                     curve: Curves.easeInOut,
                   )
                   .then()
                   .scale(
-                    begin: const Offset(1.3, 1.3),
-                    end: const Offset(1.0, 1.0),
-                    duration: 800.ms,
+                    begin: SplashDecorations.loadingDotScaleEnd2,
+                    end: SplashDecorations.loadingDotScaleEnd1,
+                    duration: SplashDecorations.loadingDotScaleDuration.ms,
                     curve: Curves.easeInOut,
                   ),
             );

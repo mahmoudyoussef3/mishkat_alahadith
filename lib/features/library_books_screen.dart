@@ -9,8 +9,8 @@ import 'package:mishkat_almasabih/features/home/ui/widgets/build_main_category_c
 import 'package:mishkat_almasabih/features/home/ui/widgets/home_screen_shimmer.dart';
 import 'package:mishkat_almasabih/features/library/ui/screens/library_screen.dart';
 
-import '../../../core/theming/colors.dart';
-import '../../../core/theming/styles.dart';
+import '../../../core/theming/library_decorations.dart';
+import '../../../core/theming/library_styles.dart';
 import '../../../core/helpers/spacing.dart';
 
 class LibraryBooksScreen extends StatefulWidget {
@@ -37,10 +37,8 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-     
-
         child: Scaffold(
-          backgroundColor: ColorsManager.secondaryBackground,
+          backgroundColor: LibraryDecorations.scaffoldBackground,
           body: _buildBody(),
         ),
       ),
@@ -138,17 +136,7 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
   Widget _buildStatisticsHeader() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: ColorsManager.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: ColorsManager.primaryPurple.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: LibraryDecorations.sectionHeaderContainer(),
       child: Row(
         children: [
           _buildStatisticsHeaderIcon(),
@@ -162,13 +150,12 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
   Widget _buildStatisticsHeaderIcon() {
     return Container(
       padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: ColorsManager.primaryPurple.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.r),
+      decoration: LibraryDecorations.sectionHeaderIconContainer(
+        LibraryDecorations.booksColor.withOpacity(0.1),
       ),
       child: Icon(
         Icons.analytics,
-        color: ColorsManager.primaryPurple,
+        color: LibraryDecorations.booksColor,
         size: 24.sp,
       ),
     );
@@ -179,19 +166,11 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'إحصائيات المكتبة',
-            style: TextStyles.headlineMedium.copyWith(
-              color: ColorsManager.primaryText,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text('إحصائيات المكتبة', style: LibraryTextStyles.headerTitleStyle),
           SizedBox(height: 4.h),
           Text(
             'نظرة عامة على محتويات المكتبة الإسلامية',
-            style: TextStyles.bodyMedium.copyWith(
-              color: ColorsManager.secondaryText,
-            ),
+            style: LibraryTextStyles.headerDescriptionStyle,
           ),
         ],
       ),
@@ -205,21 +184,21 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
           icon: Icons.book,
           title: 'إجمالي الكتب',
           value: state.statisticsResponse.statistics.totalBooks.toString(),
-          color: const Color.fromARGB(255, 51, 13, 128),
+          color: LibraryDecorations.booksColor,
         ),
         SizedBox(width: Spacing.md),
         _buildStatisticsCard(
           icon: Icons.folder,
           title: 'الأبواب',
           value: state.statisticsResponse.statistics.totalChapters.toString(),
-          color: ColorsManager.hadithAuthentic,
+          color: LibraryDecorations.chaptersColor,
         ),
         SizedBox(width: Spacing.md),
         _buildStatisticsCard(
           icon: Icons.auto_stories,
           title: 'الأحاديث',
           value: state.statisticsResponse.statistics.totalHadiths.toString(),
-          color: ColorsManager.primaryGold,
+          color: LibraryDecorations.hadithsColor,
         ),
       ],
     );
@@ -244,17 +223,7 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
   Widget _buildCategoriesHeader() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: ColorsManager.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: ColorsManager.primaryPurple.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: LibraryDecorations.sectionHeaderContainer(),
       child: Row(
         children: [
           _buildCategoriesHeaderIcon(),
@@ -268,13 +237,12 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
   Widget _buildCategoriesHeaderIcon() {
     return Container(
       padding: EdgeInsets.all(8.w),
-      decoration: BoxDecoration(
-        color: ColorsManager.primaryGold.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.r),
+      decoration: LibraryDecorations.sectionHeaderIconContainer(
+        LibraryDecorations.hadithsColor.withOpacity(0.1),
       ),
       child: Icon(
         Icons.library_books,
-        color: ColorsManager.primaryGold,
+        color: LibraryDecorations.hadithsColor,
         size: 24.sp,
       ),
     );
@@ -285,19 +253,11 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'الكتب الرئيسية',
-            style: TextStyles.headlineMedium.copyWith(
-              color: ColorsManager.primaryText,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text('الكتب الرئيسية', style: LibraryTextStyles.headerTitleStyle),
           SizedBox(height: 4.h),
           Text(
             'مصادر الأحاديث النبوية الشريفة',
-            style: TextStyles.bodyMedium.copyWith(
-              color: ColorsManager.secondaryText,
-            ),
+            style: LibraryTextStyles.headerDescriptionStyle,
           ),
         ],
       ),
@@ -368,42 +328,21 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
   }
 
   LinearGradient _buildKutubTisaaGradient() {
-    return LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryGreen, ColorsManager.darkPurple],
-    );
+    return LibraryDecorations.kutubTisaaGradient();
   }
 
   LinearGradient _buildArbaainGradient() {
-    return LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryGreen, ColorsManager.darkPurple],
-    );
+    return LibraryDecorations.arbaainGradient();
   }
 
   LinearGradient _buildAdabGradient() {
-    return LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryGreen, ColorsManager.darkPurple],
-    );
+    return LibraryDecorations.adabGradient();
   }
 
   Widget _buildIslamicSeparator() {
     return Container(
       height: 2.h,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ColorsManager.primaryPurple.withOpacity(0.3),
-            ColorsManager.primaryGold.withOpacity(0.6),
-            ColorsManager.primaryPurple.withOpacity(0.3),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(1.r),
-      ),
+      decoration: LibraryDecorations.islamicSeparator(),
     );
   }
 

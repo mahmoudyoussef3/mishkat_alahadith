@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
 import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
 
 class ChatMessageBubble extends StatelessWidget {
@@ -14,11 +15,7 @@ class ChatMessageBubble extends StatelessWidget {
     final isUser = message.role == "user";
 
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: 12.h,
-        left: 8.w,
-        right: 8.w,
-      ),
+      padding: SeragDecorations.messageBubblePadding,
       child: Row(
         mainAxisAlignment:
             isUser ? MainAxisAlignment.start : MainAxisAlignment.end,
@@ -27,12 +24,12 @@ class ChatMessageBubble extends StatelessWidget {
           if (isUser) ...[
             SizedBox(width: 8.w),
             CircleAvatar(
-              radius: 16.r,
-              backgroundColor: ColorsManager.primaryPurple,
+              radius: SeragDecorations.userAvatarRadius,
+              backgroundColor: SeragDecorations.userAvatarBackground,
               child: Icon(
                 Icons.person,
-                color: Colors.white,
-                size: 18.sp,
+                color: SeragDecorations.userAvatarIconColor,
+                size: SeragDecorations.userAvatarIconSize,
               ),
             ),
           ],
@@ -45,67 +42,34 @@ class ChatMessageBubble extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: const Text("تم نسخ الرسالة"),
-                    backgroundColor: ColorsManager.primaryPurple,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    margin: EdgeInsets.all(16.w),
+                    backgroundColor: SeragDecorations.snackbarCopyBackground,
+                    behavior: SeragDecorations.snackbarBehavior,
+                    shape: SeragDecorations.snackbarShape,
+                    margin: SeragDecorations.snackbarMargin,
                   ),
                 );
               },
               child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 12.h,
-                ),
-                decoration: BoxDecoration(
-                  gradient: isUser
-                      ? LinearGradient(
-                          colors: [
-                            ColorsManager.primaryPurple,
-                            ColorsManager.primaryPurple.withOpacity(0.8),
-                          ],
-                          begin: Alignment.topRight,
-                          end: Alignment.bottomLeft,
-                        )
-                      : null,
-                  color: isUser ? null : ColorsManager.secondaryBackground,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20.r),
-                    topRight: Radius.circular(20.r),
-                    bottomLeft:
-                        isUser ? Radius.circular(20.r) : Radius.circular(4.r),
-                    bottomRight:
-                        isUser ? Radius.circular(4.r) : Radius.circular(20.r),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isUser
-                          ? ColorsManager.primaryPurple.withOpacity(0.3)
-                          : Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
+                padding: SeragDecorations.messageBubbleInternalPadding,
+                decoration:
+                    isUser
+                        ? SeragDecorations.userMessageBubble()
+                        : SeragDecorations.assistantMessageBubble(),
                 child: Text(
                   message.content,
-                  style: TextStyle(
-                    color: isUser ? Colors.white : ColorsManager.primaryText,
-                    fontSize: 15.sp,
-                    height: 1.4,
-                    fontWeight: isUser ? FontWeight.w500 : FontWeight.w400,
-                  ),
+                  style:
+                      isUser
+                          ? SeragTextStyles.userMessage
+                          : SeragTextStyles.assistantMessage,
                 ),
               ),
             ),
           ),
-          SizedBox(width: 8.w,),
+          SizedBox(width: 8.w),
           if (!isUser) ...[
             CircleAvatar(
-              radius: 16.r,
-              backgroundImage: AssetImage('assets/images/serag_logo.jpg'),
+              radius: SeragDecorations.assistantAvatarRadius,
+              backgroundImage: AssetImage(SeragDecorations.assistantAvatarPath),
             ),
           ],
         ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
+import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
 
 class NotificationToggleCard extends StatelessWidget {
   final String title;
@@ -21,25 +23,7 @@ class NotificationToggleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: value
-              ? ColorsManager.primaryPurple.withOpacity(0.3)
-              : Colors.grey.shade200,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: value
-                ? ColorsManager.primaryPurple.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: ProfileDecorations.notificationCard(value),
       child: Padding(
         padding: EdgeInsets.all(16.w),
         child: Row(
@@ -58,12 +42,7 @@ class NotificationToggleCard extends StatelessWidget {
   Widget _buildIcon() {
     return Container(
       padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: value
-            ? ColorsManager.primaryPurple.withOpacity(0.15)
-            : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12.r),
-      ),
+      decoration: ProfileDecorations.notificationIconContainer(value),
       child: Icon(
         icon,
         size: 24.sp,
@@ -76,23 +55,9 @@ class NotificationToggleCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+        Text(title, style: ProfileTextStyles.notificationCardTitle),
         SizedBox(height: 4.h),
-        Text(
-          subtitle,
-          style: TextStyle(
-            fontSize: 13.sp,
-            color: Colors.grey.shade600,
-            height: 1.3,
-          ),
-        ),
+        Text(subtitle, style: ProfileTextStyles.notificationCardSubtitle),
       ],
     );
   }
@@ -103,10 +68,12 @@ class NotificationToggleCard extends StatelessWidget {
       child: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: ColorsManager.primaryPurple,
-        activeTrackColor: ColorsManager.primaryPurple.withOpacity(0.5),
-        inactiveThumbColor: Colors.grey.shade400,
-        inactiveTrackColor: Colors.grey.shade300,
+        activeColor: ProfileDecorations.notificationSwitchActiveColor,
+        activeTrackColor: ProfileDecorations.notificationSwitchActiveTrackColor,
+        inactiveThumbColor:
+            ProfileDecorations.notificationSwitchInactiveThumbColor,
+        inactiveTrackColor:
+            ProfileDecorations.notificationSwitchInactiveTrackColor,
       ),
     );
   }

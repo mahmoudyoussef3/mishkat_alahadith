@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
+import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
 
 class StatCard extends StatelessWidget {
   final String title;
@@ -18,26 +20,13 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: ProfileDecorations.statsCard(color),
       child: Padding(
         padding: EdgeInsets.all(16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildIcon(),
-            _buildContent(),
-          ],
+          children: [_buildIcon(), _buildContent()],
         ),
       ),
     );
@@ -46,15 +35,8 @@ class StatCard extends StatelessWidget {
   Widget _buildIcon() {
     return Container(
       padding: EdgeInsets.all(10.w),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Icon(
-        icon,
-        size: 22.sp,
-        color: color,
-      ),
+      decoration: ProfileDecorations.statsIconContainer(color),
+      child: Icon(icon, size: 22.sp, color: color),
     );
   }
 
@@ -62,22 +44,11 @@ class StatCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+        Text(value, style: ProfileTextStyles.statValue),
         SizedBox(height: 2.h),
         Text(
           title,
-          style: TextStyle(
-            fontSize: 13.sp,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
-          ),
+          style: ProfileTextStyles.statTitle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

@@ -5,7 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/theming/qiblah_finder_styles.dart';
+import 'package:mishkat_almasabih/core/theming/qiblah_finder_decorations.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
 import 'package:mishkat_almasabih/features/qiblah_finder/logic/cubit/qiblah_cubit.dart';
 
@@ -120,24 +121,13 @@ class _QiblahCompassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: ColorsManager.cardBackground,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: ColorsManager.mediumGray, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: ColorsManager.mediumGray.withOpacity(0.18),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+      decoration: QiblahFinderDecorations.compassCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             'اتجاه القبلة',
-            style: TextStyles.titleLarge.copyWith(fontWeight: FontWeight.w700),
+            style: QiblahFinderTextStyles.compassCardTitle,
             textAlign: TextAlign.right,
           ),
           SizedBox(height: 12.h),
@@ -159,9 +149,7 @@ class _QiblahCompassCard extends StatelessWidget {
                     return Center(
                       child: Text(
                         'جاري قراءة المستشعرات...',
-                        style: TextStyles.bodyMedium.copyWith(
-                          color: ColorsManager.secondaryText,
-                        ),
+                        style: QiblahFinderTextStyles.loadingMessage,
                       ),
                     );
                   }
@@ -195,26 +183,16 @@ class _QiblahCompassCard extends StatelessWidget {
           SizedBox(height: 14.h),
           Container(
             padding: EdgeInsets.all(12.r),
-            decoration: BoxDecoration(
-              color: ColorsManager.primaryPurple.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(
-                color: ColorsManager.primaryPurple.withOpacity(0.18),
-                width: 1,
-              ),
-            ),
+            decoration: QiblahFinderDecorations.tipsContainer(),
             child: Row(
               children: [
                 Container(
                   width: 36.r,
                   height: 36.r,
-                  decoration: BoxDecoration(
-                    color: ColorsManager.primaryGold.withOpacity(0.14),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
+                  decoration: QiblahFinderDecorations.tipsIconContainer(),
                   child: const Icon(
-                    Icons.tips_and_updates_rounded,
-                    color: ColorsManager.primaryGold,
+                    QiblahFinderDecorations.tipsIcon,
+                    color: QiblahFinderDecorations.tipsIconColor,
                   ),
                 ),
                 SizedBox(width: 10.w),
@@ -224,10 +202,7 @@ class _QiblahCompassCard extends StatelessWidget {
                     children: [
                       Text(
                         'نصائح لنتيجة أدق',
-                        style: TextStyles.titleSmall.copyWith(
-                          color: ColorsManager.primaryText,
-                          fontWeight: FontWeight.w800,
-                        ),
+                        style: QiblahFinderTextStyles.tipsSectionTitle,
                         textAlign: TextAlign.right,
                       ),
                       SizedBox(height: 6.h),
@@ -309,26 +284,22 @@ class _InfoChip extends StatelessWidget {
         top: 10.h,
         bottom: 10.h,
       ),
-      decoration: BoxDecoration(
-        color: ColorsManager.secondaryBackground,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: ColorsManager.mediumGray, width: 1),
-      ),
+      decoration: QiblahFinderDecorations.infoChip(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Icon(icon, color: ColorsManager.primaryPurple, size: 18.sp),
+              Icon(
+                icon,
+                color: QiblahFinderDecorations.infoChipIconColor,
+                size: 18.sp,
+              ),
               SizedBox(width: 6.w),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyles.bodySmall.copyWith(
-                    color: ColorsManager.secondaryText,
-                    fontWeight: FontWeight.w700,
-                    height: 1.1,
-                  ),
+                  style: QiblahFinderTextStyles.infoChipLabel,
                   textAlign: TextAlign.right,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -339,10 +310,7 @@ class _InfoChip extends StatelessWidget {
           SizedBox(height: 6.h),
           Text(
             value,
-            style: TextStyles.titleMedium.copyWith(
-              color: ColorsManager.primaryText,
-              fontWeight: FontWeight.w900,
-            ),
+            style: QiblahFinderTextStyles.infoChipValue,
             textAlign: TextAlign.right,
           ),
         ],
@@ -364,19 +332,15 @@ class _TipLine extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            Icons.check_circle_rounded,
+            QiblahFinderDecorations.tipsCheckIcon,
             size: 16.sp,
-            color: ColorsManager.primaryPurple,
+            color: QiblahFinderDecorations.tipsCheckIconColor,
           ),
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
               text,
-              style: TextStyles.bodyMedium.copyWith(
-                color: ColorsManager.secondaryText,
-                fontWeight: FontWeight.w600,
-                height: 1.25,
-              ),
+              style: QiblahFinderTextStyles.tipText,
               textAlign: TextAlign.right,
             ),
           ),
@@ -403,36 +367,13 @@ class _QiblahDial extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         // Outer ring
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                ColorsManager.primaryPurple.withOpacity(0.22),
-                ColorsManager.primaryPurple.withOpacity(0.10),
-              ],
-            ),
-          ),
-        ),
+        Container(decoration: QiblahFinderDecorations.dialOuterRing()),
 
         // Inner surface
         Padding(
           padding: EdgeInsets.all(14.r),
           child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: ColorsManager.cardBackground,
-              border: Border.all(color: ColorsManager.mediumGray, width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: ColorsManager.mediumGray.withOpacity(0.22),
-                  blurRadius: 14,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
+            decoration: QiblahFinderDecorations.dialInnerSurface(),
           ),
         ),
 
@@ -464,11 +405,7 @@ class _QiblahDial extends StatelessWidget {
         Container(
           width: 18.r,
           height: 18.r,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: ColorsManager.primaryPurple,
-            border: Border.all(color: ColorsManager.white, width: 2),
-          ),
+          decoration: QiblahFinderDecorations.dialCenterHub(),
         ),
 
         // Qiblah badge
@@ -476,59 +413,29 @@ class _QiblahDial extends StatelessWidget {
           top: 14.h,
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: ColorsManager.secondaryBackground,
-              borderRadius: BorderRadius.circular(999.r),
-              border: Border.all(color: ColorsManager.mediumGray, width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: ColorsManager.mediumGray.withOpacity(0.16),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
+            decoration: QiblahFinderDecorations.qiblahBadgeContainer(),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 28.r,
                   height: 28.r,
-                  decoration: BoxDecoration(
-                    color: ColorsManager.primaryGold.withOpacity(0.14),
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: QiblahFinderDecorations.qiblahIconContainer(),
                   child: const Icon(
-                    Icons.mosque,
-                    color: ColorsManager.primaryGold,
+                    QiblahFinderDecorations.qiblahIcon,
+                    color: QiblahFinderDecorations.qiblahIconColor,
                     size: 18,
                   ),
                 ),
                 SizedBox(width: 8.w),
-                Text(
-                  'القبلة',
-                  style: TextStyles.bodyMedium.copyWith(
-                    color: ColorsManager.primaryText,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+                Text('القبلة', style: QiblahFinderTextStyles.qiblahBadgeText),
                 SizedBox(width: 8.w),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: ColorsManager.primaryPurple.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(999.r),
-                    border: Border.all(
-                      color: ColorsManager.primaryPurple.withOpacity(0.16),
-                      width: 1,
-                    ),
-                  ),
+                  decoration: QiblahFinderDecorations.qiblahDegreeBadge(),
                   child: Text(
                     '${qiblahDegrees.toStringAsFixed(0)}°',
-                    style: TextStyles.bodySmall.copyWith(
-                      color: ColorsManager.primaryPurple,
-                      fontWeight: FontWeight.w900,
-                    ),
+                    style: QiblahFinderTextStyles.qiblahDegreeBadge,
                   ),
                 ),
               ],
@@ -541,17 +448,10 @@ class _QiblahDial extends StatelessWidget {
           bottom: 10.h,
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: ColorsManager.secondaryBackground,
-              borderRadius: BorderRadius.circular(999.r),
-              border: Border.all(color: ColorsManager.mediumGray, width: 1),
-            ),
+            decoration: QiblahFinderDecorations.offsetLabelContainer(),
             child: Text(
               'الانحراف: ${offsetDegrees.toStringAsFixed(1)}°',
-              style: TextStyles.bodySmall.copyWith(
-                color: ColorsManager.secondaryText,
-                fontWeight: FontWeight.w700,
-              ),
+              style: QiblahFinderTextStyles.offsetLabel,
               textAlign: TextAlign.center,
             ),
           ),
@@ -567,27 +467,13 @@ class _CompassDialPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.shortestSide / 2;
 
-    final ringPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = radius * 0.06
-          ..color = ColorsManager.primaryPurple.withOpacity(0.18);
+    final ringPaint = QiblahFinderDecorations.dialRingPaint(radius);
 
     canvas.drawCircle(center, radius * 0.98, ringPaint);
 
-    final minorPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = radius * 0.012
-          ..strokeCap = StrokeCap.round
-          ..color = ColorsManager.mediumGray.withOpacity(0.75);
+    final minorPaint = QiblahFinderDecorations.dialMinorTickPaint(radius);
 
-    final majorPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = radius * 0.02
-          ..strokeCap = StrokeCap.round
-          ..color = ColorsManager.primaryPurple.withOpacity(0.55);
+    final majorPaint = QiblahFinderDecorations.dialMajorTickPaint(radius);
 
     for (int deg = 0; deg < 360; deg += 10) {
       final isMajor = deg % 30 == 0;
@@ -614,7 +500,7 @@ class _CompassDialPainter extends CustomPainter {
       radius: radius,
       text: 'ش',
       angleDegrees: 0,
-      color: ColorsManager.primaryPurple,
+      color: QiblahFinderDecorations.dialNorthLabelColor,
     );
     _drawLabel(
       canvas: canvas,
@@ -622,7 +508,7 @@ class _CompassDialPainter extends CustomPainter {
       radius: radius,
       text: 'ق',
       angleDegrees: 90,
-      color: ColorsManager.secondaryText,
+      color: QiblahFinderDecorations.dialOtherLabelColor,
     );
     _drawLabel(
       canvas: canvas,
@@ -630,7 +516,7 @@ class _CompassDialPainter extends CustomPainter {
       radius: radius,
       text: 'ج',
       angleDegrees: 180,
-      color: ColorsManager.secondaryText,
+      color: QiblahFinderDecorations.dialOtherLabelColor,
     );
     _drawLabel(
       canvas: canvas,
@@ -638,7 +524,7 @@ class _CompassDialPainter extends CustomPainter {
       radius: radius,
       text: 'غ',
       angleDegrees: 270,
-      color: ColorsManager.secondaryText,
+      color: QiblahFinderDecorations.dialOtherLabelColor,
     );
   }
 
@@ -686,15 +572,9 @@ class _NeedlePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.shortestSide / 2;
 
-    final needlePaint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = ColorsManager.primaryGold;
+    final needlePaint = QiblahFinderDecorations.needlePaint();
 
-    final shadowPaint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = ColorsManager.black.withOpacity(0.10);
+    final shadowPaint = QiblahFinderDecorations.needleShadowPaint();
 
     final needleLength = radius * 0.88;
     final needleWidth = radius * 0.09;
@@ -736,25 +616,19 @@ class _MessageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: ColorsManager.cardBackground,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: ColorsManager.mediumGray, width: 1),
-      ),
+      decoration: QiblahFinderDecorations.messageCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             title,
-            style: TextStyles.titleLarge.copyWith(fontWeight: FontWeight.w800),
+            style: QiblahFinderTextStyles.messageCardTitle,
             textAlign: TextAlign.right,
           ),
           SizedBox(height: 8.h),
           Text(
             message,
-            style: TextStyles.bodyMedium.copyWith(
-              color: ColorsManager.secondaryText,
-            ),
+            style: QiblahFinderTextStyles.messageCardDescription,
             textAlign: TextAlign.right,
           ),
           SizedBox(height: 12.h),
@@ -762,19 +636,10 @@ class _MessageCard extends StatelessWidget {
             height: 44.h,
             child: ElevatedButton(
               onPressed: onPressed,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorsManager.primaryPurple,
-                foregroundColor: ColorsManager.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
+              style: QiblahFinderDecorations.messageCardButton(),
               child: Text(
                 buttonText,
-                style: TextStyles.labelLarge.copyWith(
-                  color: ColorsManager.white,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: QiblahFinderTextStyles.messageCardButtonText,
               ),
             ),
           ),

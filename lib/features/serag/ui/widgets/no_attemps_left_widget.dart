@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
 
 class NoAttemptsLeftWidget extends StatelessWidget {
   const NoAttemptsLeftWidget({super.key});
@@ -6,26 +8,21 @@ class NoAttemptsLeftWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade200),
-      ),
+      padding: SeragDecorations.noAttemptsContainerPadding,
+      margin: SeragDecorations.noAttemptsContainerMargin,
+      decoration: SeragDecorations.noAttemptsContainer(),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Colors.red),
+          Icon(
+            SeragDecorations.noAttemptsWarningIcon,
+            color: SeragDecorations.noAttemptsWarningIconColor,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               "عذراً، لقد استنفذت الحد اليومي.\nيرجى المحاولة مرة أخرى غداً.",
-              style: const TextStyle(
-                color: Colors.red,
-                fontSize: 14,
-                height: 1.4,
-              ),
+              style: SeragTextStyles.noAttemptsWarningText,
             ),
           ),
         ],

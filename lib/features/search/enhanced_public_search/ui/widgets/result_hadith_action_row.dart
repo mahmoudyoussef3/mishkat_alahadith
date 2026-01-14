@@ -5,7 +5,8 @@ import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
@@ -66,10 +67,7 @@ class _ResultHadithActionRowState extends State<ResultHadithActionRow> {
         horizontal: 16.w,
         vertical: 16.h,
       ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: ColorsManager.primaryPurple.withOpacity(0.1),
-      ),
+      decoration: EnhancedSearchDecorations.actionRowContainer(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -100,24 +98,27 @@ class _ResultHadithActionRowState extends State<ResultHadithActionRow> {
                 if (state is AddLoading) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      backgroundColor: ColorsManager.primaryGreen,
+                      backgroundColor:
+                          EnhancedSearchDecorations.snackBarLoadingColor,
                       content: loadingProgressIndicator(
                         size: 30,
-                        color: Colors.white,
+                        color: EnhancedSearchDecorations.snackBarIconColor,
                       ),
                     ),
                   );
                 } else if (state is AddSuccess) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      backgroundColor: Colors.green,
+                    SnackBar(
+                      backgroundColor:
+                          EnhancedSearchDecorations.snackBarSuccessColor,
                       content: Text("تم حفظ الحديث"),
                     ),
                   );
                 } else if (state is AddFailure) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      backgroundColor: Colors.red,
+                    SnackBar(
+                      backgroundColor:
+                          EnhancedSearchDecorations.snackBarErrorColor,
                       content: Text("حدث خطأ. حاول مرة أخرى"),
                     ),
                   );
@@ -138,9 +139,7 @@ class _ResultHadithActionRowState extends State<ResultHadithActionRow> {
                                 Text(
                                   'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
                                   textDirection: TextDirection.rtl,
-                                  style: TextStyle(
-                                    color: ColorsManager.secondaryBackground,
-                                  ),
+                                  style: EnhancedSearchTextStyles.snackBarText,
                                 ),
                                 IconButton(
                                   onPressed:
@@ -148,12 +147,15 @@ class _ResultHadithActionRowState extends State<ResultHadithActionRow> {
                                           context.pushNamed(Routes.loginScreen),
                                   icon: Icon(
                                     Icons.login,
-                                    color: ColorsManager.secondaryBackground,
+                                    color:
+                                        EnhancedSearchDecorations
+                                            .snackBarIconColor,
                                   ),
                                 ),
                               ],
                             ),
-                            backgroundColor: ColorsManager.primaryGreen,
+                            backgroundColor:
+                                EnhancedSearchDecorations.snackBarLoginColor,
                           ),
                         )
                         : showDialog(
@@ -202,14 +204,14 @@ class _ResultHadithActionRowState extends State<ResultHadithActionRow> {
       child: Column(
         children: [
           CircleAvatar(
-            backgroundColor: ColorsManager.primaryPurple.withOpacity(0.1),
-            child: Icon(icon, color: ColorsManager.primaryPurple),
+            backgroundColor: EnhancedSearchDecorations.actionButtonBackground,
+            child: Icon(
+              icon,
+              color: EnhancedSearchDecorations.actionButtonIconColor,
+            ),
           ),
           SizedBox(height: 6.h),
-          Text(
-            label,
-            style: TextStyle(fontSize: 13.sp, color: ColorsManager.darkGray),
-          ),
+          Text(label, style: EnhancedSearchTextStyles.actionButtonLabel),
         ],
       ),
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/models/enhanced_search_response_model.dart';
 
 class ResultHadithTabContent extends StatelessWidget {
@@ -23,11 +23,7 @@ class ResultHadithTabContent extends StatelessWidget {
             children: [
               TextSpan(
                 text: data?.explanation ?? "لا يوجد شرح",
-                style: const TextStyle(
-  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w500,                  color: ColorsManager.black,
-                  height: 1.6,
-                ),
+                style: EnhancedSearchTextStyles.explanationText,
               ),
             ],
           ),
@@ -47,19 +43,12 @@ class ResultHadithTabContent extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: "${count++}- ".toString(),
-                                style: const TextStyle(
-  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w500,                                  color: ColorsManager.black,
-                                ),
+                                style: EnhancedSearchTextStyles.hintsCounter,
                               ),
                               TextSpan(
                                 text: hint,
-                                
-                                style: TextStyle(
-                                  
-  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w500,
-                                  color: ColorsManager.black),
+
+                                style: EnhancedSearchTextStyles.hintsContent,
                               ),
                             ],
                           ),
@@ -72,8 +61,7 @@ class ResultHadithTabContent extends StatelessWidget {
         return const Text("لا توجد فوائد");
 
       case "معاني الكلمات":
-        if (data?.words_meanings != null &&
-            data!.words_meanings!.isNotEmpty) {
+        if (data?.words_meanings != null && data!.words_meanings!.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children:
@@ -85,27 +73,18 @@ class ResultHadithTabContent extends StatelessWidget {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: wm.word ,
-                                style: const TextStyle(
-  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w700,                                  color: ColorsManager.darkPurple,
-                                ),
-                              ),
-                              const TextSpan(
-                                text: ": ",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: ColorsManager.darkPurple,
-                                ),
+                                text: wm.word,
+                                style: EnhancedSearchTextStyles.wordMeaningWord,
                               ),
                               TextSpan(
-                                text: wm.meaning ,
-                                style: const TextStyle(
-                                  fontSize: 15,
-  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black87,
-                                ),
+                                text: ": ",
+                                style:
+                                    EnhancedSearchTextStyles
+                                        .wordMeaningSeparator,
+                              ),
+                              TextSpan(
+                                text: wm.meaning,
+                                style: EnhancedSearchTextStyles.wordMeaningText,
                               ),
                             ],
                           ),

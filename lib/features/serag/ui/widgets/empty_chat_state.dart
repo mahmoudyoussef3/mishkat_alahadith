@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
 
 class EmptyChatState extends StatelessWidget {
   const EmptyChatState({super.key});
@@ -14,26 +15,19 @@ class EmptyChatState extends StatelessWidget {
           children: [
             Icon(
               Icons.chat_bubble_outline,
-              size: 64.sp,
-              color: ColorsManager.primaryPurple.withOpacity(0.3),
+              size: SeragDecorations.emptyStateIconSize,
+              color: SeragDecorations.emptyStateIconColor,
             ),
             SizedBox(height: 16.h),
             Text(
               "ابدأ بكتابة سؤالك لبدء المحادثة",
-              style: TextStyle(
-                fontSize: 16.sp,
-                color: ColorsManager.secondaryText,
-                fontWeight: FontWeight.w500,
-              ),
+              style: SeragTextStyles.emptyStateMainText,
             ),
             SizedBox(height: 8.h),
             Text(
               "سراج مساعدك الذكي للإجابة على أسئلة الحديث",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: ColorsManager.secondaryText.withOpacity(0.7),
-              ),
+              style: SeragTextStyles.emptyStateSubtitle,
             ),
           ],
         ),

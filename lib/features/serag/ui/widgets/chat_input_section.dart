@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/logic/cubit/remaining_questions_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/logic/cubit/serag_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/logic/cubit/serag_state.dart';
@@ -24,16 +25,7 @@ class ChatInputSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: ColorsManager.primaryBackground,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+      decoration: SeragDecorations.inputSectionContainer(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -50,57 +42,32 @@ class ChatInputSection extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.errMessage),
-                    backgroundColor: Colors.red,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    margin: EdgeInsets.all(16.w),
+                    backgroundColor: SeragDecorations.errorSnackbarBackground,
+                    behavior: SeragDecorations.snackbarBehavior,
+                    shape: SeragDecorations.snackbarShape,
+                    margin: SeragDecorations.snackbarMargin,
                   ),
                 );
               }
             },
             builder: (context, seragState) {
               return Container(
-                padding: EdgeInsets.only(
-                  left: 16.w,
-                  right: 16.w,
-                  top: 8.h,
-                  bottom: MediaQuery.of(context).padding.bottom,
-                ),
+                padding: SeragDecorations.inputSectionPadding(context),
                 child: Row(
                   children: [
                     Expanded(
                       child: Container(
-                        decoration: BoxDecoration(
-                          color: ColorsManager.secondaryBackground,
-                          borderRadius: BorderRadius.circular(25.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
+                        decoration: SeragDecorations.textFieldContainer(),
                         child: TextField(
                           controller: controller,
                           minLines: 1,
                           maxLines: 4,
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            color: ColorsManager.primaryText,
-                          ),
+                          style: SeragTextStyles.inputFieldText,
                           decoration: InputDecoration(
                             hintText: "اكتب رسالتك هنا...",
-                            hintStyle: TextStyle(
-                              color: ColorsManager.secondaryText,
-                              fontSize: 15.sp,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20.w,
-                            ),
+                            hintStyle: SeragTextStyles.inputHintText,
+                            border: SeragDecorations.textFieldBorder,
+                            contentPadding: SeragDecorations.textFieldPadding,
                           ),
                           onTap: scrollToBottom,
                         ),
@@ -108,24 +75,7 @@ class ChatInputSection extends StatelessWidget {
                     ),
                     SizedBox(width: 12.w),
                     Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            ColorsManager.primaryPurple,
-                            ColorsManager.primaryPurple.withOpacity(0.8),
-                          ],
-                          begin: Alignment.topRight,
-                          end: Alignment.bottomLeft,
-                        ),
-                        borderRadius: BorderRadius.circular(25.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: ColorsManager.primaryPurple.withOpacity(0.4),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
+                      decoration: SeragDecorations.sendButtonGradient(),
                       child: Material(
                         color: Colors.transparent,
                         child: GestureDetector(
@@ -142,42 +92,52 @@ class ChatInputSection extends StatelessWidget {
                                           context,
                                         ).showSnackBar(
                                           SnackBar(
-                                            behavior: SnackBarBehavior.floating,
+                                            behavior:
+                                                SeragDecorations
+                                                    .snackbarBehavior,
                                             backgroundColor:
-                                                Colors.red.shade300,
+                                                SeragDecorations
+                                                    .limitExceededSnackbarBackground,
 
                                             content: Text(
                                               "عذراً، لقد استنفذت الحد اليومي.\nيرجى المحاولة مرة أخرى غداً.",
-                                              style: TextStyle(
-                                                color:
-                                                    ColorsManager
-                                                        .secondaryBackground,
-                                                fontSize: 14.sp,
-                                                height: 1.4,
-                                              ),
+                                              style:
+                                                  SeragTextStyles
+                                                      .limitExceededSnackbar,
                                             ),
                                           ),
                                         )
                                         : _handleSendMessage(context);
                                   },
                           child: SizedBox(
-                            width: 50.w,
-                            height: 50.h,
+                            width: SeragDecorations.sendButtonSize,
+                            height: SeragDecorations.sendButtonHeight,
                             child: Center(
                               child:
                                   seragState is SeragLoading
                                       ? SizedBox(
-                                        width: 20.w,
-                                        height: 20.h,
-                                        child: const CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2.5,
+                                        width:
+                                            SeragDecorations
+                                                .loadingIndicatorSize,
+                                        height:
+                                            SeragDecorations
+                                                .loadingIndicatorHeight,
+                                        child: CircularProgressIndicator(
+                                          color:
+                                              SeragDecorations
+                                                  .loadingIndicatorColor,
+                                          strokeWidth:
+                                              SeragDecorations
+                                                  .loadingIndicatorStrokeWidth,
                                         ),
                                       )
                                       : Icon(
                                         Icons.send_rounded,
-                                        color: Colors.white,
-                                        size: 24.sp,
+                                        color:
+                                            SeragDecorations
+                                                .sendButtonIconColor,
+                                        size:
+                                            SeragTextStyles.sendButtonIconSize,
                                       ),
                             ),
                           ),
@@ -191,23 +151,19 @@ class ChatInputSection extends StatelessWidget {
           ),
 
           Divider(
-            endIndent: 50.w,
-            indent: 50.w,
-            color: ColorsManager.mediumGray,
+            endIndent: SeragDecorations.dividerEndIndent,
+            indent: SeragDecorations.dividerIndent,
+            color: SeragDecorations.dividerColor,
           ),
 
           // Warning
           Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            padding: SeragDecorations.warningDisclaimerPadding,
             child: Text(
               " سراج قد يقدم معلومات غير دقيقة، يُفضل الرجوع إلى المصادر الأصلية للتأكد.",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11.sp,
-                color: ColorsManager.secondaryText,
-                fontStyle: FontStyle.italic,
-              ),
+              style: SeragTextStyles.warningDisclaimer,
             ),
           ),
         ],

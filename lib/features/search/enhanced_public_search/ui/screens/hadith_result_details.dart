@@ -6,6 +6,8 @@ import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_decorations.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_bookmark_dialogs.dart';
@@ -75,11 +77,9 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                         Text(
                                           'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
                                           textDirection: TextDirection.rtl,
-                                          style: TextStyle(
-                                            color:
-                                                ColorsManager
-                                                    .secondaryBackground,
-                                          ),
+                                          style:
+                                              EnhancedSearchTextStyles
+                                                  .loginRequiredSnackbar,
                                         ),
                                         IconButton(
                                           onPressed:
@@ -95,7 +95,9 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                         ),
                                       ],
                                     ),
-                                    backgroundColor: ColorsManager.primaryGreen,
+                                    backgroundColor:
+                                        EnhancedSearchDecorations
+                                            .loginSnackbarBackground,
                                   ),
                                 );
                               }
@@ -127,25 +129,20 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                   ),
                                 );
                               },
-                      backgroundColor: ColorsManager.primaryPurple,
-                      elevation: 10,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+                      backgroundColor:
+                          EnhancedSearchDecorations.seragFabBackgroundColor,
+                      elevation: EnhancedSearchDecorations.seragFabElevation,
+                      shape: EnhancedSearchDecorations.seragFabShape,
                       icon: CircleAvatar(
                         radius: 20.r,
                         backgroundImage: const AssetImage(
-                          'assets/images/serag_logo.jpg',
+                          EnhancedSearchDecorations.seragLogoPath,
                         ),
                         backgroundColor: Colors.transparent,
                       ),
                       label: Text(
                         "اسأل سراج",
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: ColorsManager.secondaryBackground,
-                        ),
+                        style: EnhancedSearchTextStyles.seragFabLabel,
                       ),
                     );
                   },
@@ -163,15 +160,19 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                             if (token == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  backgroundColor: ColorsManager.primaryGreen,
+                                  backgroundColor:
+                                      EnhancedSearchDecorations
+                                          .loginSnackbarBackground,
                                   content: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text(
+                                      Text(
                                         'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
                                         textDirection: TextDirection.rtl,
-                                        style: TextStyle(color: Colors.white),
+                                        style:
+                                            EnhancedSearchTextStyles
+                                                .loginButtonSnackbar,
                                       ),
                                       IconButton(
                                         onPressed:
@@ -252,7 +253,7 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                 Divider(
                                   endIndent: 30.w,
                                   indent: 30.w,
-                                  color: ColorsManager.gray,
+                                  color: EnhancedSearchDecorations.dividerColor,
                                 ),
                                 SizedBox(height: 5.h),
                               ],
@@ -266,7 +267,7 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                 Divider(
                                   endIndent: 30.w,
                                   indent: 30.w,
-                                  color: ColorsManager.gray,
+                                  color: EnhancedSearchDecorations.dividerColor,
                                 ),
                                 SizedBox(height: 5.h),
                               ],
@@ -283,10 +284,8 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
                                 horizontal: 16.w,
                                 vertical: 8.h,
                               ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16.r),
-                                border: Border.all(color: ColorsManager.gray),
-                              ),
+                              decoration:
+                                  EnhancedSearchDecorations.tabContentContainer(),
                               child: ResultHadithTabContent(
                                 selectedTab: selectedTab,
                                 data: widget.enhancedHadithModel,
@@ -320,18 +319,7 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
   Widget _buildEnhancedTabsSection() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-      decoration: BoxDecoration(
-        color: ColorsManager.white,
-
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: ColorsManager.primaryPurple.withOpacity(0.08),
-            blurRadius: 20.r,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: EnhancedSearchDecorations.enhancedTabsSection(),
       child: HadithTabs(
         selectedTab: selectedTab,
         onTabSelected: (tab) {
@@ -344,21 +332,7 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
   Widget _buildEnhancedActionsSection() {
     return Container(
       padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            ColorsManager.primaryGreen.withOpacity(0.1),
-            ColorsManager.primaryPurple.withOpacity(0.05),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: ColorsManager.primaryGold.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
+      decoration: EnhancedSearchDecorations.enhancedActionsSection(),
       child: ResultHadithActionRow(
         author: widget.enhancedHadithModel.attribution ?? "",
         authorDeath: 'غير معروف',

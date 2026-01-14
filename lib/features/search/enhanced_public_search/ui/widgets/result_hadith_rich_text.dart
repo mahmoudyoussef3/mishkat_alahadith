@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
+import 'package:mishkat_almasabih/core/theming/enhanced_search_decorations.dart';
 
 class ResultHadithRichText extends StatelessWidget {
   final String hadith;
@@ -42,13 +43,12 @@ class ResultHadithRichText extends StatelessWidget {
                               textDirection: TextDirection.rtl,
                               child: AlertDialog(
                                 backgroundColor:
-                                    ColorsManager.secondaryBackground,
+                                    EnhancedSearchDecorations
+                                        .wordDialogBackground,
                                 title: Text(
                                   cleaned,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: ColorsManager.primaryPurple,
-                                  ),
+                                  style:
+                                      EnhancedSearchTextStyles.wordDialogTitle,
                                 ),
                                 content: Text(
                                   wordMap[finalWord] ?? "لا يوجد معنى",
@@ -65,13 +65,7 @@ class ResultHadithRichText extends StatelessWidget {
                     },
                     child: Text(
                       "$word ",
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontFamily: "Amiri",
-                        height: 1.8,
-                        color: ColorsManager.primaryPurple,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: EnhancedSearchTextStyles.specialWord,
                     ),
                   ),
                 );
@@ -79,13 +73,7 @@ class ResultHadithRichText extends StatelessWidget {
 
               return TextSpan(
                 text: "$word ",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontFamily: "Amiri",
-                  height: 1.8,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: EnhancedSearchTextStyles.regularWord,
               );
             }).toList(),
       ),
