@@ -19,4 +19,15 @@ class GetBookmarksCubit extends Cubit<GetBookmarksState> {
       (r) => emit(UserBookmarksSuccess(r.bookmarks!)),
     );
   }
+
+
+
+  Future<void> deleteBookmark(int hadithId) async {
+    final result = await _bookMarkRepo.deleteBookMark(hadithId);
+
+    result.fold(
+      (l) => emit(GetBookmarksFailure(l.getAllErrorMessages())),
+      (r) => getUserBookmarks(),
+    );
+  }
 }

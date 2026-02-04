@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
+import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/logic/get_cubit/user_bookmarks_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
@@ -49,19 +52,31 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: SafeArea(
-        top: false,
-        bottom: true,
-        child: Scaffold(
-          backgroundColor: ColorsManager.secondaryBackground,
-          body:
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _isLoggedIn
-                  ? _buildBookmarkContent()
-                  : _buildLoginPrompt(context),
+    return RefreshIndicator(
+      onRefresh: 
+      _isLoggedIn
+          ?
+      
+      () => Future.wait([
+        BlocProvider.of<GetBookmarksCubit>(context).getUserBookmarks(),
+        BlocProvider.of<GetCollectionsBookmarkCubit>(context)
+            .getBookMarkCollections(),
+      ]) 
+          : () async {},
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          top: false,
+          bottom: true,
+          child: Scaffold(
+            backgroundColor: ColorsManager.secondaryBackground,
+            body:
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _isLoggedIn
+                    ? _buildBookmarkContent()
+                    : _buildLoginPrompt(context),
+          ),
         ),
       ),
     );

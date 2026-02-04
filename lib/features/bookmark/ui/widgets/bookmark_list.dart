@@ -68,11 +68,9 @@ class _BookmarkListState extends State<BookmarkList> {
         if (state is UserBookmarksSuccess) {
           final bookmarks = state.bookmarks;
 
-          // ✅ تقسيم الـ bookmarks
           final ahadith = bookmarks.where((b) => b.type == 'hadith').toList();
           final chapters = bookmarks.where((b) => b.type == 'chapter').toList();
 
-          // ✅ فلترة حسب المجموعة
           final filteredCollection =
               widget.selectedCollection == "الكل"
                   ? ahadith
@@ -80,7 +78,6 @@ class _BookmarkListState extends State<BookmarkList> {
                       .where((b) => b.collection == widget.selectedCollection)
                       .toList();
 
-          // ✅ فلترة حسب البحث
           final filteredSearch =
               widget.query.isEmpty
                   ? filteredCollection
@@ -96,7 +93,6 @@ class _BookmarkListState extends State<BookmarkList> {
 
           log("✅ Chapters loaded: ${chapters.length}");
 
-          // ✅ لو مفيش نتائج
           if (filteredSearch.isEmpty && widget.showHadiht) {
             return const SliverToBoxAdapter(child: BookmarkEmptyState());
           }
@@ -117,7 +113,6 @@ class _BookmarkListState extends State<BookmarkList> {
     );
   }
 
-  /// 🕌 قائمة الأحاديث
   Widget _buildHadithList(List<Bookmark> filteredSearch) {
     return ListView.separated(
       padding: EdgeInsets.zero,
@@ -156,21 +151,23 @@ class _BookmarkListState extends State<BookmarkList> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ChapterAhadithCard(
+                
                 grade: convertToArabicNumber(index + 1),
                 reference: createdAt,
                 number: hadith.hadithNumber ?? '',
                 text: hadith.hadithText ?? '',
                 bookName: hadith.bookName ?? '',
               ),
-              if ((hadith.notes ?? '').isNotEmpty) _buildNotes(hadith.notes!),
-            ],
-          ),
+              hadith.notes != null && hadith.notes!.isNotEmpty
+                  ?
+                Column(children: [_buildNotes(hadith.notes!), _deleteBookmark(hadith.id!)])  
+                  :  _deleteBookmark(hadith.id!),
+              ],),
         );
       },
     );
   }
 
-  /// 📚 قائمة الفصول
   Widget _buildChapterList(List<Bookmark> chapters) {
     final firstChapter = chapters.isNotEmpty ? chapters.first : null;
     return SizedBox(
@@ -192,7 +189,6 @@ class _BookmarkListState extends State<BookmarkList> {
     );
   }
 
-  /// 📝 ويدجت الملاحظات
   Widget _buildNotes(String notes) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
@@ -203,6 +199,38 @@ class _BookmarkListState extends State<BookmarkList> {
         child: Text(
           "📝 الملاحظات: $notes",
           style: BookmarkTextStyles.notesText,
+        ),
+      ),
+    );
+  }
+
+    Widget _deleteBookmark(int hadithId) {
+    return GestureDetector(
+      onTap: () {
+        BlocProvider.of<GetBookmarksCubit>(context).deleteBookmark(hadithId);
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(12.w),
+          decoration: BookmarkDecorations.notesContainer(),
+          child: Row(
+            children: [
+              Text(
+                "حذف الحديث من المفضلة",
+                style: BookmarkTextStyles.notesText.copyWith(
+                  fontSize: 14.sp,
+                ),
+      
+              ),
+              SizedBox(width: 4.w),
+              Icon(
+                Icons.delete,
+                color: ColorsManager.gray,
+              ),
+            ],
+          ),
         ),
       ),
     );
