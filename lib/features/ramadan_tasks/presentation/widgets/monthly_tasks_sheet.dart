@@ -172,10 +172,7 @@ class _SheetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.symmetric(
-        horizontal: 20.w,
-        vertical: 8.h,
-      ),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 20.w, vertical: 8.h),
       child: Column(
         children: [
           Row(
@@ -274,7 +271,8 @@ class _DayCard extends StatelessWidget {
 
   bool get _isToday => day == todayDay;
   bool get _isFuture => day > todayDay;
-  bool get _isFullyCompleted => tasks.isNotEmpty && completedCount == tasks.length;
+  bool get _isFullyCompleted =>
+      tasks.isNotEmpty && completedCount == tasks.length;
 
   @override
   Widget build(BuildContext context) {
@@ -351,11 +349,7 @@ class _DayCard extends StatelessWidget {
               child: Column(
                 children: [
                   for (int i = 0; i < tasks.length; i++) ...[
-                    _TaskRow(
-                      task: tasks[i],
-                      day: day,
-                      isFuture: _isFuture,
-                    ),
+                    _TaskRow(task: tasks[i], day: day, isFuture: _isFuture),
                     if (i < tasks.length - 1)
                       Divider(
                         height: 1,
@@ -427,10 +421,7 @@ class _DayHeaderBar extends StatelessWidget {
             child: Text(
               toArabicNumerals(day),
               style: TextStyles.titleMedium.copyWith(
-                color:
-                    isToday
-                        ? ColorsManager.white
-                        : headerColor,
+                color: isToday ? ColorsManager.white : headerColor,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -543,10 +534,7 @@ class _TaskRow extends StatelessWidget {
     final isCompleted = task.completedDays.contains(relevantDay);
 
     return Padding(
-      padding: EdgeInsetsDirectional.symmetric(
-        vertical: 10.h,
-        horizontal: 4.w,
-      ),
+      padding: EdgeInsetsDirectional.symmetric(vertical: 10.h, horizontal: 4.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -558,10 +546,7 @@ class _TaskRow extends StatelessWidget {
               width: 22.w,
               height: 22.w,
               decoration: BoxDecoration(
-                color:
-                    isCompleted
-                        ? ColorsManager.success
-                        : Colors.transparent,
+                color: isCompleted ? ColorsManager.success : Colors.transparent,
                 borderRadius: BorderRadius.circular(6.r),
                 border: Border.all(
                   color:

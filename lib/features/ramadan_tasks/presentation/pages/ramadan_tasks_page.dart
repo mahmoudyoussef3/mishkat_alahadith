@@ -36,7 +36,6 @@ class RamadanTasksPage extends StatelessWidget {
           onRefresh: () => context.read<RamadanTasksCubit>().init(),
           child: CustomScrollView(
             slivers: [
-              
               BuildHeaderAppBar(
                 title: 'مشكاة في رمضان',
                 description: "أنشئ خطتك الخاصة لشهر رمضان",
