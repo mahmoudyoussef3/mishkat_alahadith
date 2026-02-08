@@ -7,8 +7,8 @@ import '../models/ramadan_task_model.dart';
 ///
 /// Design decisions:
 /// - Daily task completions are preserved across all 30 days for history.
-///   The old code wiped history on each reset — this version keeps it.
-/// - Monthly tasks record the single day they were completed on.
+/// - TodayOnly tasks belong to a specific day (createdForDay) and toggle
+///   completion for that day.
 class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
   final RamadanTasksLocalDataSource _ds;
   RamadanTasksRepositoryImpl(this._ds);
@@ -51,7 +51,6 @@ class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
     if (t.type != TaskType.daily) {
       throw StateError('toggleDailyCompletion only valid for daily tasks');
     }
-    // BUG FIX: preserve completions on other days — only toggle TODAY.
     final completed = Set<int>.from(t.completedDays);
     if (completed.contains(day)) {
       completed.remove(day);
@@ -62,9 +61,8 @@ class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
   }
 
   @override
-  Future<void> setMonthlyCompleted({
+  Future<void> toggleTodayOnlyCompletion({
     required String id,
-    required bool completed,
     required int day,
   }) async {
     final tasks = await getTasks();
@@ -72,23 +70,22 @@ class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
       (e) => e.id == id,
       orElse: () => throw ArgumentError('Task not found'),
     );
-    if (t.type != TaskType.monthly) {
-      throw StateError('setMonthlyCompleted only valid for monthly tasks');
+    if (t.type != TaskType.todayOnly) {
+      throw StateError(
+        'toggleTodayOnlyCompletion only valid for todayOnly tasks',
+      );
     }
-    final days = Set<int>.from(t.completedDays);
-    if (completed) {
-      if (!days.contains(day)) days.add(day);
+    final completed = Set<int>.from(t.completedDays);
+    if (completed.contains(day)) {
+      completed.remove(day);
     } else {
-      days.clear();
+      completed.add(day);
     }
-    await updateTask(t.copyWith(completedDays: days));
+    await updateTask(t.copyWith(completedDays: completed));
   }
 
   @override
   Future<void> ensureDailyReset(int day) async {
-    // BUG FIX: This method previously wiped all past-day completions,
-    // destroying history. Now it's a no-op; daily completions are kept
-    // across all 30 days so the History view works correctly.
-    // The "completed today?" check is done at the UI/Cubit level.
+    // No-op: daily completions are kept across all 30 days for history.
   }
 }

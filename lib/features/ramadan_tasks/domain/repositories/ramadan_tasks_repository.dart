@@ -8,9 +8,8 @@ abstract class RamadanTasksRepository {
 
   Future<void> toggleDailyCompletion({required String id, required int day});
 
-  Future<void> setMonthlyCompleted({
+  Future<void> toggleTodayOnlyCompletion({
     required String id,
-    required bool completed,
     required int day,
   });
 

@@ -8,7 +8,7 @@ import 'package:mishkat_almasabih/core/theming/styles.dart';
 class RamadanProgress extends StatelessWidget {
   final int todayDay;
   final double dailyPercent;
-  final double monthlyPercent;
+  final double overallPercent;
   final double weeklyPercent;
   final int dailyCompleted;
   final int dailyTotal;
@@ -18,7 +18,7 @@ class RamadanProgress extends StatelessWidget {
     super.key,
     required this.todayDay,
     required this.dailyPercent,
-    required this.monthlyPercent,
+    required this.overallPercent,
     required this.weeklyPercent,
     required this.dailyCompleted,
     required this.dailyTotal,
@@ -98,14 +98,14 @@ class RamadanProgress extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'اليوم $todayDay من رمضان',
+                      'اليوم ${_toArabicNumerals(todayDay)} من رمضان',
                       style: TextStyles.titleLarge.copyWith(
                         color: ColorsManager.white,
                       ),
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      '$dailyCompleted من $dailyTotal مهمة يومية',
+                      '$dailyCompleted من $dailyTotal مهمة مكتملة',
                       style: TextStyles.bodyMedium.copyWith(
                         color: ColorsManager.white.withOpacity(0.8),
                       ),
@@ -120,8 +120,8 @@ class RamadanProgress extends StatelessWidget {
 
           // ── Monthly & weekly bars ──
           _ProgressBar(
-            label: 'تقدّم الشهر',
-            percent: monthlyPercent,
+            label: 'التقدّم الكلي',
+            percent: overallPercent,
             barColor: ColorsManager.primaryGold,
           ),
           SizedBox(height: 10.h),
@@ -228,4 +228,14 @@ class _ProgressBar extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Converts an integer to Arabic-Indic numerals string.
+String _toArabicNumerals(int number) {
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return number
+      .toString()
+      .split('')
+      .map((d) => arabicDigits[int.parse(d)])
+      .join();
 }

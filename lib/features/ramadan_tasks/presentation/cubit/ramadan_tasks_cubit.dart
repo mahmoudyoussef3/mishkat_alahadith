@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hijri/hijri_calendar.dart';
 import '../../domain/entities/ramadan_task_entity.dart';
 import '../../domain/repositories/ramadan_tasks_repository.dart';
 import '../../domain/usecases/get_tasks.dart';
@@ -13,26 +14,19 @@ part 'ramadan_tasks_state.dart';
 
 /// View modes for the Ramadan tasks screen.
 ///
-/// - [today]: shows tasks for today (daily + uncompleted monthly). Editable.
+/// - [today]: shows tasks for today (daily + todayOnly for this day). Editable.
 /// - [history]: read-only view of any past day. Day selector visible.
 /// - [all]: shows every task regardless of status. Editable.
 enum ViewMode { today, history, all }
 
 /// Manages all Ramadan tasks state: loading, filtering, selection, progress.
-///
-/// Performance notes:
-/// - Full task list is cached in [_allTasks] to avoid re-fetching from Hive
-///   on every filter/selection change.
-/// - Progress is recomputed from the cached list (lightweight).
-/// - Hive reads only happen on [init], [addNewTask], [deleteById],
-///   [toggleDaily], and [setMonthly].
 class RamadanTasksCubit extends Cubit<RamadanTasksState> {
   final RamadanTasksRepository _repo;
   late final GetTasks _getTasks;
   late final AddTask _addTask;
   late final DeleteTask _deleteTask;
   late final ToggleDailyCompletion _toggleDaily;
-  late final SetMonthlyCompleted _setMonthly;
+  late final ToggleTodayOnlyCompletion _toggleTodayOnly;
   late final EnsureDailyReset _ensureDailyReset;
   final _computeProgress = ComputeProgress();
 
@@ -49,7 +43,7 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     _addTask = AddTask(_repo);
     _deleteTask = DeleteTask(_repo);
     _toggleDaily = ToggleDailyCompletion(_repo);
-    _setMonthly = SetMonthlyCompleted(_repo);
+    _toggleTodayOnly = ToggleTodayOnlyCompletion(_repo);
     _ensureDailyReset = EnsureDailyReset(_repo);
   }
 
@@ -75,12 +69,14 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     String description = '',
     required TaskType type,
   }) async {
+    final todayDay = _todayDayNumber();
     final newTask = RamadanTaskEntity(
       id: '',
       title: title.trim(),
       description: description.trim(),
       type: type,
       completedDays: const {},
+      createdForDay: type == TaskType.todayOnly ? todayDay : 0,
     );
     await _addTask(newTask);
     _allTasks = await _getTasks();
@@ -100,9 +96,9 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     _emitLoaded();
   }
 
-  Future<void> setMonthly(String id, bool completed) async {
+  Future<void> toggleTodayOnly(String id) async {
     final day = _todayDayNumber();
-    await _setMonthly(id: id, completed: completed, day: day);
+    await _toggleTodayOnly(id: id, day: day);
     _allTasks = await _getTasks();
     _emitLoaded();
   }
@@ -138,7 +134,48 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
 
   // ─── Internal helpers ──────────────────────────────────────
 
-  int _todayDayNumber() => DateTime.now().day.clamp(1, 30);
+  /// Returns the current Hijri day of the month (Ramadan day 1..30).
+  int _todayDayNumber() {
+    final hijri = HijriCalendar.now();
+    return hijri.hDay.clamp(1, 30);
+  }
+
+  /// Formatted Hijri date string, e.g. "١٥ رمضان ١٤٤٧ هـ".
+  String _hijriDateString() {
+    final hijri = HijriCalendar.now();
+    HijriCalendar.setLocal('ar');
+    return '${_toArabicNumerals(hijri.hDay)} ${hijri.getLongMonthName()} ${_toArabicNumerals(hijri.hYear)} هـ';
+  }
+
+  /// Formatted Gregorian date string, e.g. "٨ فبراير ٢٠٢٦ م".
+  String _gregorianDateString() {
+    final now = DateTime.now();
+    const months = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ];
+    return '${_toArabicNumerals(now.day)} ${months[now.month - 1]} ${_toArabicNumerals(now.year)} م';
+  }
+
+  /// Converts an integer to Arabic-Indic numerals string.
+  String _toArabicNumerals(int number) {
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return number
+        .toString()
+        .split('')
+        .map((d) => arabicDigits[int.parse(d)])
+        .join();
+  }
 
   /// Returns which week (1..4) a given day belongs to.
   int _weekForDay(int day) {
@@ -194,19 +231,21 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
         weekEnd: range.$2,
         viewMode: _viewMode,
         dailyPercent: progress.dailyPercent,
-        monthlyPercent: progress.monthlyPercent,
+        overallPercent: progress.overallPercent,
         weeklyPercent: progress.weeklyPercent,
         dailyCompleted: progress.dailyCompleted,
         dailyTotal: progress.dailyTotal,
         motivationalText: motivation,
+        hijriDateString: _hijriDateString(),
+        gregorianDateString: _gregorianDateString(),
       ),
     );
   }
 
   /// Filtering logic (pure function — no I/O).
   ///
-  /// - Today: all daily tasks + monthly tasks that haven't been completed yet.
-  /// - History: all tasks (status shown per selectedDay, read-only).
+  /// - Today: all daily tasks + todayOnly tasks created for today.
+  /// - History: all daily tasks + todayOnly tasks for that selected day.
   /// - All: all tasks.
   List<RamadanTaskEntity> _filterTasks(
     List<RamadanTaskEntity> tasks,
@@ -216,10 +255,15 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
       case ViewMode.today:
         return tasks.where((t) {
           if (t.type == TaskType.daily) return true;
-          // Show monthly tasks that are not yet completed
-          return t.completedDays.isEmpty;
+          // Show todayOnly tasks only on their specific day
+          return t.createdForDay == todayDay;
         }).toList();
       case ViewMode.history:
+        return tasks.where((t) {
+          if (t.type == TaskType.daily) return true;
+          // Show todayOnly tasks for the selected day
+          return t.createdForDay == _selectedDay;
+        }).toList();
       case ViewMode.all:
         return List.unmodifiable(tasks);
     }

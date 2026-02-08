@@ -4,14 +4,6 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import '../../domain/entities/ramadan_task_entity.dart';
 
-/// A beautiful bottom sheet displaying a 30-day Ramadan calendar grid.
-///
-/// Each day cell is color-coded based on task completion:
-/// - Green fill → all daily tasks completed
-/// - Half-filled → some tasks completed
-/// - Empty → no tasks completed
-///
-/// Tapping a day shows a detail card with completed/total breakdown.
 class RamadanCalendarSheet extends StatefulWidget {
   final List<RamadanTaskEntity> allTasks;
   final int todayDay;
@@ -22,7 +14,6 @@ class RamadanCalendarSheet extends StatefulWidget {
     required this.todayDay,
   });
 
-  /// Opens the calendar as a modal bottom sheet.
   static void show(
     BuildContext context, {
     required List<RamadanTaskEntity> allTasks,
@@ -49,20 +40,30 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
   List<RamadanTaskEntity> get _dailyTasks =>
       widget.allTasks.where((t) => t.type == TaskType.daily).toList();
 
-  List<RamadanTaskEntity> get _monthlyTasks =>
-      widget.allTasks.where((t) => t.type == TaskType.monthly).toList();
+  /// TodayOnly tasks that belong to a specific day.
+  List<RamadanTaskEntity> _todayOnlyForDay(int day) =>
+      widget.allTasks
+          .where((t) => t.type == TaskType.todayOnly && t.createdForDay == day)
+          .toList();
+
+  /// All todayOnly tasks across the month.
+  List<RamadanTaskEntity> get _allTodayOnly =>
+      widget.allTasks.where((t) => t.type == TaskType.todayOnly).toList();
 
   int _dailyCompletedOnDay(int day) =>
       _dailyTasks.where((t) => t.completedDays.contains(day)).length;
 
-  /// Returns a 0.0–1.0 ratio of daily tasks completed on [day].
-  double _completionRatio(int day) {
-    if (_dailyTasks.isEmpty) return 0;
-    return _dailyCompletedOnDay(day) / _dailyTasks.length;
-  }
+  int _todayOnlyCompletedOnDay(int day) =>
+      _todayOnlyForDay(day).where((t) => t.completedDays.contains(day)).length;
 
-  /// Weekday labels (Sat–Fri for an Islamic-style week).
-  static const _weekdayLabels = ['س', 'ح', 'ن', 'ث', 'ر', 'خ', 'ج'];
+  /// Returns a 0.0–1.0 ratio of all tasks completed on [day].
+  double _completionRatio(int day) {
+    final todayOnlyForThisDay = _todayOnlyForDay(day);
+    final total = _dailyTasks.length + todayOnlyForThisDay.length;
+    if (total == 0) return 0;
+    final completed = _dailyCompletedOnDay(day) + _todayOnlyCompletedOnDay(day);
+    return completed / total;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,28 +121,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
                 SizedBox(height: 16.h),
 
                 // ── Weekday header row ──
-                Padding(
-                  padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
-                  child: Row(
-                    children:
-                        _weekdayLabels
-                            .map(
-                              (l) => Expanded(
-                                child: Center(
-                                  child: Text(
-                                    l,
-                                    style: TextStyles.bodySmall.copyWith(
-                                      color: ColorsManager.secondaryText,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                  ),
-                ),
-
                 SizedBox(height: 8.h),
 
                 // ── Calendar grid ──
@@ -153,9 +132,9 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
                       _buildCalendarGrid(),
                       SizedBox(height: 12.h),
 
-                      // ── Monthly tasks section ──
-                      if (_monthlyTasks.isNotEmpty) ...[
-                        _buildMonthlySection(),
+                      // ── Today-only tasks overview ──
+                      if (_allTodayOnly.isNotEmpty) ...[
+                        _buildTodayOnlySection(),
                         SizedBox(height: 12.h),
                       ],
 
@@ -221,11 +200,13 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // Monthly Tasks Section
+  // Today-Only Tasks Section
   // ─────────────────────────────────────────────────────────────
-  Widget _buildMonthlySection() {
+  Widget _buildTodayOnlySection() {
     final completed =
-        _monthlyTasks.where((t) => t.completedDays.isNotEmpty).length;
+        _allTodayOnly
+            .where((t) => t.completedDays.contains(t.createdForDay))
+            .length;
     return Container(
       padding: EdgeInsetsDirectional.all(14.w),
       decoration: BoxDecoration(
@@ -239,13 +220,13 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
           Row(
             children: [
               Icon(
-                Icons.star_rounded,
+                Icons.today_rounded,
                 color: ColorsManager.primaryGold,
                 size: 20.sp,
               ),
               SizedBox(width: 6.w),
               Text(
-                'المهام الشهرية',
+                'مهام اليوم فقط',
                 style: TextStyles.titleMedium.copyWith(
                   color: ColorsManager.primaryGold,
                   fontWeight: FontWeight.w600,
@@ -253,7 +234,7 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
               ),
               const Spacer(),
               Text(
-                '$completed / ${_monthlyTasks.length}',
+                '$completed / ${_allTodayOnly.length}',
                 style: TextStyles.titleSmall.copyWith(
                   color: ColorsManager.primaryGold,
                 ),
@@ -261,8 +242,8 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
             ],
           ),
           SizedBox(height: 10.h),
-          ..._monthlyTasks.map((t) {
-            final done = t.completedDays.isNotEmpty;
+          ..._allTodayOnly.map((t) {
+            final done = t.completedDays.contains(t.createdForDay);
             return Padding(
               padding: EdgeInsetsDirectional.only(bottom: 6.h),
               child: Row(
@@ -288,6 +269,13 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
                       ),
                     ),
                   ),
+                  Text(
+                    'اليوم ${t.createdForDay}',
+                    style: TextStyles.bodySmall.copyWith(
+                      color: ColorsManager.secondaryText,
+                      fontSize: 10.sp,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -301,8 +289,10 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
   // Day Detail Card
   // ─────────────────────────────────────────────────────────────
   Widget _buildDayDetail(int day) {
-    final completed = _dailyCompletedOnDay(day);
-    final total = _dailyTasks.length;
+    final todayOnlyForDay = _todayOnlyForDay(day);
+    final allTasksForDay = [..._dailyTasks, ...todayOnlyForDay];
+    final completed = _dailyCompletedOnDay(day) + _todayOnlyCompletedOnDay(day);
+    final total = allTasksForDay.length;
     final isFuture = day > widget.todayDay;
 
     return Container(
@@ -366,11 +356,13 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
                 _MiniProgressRing(ratio: total == 0 ? 0 : completed / total),
             ],
           ),
-          if (!isFuture && _dailyTasks.isNotEmpty) ...[
+          if (!isFuture && allTasksForDay.isNotEmpty) ...[
             SizedBox(height: 12.h),
             // Per-task completion list
-            ..._dailyTasks.map((t) {
-              final done = t.completedDays.contains(day);
+            ...allTasksForDay.map((t) {
+              final relevantDay =
+                  t.type == TaskType.daily ? day : t.createdForDay;
+              final done = t.completedDays.contains(relevantDay);
               return Padding(
                 padding: EdgeInsetsDirectional.only(bottom: 4.h),
                 child: Row(
@@ -393,7 +385,8 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
                           Text(
                             t.title,
                             style: TextStyles.bodySmall.copyWith(
-                              decoration: done ? TextDecoration.lineThrough : null,
+                              decoration:
+                                  done ? TextDecoration.lineThrough : null,
                               color:
                                   done
                                       ? ColorsManager.secondaryText

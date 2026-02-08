@@ -1,6 +1,4 @@
-
-enum TaskType { daily, monthly }
-
+enum TaskType { daily, todayOnly }
 
 class RamadanTaskEntity {
   final String id;
@@ -9,12 +7,17 @@ class RamadanTaskEntity {
   final TaskType type;
   final Set<int> completedDays;
 
+  /// For [TaskType.todayOnly] tasks: which Ramadan day (1..30) this task
+  /// was created for. Ignored for [TaskType.daily] tasks.
+  final int createdForDay;
+
   const RamadanTaskEntity({
     required this.id,
     required this.title,
     this.description = '',
     required this.type,
     required this.completedDays,
+    this.createdForDay = 0,
   });
 
   RamadanTaskEntity copyWith({
@@ -23,6 +26,7 @@ class RamadanTaskEntity {
     String? description,
     TaskType? type,
     Set<int>? completedDays,
+    int? createdForDay,
   }) {
     return RamadanTaskEntity(
       id: id ?? this.id,
@@ -30,6 +34,7 @@ class RamadanTaskEntity {
       description: description ?? this.description,
       type: type ?? this.type,
       completedDays: completedDays ?? this.completedDays,
+      createdForDay: createdForDay ?? this.createdForDay,
     );
   }
 
@@ -41,13 +46,21 @@ class RamadanTaskEntity {
         other.title == title &&
         other.description == description &&
         other.type == type &&
+        other.createdForDay == createdForDay &&
         _setEquals(other.completedDays, completedDays);
   }
 
   @override
   int get hashCode {
     final sorted = completedDays.toList()..sort();
-    return Object.hash(id, title, description, type, Object.hashAll(sorted));
+    return Object.hash(
+      id,
+      title,
+      description,
+      type,
+      createdForDay,
+      Object.hashAll(sorted),
+    );
   }
 }
 

@@ -4,12 +4,11 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import '../../domain/entities/ramadan_task_entity.dart';
 
-/// A single task card with animated checkbox, type badge, and swipe-to-delete.
+/// A single task card with animated checkbox, type badge, and delete.
 class RamadanTaskItem extends StatelessWidget {
   final RamadanTaskEntity task;
   final int todayDay;
-  final VoidCallback onToggleDaily;
-  final ValueChanged<bool> onToggleMonthly;
+  final VoidCallback onToggle;
   final VoidCallback onDelete;
   final bool readOnly;
 
@@ -17,8 +16,7 @@ class RamadanTaskItem extends StatelessWidget {
     super.key,
     required this.task,
     required this.todayDay,
-    required this.onToggleDaily,
-    required this.onToggleMonthly,
+    required this.onToggle,
     required this.onDelete,
     this.readOnly = false,
   });
@@ -26,10 +24,8 @@ class RamadanTaskItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDaily = task.type == TaskType.daily;
-    final isCompleted =
-        isDaily
-            ? task.completedDays.contains(todayDay)
-            : task.completedDays.isNotEmpty;
+    final relevantDay = isDaily ? todayDay : task.createdForDay;
+    final isCompleted = task.completedDays.contains(relevantDay);
 
     final card = Container(
       decoration: BoxDecoration(
@@ -53,16 +49,7 @@ class RamadanTaskItem extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(14.r),
-          onTap:
-              readOnly
-                  ? null
-                  : () {
-                    if (isDaily) {
-                      onToggleDaily();
-                    } else {
-                      onToggleMonthly(!isCompleted);
-                    }
-                  },
+          onTap: readOnly ? null : onToggle,
           child: Padding(
             padding: EdgeInsetsDirectional.symmetric(
               horizontal: 14.w,
@@ -92,7 +79,8 @@ class RamadanTaskItem extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (task.description.isNotEmpty) ...[                        SizedBox(height: 2.h),
+                      if (task.description.isNotEmpty) ...[
+                        SizedBox(height: 2.h),
                         Text(
                           task.description,
                           style: TextStyles.bodySmall.copyWith(
@@ -106,18 +94,12 @@ class RamadanTaskItem extends StatelessWidget {
                       SizedBox(height: 4.h),
                       Row(
                         children: [
-                          _TypeBadge(type: task.type),
+                          _TypeBadge(task: task),
                           SizedBox(width: 8.w),
-                          if (isDaily)
-                            _StatusText(
-                              text: isCompleted ? 'مكتملة' : 'غير مكتملة',
-                              isCompleted: isCompleted,
-                            ),
-                          if (!isDaily)
-                            _StatusText(
-                              text: isCompleted ? 'تم الإنجاز' : 'لم تكتمل',
-                              isCompleted: isCompleted,
-                            ),
+                          _StatusText(
+                            text: isCompleted ? 'مكتملة' : 'غير مكتملة',
+                            isCompleted: isCompleted,
+                          ),
                         ],
                       ),
                     ],
@@ -185,14 +167,15 @@ class _AnimatedCheckbox extends StatelessWidget {
   }
 }
 
-/// Small type badge (daily / monthly).
+/// Small type badge (daily / today only).
 class _TypeBadge extends StatelessWidget {
-  final TaskType type;
-  const _TypeBadge({required this.type});
+  final RamadanTaskEntity task;
+  const _TypeBadge({required this.task});
 
   @override
   Widget build(BuildContext context) {
-    final isDaily = type == TaskType.daily;
+    final isDaily = task.type == TaskType.daily;
+    final label = isDaily ? 'يومياً' : 'اليوم ${task.createdForDay} فقط';
     return Container(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 3.h),
       decoration: BoxDecoration(
@@ -203,7 +186,7 @@ class _TypeBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
-        isDaily ? 'يومية' : 'شهرية',
+        label,
         style: TextStyles.bodySmall.copyWith(
           color:
               isDaily ? ColorsManager.primaryPurple : ColorsManager.primaryGold,

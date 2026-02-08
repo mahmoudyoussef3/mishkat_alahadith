@@ -5,8 +5,9 @@ class RamadanTaskModel {
   String id;
   String title;
   String description;
-  int typeIndex; // 0=daily, 1=monthly
+  int typeIndex; // 0=daily, 1=todayOnly
   List<int> completedDays; // store as list for Hive
+  int createdForDay; // which Ramadan day this todayOnly task belongs to
 
   RamadanTaskModel({
     required this.id,
@@ -14,6 +15,7 @@ class RamadanTaskModel {
     this.description = '',
     required this.typeIndex,
     required this.completedDays,
+    this.createdForDay = 0,
   });
 
   factory RamadanTaskModel.fromEntity(RamadanTaskEntity e) => RamadanTaskModel(
@@ -22,6 +24,7 @@ class RamadanTaskModel {
     description: e.description,
     typeIndex: e.type.index,
     completedDays: e.completedDays.toList()..sort(),
+    createdForDay: e.createdForDay,
   );
 
   RamadanTaskEntity toEntity() => RamadanTaskEntity(
@@ -30,6 +33,7 @@ class RamadanTaskModel {
     description: description,
     type: TaskType.values[typeIndex],
     completedDays: completedDays.toSet(),
+    createdForDay: createdForDay,
   );
 }
 
@@ -51,13 +55,14 @@ class RamadanTaskModelAdapter extends TypeAdapter<RamadanTaskModel> {
       description: (fields[4] as String?) ?? '',
       typeIndex: fields[2] as int,
       completedDays: (fields[3] as List).cast<int>(),
+      createdForDay: (fields[5] as int?) ?? 0,
     );
   }
 
   @override
   void write(BinaryWriter writer, RamadanTaskModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -67,6 +72,8 @@ class RamadanTaskModelAdapter extends TypeAdapter<RamadanTaskModel> {
       ..writeByte(3)
       ..write(obj.completedDays)
       ..writeByte(4)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(5)
+      ..write(obj.createdForDay);
   }
 }

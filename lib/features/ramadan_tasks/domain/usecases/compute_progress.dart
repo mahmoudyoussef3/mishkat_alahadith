@@ -5,16 +5,16 @@ import '../entities/ramadan_task_entity.dart';
 /// All values are 0.0 – 1.0 (percentage as fraction).
 class ProgressResult {
   final double dailyPercent;
-  final double monthlyPercent;
+  final double overallPercent;
   final double weeklyPercent;
 
-  /// How many daily tasks were completed on [day].
+  /// How many tasks (daily + todayOnly) were completed on [day].
   final int dailyCompleted;
   final int dailyTotal;
 
   const ProgressResult({
     required this.dailyPercent,
-    required this.monthlyPercent,
+    required this.overallPercent,
     required this.weeklyPercent,
     required this.dailyCompleted,
     required this.dailyTotal,
@@ -24,10 +24,9 @@ class ProgressResult {
 /// Pure use-case that computes progress from a list of tasks.
 ///
 /// Progress formulas:
-/// - Daily  : completedDailyToday / totalDailyTasks
-/// - Monthly: (completedDailySlots + completedMonthlyTasks) /
-///            (dailyTasksCount * daysSoFar + monthlyTasksCount)
-///   → This avoids the "30× daily" denominator that made progress always ≈0%.
+/// - Daily  : (completedDaily + completedTodayOnly) / (totalDaily + todayOnlyForDay)
+///   on the specific day being viewed.
+/// - Overall: total daily completions across daysSoFar / (dailyCount × daysSoFar + todayOnlyCount)
 /// - Weekly : daily completions within [weekStart..weekEnd] / (dailyCount × weekDays)
 class ComputeProgress {
   ProgressResult call({
@@ -37,30 +36,37 @@ class ComputeProgress {
     required int weekEnd,
   }) {
     final dailyTasks = tasks.where((t) => t.type == TaskType.daily).toList();
-    final monthlyTasks =
-        tasks.where((t) => t.type == TaskType.monthly).toList();
+    final todayOnlyForDay =
+        tasks
+            .where(
+              (t) => t.type == TaskType.todayOnly && t.createdForDay == day,
+            )
+            .toList();
+    final allTodayOnly =
+        tasks.where((t) => t.type == TaskType.todayOnly).toList();
 
     // ── Daily progress (for the specific day) ──
-    final dailyCompleted =
+    final dailyCompletedCount =
         dailyTasks.where((t) => t.completedDays.contains(day)).length;
-    final dailyPercent =
-        dailyTasks.isEmpty ? 0.0 : dailyCompleted / dailyTasks.length;
+    final todayOnlyCompletedCount =
+        todayOnlyForDay.where((t) => t.completedDays.contains(day)).length;
+    final totalForDay = dailyTasks.length + todayOnlyForDay.length;
+    final completedForDay = dailyCompletedCount + todayOnlyCompletedCount;
+    final dailyPercent = totalForDay == 0 ? 0.0 : completedForDay / totalForDay;
 
     // ── Overall Ramadan progress ──
-    // Use daysSoFar (1..day) instead of 30 so progress feels achievable early on.
     final daysSoFar = day.clamp(1, 30);
-    final totalSlots = (daysSoFar * dailyTasks.length) + monthlyTasks.length;
+    final totalSlots = (daysSoFar * dailyTasks.length) + allTodayOnly.length;
     int completedSlots = 0;
     for (final t in dailyTasks) {
-      // Only count completions up to daysSoFar
       completedSlots += t.completedDays.where((d) => d <= daysSoFar).length;
     }
-    for (final t in monthlyTasks) {
-      if (t.completedDays.isNotEmpty) completedSlots += 1;
+    for (final t in allTodayOnly) {
+      if (t.completedDays.contains(t.createdForDay)) completedSlots += 1;
     }
-    final monthlyPercent = totalSlots == 0 ? 0.0 : completedSlots / totalSlots;
+    final overallPercent = totalSlots == 0 ? 0.0 : completedSlots / totalSlots;
 
-    // ── Weekly progress ──
+    // ── Weekly progress (daily tasks only) ──
     final weekDays = (weekEnd - weekStart + 1).clamp(1, 30);
     final totalWeeklySlots = dailyTasks.length * weekDays;
     int weeklyCompleted = 0;
@@ -73,10 +79,10 @@ class ComputeProgress {
 
     return ProgressResult(
       dailyPercent: dailyPercent.clamp(0.0, 1.0),
-      monthlyPercent: monthlyPercent.clamp(0.0, 1.0),
+      overallPercent: overallPercent.clamp(0.0, 1.0),
       weeklyPercent: weeklyPercent.clamp(0.0, 1.0),
-      dailyCompleted: dailyCompleted,
-      dailyTotal: dailyTasks.length,
+      dailyCompleted: completedForDay,
+      dailyTotal: totalForDay,
     );
   }
 }

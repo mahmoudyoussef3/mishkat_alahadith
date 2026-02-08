@@ -31,11 +31,13 @@ class RamadanTasksLoaded extends RamadanTasksState {
   final int weekEnd;
   final ViewMode viewMode;
   final double dailyPercent;
-  final double monthlyPercent;
+  final double overallPercent;
   final double weeklyPercent;
   final int dailyCompleted;
   final int dailyTotal;
   final String? motivationalText;
+  final String hijriDateString;
+  final String gregorianDateString;
 
   RamadanTasksLoaded({
     required this.allTasks,
@@ -47,11 +49,13 @@ class RamadanTasksLoaded extends RamadanTasksState {
     required this.weekEnd,
     required this.viewMode,
     required this.dailyPercent,
-    required this.monthlyPercent,
+    required this.overallPercent,
     required this.weeklyPercent,
     required this.dailyCompleted,
     required this.dailyTotal,
     this.motivationalText,
+    required this.hijriDateString,
+    required this.gregorianDateString,
   });
 
   /// Whether the user can interact (toggle/delete) with tasks.

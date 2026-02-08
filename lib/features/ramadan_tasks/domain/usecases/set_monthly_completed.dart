@@ -1,11 +1,8 @@
 import '../repositories/ramadan_tasks_repository.dart';
 
-class SetMonthlyCompleted {
+class ToggleTodayOnlyCompletion {
   final RamadanTasksRepository repo;
-  SetMonthlyCompleted(this.repo);
-  Future<void> call({
-    required String id,
-    required bool completed,
-    required int day,
-  }) => repo.setMonthlyCompleted(id: id, completed: completed, day: day);
+  ToggleTodayOnlyCompletion(this.repo);
+  Future<void> call({required String id, required int day}) =>
+      repo.toggleTodayOnlyCompletion(id: id, day: day);
 }
