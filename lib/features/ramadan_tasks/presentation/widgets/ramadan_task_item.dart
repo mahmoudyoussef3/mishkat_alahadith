@@ -92,6 +92,17 @@ class RamadanTaskItem extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (task.description.isNotEmpty) ...[                        SizedBox(height: 2.h),
+                        Text(
+                          task.description,
+                          style: TextStyles.bodySmall.copyWith(
+                            color: ColorsManager.secondaryText,
+                            height: 1.4,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                       SizedBox(height: 4.h),
                       Row(
                         children: [

@@ -4,12 +4,14 @@ import '../../domain/entities/ramadan_task_entity.dart';
 class RamadanTaskModel {
   String id;
   String title;
+  String description;
   int typeIndex; // 0=daily, 1=monthly
   List<int> completedDays; // store as list for Hive
 
   RamadanTaskModel({
     required this.id,
     required this.title,
+    this.description = '',
     required this.typeIndex,
     required this.completedDays,
   });
@@ -17,6 +19,7 @@ class RamadanTaskModel {
   factory RamadanTaskModel.fromEntity(RamadanTaskEntity e) => RamadanTaskModel(
     id: e.id,
     title: e.title,
+    description: e.description,
     typeIndex: e.type.index,
     completedDays: e.completedDays.toList()..sort(),
   );
@@ -24,6 +27,7 @@ class RamadanTaskModel {
   RamadanTaskEntity toEntity() => RamadanTaskEntity(
     id: id,
     title: title,
+    description: description,
     type: TaskType.values[typeIndex],
     completedDays: completedDays.toSet(),
   );
@@ -44,6 +48,7 @@ class RamadanTaskModelAdapter extends TypeAdapter<RamadanTaskModel> {
     return RamadanTaskModel(
       id: fields[0] as String,
       title: fields[1] as String,
+      description: (fields[4] as String?) ?? '',
       typeIndex: fields[2] as int,
       completedDays: (fields[3] as List).cast<int>(),
     );
@@ -52,7 +57,7 @@ class RamadanTaskModelAdapter extends TypeAdapter<RamadanTaskModel> {
   @override
   void write(BinaryWriter writer, RamadanTaskModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -60,6 +65,8 @@ class RamadanTaskModelAdapter extends TypeAdapter<RamadanTaskModel> {
       ..writeByte(2)
       ..write(obj.typeIndex)
       ..writeByte(3)
-      ..write(obj.completedDays);
+      ..write(obj.completedDays)
+      ..writeByte(4)
+      ..write(obj.description);
   }
 }

@@ -8,6 +8,7 @@ import '../cubit/ramadan_tasks_cubit.dart';
 import '../../domain/entities/ramadan_task_entity.dart';
 import '../widgets/ramadan_task_item.dart';
 import '../widgets/ramadan_progress.dart';
+import '../widgets/ramadan_calendar_sheet.dart';
 
 class RamadanTasksPage extends StatelessWidget {
   const RamadanTasksPage({super.key});
@@ -96,13 +97,28 @@ class RamadanTasksPage extends StatelessWidget {
                           ),
                           SizedBox(height: 16.h),
 
-                          // ── View mode tabs ──
-                          _ViewTabs(
-                            viewMode: s.viewMode,
-                            onChange:
-                                (m) => context
-                                    .read<RamadanTasksCubit>()
-                                    .setViewMode(m),
+                          // ── View mode tabs + calendar button ──
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _ViewTabs(
+                                  viewMode: s.viewMode,
+                                  onChange:
+                                      (m) => context
+                                          .read<RamadanTasksCubit>()
+                                          .setViewMode(m),
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              _CalendarButton(
+                                onTap:
+                                    () => RamadanCalendarSheet.show(
+                                      context,
+                                      allTasks: s.allTasks,
+                                      todayDay: s.todayDay,
+                                    ),
+                              ),
+                            ],
                           ),
                           SizedBox(height: 12.h),
 
@@ -229,6 +245,7 @@ class RamadanTasksPage extends StatelessWidget {
   void _showAddTaskSheet(BuildContext parentContext) {
     final cubit = parentContext.read<RamadanTasksCubit>();
     final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
 
     showModalBottomSheet(
       context: parentContext,
@@ -252,9 +269,14 @@ class RamadanTasksPage extends StatelessWidget {
               builder: (sbContext, setSheetState) {
                 return _AddTaskSheetBody(
                   titleController: titleController,
-                  onAdd: (title, type) {
+                  descriptionController: descriptionController,
+                  onAdd: (title, description, type) {
                     if (title.trim().isNotEmpty) {
-                      cubit.addNewTask(title: title, type: type);
+                      cubit.addNewTask(
+                        title: title,
+                        description: description,
+                        type: type,
+                      );
                       Navigator.pop(sheetContext);
                     }
                   },
@@ -276,9 +298,14 @@ class RamadanTasksPage extends StatelessWidget {
 /// buttons rebuild properly without hacks like `markNeedsBuild`.
 class _AddTaskSheetBody extends StatefulWidget {
   final TextEditingController titleController;
-  final void Function(String title, TaskType type) onAdd;
+  final TextEditingController descriptionController;
+  final void Function(String title, String description, TaskType type) onAdd;
 
-  const _AddTaskSheetBody({required this.titleController, required this.onAdd});
+  const _AddTaskSheetBody({
+    required this.titleController,
+    required this.descriptionController,
+    required this.onAdd,
+  });
 
   @override
   State<_AddTaskSheetBody> createState() => _AddTaskSheetBodyState();
@@ -312,6 +339,39 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
           style: TextStyles.bodyLarge,
           decoration: InputDecoration(
             hintText: 'مثال: قراءة جزء من القرآن',
+            hintStyle: TextStyles.bodyMedium.copyWith(
+              color: ColorsManager.secondaryText,
+            ),
+            filled: true,
+            fillColor: ColorsManager.lightGray,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: const BorderSide(
+                color: ColorsManager.primaryPurple,
+                width: 1.5,
+              ),
+            ),
+            contentPadding: EdgeInsetsDirectional.symmetric(
+              horizontal: 16.w,
+              vertical: 14.h,
+            ),
+          ),
+        ),
+        SizedBox(height: 12.h),
+
+        // Description field
+        TextField(
+          controller: widget.descriptionController,
+          textDirection: TextDirection.rtl,
+          style: TextStyles.bodyMedium,
+          maxLines: 3,
+          minLines: 1,
+          decoration: InputDecoration(
+            hintText: 'وصف المهمة (اختياري)',
             hintStyle: TextStyles.bodyMedium.copyWith(
               color: ColorsManager.secondaryText,
             ),
@@ -378,7 +438,11 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
               elevation: 0,
             ),
             onPressed:
-                () => widget.onAdd(widget.titleController.text, _selectedType),
+                () => widget.onAdd(
+                  widget.titleController.text,
+                  widget.descriptionController.text,
+                  _selectedType,
+                ),
             child: Text(
               'إضافة',
               style: TextStyles.titleMedium.copyWith(
@@ -814,6 +878,35 @@ class _ErrorView extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Rounded icon button that opens the calendar sheet.
+class _CalendarButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _CalendarButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 42.w,
+        height: 42.w,
+        decoration: BoxDecoration(
+          color: ColorsManager.primaryPurple.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: ColorsManager.primaryPurple.withOpacity(0.2),
+          ),
+        ),
+        child: Icon(
+          Icons.calendar_month_rounded,
+          color: ColorsManager.primaryPurple,
+          size: 22.sp,
+        ),
       ),
     );
   }

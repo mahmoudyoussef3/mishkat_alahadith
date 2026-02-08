@@ -72,11 +72,13 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
 
   Future<void> addNewTask({
     required String title,
+    String description = '',
     required TaskType type,
   }) async {
     final newTask = RamadanTaskEntity(
       id: '',
       title: title.trim(),
+      description: description.trim(),
       type: type,
       completedDays: const {},
     );
