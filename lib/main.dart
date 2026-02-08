@@ -16,6 +16,7 @@ import 'package:mishkat_almasabih/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mishkat_almasabih/core/services/hive_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,8 +35,10 @@ Future<void> main() async {
 
   await setUpGetIt();
 
+  // Initialize Hive for local persistence (e.g., Ramadan Tasks feature)
+  await HiveService.init();
+
   try {
- 
     await DailyZekrCubit(getIt()).init();
   } catch (_) {}
   await initializeDateFormatting('ar', null);

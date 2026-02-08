@@ -51,6 +51,8 @@ import '../../features/splash/splash_screen.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/ui/screen/daily_zekr_screen.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/pages/ramadan_tasks_page.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/cubit/ramadan_tasks_cubit.dart';
 
 class AppRouter {
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -348,6 +350,16 @@ class AppRouter {
               (_) => BlocProvider(
                 create: (context) => getIt<QiblahCubit>(),
                 child: const QiblahFinderScreen(),
+              ),
+        );
+
+      case Routes.ramadanTasksScreen:
+        _logScreenView('RamadanTasksScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<RamadanTasksCubit>()..init(),
+                child: const RamadanTasksPage(),
               ),
         );
 

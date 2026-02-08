@@ -23,6 +23,7 @@ import 'package:mishkat_almasabih/features/home/ui/widgets/home_search_bar_secti
 import '../../../core/theming/colors.dart';
 import '../../../core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/theming/home_styles.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
 
 class HomeScreenWrapper extends StatelessWidget {
   const HomeScreenWrapper({super.key});
@@ -115,6 +116,13 @@ class _HomeScreenState extends State<HomeScreen> {
         const HomeSearchBarSection(),
         SliverToBoxAdapter(child: const HadithOfTheDayCard()),
         const SectionDivider(),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: _RamadanTasksEntry(),
+          ),
+        ),
+        const SectionDivider(),
         const TopBooksSection(),
         const SectionDivider(),
         SliverToBoxAdapter(
@@ -141,4 +149,67 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Section widgets extracted into separate files for better structure and fewer rebuilds.
+}
+
+class _RamadanTasksEntry extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: InkWell(
+        onTap: () => Navigator.pushNamed(context, Routes.ramadanTasksScreen),
+        child: Container(
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: ColorsManager.cardBackground,
+            borderRadius: BorderRadius.circular(12.w),
+            boxShadow: [
+              BoxShadow(
+                color: ColorsManager.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48.w,
+                height: 48.w,
+                decoration: BoxDecoration(
+                  color: ColorsManager.primaryPurple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12.w),
+                ),
+                child: Icon(
+                  Icons.nightlight_round,
+                  color: ColorsManager.primaryPurple,
+                  size: 28.sp,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'مهام رمضان',
+                      style: TextStyles.titleLarge.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      'أضف مهامك وتابع تقدّمك اليومي والشهري',
+                      style: TextStyles.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_left, color: ColorsManager.secondaryText),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -59,6 +59,10 @@ import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times
 import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_reminder_service.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_tasks_repository.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/data/datasources/ramadan_tasks_local_datasource.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/data/repositories/ramadan_tasks_repository_impl.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/cubit/ramadan_tasks_cubit.dart';
 
 final getIt = GetIt.instance;
 final customGetIt = GetIt.instance;
@@ -211,4 +215,15 @@ Future<void> setUpGetIt() async {
   );
 
   getIt.registerFactory<QiblahCubit>(() => QiblahCubit());
+
+  // Ramadan Tasks feature (Hive-based)
+  getIt.registerLazySingleton<RamadanTasksLocalDataSource>(
+    () => RamadanTasksLocalDataSource(),
+  );
+  getIt.registerLazySingleton<RamadanTasksRepository>(
+    () => RamadanTasksRepositoryImpl(getIt<RamadanTasksLocalDataSource>()),
+  );
+  getIt.registerFactory<RamadanTasksCubit>(
+    () => RamadanTasksCubit(getIt<RamadanTasksRepository>()),
+  );
 }
