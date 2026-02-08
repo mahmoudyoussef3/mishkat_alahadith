@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hijri/hijri_calendar.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
@@ -8,7 +9,6 @@ import '../../domain/entities/ramadan_task_entity.dart';
 import '../cubit/ramadan_tasks_cubit.dart';
 import '../widgets/add_task_sheet.dart';
 import '../widgets/calendar_button.dart';
-import '../widgets/date_header_card.dart';
 import '../widgets/day_selector.dart';
 import '../widgets/delete_confirm_dialog.dart';
 import '../widgets/empty_state.dart';
@@ -23,6 +23,20 @@ import '../widgets/week_selector.dart';
 class RamadanTasksPage extends StatelessWidget {
   const RamadanTasksPage({super.key});
 
+    String _hijriDateString() {
+    final hijri = HijriCalendar.now();
+    HijriCalendar.setLocal('ar');
+    return '${_toArabicNumerals(hijri.hDay)} ${hijri.getLongMonthName()} ${_toArabicNumerals(hijri.hYear)} هـ';
+  }
+    String _toArabicNumerals(int number) {
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return number
+        .toString()
+        .split('')
+        .map((d) => arabicDigits[int.parse(d)])
+        .join();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -31,46 +45,45 @@ class RamadanTasksPage extends StatelessWidget {
         backgroundColor: ColorsManager.primaryBackground,
         floatingActionButton: const _AddTaskFab(),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        body: SafeArea(
-          child: RefreshIndicator(
-            color: ColorsManager.primaryPurple,
-            onRefresh: () => context.read<RamadanTasksCubit>().init(),
-            child: CustomScrollView(
-              slivers: [
-                const BuildHeaderAppBar(
-                  title: 'مهام رمضان',
-                  description: 'تابع إنجازك اليومي والشهري بروح رمضانية',
-                  home: false,
-                  bottomNav: false,
-                ),
-                SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-                SliverPadding(
-                  padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
-                  sliver: BlocBuilder<RamadanTasksCubit, RamadanTasksState>(
-                    builder: (context, state) {
-                      if (state is RamadanTasksLoading) {
-                        return const SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: ColorsManager.primaryPurple,
-                            ),
+        body: RefreshIndicator(
+          color: ColorsManager.primaryPurple,
+          onRefresh: () => context.read<RamadanTasksCubit>().init(),
+          child: CustomScrollView(
+            slivers: [
+              
+              BuildHeaderAppBar(
+                title: 'مشكاة في رمضان',
+                description: "أنشئ خطتك الخاصة لشهر رمضان",
+                home: false,
+                bottomNav: false,
+              ),
+              SliverToBoxAdapter(child: SizedBox(height: 16.h)),
+              SliverPadding(
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
+                sliver: BlocBuilder<RamadanTasksCubit, RamadanTasksState>(
+                  builder: (context, state) {
+                    if (state is RamadanTasksLoading) {
+                      return const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: ColorsManager.primaryPurple,
                           ),
-                        );
-                      }
-                      if (state is RamadanTasksError) {
-                        return SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: RamadanErrorView(message: state.message),
-                        );
-                      }
-                      final s = state as RamadanTasksLoaded;
-                      return _LoadedBody(state: s);
-                    },
-                  ),
+                        ),
+                      );
+                    }
+                    if (state is RamadanTasksError) {
+                      return SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: RamadanErrorView(message: state.message),
+                      );
+                    }
+                    final s = state as RamadanTasksLoaded;
+                    return _LoadedBody(state: s);
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -113,7 +126,6 @@ class _AddTaskFab extends StatelessWidget {
   }
 }
 
-/// Main loaded content: progress card, tabs, selectors, task list.
 class _LoadedBody extends StatelessWidget {
   final RamadanTasksLoaded state;
   const _LoadedBody({required this.state});
@@ -123,14 +135,6 @@ class _LoadedBody extends StatelessWidget {
     final s = state;
     return SliverList(
       delegate: SliverChildListDelegate([
-        // ── Date header (Hijri + Gregorian) ──
-        DateHeaderCard(
-          hijriDate: s.hijriDateString,
-          gregorianDate: s.gregorianDateString,
-        ),
-        SizedBox(height: 12.h),
-
-        // ── Progress card ──
         RamadanProgress(
           todayDay: s.displayDay,
           dailyPercent: s.dailyPercent,
@@ -143,7 +147,6 @@ class _LoadedBody extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
 
-        // ── View mode tabs + calendar button ──
         Row(
           children: [
             Expanded(
@@ -166,7 +169,6 @@ class _LoadedBody extends StatelessWidget {
         ),
         SizedBox(height: 12.h),
 
-        // ── History selectors ──
         if (s.viewMode == ViewMode.history) ...[
           WeekSelector(
             selectedWeek: s.selectedWeek,
