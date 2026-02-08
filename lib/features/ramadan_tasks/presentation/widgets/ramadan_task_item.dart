@@ -4,12 +4,14 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import '../../domain/entities/ramadan_task_entity.dart';
 
+/// A single task card with animated checkbox, type badge, and swipe-to-delete.
 class RamadanTaskItem extends StatelessWidget {
   final RamadanTaskEntity task;
   final int todayDay;
   final VoidCallback onToggleDaily;
   final ValueChanged<bool> onToggleMonthly;
   final VoidCallback onDelete;
+  final bool readOnly;
 
   const RamadanTaskItem({
     super.key,
@@ -18,92 +20,161 @@ class RamadanTaskItem extends StatelessWidget {
     required this.onToggleDaily,
     required this.onToggleMonthly,
     required this.onDelete,
+    this.readOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDaily = task.type == TaskType.daily;
-    final completedToday = task.completedDays.contains(todayDay);
-    final monthlyCompleted = task.completedDays.isNotEmpty;
+    final isCompleted =
+        isDaily
+            ? task.completedDays.contains(todayDay)
+            : task.completedDays.isNotEmpty;
 
-    return Card(
-      color: ColorsManager.cardBackground,
-      margin: EdgeInsetsDirectional.only(bottom: 8.h),
-      child: Padding(
-        padding: EdgeInsetsDirectional.only(
-          start: 12.w,
-          end: 12.w,
-          top: 12.h,
-          bottom: 12.h,
+    final card = Container(
+      decoration: BoxDecoration(
+        color: ColorsManager.cardBackground,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color:
+              isCompleted
+                  ? ColorsManager.success.withOpacity(0.3)
+                  : ColorsManager.mediumGray.withOpacity(0.5),
         ),
-        child: Row(
-          children: [
-            // Checkbox area
-            InkWell(
-              onTap: () {
-                if (isDaily) {
-                  onToggleDaily();
-                } else {
-                  onToggleMonthly(!monthlyCompleted);
-                }
-              },
-              child: Container(
-                width: 24.w,
-                height: 24.w,
-                decoration: BoxDecoration(
-                  color:
-                      (isDaily ? completedToday : monthlyCompleted)
-                          ? ColorsManager.success
-                          : ColorsManager.mediumGray,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Icon(
-                  (isDaily ? completedToday : monthlyCompleted)
-                      ? Icons.check
-                      : Icons.close,
-                  size: 16.sp,
-                  color: ColorsManager.white,
-                ),
-              ),
+        boxShadow: [
+          BoxShadow(
+            color: ColorsManager.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14.r),
+          onTap:
+              readOnly
+                  ? null
+                  : () {
+                    if (isDaily) {
+                      onToggleDaily();
+                    } else {
+                      onToggleMonthly(!isCompleted);
+                    }
+                  },
+          child: Padding(
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: 14.w,
+              vertical: 14.h,
             ),
-            SizedBox(width: 12.w),
-            // Title and meta
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(task.title, style: TextStyles.titleLarge),
-                  SizedBox(height: 4.h),
-                  Row(
+            child: Row(
+              children: [
+                // ── Animated checkbox ──
+                _AnimatedCheckbox(isCompleted: isCompleted),
+                SizedBox(width: 14.w),
+
+                // ── Title + meta ──
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _TypeBadge(type: task.type),
-                      SizedBox(width: 8.w),
-                      if (isDaily)
-                        Text(
-                          completedToday ? 'مكتملة اليوم' : 'غير مكتملة اليوم',
-                          style: TextStyles.bodySmall,
+                      Text(
+                        task.title,
+                        style: TextStyles.titleMedium.copyWith(
+                          decoration:
+                              isCompleted ? TextDecoration.lineThrough : null,
+                          color:
+                              isCompleted
+                                  ? ColorsManager.secondaryText
+                                  : ColorsManager.primaryText,
                         ),
-                      if (!isDaily)
-                        Text(
-                          monthlyCompleted ? 'مكتملة' : 'غير مكتملة',
-                          style: TextStyles.bodySmall,
-                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4.h),
+                      Row(
+                        children: [
+                          _TypeBadge(type: task.type),
+                          SizedBox(width: 8.w),
+                          if (isDaily)
+                            _StatusText(
+                              text: isCompleted ? 'مكتملة' : 'غير مكتملة',
+                              isCompleted: isCompleted,
+                            ),
+                          if (!isDaily)
+                            _StatusText(
+                              text: isCompleted ? 'تم الإنجاز' : 'لم تكتمل',
+                              isCompleted: isCompleted,
+                            ),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+
+                // ── Delete button ──
+                if (!readOnly)
+                  IconButton(
+                    onPressed: onDelete,
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      color: ColorsManager.error.withOpacity(0.7),
+                      size: 22.sp,
+                    ),
+                    splashRadius: 20.r,
+                    tooltip: 'حذف',
+                  ),
+              ],
             ),
-            IconButton(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete, color: ColorsManager.error),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+
+    return card;
+  }
+}
+
+/// Animated circular checkbox with scale + color transition.
+class _AnimatedCheckbox extends StatelessWidget {
+  final bool isCompleted;
+  const _AnimatedCheckbox({required this.isCompleted});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOutCubic,
+      width: 28.w,
+      height: 28.w,
+      decoration: BoxDecoration(
+        color: isCompleted ? ColorsManager.success : Colors.transparent,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isCompleted ? ColorsManager.success : ColorsManager.mediumGray,
+          width: 2,
+        ),
+      ),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        transitionBuilder:
+            (child, anim) => ScaleTransition(scale: anim, child: child),
+        child:
+            isCompleted
+                ? Icon(
+                  Icons.check_rounded,
+                  key: const ValueKey('check'),
+                  size: 16.sp,
+                  color: ColorsManager.white,
+                )
+                : SizedBox(key: const ValueKey('empty'), width: 16.sp),
       ),
     );
   }
 }
 
+/// Small type badge (daily / monthly).
 class _TypeBadge extends StatelessWidget {
   final TaskType type;
   const _TypeBadge({required this.type});
@@ -111,23 +182,42 @@ class _TypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDaily = type == TaskType.daily;
-    final label = isDaily ? 'يومية' : 'شهرية';
-    final color =
-        isDaily ? ColorsManager.primaryPurple : ColorsManager.primaryGold;
-    final textColor = isDaily ? ColorsManager.white : ColorsManager.black;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 3.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(isDaily ? 1.0 : 0.2),
-        borderRadius: BorderRadius.circular(8.r),
-        border:
+        color:
             isDaily
-                ? null
-                : Border.all(color: ColorsManager.primaryGold, width: 1),
+                ? ColorsManager.primaryPurple.withOpacity(0.1)
+                : ColorsManager.primaryGold.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
-        label,
-        style: TextStyles.labelMedium.copyWith(color: textColor),
+        isDaily ? 'يومية' : 'شهرية',
+        style: TextStyles.bodySmall.copyWith(
+          color:
+              isDaily ? ColorsManager.primaryPurple : ColorsManager.primaryGold,
+          fontWeight: FontWeight.w600,
+          fontSize: 11.sp,
+        ),
+      ),
+    );
+  }
+}
+
+/// Completion status text.
+class _StatusText extends StatelessWidget {
+  final String text;
+  final bool isCompleted;
+  const _StatusText({required this.text, required this.isCompleted});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyles.bodySmall.copyWith(
+        color:
+            isCompleted ? ColorsManager.success : ColorsManager.secondaryText,
+        fontSize: 11.sp,
       ),
     );
   }

@@ -3,6 +3,12 @@ import '../../domain/repositories/ramadan_tasks_repository.dart';
 import '../datasources/ramadan_tasks_local_datasource.dart';
 import '../models/ramadan_task_model.dart';
 
+/// Concrete implementation of [RamadanTasksRepository] backed by Hive.
+///
+/// Design decisions:
+/// - Daily task completions are preserved across all 30 days for history.
+///   The old code wiped history on each reset — this version keeps it.
+/// - Monthly tasks record the single day they were completed on.
 class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
   final RamadanTasksLocalDataSource _ds;
   RamadanTasksRepositoryImpl(this._ds);
@@ -15,7 +21,6 @@ class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
 
   @override
   Future<void> addTask(RamadanTaskEntity task) async {
-    // Ensure ID
     final id =
         task.id.isEmpty
             ? DateTime.now().microsecondsSinceEpoch.toString()
@@ -46,14 +51,12 @@ class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
     if (t.type != TaskType.daily) {
       throw StateError('toggleDailyCompletion only valid for daily tasks');
     }
+    // BUG FIX: preserve completions on other days — only toggle TODAY.
     final completed = Set<int>.from(t.completedDays);
     if (completed.contains(day)) {
       completed.remove(day);
     } else {
-      // daily tasks should only hold current day completion; clear any other day entries
-      completed
-        ..clear()
-        ..add(day);
+      completed.add(day);
     }
     await updateTask(t.copyWith(completedDays: completed));
   }
@@ -74,7 +77,6 @@ class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
     }
     final days = Set<int>.from(t.completedDays);
     if (completed) {
-      // record completion on provided day if not already
       if (!days.contains(day)) days.add(day);
     } else {
       days.clear();
@@ -84,11 +86,9 @@ class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
 
   @override
   Future<void> ensureDailyReset(int day) async {
-    final tasks = await getTasks();
-    for (final t in tasks.where((e) => e.type == TaskType.daily)) {
-      final newDays = <int>{};
-      if (t.completedDays.contains(day)) newDays.add(day);
-      await updateTask(t.copyWith(completedDays: newDays));
-    }
+    // BUG FIX: This method previously wiped all past-day completions,
+    // destroying history. Now it's a no-op; daily completions are kept
+    // across all 30 days so the History view works correctly.
+    // The "completed today?" check is done at the UI/Cubit level.
   }
 }

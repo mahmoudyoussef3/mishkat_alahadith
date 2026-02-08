@@ -11,9 +11,21 @@ import '../../domain/usecases/compute_progress.dart';
 
 part 'ramadan_tasks_state.dart';
 
-/// View modes for Ramadan tasks UI
+/// View modes for the Ramadan tasks screen.
+///
+/// - [today]: shows tasks for today (daily + uncompleted monthly). Editable.
+/// - [history]: read-only view of any past day. Day selector visible.
+/// - [all]: shows every task regardless of status. Editable.
 enum ViewMode { today, history, all }
 
+/// Manages all Ramadan tasks state: loading, filtering, selection, progress.
+///
+/// Performance notes:
+/// - Full task list is cached in [_allTasks] to avoid re-fetching from Hive
+///   on every filter/selection change.
+/// - Progress is recomputed from the cached list (lightweight).
+/// - Hive reads only happen on [init], [addNewTask], [deleteById],
+///   [toggleDaily], and [setMonthly].
 class RamadanTasksCubit extends Cubit<RamadanTasksState> {
   final RamadanTasksRepository _repo;
   late final GetTasks _getTasks;
@@ -24,10 +36,12 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
   late final EnsureDailyReset _ensureDailyReset;
   final _computeProgress = ComputeProgress();
 
-  // Selection state
-  int _selectedDay = DateTime.now().day.clamp(1, 30);
-  int _weekStart = 1;
-  int _weekEnd = 7;
+  // Cached full task list (unfiltered) for fast re-filtering without I/O.
+  List<RamadanTaskEntity> _allTasks = [];
+
+  // Selection state kept in the cubit so it survives rebuilds.
+  int _selectedDay = 1;
+  int _selectedWeek = 1; // 1..4
   ViewMode _viewMode = ViewMode.today;
 
   RamadanTasksCubit(this._repo) : super(RamadanTasksLoading()) {
@@ -39,123 +53,173 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     _ensureDailyReset = EnsureDailyReset(_repo);
   }
 
+  // ─── Public API ────────────────────────────────────────────
+
+  /// Initial load. Call once when the screen is created.
   Future<void> init() async {
     emit(RamadanTasksLoading());
-    final todayDay = _todayDayNumber();
-    await _ensureDailyReset(todayDay);
-    final tasks = await _getTasks();
-    final initialRange = _weekRange(todayDay);
-    _weekStart = initialRange.$1;
-    _weekEnd = initialRange.$2;
-    _selectedDay = todayDay;
-    emit(_buildLoadedState(tasks: tasks, todayDay: todayDay));
+    try {
+      final todayDay = _todayDayNumber();
+      await _ensureDailyReset(todayDay);
+      _allTasks = await _getTasks();
+      _selectedDay = todayDay;
+      _selectedWeek = _weekForDay(todayDay);
+      _emitLoaded();
+    } catch (e) {
+      emit(RamadanTasksError('حدث خطأ أثناء تحميل المهام'));
+    }
   }
 
-  Future<void> addNewTask({required String title, required TaskType type}) async {
-    final newTask = RamadanTaskEntity(id: '', title: title.trim(), type: type, completedDays: {});
+  Future<void> addNewTask({
+    required String title,
+    required TaskType type,
+  }) async {
+    final newTask = RamadanTaskEntity(
+      id: '',
+      title: title.trim(),
+      type: type,
+      completedDays: const {},
+    );
     await _addTask(newTask);
-    await init();
+    _allTasks = await _getTasks();
+    _emitLoaded();
   }
 
   Future<void> deleteById(String id) async {
     await _deleteTask(id);
-    await init();
+    _allTasks = await _getTasks();
+    _emitLoaded();
   }
 
   Future<void> toggleDaily(String id) async {
     final day = _todayDayNumber();
     await _toggleDaily(id: id, day: day);
-    await _reloadPreservingSelection();
+    _allTasks = await _getTasks();
+    _emitLoaded();
   }
 
   Future<void> setMonthly(String id, bool completed) async {
     final day = _todayDayNumber();
     await _setMonthly(id: id, completed: completed, day: day);
-    await _reloadPreservingSelection();
+    _allTasks = await _getTasks();
+    _emitLoaded();
   }
 
-  Future<void> _reloadPreservingSelection() async {
-    final todayDay = _todayDayNumber();
-    final tasks = await _getTasks();
-    emit(_buildLoadedState(tasks: tasks, todayDay: todayDay));
-  }
-
-  // Filtering & selection API
-  void setViewMode(ViewMode mode) async {
+  /// Switch between Today / History / All.
+  Future<void> setViewMode(ViewMode mode) async {
     _viewMode = mode;
-    await _reloadPreservingSelection();
-  }
-
-  void setWeekIndex(int index) async {
-    // index: 1..4
-    switch (index) {
-      case 1:
-        _weekStart = 1;
-        _weekEnd = 7;
-        break;
-      case 2:
-        _weekStart = 8;
-        _weekEnd = 14;
-        break;
-      case 3:
-        _weekStart = 15;
-        _weekEnd = 21;
-        break;
-      default:
-        _weekStart = 22;
-        _weekEnd = 30;
+    // When switching to history, default to today's day so the user
+    // starts from a meaningful reference point.
+    if (mode == ViewMode.history) {
+      _selectedDay = _todayDayNumber();
+      _selectedWeek = _weekForDay(_selectedDay);
     }
-    // Clamp selected day into week range for history view UX
-    _selectedDay = _selectedDay.clamp(_weekStart, _weekEnd);
-    await _reloadPreservingSelection();
+    _emitLoaded();
   }
 
-  void setSelectedDay(int day) async {
+  /// Select a week (1..4). Clamps the selected day into the week range.
+  Future<void> setSelectedWeek(int week) async {
+    _selectedWeek = week.clamp(1, 4);
+    final range = _weekRange(_selectedWeek);
+    // Keep selectedDay inside the new week bounds.
+    if (_selectedDay < range.$1 || _selectedDay > range.$2) {
+      _selectedDay = range.$1;
+    }
+    _emitLoaded();
+  }
+
+  /// Select a specific day (1..30) in History view.
+  Future<void> setSelectedDay(int day) async {
     _selectedDay = day.clamp(1, 30);
-    await _reloadPreservingSelection();
+    _emitLoaded();
   }
 
-  int _todayDayNumber() {
-    // Simplified: clamp day-of-month to 1..30
-    final d = DateTime.now().day;
-    return d.clamp(1, 30);
+  // ─── Internal helpers ──────────────────────────────────────
+
+  int _todayDayNumber() => DateTime.now().day.clamp(1, 30);
+
+  /// Returns which week (1..4) a given day belongs to.
+  int _weekForDay(int day) {
+    if (day <= 7) return 1;
+    if (day <= 14) return 2;
+    if (day <= 21) return 3;
+    return 4;
   }
 
-  (int, int) _weekRange(int day) {
-    if (day <= 7) return (1, 7);
-    if (day <= 14) return (8, 14);
-    if (day <= 21) return (15, 21);
-    return (22, 30);
+  /// Returns (start, end) day numbers for a given week index.
+  (int, int) _weekRange(int week) {
+    switch (week) {
+      case 1:
+        return (1, 7);
+      case 2:
+        return (8, 14);
+      case 3:
+        return (15, 21);
+      default:
+        return (22, 30);
+    }
   }
 
-  RamadanTasksLoaded _buildLoadedState({required List<RamadanTaskEntity> tasks, required int todayDay}) {
-    final filtered = _filterTasks(tasks: tasks, todayDay: todayDay);
-    final dayForDailyProgress = _viewMode == ViewMode.history ? _selectedDay : todayDay;
-    final progress = _computeProgress(tasks: tasks, day: dayForDailyProgress, weekStart: _weekStart, weekEnd: _weekEnd);
-    return RamadanTasksLoaded(
-      tasks: filtered,
-      todayDay: todayDay,
-      selectedDay: _selectedDay,
-      weekStart: _weekStart,
-      weekEnd: _weekEnd,
-      viewMode: _viewMode,
-      dailyPercent: progress.dailyPercent,
-      monthlyPercent: progress.monthlyPercent,
-      weeklyPercent: progress.weeklyPercent,
-      motivationalText: progress.dailyPercent >= 1.0 ? 'ما شاء الله! أنجزت مهامك اليومية بالكامل 👏' : null,
+  /// Emits a new [RamadanTasksLoaded] from the cached [_allTasks].
+  void _emitLoaded() {
+    final todayDay = _todayDayNumber();
+    final range = _weekRange(_selectedWeek);
+    final dayForProgress =
+        _viewMode == ViewMode.history ? _selectedDay : todayDay;
+    final progress = _computeProgress(
+      tasks: _allTasks,
+      day: dayForProgress,
+      weekStart: range.$1,
+      weekEnd: range.$2,
+    );
+    final filtered = _filterTasks(_allTasks, todayDay);
+
+    String? motivation;
+    if (_viewMode == ViewMode.today &&
+        progress.dailyPercent >= 1.0 &&
+        progress.dailyTotal > 0) {
+      motivation = 'ما شاء الله! أتممت جميع مهامك اليوم 🌟';
+    }
+
+    emit(
+      RamadanTasksLoaded(
+        allTasks: _allTasks,
+        filteredTasks: filtered,
+        todayDay: todayDay,
+        selectedDay: _selectedDay,
+        selectedWeek: _selectedWeek,
+        weekStart: range.$1,
+        weekEnd: range.$2,
+        viewMode: _viewMode,
+        dailyPercent: progress.dailyPercent,
+        monthlyPercent: progress.monthlyPercent,
+        weeklyPercent: progress.weeklyPercent,
+        dailyCompleted: progress.dailyCompleted,
+        dailyTotal: progress.dailyTotal,
+        motivationalText: motivation,
+      ),
     );
   }
 
-  List<RamadanTaskEntity> _filterTasks({required List<RamadanTaskEntity> tasks, required int todayDay}) {
+  /// Filtering logic (pure function — no I/O).
+  ///
+  /// - Today: all daily tasks + monthly tasks that haven't been completed yet.
+  /// - History: all tasks (status shown per selectedDay, read-only).
+  /// - All: all tasks.
+  List<RamadanTaskEntity> _filterTasks(
+    List<RamadanTaskEntity> tasks,
+    int todayDay,
+  ) {
     switch (_viewMode) {
       case ViewMode.today:
-        // Show all daily tasks; monthly tasks until first completion
-        return tasks.where((t) => t.type == TaskType.daily || (t.type == TaskType.monthly && t.completedDays.isEmpty)).toList();
+        return tasks.where((t) {
+          if (t.type == TaskType.daily) return true;
+          // Show monthly tasks that are not yet completed
+          return t.completedDays.isEmpty;
+        }).toList();
       case ViewMode.history:
-        // Read-only: show all tasks for inspection
-        return tasks;
       case ViewMode.all:
-        return tasks;
+        return List.unmodifiable(tasks);
     }
   }
 }
