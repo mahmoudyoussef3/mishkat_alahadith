@@ -20,8 +20,8 @@ import '../widgets/section_header.dart';
 import '../widgets/view_mode_tabs.dart';
 import '../widgets/week_selector.dart';
 
-class RamadanTasksPage extends StatelessWidget {
-  const RamadanTasksPage({super.key});
+class RamadanTasksScreen extends StatelessWidget {
+  const RamadanTasksScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +76,7 @@ class RamadanTasksPage extends StatelessWidget {
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-// Page-level private helper widgets
-// ══════════════════════════════════════════════════════════════
 
-/// FAB that shows only when not in history mode.
 class _AddTaskFab extends StatelessWidget {
   const _AddTaskFab();
 

@@ -6,9 +6,6 @@ class RamadanTaskEntity {
   final String description;
   final TaskType type;
   final Set<int> completedDays;
-
-  /// For [TaskType.todayOnly] tasks: which Ramadan day (1..30) this task
-  /// was created for. Ignored for [TaskType.daily] tasks.
   final int createdForDay;
 
   const RamadanTaskEntity({

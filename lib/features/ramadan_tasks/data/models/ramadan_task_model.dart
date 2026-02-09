@@ -5,9 +5,9 @@ class RamadanTaskModel {
   String id;
   String title;
   String description;
-  int typeIndex; // 0=daily, 1=todayOnly
-  List<int> completedDays; // store as list for Hive
-  int createdForDay; // which Ramadan day this todayOnly task belongs to
+  int typeIndex; 
+  List<int> completedDays; 
+  int createdForDay; 
 
   RamadanTaskModel({
     required this.id,
@@ -37,7 +37,6 @@ class RamadanTaskModel {
   );
 }
 
-/// Manual adapter to avoid code generation
 class RamadanTaskModelAdapter extends TypeAdapter<RamadanTaskModel> {
   @override
   final int typeId = 33;

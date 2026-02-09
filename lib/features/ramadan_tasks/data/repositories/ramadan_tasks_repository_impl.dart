@@ -3,12 +3,6 @@ import '../../domain/repositories/ramadan_tasks_repository.dart';
 import '../datasources/ramadan_tasks_local_datasource.dart';
 import '../models/ramadan_task_model.dart';
 
-/// Concrete implementation of [RamadanTasksRepository] backed by Hive.
-///
-/// Design decisions:
-/// - Daily task completions are preserved across all 30 days for history.
-/// - TodayOnly tasks belong to a specific day (createdForDay) and toggle
-///   completion for that day.
 class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
   final RamadanTasksLocalDataSource _ds;
   RamadanTasksRepositoryImpl(this._ds);

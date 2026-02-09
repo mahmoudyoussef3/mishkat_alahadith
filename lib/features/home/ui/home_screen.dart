@@ -161,8 +161,18 @@ class _RamadanTasksEntry extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
-            color: ColorsManager.cardBackground,
+            color: ColorsManager.primaryGreen,
             borderRadius: BorderRadius.circular(12.w),
+            gradient: const LinearGradient(
+              transform: GradientRotation(45 * 3.1415926535 / 180),
+              colors: [
+                ColorsManager.primaryBackground,
+                ColorsManager.primaryGreen,
+                ColorsManager.primaryGreen,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             boxShadow: [
               BoxShadow(
                 color: ColorsManager.black.withOpacity(0.05),
@@ -177,12 +187,12 @@ class _RamadanTasksEntry extends StatelessWidget {
                 width: 48.w,
                 height: 48.w,
                 decoration: BoxDecoration(
-                  color: ColorsManager.primaryPurple.withOpacity(0.1),
+                  color: ColorsManager.secondaryBackground,
                   borderRadius: BorderRadius.circular(12.w),
                 ),
                 child: Icon(
                   Icons.nightlight_round,
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.primaryGreen,
                   size: 28.sp,
                 ),
               ),
@@ -194,18 +204,24 @@ class _RamadanTasksEntry extends StatelessWidget {
                     Text(
                       'مهام رمضان',
                       style: TextStyles.titleLarge.copyWith(
+                        color: ColorsManager.secondaryBackground,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 4.h),
                     Text(
                       'أضف مهامك وتابع تقدّمك اليومي والشهري',
-                      style: TextStyles.bodySmall,
+                      style: TextStyles.bodySmall.copyWith(
+                        color: ColorsManager.secondaryBackground,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_left, color: ColorsManager.secondaryText),
+              Icon(
+                Icons.chevron_right,
+                color: ColorsManager.secondaryBackground,
+              ),
             ],
           ),
         ),

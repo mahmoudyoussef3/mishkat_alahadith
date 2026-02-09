@@ -1,14 +1,10 @@
 import '../entities/ramadan_task_entity.dart';
 
-/// Result of progress computation for Ramadan tasks.
-///
-/// All values are 0.0 – 1.0 (percentage as fraction).
 class ProgressResult {
   final double dailyPercent;
   final double overallPercent;
   final double weeklyPercent;
 
-  /// How many tasks (daily + todayOnly) were completed on [day].
   final int dailyCompleted;
   final int dailyTotal;
 
@@ -21,13 +17,7 @@ class ProgressResult {
   });
 }
 
-/// Pure use-case that computes progress from a list of tasks.
-///
-/// Progress formulas:
-/// - Daily  : (completedDaily + completedTodayOnly) / (totalDaily + todayOnlyForDay)
-///   on the specific day being viewed.
-/// - Overall: total daily completions across daysSoFar / (dailyCount × daysSoFar + todayOnlyCount)
-/// - Weekly : daily completions within [weekStart..weekEnd] / (dailyCount × weekDays)
+
 class ComputeProgress {
   ProgressResult call({
     required List<RamadanTaskEntity> tasks,
@@ -45,7 +35,6 @@ class ComputeProgress {
     final allTodayOnly =
         tasks.where((t) => t.type == TaskType.todayOnly).toList();
 
-    // ── Daily progress (for the specific day) ──
     final dailyCompletedCount =
         dailyTasks.where((t) => t.completedDays.contains(day)).length;
     final todayOnlyCompletedCount =
@@ -54,7 +43,6 @@ class ComputeProgress {
     final completedForDay = dailyCompletedCount + todayOnlyCompletedCount;
     final dailyPercent = totalForDay == 0 ? 0.0 : completedForDay / totalForDay;
 
-    // ── Overall Ramadan progress ──
     final daysSoFar = day.clamp(1, 30);
     final totalSlots = (daysSoFar * dailyTasks.length) + allTodayOnly.length;
     int completedSlots = 0;
@@ -66,7 +54,6 @@ class ComputeProgress {
     }
     final overallPercent = totalSlots == 0 ? 0.0 : completedSlots / totalSlots;
 
-    // ── Weekly progress (daily tasks only) ──
     final weekDays = (weekEnd - weekStart + 1).clamp(1, 30);
     final totalWeeklySlots = dailyTasks.length * weekDays;
     int weeklyCompleted = 0;
