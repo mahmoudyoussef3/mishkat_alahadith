@@ -7,9 +7,21 @@ import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/core/theming/qiblah_finder_decorations.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
 import 'package:mishkat_almasabih/features/qiblah_finder/logic/cubit/qiblah_cubit.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const double _kAlignmentThreshold = 5.0;
+const Duration _kAnimDuration = Duration(milliseconds: 350);
+const Duration _kPulseDuration = Duration(milliseconds: 1200);
+const Curve _kAnimCurve = Curves.easeOutCubic;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Screen
+// ─────────────────────────────────────────────────────────────────────────────
 
 class QiblahFinderScreen extends StatefulWidget {
   const QiblahFinderScreen({super.key});
@@ -22,9 +34,7 @@ class _QiblahFinderScreenState extends State<QiblahFinderScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      context.read<QiblahCubit>().init();
-    });
+    Future.microtask(() => context.read<QiblahCubit>().init());
   }
 
   @override
@@ -32,25 +42,28 @@ class _QiblahFinderScreenState extends State<QiblahFinderScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: ColorsManager.secondaryBackground,
+        backgroundColor: ColorsManager.primaryBackground,
         body: SafeArea(
           bottom: true,
           child: BlocBuilder<QiblahCubit, QiblahState>(
             builder: (context, state) {
               return CustomScrollView(
+                physics: const BouncingScrollPhysics(),
                 slivers: [
                   const BuildHeaderAppBar(
                     title: 'محدد القبلة',
-                    description: 'وجّه هاتفك حتى تصبح الإبرة للأعلى',
+                    description: 'وجّه هاتفك نحو اتجاه القبلة',
                     pinned: true,
                   ),
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    sliver: SliverToBoxAdapter(
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.symmetric(
+                        horizontal: 20.w,
+                        vertical: 16.h,
+                      ),
                       child: _buildBody(context, state),
                     ),
                   ),
-                  SliverToBoxAdapter(child: SizedBox(height: 24.h)),
                 ],
               );
             },
@@ -61,539 +74,77 @@ class _QiblahFinderScreenState extends State<QiblahFinderScreen> {
   }
 
   Widget _buildBody(BuildContext context, QiblahState state) {
-    if (state is QiblahLoading || state is QiblahInitial) {
-      return const Center(child: CircularProgressIndicator.adaptive());
-    }
-
-    if (state is QiblahSensorUnsupported) {
-      return _MessageCard(
+    return switch (state) {
+      QiblahInitial() || QiblahLoading() => const _LoadingView(),
+      QiblahSensorUnsupported() => _StateMessageView(
+        icon: Icons.sensors_off_rounded,
+        iconColor: ColorsManager.error,
         title: 'البوصلة غير مدعومة',
-        message: 'جهازك لا يدعم مستشعر البوصلة.',
+        message: 'جهازك لا يدعم مستشعر البوصلة اللازم لتحديد اتجاه القبلة.',
         buttonText: 'إعادة المحاولة',
-        onPressed: () => context.read<QiblahCubit>().refresh(),
-      );
-    }
-
-    if (state is QiblahLocationDisabled) {
-      return _MessageCard(
+        onRetry: () => context.read<QiblahCubit>().refresh(),
+      ),
+      QiblahLocationDisabled() => _StateMessageView(
+        icon: Icons.location_off_rounded,
+        iconColor: ColorsManager.warning,
         title: 'خدمة الموقع متوقفة',
-        message: 'يرجى تفعيل GPS.',
+        message:
+            'يرجى تفعيل خدمة تحديد الموقع (GPS) حتى نتمكن من حساب اتجاه القبلة بدقة.',
         buttonText: 'إعادة المحاولة',
-        onPressed: () => context.read<QiblahCubit>().refresh(),
-      );
-    }
-
-    if (state is QiblahPermissionDenied ||
-        state is QiblahPermissionDeniedForever) {
-      return _MessageCard(
+        onRetry: () => context.read<QiblahCubit>().refresh(),
+      ),
+      QiblahPermissionDenied() ||
+      QiblahPermissionDeniedForever() => _StateMessageView(
+        icon: Icons.lock_outline_rounded,
+        iconColor: ColorsManager.primaryGold,
         title: 'إذن الموقع مطلوب',
-        message: 'يرجى تفعيل إذن الموقع من الإعدادات.',
+        message:
+            'نحتاج إذن الوصول إلى موقعك لحساب اتجاه القبلة. يرجى تفعيل الإذن من إعدادات الهاتف.',
         buttonText: 'إعادة المحاولة',
-        onPressed: () => context.read<QiblahCubit>().refresh(),
-      );
-    }
-
-    if (state is QiblahError) {
-      return _MessageCard(
+        onRetry: () => context.read<QiblahCubit>().refresh(),
+      ),
+      QiblahError(message: final msg) => _StateMessageView(
+        icon: Icons.error_outline_rounded,
+        iconColor: ColorsManager.error,
         title: 'حدث خطأ',
-        message: state.message,
+        message: msg,
         buttonText: 'إعادة المحاولة',
-        onPressed: () => context.read<QiblahCubit>().refresh(),
-      );
-    }
-
-    return const _QiblahCompassCard();
-  }
-}
-
-class _QiblahCompassCard extends StatefulWidget {
-  const _QiblahCompassCard();
-
-  @override
-  State<_QiblahCompassCard> createState() => _QiblahCompassCardState();
-}
-
-class _QiblahCompassCardState extends State<_QiblahCompassCard> {
-  bool _wasAligned = false;
-
-  void _checkAlignment(double offset) {
-    final isAligned = offset.abs() <= 5;
-    if (isAligned && !_wasAligned) {
-      HapticFeedback.mediumImpact();
-      _wasAligned = true;
-    } else if (!isAligned && _wasAligned) {
-      _wasAligned = false;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20.r),
-      decoration: QiblahFinderDecorations.compassCard(),
-      child: StreamBuilder<QiblahDirection>(
-        stream: FlutterQiblah.qiblahStream,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator.adaptive(),
-                  SizedBox(height: 16.h),
-                  Text('جاري تحديد الموقع...', style: TextStyles.bodyMedium),
-                ],
-              ),
-            );
-          }
-
-          final data = snapshot.data!;
-          _checkAlignment(data.offset);
-          final isAligned = data.offset.abs() <= 5;
-
-          return Column(
-            children: [
-              /// Big Success Indicator
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: EdgeInsets.all(isAligned ? 20.r : 12.r),
-                decoration: BoxDecoration(
-                  color:
-                      isAligned
-                          ? Colors.green.withOpacity(0.2)
-                          : Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color: isAligned ? Colors.green : Colors.grey.shade300,
-                    width: isAligned ? 3 : 1.5,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    AnimatedScale(
-                      scale: isAligned ? 1.1 : 1.0,
-                      duration: const Duration(milliseconds: 300),
-                      child: Icon(
-                        isAligned ? Icons.check_circle : Icons.explore,
-                        size: isAligned ? 48.r : 36.r,
-                        color: isAligned ? Colors.green : Colors.grey.shade600,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      isAligned ? 'تم ضبط اتجاه القبلة ✓' : 'اتجاه القبلة',
-                      style: TextStyles.headlineMedium.copyWith(
-                        color:
-                            isAligned
-                                ? Colors.green
-                                : ColorsManager.primaryText,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    if (!isAligned) ...{
-                      SizedBox(height: 4.h),
-                      Text(
-                        'حرّك الهاتف حتى تصبح الإبرة للأعلى',
-                        style: TextStyles.bodySmall.copyWith(
-                          color: ColorsManager.secondaryText,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    },
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 20.h),
-
-              /// Compass with circular progress indicator and arrows
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Circular Progress Indicator
-                  SizedBox(
-                    width: 310.r,
-                    height: 310.r,
-                    child: AnimatedRotation(
-                      turns: isAligned ? 0.25 : 0,
-                      duration: const Duration(milliseconds: 500),
-                      child: CircularProgressIndicator(
-                        value: _getProgressValue(data.offset),
-                        strokeWidth: 8.w,
-                        backgroundColor: Colors.grey.shade200,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          _getProgressColor(data.offset),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Direction Arrow (when not aligned)
-                  if (!isAligned)
-                    Positioned(
-                      top: data.offset > 0 ? null : 10.h,
-                      bottom: data.offset > 0 ? 10.h : null,
-                      child: AnimatedOpacity(
-                        opacity: data.offset.abs() > 10 ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 300),
-                        child: Icon(
-                          data.offset > 0
-                              ? Icons.keyboard_arrow_down_rounded
-                              : Icons.keyboard_arrow_up_rounded,
-                          size: 40.r,
-                          color: _getProgressColor(data.offset),
-                        ),
-                      ),
-                    ),
-
-                  // Compass with glow effect when aligned
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow:
-                          isAligned
-                              ? [
-                                BoxShadow(
-                                  color: Colors.green.withOpacity(0.5),
-                                  blurRadius: 40.r,
-                                  spreadRadius: 8.r,
-                                ),
-                              ]
-                              : [
-                                BoxShadow(
-                                  color: _getProgressColor(
-                                    data.offset,
-                                  ).withOpacity(0.2),
-                                  blurRadius: 20.r,
-                                  spreadRadius: 3.r,
-                                ),
-                              ],
-                    ),
-                    child: SizedBox(
-                      width: 280.r,
-                      height: 280.r,
-                      child: _QiblahDial(
-                        directionDegrees: data.direction,
-                        qiblahDegrees: data.qiblah,
-                        offsetDegrees: data.offset,
-                        isAligned: isAligned,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 24.h),
-
-              /// Large Offset Display with dynamic colors
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: EdgeInsets.symmetric(vertical: 18.h, horizontal: 24.w),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors:
-                        isAligned
-                            ? [
-                              Colors.green.shade50,
-                              Colors.green.shade100,
-                              Colors.green.shade50,
-                            ]
-                            : [
-                              _getProgressColor(data.offset).withOpacity(0.1),
-                              _getProgressColor(data.offset).withOpacity(0.2),
-                              _getProgressColor(data.offset).withOpacity(0.1),
-                            ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color:
-                        isAligned
-                            ? Colors.green
-                            : _getProgressColor(data.offset),
-                    width: 2.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (isAligned
-                              ? Colors.green
-                              : _getProgressColor(data.offset))
-                          .withOpacity(0.2),
-                      blurRadius: 12.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedScale(
-                          scale: isAligned ? 1.2 : 1.0,
-                          duration: const Duration(milliseconds: 300),
-                          child: Icon(
-                            isAligned
-                                ? Icons.check_circle_rounded
-                                : Icons.my_location,
-                            color:
-                                isAligned
-                                    ? Colors.green
-                                    : _getProgressColor(data.offset),
-                            size: 28.r,
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Flexible(
-                          child: Text(
-                            isAligned
-                                ? 'أنت الآن متجه نحو القبلة'
-                                : 'الانحراف: ${data.offset.abs().toStringAsFixed(1)}°',
-                            style: TextStyles.titleLarge.copyWith(
-                              color:
-                                  isAligned
-                                      ? Colors.green.shade900
-                                      : Colors.deepOrange.shade800,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.sp,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (!isAligned) ...{
-                      SizedBox(height: 12.h),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 8.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              data.offset > 0
-                                  ? Icons.arrow_forward_rounded
-                                  : Icons.arrow_back_rounded,
-                              color: _getProgressColor(data.offset),
-                              size: 20.r,
-                            ),
-                            SizedBox(width: 8.w),
-                            Flexible(
-                              child: Text(
-                                _getDirectionHint(data.offset),
-                                style: TextStyles.bodyMedium.copyWith(
-                                  color: Colors.deepOrange.shade700,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    },
-                    // Progress percentage
-                    if (!isAligned) ...{
-                      SizedBox(height: 10.h),
-                      Text(
-                        'دقة الاتجاه: ${(_getProgressValue(data.offset) * 100).toStringAsFixed(0)}%',
-                        style: TextStyles.bodySmall.copyWith(
-                          color: ColorsManager.secondaryText,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    },
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 16.h),
-
-              _QiblahInfoRow(
-                qiblahDegrees: data.qiblah,
-                directionDegrees: data.direction,
-                offsetDegrees: data.offset,
-                isAligned: isAligned,
-              ),
-            ],
-          );
-        },
+        onRetry: () => context.read<QiblahCubit>().refresh(),
       ),
-    );
-  }
-
-  String _getDirectionHint(double offset) {
-    if (offset.abs() <= 5) return 'تم الضبط بنجاح';
-    if (offset > 0) {
-      if (offset > 45) return 'حرّك الهاتف كثيراً لليمين';
-      if (offset > 15) return 'حرّك الهاتف لليمين';
-      return 'حرّك الهاتف قليلاً لليمين';
-    } else {
-      if (offset < -45) return 'حرّك الهاتف كثيراً لليسار';
-      if (offset < -15) return 'حرّك الهاتف لليسار';
-      return 'حرّك الهاتف قليلاً لليسار';
-    }
-  }
-
-  Color _getProgressColor(double offset) {
-    final absOffset = offset.abs();
-    if (absOffset <= 5) return Colors.green;
-    if (absOffset <= 15) return Colors.lightGreen;
-    if (absOffset <= 30) return Colors.amber;
-    if (absOffset <= 60) return Colors.orange;
-    return Colors.red;
-  }
-
-  double _getProgressValue(double offset) {
-    final absOffset = offset.abs();
-    if (absOffset >= 90) return 0.0;
-    return 1.0 - (absOffset / 90);
+      QiblahReady() => const _QiblahCompassView(),
+    };
   }
 }
 
-class _QiblahInfoRow extends StatelessWidget {
-  final double qiblahDegrees;
-  final double directionDegrees;
-  final double offsetDegrees;
-  final bool isAligned;
+// ─────────────────────────────────────────────────────────────────────────────
+// Loading View
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const _QiblahInfoRow({
-    required this.qiblahDegrees,
-    required this.directionDegrees,
-    required this.offsetDegrees,
-    required this.isAligned,
-  });
+class _LoadingView extends StatelessWidget {
+  const _LoadingView();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _InfoChip(
-            icon: Icons.mosque,
-            label: 'زاوية القبلة',
-            value: '${qiblahDegrees.toStringAsFixed(0)}°',
-            isAligned: isAligned,
-          ),
-        ),
-        SizedBox(width: 10.w),
-        Expanded(
-          child: _InfoChip(
-            icon: Icons.explore,
-            label: 'اتجاهك الحالي',
-            value: '${directionDegrees.toStringAsFixed(0)}°',
-            isAligned: isAligned,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool isAligned;
-
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.isAligned,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors:
-              isAligned
-                  ? [
-                    Colors.green.shade50,
-                    Colors.green.shade100,
-                    Colors.green.shade50,
-                  ]
-                  : [
-                    Colors.white,
-                    ColorsManager.primaryPurple.withOpacity(0.05),
-                    Colors.white,
-                  ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color:
-              isAligned
-                  ? Colors.green.shade400
-                  : ColorsManager.primaryPurple.withOpacity(0.3),
-          width: isAligned ? 2 : 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: (isAligned ? Colors.green : ColorsManager.primaryPurple)
-                .withOpacity(isAligned ? 0.2 : 0.1),
-            blurRadius: isAligned ? 12.r : 8.r,
-            offset: Offset(0, 4.h),
-          ),
-        ],
-      ),
+    return Center(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedScale(
-            scale: isAligned ? 1.1 : 1.0,
-            duration: const Duration(milliseconds: 300),
-            child: Container(
-              padding: EdgeInsets.all(8.r),
-              decoration: BoxDecoration(
-                color:
-                    isAligned
-                        ? Colors.green.withOpacity(0.15)
-                        : ColorsManager.primaryPurple.withOpacity(0.1),
-                shape: BoxShape.circle,
+          SizedBox(
+            width: 56.r,
+            height: 56.r,
+            child: CircularProgressIndicator(
+              strokeWidth: 3.5,
+              valueColor: const AlwaysStoppedAnimation(
+                ColorsManager.primaryPurple,
               ),
-              child: Icon(
-                icon,
-                size: 26.r,
-                color:
-                    isAligned
-                        ? Colors.green.shade700
-                        : ColorsManager.primaryPurple,
-              ),
+              backgroundColor: ColorsManager.primaryPurple.withOpacity(0.12),
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 24.h),
           Text(
-            label,
-            style: TextStyles.bodySmall.copyWith(
+            'جاري تهيئة البوصلة…',
+            style: TextStyles.titleMedium.copyWith(
               color: ColorsManager.secondaryText,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            value,
-            style: TextStyles.titleLarge.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 20.sp,
-              color:
-                  isAligned ? Colors.green.shade900 : ColorsManager.primaryText,
             ),
           ),
         ],
@@ -602,84 +153,63 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _QiblahDial extends StatelessWidget {
-  final double directionDegrees;
-  final double qiblahDegrees;
-  final double offsetDegrees;
-  final bool isAligned;
+// ─────────────────────────────────────────────────────────────────────────────
+// State Message View (errors / permissions / GPS)
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const _QiblahDial({
-    required this.directionDegrees,
-    required this.qiblahDegrees,
-    required this.offsetDegrees,
-    required this.isAligned,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Container(decoration: QiblahFinderDecorations.dialOuterRing()),
-
-        /// Dial - rotates opposite to phone direction
-        AnimatedRotation(
-          turns: directionDegrees / 360,
-          duration: const Duration(milliseconds: 300),
-          child: CustomPaint(
-            painter: _CompassDialPainter(isAligned: isAligned),
-            child: const SizedBox.expand(),
-          ),
-        ),
-
-        /// Needle - points to Qiblah direction relative to the dial
-        AnimatedRotation(
-          turns: (directionDegrees - qiblahDegrees) / 360,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-          child: CustomPaint(
-            painter: _NeedlePainter(isAligned: isAligned),
-            child: const SizedBox.expand(),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Message Card Widget for errors and states
-class _MessageCard extends StatelessWidget {
+class _StateMessageView extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
   final String title;
   final String message;
   final String buttonText;
-  final VoidCallback onPressed;
+  final VoidCallback onRetry;
 
-  const _MessageCard({
+  const _StateMessageView({
+    required this.icon,
+    required this.iconColor,
     required this.title,
     required this.message,
     required this.buttonText,
-    required this.onPressed,
+    required this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 32.h),
-        padding: EdgeInsets.all(24.r),
-        decoration: QiblahFinderDecorations.compassCard(),
+        margin: EdgeInsets.symmetric(vertical: 24.h),
+        padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 36.h),
+        decoration: BoxDecoration(
+          color: ColorsManager.cardBackground,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: ColorsManager.black.withOpacity(0.06),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.info_outline,
-              size: 64.r,
-              color: ColorsManager.primaryPurple,
+            // Icon circle
+            Container(
+              width: 80.r,
+              height: 80.r,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: iconColor.withOpacity(0.10),
+              ),
+              child: Icon(icon, size: 40.r, color: iconColor),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 24.h),
             Text(
               title,
-              style: TextStyles.headlineMedium,
+              style: TextStyles.headlineMedium.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 12.h),
@@ -687,21 +217,32 @@ class _MessageCard extends StatelessWidget {
               message,
               style: TextStyles.bodyMedium.copyWith(
                 color: ColorsManager.secondaryText,
+                height: 1.6,
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24.h),
-            ElevatedButton(
-              onPressed: onPressed,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorsManager.primaryPurple,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
+            SizedBox(height: 32.h),
+            SizedBox(
+              width: double.infinity,
+              height: 50.h,
+              child: ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded, size: 20),
+                label: Text(
+                  buttonText,
+                  style: TextStyles.titleMedium.copyWith(
+                    color: ColorsManager.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorsManager.primaryPurple,
+                  foregroundColor: ColorsManager.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
+                  elevation: 0,
                 ),
               ),
-              child: Text(buttonText),
             ),
           ],
         ),
@@ -710,77 +251,755 @@ class _MessageCard extends StatelessWidget {
   }
 }
 
-/// Compass Dial Painter
-class _CompassDialPainter extends CustomPainter {
+// ─────────────────────────────────────────────────────────────────────────────
+// Compass View  –  StreamBuilder on FlutterQiblah.qiblahStream
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _QiblahCompassView extends StatefulWidget {
+  const _QiblahCompassView();
+
+  @override
+  State<_QiblahCompassView> createState() => _QiblahCompassViewState();
+}
+
+class _QiblahCompassViewState extends State<_QiblahCompassView>
+    with SingleTickerProviderStateMixin {
+  bool _wasAligned = false;
+
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: _kPulseDuration,
+    )..repeat(reverse: true);
+
+    _pulseAnim = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  void _checkAlignment(double offset) {
+    final aligned = offset.abs() <= _kAlignmentThreshold;
+    if (aligned && !_wasAligned) {
+      HapticFeedback.mediumImpact();
+      _wasAligned = true;
+    } else if (!aligned && _wasAligned) {
+      _wasAligned = false;
+    }
+  }
+
+  // Helpers ───────────────────────────────────────────────────────────────
+
+  Color _progressColor(double offset) {
+    final a = offset.abs();
+    if (a <= 5) return ColorsManager.success;
+    if (a <= 15) return const Color(0xFF8BC34A); // light green
+    if (a <= 30) return ColorsManager.warning;
+    if (a <= 60) return const Color(0xFFFF5722); // deep orange
+    return ColorsManager.error;
+  }
+
+  double _progressValue(double offset) =>
+      (1.0 - (offset.abs().clamp(0, 90) / 90));
+
+  String _directionHint(double offset) {
+    if (offset.abs() <= _kAlignmentThreshold) return 'أنت على اتجاه القبلة';
+    if (offset > 0) {
+      if (offset > 45) return 'أدِر الهاتف كثيراً لليمين ←';
+      if (offset > 15) return 'أدِر الهاتف لليمين ←';
+      return 'أدِر قليلاً لليمين ←';
+    } else {
+      if (offset < -45) return '→ أدِر الهاتف كثيراً لليسار';
+      if (offset < -15) return '→ أدِر الهاتف لليسار';
+      return '→ أدِر قليلاً لليسار';
+    }
+  }
+
+  String _cardinalName(double deg) {
+    const names = [
+      'شمال',
+      'شمال شرق',
+      'شرق',
+      'جنوب شرق',
+      'جنوب',
+      'جنوب غرب',
+      'غرب',
+      'شمال غرب',
+    ];
+    final i = ((deg % 360 + 22.5) / 45).floor() % 8;
+    return names[i];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QiblahDirection>(
+      stream: FlutterQiblah.qiblahStream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const _LoadingView();
+        }
+
+        final data = snapshot.data!;
+        _checkAlignment(data.offset);
+
+        final isAligned = data.offset.abs() <= _kAlignmentThreshold;
+        final color = _progressColor(data.offset);
+        final progress = _progressValue(data.offset);
+
+        return Column(
+          children: [
+            SizedBox(height: 8.h),
+
+            // ── Status banner ──
+            _StatusBanner(
+              isAligned: isAligned,
+              hint: _directionHint(data.offset),
+              color: color,
+            ),
+
+            SizedBox(height: 20.h),
+
+            // ── Compass ──
+            Builder(
+              builder: (context) {
+                final screenWidth = MediaQuery.of(context).size.width - 40.w;
+                final compassSize = math.min(screenWidth, 340.0);
+                return Center(
+                  child: _CompassWidget(
+                    size: compassSize,
+                    directionDeg: data.direction,
+                    qiblahDeg: data.qiblah,
+                    offsetDeg: data.offset,
+                    isAligned: isAligned,
+                    progressColor: color,
+                    progress: progress,
+                    pulseAnim: _pulseAnim,
+                  ),
+                );
+              },
+            ),
+
+            SizedBox(height: 20.h),
+
+            // ── Offset pill ──
+            _OffsetPill(
+              offset: data.offset,
+              progress: progress,
+              color: color,
+              isAligned: isAligned,
+            ),
+
+            SizedBox(height: 16.h),
+
+            // ── Info chips row ──
+            _InfoRow(
+              qiblahDeg: data.qiblah,
+              directionDeg: data.direction,
+              cardinalName: _cardinalName(data.direction),
+              isAligned: isAligned,
+            ),
+
+            SizedBox(height: 12.h),
+
+            // ── Tip ──
+            _TipBar(isAligned: isAligned),
+
+            SizedBox(height: 8.h),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Status Banner
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _StatusBanner extends StatelessWidget {
+  final bool isAligned;
+  final String hint;
+  final Color color;
+
+  const _StatusBanner({
+    required this.isAligned,
+    required this.hint,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: _kAnimDuration,
+      curve: _kAnimCurve,
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 20.w),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: color.withOpacity(0.25), width: 1.5),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: Icon(
+              isAligned ? Icons.check_circle_rounded : Icons.explore_outlined,
+              key: ValueKey(isAligned),
+              color: color,
+              size: 24.r,
+            ),
+          ),
+          SizedBox(width: 10.w),
+          Flexible(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: Text(
+                hint,
+                key: ValueKey(hint),
+                style: TextStyles.titleMedium.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Compass Widget
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CompassWidget extends StatelessWidget {
+  final double size;
+  final double directionDeg;
+  final double qiblahDeg;
+  final double offsetDeg;
+  final bool isAligned;
+  final Color progressColor;
+  final double progress;
+  final Animation<double> pulseAnim;
+
+  const _CompassWidget({
+    required this.size,
+    required this.directionDeg,
+    required this.qiblahDeg,
+    required this.offsetDeg,
+    required this.isAligned,
+    required this.progressColor,
+    required this.progress,
+    required this.pulseAnim,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // ── Pulsing glow ring ──
+          if (isAligned)
+            AnimatedBuilder(
+              animation: pulseAnim,
+              builder: (_, __) {
+                return Container(
+                  width: size * pulseAnim.value,
+                  height: size * pulseAnim.value,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: ColorsManager.success.withOpacity(
+                        0.35 * pulseAnim.value,
+                      ),
+                      width: 4,
+                    ),
+                  ),
+                );
+              },
+            ),
+
+          // ── Progress arc ──
+          SizedBox(
+            width: size * 0.92,
+            height: size * 0.92,
+            child: AnimatedContainer(
+              duration: _kAnimDuration,
+              child: CircularProgressIndicator(
+                value: progress,
+                strokeWidth: 6,
+                strokeCap: StrokeCap.round,
+                backgroundColor: ColorsManager.lightGray,
+                valueColor: AlwaysStoppedAnimation(progressColor),
+              ),
+            ),
+          ),
+
+          // ── Compass dial ──
+          SizedBox(
+            width: size * 0.82,
+            height: size * 0.82,
+            child: _CompassDial(
+              directionDeg: directionDeg,
+              qiblahDeg: qiblahDeg,
+              isAligned: isAligned,
+            ),
+          ),
+
+          // ── Kaaba icon at top (fixed) ──
+          Positioned(
+            top: size * 0.015,
+            child: AnimatedScale(
+              scale: isAligned ? 1.15 : 1.0,
+              duration: _kAnimDuration,
+              child: Container(
+                width: 36.r,
+                height: 36.r,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color:
+                      isAligned
+                          ? ColorsManager.success
+                          : ColorsManager.primaryPurple,
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isAligned
+                              ? ColorsManager.success
+                              : ColorsManager.primaryPurple)
+                          .withOpacity(0.35),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.mosque_rounded,
+                  color: ColorsManager.white,
+                  size: 18.r,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Compass Dial  (rotates, contains needle)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CompassDial extends StatelessWidget {
+  final double directionDeg;
+  final double qiblahDeg;
   final bool isAligned;
 
-  _CompassDialPainter({required this.isAligned});
+  const _CompassDial({
+    required this.directionDeg,
+    required this.qiblahDeg,
+    required this.isAligned,
+  });
 
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Dial background
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: ColorsManager.cardBackground,
+            border: Border.all(
+              color: ColorsManager.primaryPurple.withOpacity(0.15),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: ColorsManager.black.withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+        ),
+
+        // Rotating compass markings
+        AnimatedRotation(
+          turns: -directionDeg / 360,
+          duration: const Duration(milliseconds: 280),
+          curve: _kAnimCurve,
+          child: CustomPaint(
+            painter: _DialPainter(),
+            child: const SizedBox.expand(),
+          ),
+        ),
+
+        // Qiblah needle  (rotates to qiblah relative to device heading)
+        AnimatedRotation(
+          turns: -(directionDeg - qiblahDeg) / 360,
+          duration: const Duration(milliseconds: 280),
+          curve: _kAnimCurve,
+          child: CustomPaint(
+            painter: _NeedlePainter(isAligned: isAligned),
+            child: const SizedBox.expand(),
+          ),
+        ),
+
+        // Center hub
+        Container(
+          width: 28.r,
+          height: 28.r,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
+            ),
+            border: Border.all(color: ColorsManager.white, width: 2.5),
+            boxShadow: [
+              BoxShadow(
+                color: ColorsManager.primaryPurple.withOpacity(0.35),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.navigation_rounded,
+            color: ColorsManager.white,
+            size: 14.r,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Offset Pill
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _OffsetPill extends StatelessWidget {
+  final double offset;
+  final double progress;
+  final Color color;
+  final bool isAligned;
+
+  const _OffsetPill({
+    required this.offset,
+    required this.progress,
+    required this.color,
+    required this.isAligned,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: _kAnimDuration,
+      curve: _kAnimCurve,
+      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 24.w),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: color.withOpacity(0.22), width: 1.5),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Accuracy badge
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              '${(progress * 100).toStringAsFixed(0)}%',
+              style: TextStyles.titleMedium.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Flexible(
+            child: Text(
+              isAligned
+                  ? 'اتجاه القبلة مضبوط بدقة'
+                  : 'الانحراف ${offset.abs().toStringAsFixed(1)}°',
+              style: TextStyles.titleMedium.copyWith(
+                color: ColorsManager.primaryText,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Info Row (Qiblah angle + Current heading)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _InfoRow extends StatelessWidget {
+  final double qiblahDeg;
+  final double directionDeg;
+  final String cardinalName;
+  final bool isAligned;
+
+  const _InfoRow({
+    required this.qiblahDeg,
+    required this.directionDeg,
+    required this.cardinalName,
+    required this.isAligned,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _InfoTile(
+            icon: Icons.mosque_rounded,
+            label: 'زاوية القبلة',
+            value: '${qiblahDeg.toStringAsFixed(1)}°',
+            accent: ColorsManager.primaryGold,
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: _InfoTile(
+            icon: Icons.explore_rounded,
+            label: cardinalName,
+            value: '${directionDeg.toStringAsFixed(1)}°',
+            accent: ColorsManager.primaryPurple,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color accent;
+
+  const _InfoTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: ColorsManager.cardBackground,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: accent.withOpacity(0.18), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: ColorsManager.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40.r,
+            height: 40.r,
+            decoration: BoxDecoration(
+              color: accent.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Icon(icon, size: 22.r, color: accent),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyles.labelSmall.copyWith(
+                    color: ColorsManager.secondaryText,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  value,
+                  style: TextStyles.titleLarge.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: ColorsManager.primaryText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tip Bar
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _TipBar extends StatelessWidget {
+  final bool isAligned;
+  const _TipBar({required this.isAligned});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: _kAnimDuration,
+      child:
+          isAligned
+              ? const SizedBox.shrink()
+              : Container(
+                key: const ValueKey('tip'),
+                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 14.w),
+                decoration: BoxDecoration(
+                  color: ColorsManager.primaryPurple.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: ColorsManager.primaryPurple.withOpacity(0.14),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.tips_and_updates_rounded,
+                      size: 20.r,
+                      color: ColorsManager.primaryGold,
+                    ),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Text(
+                        'أمسك الهاتف بشكل أفقي بعيداً عن المعادن للحصول على أفضل دقة',
+                        style: TextStyles.bodySmall.copyWith(
+                          color: ColorsManager.secondaryText,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Custom Painters
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dial Painter  — tick marks + cardinal letters
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _DialPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
-    // Draw cardinal directions
-    final textPainter = TextPainter(
-      textDirection: TextDirection.rtl,
-      textAlign: TextAlign.center,
-    );
+    // ── Ticks ──
+    final minorPaint =
+        Paint()
+          ..color = ColorsManager.mediumGray.withOpacity(0.6)
+          ..strokeWidth = 1.2
+          ..strokeCap = StrokeCap.round;
 
-    final directions = [
-      {'angle': 0.0, 'label': 'ش', 'color': Colors.red},
-      {'angle': math.pi / 2, 'label': 'ق', 'color': Colors.white},
-      {'angle': math.pi, 'label': 'ج', 'color': Colors.white},
-      {'angle': 3 * math.pi / 2, 'label': 'غ', 'color': Colors.white},
-    ];
+    final majorPaint =
+        Paint()
+          ..color = ColorsManager.primaryPurple.withOpacity(0.55)
+          ..strokeWidth = 2.2
+          ..strokeCap = StrokeCap.round;
 
-    for (var dir in directions) {
-      final angle = dir['angle'] as double;
-      final label = dir['label'] as String;
-      final color = dir['color'] as Color;
+    for (int i = 0; i < 360; i += 5) {
+      final angle = i * math.pi / 180;
+      final isMajor = i % 30 == 0;
+      final tickLen = isMajor ? radius * 0.10 : radius * 0.05;
+      final outerR = radius - 4;
+      final innerR = outerR - tickLen;
 
-      textPainter.text = TextSpan(
-        text: label,
-        style: TextStyle(
-          color: color,
-          fontSize: 20.sp,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Cairo',
-        ),
+      final p1 = Offset(
+        center.dx + outerR * math.sin(angle),
+        center.dy - outerR * math.cos(angle),
       );
-      textPainter.layout();
-
-      final x = center.dx + (radius - 30.r) * math.sin(angle);
-      final y = center.dy - (radius - 30.r) * math.cos(angle);
-
-      textPainter.paint(
-        canvas,
-        Offset(x - textPainter.width / 2, y - textPainter.height / 2),
+      final p2 = Offset(
+        center.dx + innerR * math.sin(angle),
+        center.dy - innerR * math.cos(angle),
       );
+
+      canvas.drawLine(p1, p2, isMajor ? majorPaint : minorPaint);
     }
 
-    // Draw tick marks
-    final paint =
-        Paint()
-          ..color = Colors.white.withOpacity(0.3)
-          ..strokeWidth = 2.w;
+    // ── Cardinal labels ──
+    const labels = [
+      (0.0, 'ش'), // N
+      (math.pi / 2, 'ق'), // E
+      (math.pi, 'ج'), // S
+      (3 * math.pi / 2, 'غ'), // W
+    ];
 
-    for (int i = 0; i < 72; i++) {
-      final angle = (i * 5) * math.pi / 180;
-      final isMajor = i % 6 == 0;
-      final lineLength = isMajor ? 15.r : 8.r;
+    for (final (angle, label) in labels) {
+      final isNorth = angle == 0.0;
+      final tp = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: TextStyle(
+            color:
+                isNorth
+                    ? ColorsManager.primaryPurple
+                    : ColorsManager.secondaryText,
+            fontSize: radius * 0.15,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Cairo',
+          ),
+        ),
+        textDirection: TextDirection.rtl,
+        textAlign: TextAlign.center,
+      )..layout();
 
-      final startRadius = radius - lineLength;
-      final x1 = center.dx + startRadius * math.sin(angle);
-      final y1 = center.dy - startRadius * math.cos(angle);
-      final x2 = center.dx + radius * math.sin(angle);
-      final y2 = center.dy - radius * math.cos(angle);
+      final labelR = radius * 0.72;
+      final dx = center.dx + labelR * math.sin(angle) - tp.width / 2;
+      final dy = center.dy - labelR * math.cos(angle) - tp.height / 2;
 
-      canvas.drawLine(
-        Offset(x1, y1),
-        Offset(x2, y2),
-        paint..strokeWidth = isMajor ? 3.w : 1.5.w,
-      );
+      tp.paint(canvas, Offset(dx, dy));
     }
   }
 
@@ -788,94 +1007,95 @@ class _CompassDialPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Needle Painter for Qiblah direction
+// ─────────────────────────────────────────────────────────────────────────────
+// Needle Painter  — gold arrow pointing to Qiblah
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _NeedlePainter extends CustomPainter {
   final bool isAligned;
-
   _NeedlePainter({required this.isAligned});
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
+    final r = size.width / 2;
 
-    // Draw needle shadow
+    final needleW = r * 0.09;
+    final needleTopY = center.dy - r * 0.58;
+    final needleBottomY = center.dy + r * 0.20;
+
+    // ── Shadow ──
     final shadowPath =
         Path()
-          ..moveTo(center.dx, center.dy - radius * 0.65)
-          ..lineTo(center.dx - 12.w, center.dy + 10.h)
-          ..lineTo(center.dx + 12.w, center.dy + 10.h)
+          ..moveTo(center.dx, needleTopY + 2)
+          ..lineTo(center.dx - needleW, center.dy + 4)
+          ..lineTo(center.dx + needleW, center.dy + 4)
           ..close();
 
     canvas.drawPath(
       shadowPath,
       Paint()
-        ..color = Colors.black.withOpacity(0.2)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4.r),
+        ..color = ColorsManager.black.withOpacity(0.10)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
     );
 
-    // Draw needle (green/gold top based on alignment)
-    final needlePath =
+    // ── Top half (gold / green when aligned) ──
+    final topPath =
         Path()
-          ..moveTo(center.dx, center.dy - radius * 0.65)
-          ..lineTo(center.dx - 10.w, center.dy)
-          ..lineTo(center.dx + 10.w, center.dy)
+          ..moveTo(center.dx, needleTopY)
+          ..lineTo(center.dx - needleW, center.dy)
+          ..lineTo(center.dx + needleW, center.dy)
           ..close();
 
+    final topColor =
+        isAligned ? ColorsManager.success : ColorsManager.primaryGold;
     final topGradient =
         Paint()
           ..shader = LinearGradient(
-            colors:
-                isAligned
-                    ? [Colors.green.shade600, Colors.lightGreenAccent]
-                    : [Colors.amber.shade700, Colors.amber.shade300],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-          ).createShader(Rect.fromCircle(center: center, radius: radius));
+            colors: [topColor, topColor.withOpacity(0.7)],
+          ).createShader(
+            Rect.fromLTRB(
+              center.dx - needleW,
+              needleTopY,
+              center.dx + needleW,
+              center.dy,
+            ),
+          );
 
-    canvas.drawPath(needlePath, topGradient);
+    canvas.drawPath(topPath, topGradient);
 
-    // Draw needle border with glow effect when aligned
+    // Outline
     canvas.drawPath(
-      needlePath,
+      topPath,
       Paint()
-        ..color = isAligned ? Colors.green : Colors.white
+        ..color = ColorsManager.white.withOpacity(0.6)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = isAligned ? 2.5.w : 1.5.w,
+        ..strokeWidth = 1.2,
     );
 
-    // Draw needle (red bottom)
-    final needleBottomPath =
+    // ── Bottom half (muted) ──
+    final bottomPath =
         Path()
-          ..moveTo(center.dx, center.dy + radius * 0.25)
-          ..lineTo(center.dx - 10.w, center.dy)
-          ..lineTo(center.dx + 10.w, center.dy)
+          ..moveTo(center.dx, needleBottomY)
+          ..lineTo(center.dx - needleW, center.dy)
+          ..lineTo(center.dx + needleW, center.dy)
           ..close();
 
-    canvas.drawPath(needleBottomPath, Paint()..color = Colors.red.shade700);
-
-    // Draw center circle
-    canvas.drawCircle(
-      center,
-      12.r,
-      Paint()
-        ..color = ColorsManager.primaryPurple
-        ..style = PaintingStyle.fill,
+    canvas.drawPath(
+      bottomPath,
+      Paint()..color = ColorsManager.mediumGray.withOpacity(0.55),
     );
-
-    canvas.drawCircle(
-      center,
-      12.r,
+    canvas.drawPath(
+      bottomPath,
       Paint()
-        ..color = Colors.white
+        ..color = ColorsManager.white.withOpacity(0.4)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.w,
+        ..strokeWidth = 1.0,
     );
-
-    // Draw center dot
-    canvas.drawCircle(center, 4.r, Paint()..color = Colors.white);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(_NeedlePainter old) => old.isAligned != isAligned;
 }
