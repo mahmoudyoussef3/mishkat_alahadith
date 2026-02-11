@@ -128,6 +128,8 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.libraryScreen);
                   },
                 ),
+                /*
+              
                       _buildDrawerItem(
                   context,
                   icon: Icons.alarm_rounded,
@@ -137,6 +139,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.dailyZekrScreen);
                   },
                 ),
+                */
 
                                       _buildDrawerItem(
                   context,

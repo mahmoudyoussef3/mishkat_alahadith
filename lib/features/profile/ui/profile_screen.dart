@@ -134,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   // Profile Header for logged-in users
                   if (_token != null) _buildProfileHeader(state),
-
+/*
                   // Notification Settings
                   NotificationSection(
                     dailyHadithNotification: _dailyHadithNotification,
@@ -142,6 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     werdNotification: _werdNotification,
                     onNotificationChanged: _onNotificationChanged,
                   ),
+                  */
 
                   // Statistics Section
                   if (_token != null) const StatisticsSection(),

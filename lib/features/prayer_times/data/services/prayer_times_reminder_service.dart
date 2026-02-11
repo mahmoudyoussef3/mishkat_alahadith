@@ -19,7 +19,7 @@ class PrayerTimesReminderService {
   static const int _maghribTomorrowId = _maghribId + 100;
   static const int _ishaTomorrowId = _ishaId + 100;
 
-  static const _offset = Duration(minutes: 2);
+  static const _offset = Duration.zero;
 
   Future<void> syncPrayerReminders({
     required PrayerTimes todayTimes,
@@ -92,7 +92,7 @@ class PrayerTimesReminderService {
           channelId: _channelId,
           channelName: _channelName,
           title: 'تذكير الصلاة',
-          body: 'تبقّى دقيقتان على صلاة ${schedule.arabicName}',
+          body: 'حان الآن موعد صلاة ${schedule.arabicName}',
           scheduledDate: schedule.reminderTime,
           payload: 'prayer_times:${schedule.prayerName.name}',
         );

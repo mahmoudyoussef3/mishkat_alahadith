@@ -30,17 +30,38 @@ class LocalNotification {
   static Future<bool> _ensureExactAlarmPermissionIfNeeded() async {
     if (!Platform.isAndroid) return true;
 
-    // On Android 12+ exact alarms may require user approval.
-    // If the permission is not supported on this OS/device, treat it as granted.
+    // On Android 12+ (API 31+), exact alarms require explicit user permission.
+    // This permission cannot be requested via a normal dialog - it opens Settings.
     try {
       final status = await Permission.scheduleExactAlarm.status;
-      if (status.isGranted) return true;
 
+      if (status.isGranted) {
+        log('Exact alarm permission: GRANTED');
+        return true;
+      }
+
+      log('Exact alarm permission not granted. Status: $status');
+      log('Opening system settings for exact alarm permission...');
+
+      // On Android 12+, request() opens the system settings page
+      // where the user must manually enable "Alarms & reminders"
       final requested = await Permission.scheduleExactAlarm.request();
-      log('Exact alarm permission status: $requested');
+
+      log('Exact alarm permission after request: $requested');
+
+      if (!requested.isGranted) {
+        log(
+          '⚠️ Exact alarm permission denied. Prayer time notifications may not work accurately.',
+        );
+        log(
+          'Users should enable "Alarms & reminders" in app settings for precise prayer notifications.',
+        );
+      }
+
       return requested.isGranted;
     } catch (e) {
       log('Exact alarm permission check failed: $e');
+      // If permission check fails (older Android), assume it's okay
       return true;
     }
   }
