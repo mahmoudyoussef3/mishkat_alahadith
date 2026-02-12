@@ -26,6 +26,7 @@ class LocalNotification {
       );
     }
   }
+  
 
   static Future<bool> _ensureExactAlarmPermissionIfNeeded() async {
     if (!Platform.isAndroid) return true;

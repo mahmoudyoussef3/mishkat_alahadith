@@ -144,11 +144,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   */
 
-                  // Statistics Section
                   if (_token != null) const StatisticsSection(),
 
-                  // Bottom Padding
-                  SliverPadding(padding: EdgeInsets.only(bottom: 60.h)),
+                if (_token != null)    SliverPadding(padding: EdgeInsets.only(bottom: 60.h)),
                 ],
               );
             },

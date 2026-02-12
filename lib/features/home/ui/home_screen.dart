@@ -166,7 +166,6 @@ class _RamadanTasksEntry extends StatelessWidget {
             gradient: const LinearGradient(
               transform: GradientRotation(45 * 3.1415926535 / 180),
               colors: [
-                ColorsManager.primaryBackground,
                 ColorsManager.primaryGreen,
                 ColorsManager.primaryGreen,
               ],
@@ -191,7 +190,7 @@ class _RamadanTasksEntry extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12.w),
                 ),
                 child: Icon(
-                  Icons.nightlight_round,
+                  Icons.mosque_outlined,
                   color: ColorsManager.primaryGreen,
                   size: 28.sp,
                 ),
