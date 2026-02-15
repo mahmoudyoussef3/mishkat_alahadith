@@ -398,7 +398,6 @@ class _MonthlyProgressCardState extends State<_MonthlyProgressCard>
                           ],
                         ),
                       ),
-                      // Arrow Icon
                       Container(
                         width: 32.w,
                         height: 32.w,

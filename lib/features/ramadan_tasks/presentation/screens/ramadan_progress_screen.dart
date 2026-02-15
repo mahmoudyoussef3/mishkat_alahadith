@@ -94,7 +94,7 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
                 borderRadius: BorderRadius.circular(10.r),
               ),
               child: Icon(
-                Icons.arrow_forward_rounded,
+                Icons.arrow_back_rounded,
                 size: 20.sp,
                 color: ColorsManager.primaryText,
               ),
