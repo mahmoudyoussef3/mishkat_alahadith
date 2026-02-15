@@ -44,6 +44,7 @@ class _QiblahFinderScreenState extends State<QiblahFinderScreen> {
       child: Scaffold(
         backgroundColor: ColorsManager.primaryBackground,
         body: SafeArea(
+          top: false,
           bottom: true,
           child: BlocBuilder<QiblahCubit, QiblahState>(
             builder: (context, state) {
