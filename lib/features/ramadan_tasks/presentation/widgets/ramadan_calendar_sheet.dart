@@ -56,7 +56,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
   int _todayOnlyCompletedOnDay(int day) =>
       _todayOnlyForDay(day).where((t) => t.completedDays.contains(day)).length;
 
-  /// Returns a 0.0–1.0 ratio of all tasks completed on [day].
   double _completionRatio(int day) {
     final todayOnlyForThisDay = _todayOnlyForDay(day);
     final total = _dailyTasks.length + todayOnlyForThisDay.length;
@@ -67,93 +66,114 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.75,
-        minChildSize: 0.5,
-        maxChildSize: 0.92,
-        builder: (_, scrollController) {
-          return Container(
-            decoration: BoxDecoration(
-              color: ColorsManager.secondaryBackground,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-            ),
-            child: Column(
-              children: [
-                // ── Drag handle ──
-                Padding(
-                  padding: EdgeInsetsDirectional.only(top: 12.h, bottom: 8.h),
-                  child: Container(
-                    width: 40.w,
-                    height: 4.h,
-                    decoration: BoxDecoration(
-                      color: ColorsManager.mediumGray,
-                      borderRadius: BorderRadius.circular(2.r),
+    return SafeArea(
+      top: false,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.75,
+          minChildSize: 0.5,
+          maxChildSize: 0.92,
+          builder: (_, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: ColorsManager.secondaryBackground,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+              ),
+              child: Column(
+                children: [
+                  // ── Drag handle ──
+                  Padding(
+                    padding: EdgeInsetsDirectional.only(top: 12.h, bottom: 8.h),
+                    child: Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: ColorsManager.mediumGray,
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
                     ),
                   ),
-                ),
-
-                // ── Title ──
-                Padding(
-                  padding: EdgeInsetsDirectional.symmetric(horizontal: 20.w),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_month_rounded,
-                        color: ColorsManager.primaryPurple,
-                        size: 24.sp,
-                      ),
-                      SizedBox(width: 8.w),
-                      Text('تقويم رمضان', style: TextStyles.headlineSmall),
-                      const Spacer(),
-                      // Legend
-                      _LegendDot(color: ColorsManager.success, label: 'مكتمل'),
-                      SizedBox(width: 10.w),
-                      _LegendDot(
-                        color: ColorsManager.primaryGold,
-                        label: 'جزئي',
-                      ),
-                    ],
+      
+                  // ── Title ──
+                  Padding(
+                    padding: EdgeInsetsDirectional.symmetric(horizontal: 20.w),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_month_rounded,
+                          color: ColorsManager.primaryPurple,
+                          size: 24.sp,
+                        ),
+                        SizedBox(width: 8.w),
+                        Text('تقويم رمضان', style: TextStyles.headlineSmall),
+                        const Spacer(),
+                        // Legend
+                        _LegendDot(color: ColorsManager.success, label: 'مكتمل'),
+                        SizedBox(width: 10.w),
+                        _LegendDot(
+                          color: ColorsManager.primaryGold,
+                          label: 'جزئي',
+                        ),
+                                              const Spacer(),
+                                              GestureDetector(
+                                                child: Container(
+                                                  width: 36.w,
+                                                  height: 36.w,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorsManager.lightGray,
+                                                    borderRadius:
+                                                        BorderRadius.circular(10.r),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.cancel,
+                                                    size: 20.sp,
+                                                    color: ColorsManager.primaryText,
+                                                  ),
+                                                ),
+                          onTap: () => Navigator.of(context).pop(), )
+      
+                      ],
+                    ),
                   ),
-                ),
-
-                SizedBox(height: 16.h),
-
-                // ── Weekday header row ──
-                SizedBox(height: 8.h),
-
-                // ── Calendar grid ──
-                Expanded(
-                  child: ListView(
-                    controller: scrollController,
-                    padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
-                    children: [
-                      _buildCalendarGrid(),
-                      SizedBox(height: 12.h),
-
-                      // ── Today-only tasks overview ──
-                      if (_allTodayOnly.isNotEmpty) ...[
-                        _buildTodayOnlySection(),
+      
+                  SizedBox(height: 16.h),
+      
+                  // ── Weekday header row ──
+                  SizedBox(height: 8.h),
+      
+                  // ── Calendar grid ──
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
+                      children: [
+                        _buildCalendarGrid(),
                         SizedBox(height: 12.h),
+      
+                        // ── Today-only tasks overview ──
+                        if (_allTodayOnly.isNotEmpty) ...[
+                          _buildTodayOnlySection(),
+                          SizedBox(height: 12.h),
+                        ],
+      
+                        // ── Day detail card (shown on tap) ──
+                        if (_selectedDay != null) ...[
+                          _buildDayDetail(_selectedDay!),
+                          SizedBox(height: 16.h),
+                        ],
+      
+                        // ── Stats summary ──
+                        _buildStatsSummary(),
+                        SizedBox(height: 24.h),
                       ],
-
-                      // ── Day detail card (shown on tap) ──
-                      if (_selectedDay != null) ...[
-                        _buildDayDetail(_selectedDay!),
-                        SizedBox(height: 16.h),
-                      ],
-
-                      // ── Stats summary ──
-                      _buildStatsSummary(),
-                      SizedBox(height: 24.h),
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

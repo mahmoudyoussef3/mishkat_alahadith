@@ -10,7 +10,7 @@ enum PresentationMode { card, table }
 /// A premium Ramadan-themed toggle switch between Card View and Table View.
 ///
 /// Features:
-/// - Islamic-inspired emerald/deep-teal gradient on selected chip
+/// - Purple gradient using app colors (primaryPurple to darkPurple) on selected chip
 /// - Smooth animated transitions (300ms)
 /// - Haptic feedback on toggle
 /// - RTL-aware layout
@@ -24,31 +24,33 @@ class PresentationModeToggle extends StatelessWidget {
     required this.onChanged,
   });
 
-  // Islamic-inspired palette
-  static const emerald = Color(0xFF0D7C66);
-  static const deepTeal = Color(0xFF0A5E4F);
-  static const softMint = Color(0xFFE8F5F0);
-  static const borderMint = Color(0xFFB2DFDB);
-
   @override
   Widget build(BuildContext context) {
     return Container(
+      
       decoration: BoxDecoration(
-        color: softMint,
+        color: ColorsManager.primaryBackground,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: borderMint, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: emerald.withOpacity(0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+      
+ 
       ),
-      padding: EdgeInsets.all(3.w),
+      padding: EdgeInsets.all(16.w),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+             _ToggleChip(
+            icon: Icons.grid_on_rounded,
+            label: 'جدول',
+            isSelected: mode == PresentationMode.table,
+            onTap: () {
+              if (mode != PresentationMode.table) {
+                HapticFeedback.selectionClick();
+                onChanged(PresentationMode.table);
+              }
+            },
+          ),
+                    SizedBox(width: 2.w),
+
           _ToggleChip(
             icon: Icons.view_agenda_rounded,
             label: 'بطاقات',
@@ -60,18 +62,7 @@ class PresentationModeToggle extends StatelessWidget {
               }
             },
           ),
-          SizedBox(width: 2.w),
-          _ToggleChip(
-            icon: Icons.grid_on_rounded,
-            label: 'جدول',
-            isSelected: mode == PresentationMode.table,
-            onTap: () {
-              if (mode != PresentationMode.table) {
-                HapticFeedback.selectionClick();
-                onChanged(PresentationMode.table);
-              }
-            },
-          ),
+  
         ],
       ),
     );
@@ -107,8 +98,8 @@ class _ToggleChip extends StatelessWidget {
               isSelected
                   ? const LinearGradient(
                     colors: [
-                      PresentationModeToggle.emerald,
-                      PresentationModeToggle.deepTeal,
+                      ColorsManager.primaryPurple,
+                      ColorsManager.darkPurple,
                     ],
                     begin: AlignmentDirectional.topStart,
                     end: AlignmentDirectional.bottomEnd,
@@ -120,7 +111,7 @@ class _ToggleChip extends StatelessWidget {
               isSelected
                   ? [
                     BoxShadow(
-                      color: PresentationModeToggle.emerald.withOpacity(0.25),
+                      color: ColorsManager.primaryPurple.withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),

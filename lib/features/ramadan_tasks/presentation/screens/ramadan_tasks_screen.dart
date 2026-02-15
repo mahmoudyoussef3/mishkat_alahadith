@@ -3,17 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
 import '../cubit/ramadan_tasks_cubit.dart';
 import '../widgets/add_task_sheet.dart';
+import '../widgets/calendar_button.dart';
 import '../widgets/error_view.dart';
+import '../widgets/ramadan_calendar_sheet.dart';
 import '../widgets/table_view/presentation_mode_toggle.dart';
 import '../widgets/table_view/ramadan_card_view.dart';
 import '../widgets/table_view/ramadan_table_view.dart';
 import '../../../../core/routing/routes.dart';
-
-// ────────────────────────────────────────────────────────────────
-// RamadanTasksScreen
-// ────────────────────────────────────────────────────────────────
 
 class RamadanTasksScreen extends StatefulWidget {
   const RamadanTasksScreen({super.key});
@@ -23,174 +22,133 @@ class RamadanTasksScreen extends StatefulWidget {
 }
 
 class _RamadanTasksScreenState extends State<RamadanTasksScreen> {
-  PresentationMode _presentationMode = PresentationMode.card;
+  PresentationMode _presentationMode = PresentationMode.table;
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: ColorsManager.primaryBackground,
+        backgroundColor: ColorsManager.secondaryBackground,
         floatingActionButton: const _AddTaskFab(),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              // ── Compact app bar ──
-              _CompactAppBar(
-                presentationMode: _presentationMode,
-                onModeChanged: (mode) {
-                  setState(() => _presentationMode = mode);
-                },
-              ),
-
-              // ── Full-screen content area ──
-              Expanded(
-                child: BlocBuilder<RamadanTasksCubit, RamadanTasksState>(
-                  builder: (context, state) {
-                    if (state is RamadanTasksLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: ColorsManager.primaryPurple,
-                        ),
-                      );
-                    }
-                    if (state is RamadanTasksError) {
-                      return Center(
-                        child: RamadanErrorView(message: state.message),
-                      );
-                    }
-                    final s = state as RamadanTasksLoaded;
-                    return _FullScreenContent(
-                      state: s,
-                      mode: _presentationMode,
-                    );
-                  },
+        body: BlocBuilder<RamadanTasksCubit, RamadanTasksState>(
+          builder: (context, state) {
+            return CustomScrollView(
+              slivers: [
+                BuildHeaderAppBar(
+                  home: false,
+                  /*
+                  actions: [
+                    _StatsHeaderAction(
+                      onTap:
+                          () => Navigator.of(
+                            context,
+                          ).pushNamed(Routes.ramadanProgressScreen),
+                    ),
+                  ],
+                  */
+                  bottomNav: false,
+                  title: 'مشكاة في رمضان',
+                  description: 'أنشئ خطتك الخاصة لشهر رمضان',
                 ),
-              ),
-            ],
-          ),
+                SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+
+                // ── Monthly Progress Summary Card ──
+                if (state is RamadanTasksLoaded)
+                  SliverToBoxAdapter(
+                    child: _MonthlyProgressCard(
+                      overallPercent: state.overallPercent,
+                      onTap:
+                          () => Navigator.of(
+                            context,
+                          ).pushNamed(Routes.ramadanProgressScreen),
+                    ),
+                  ),
+
+                SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+
+                // ── Calendar Button ──
+                if (state is RamadanTasksLoaded)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        start: 12.w,
+                        end: 12.w,
+                      ),
+                      child: CalendarButton(
+                        onTap:
+                            () => RamadanCalendarSheet.show(
+                              context,
+                              allTasks: state.allTasks,
+                              todayDay: state.todayDay,
+                            ),
+                      ),
+                    ),
+                  ),
+
+                SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+
+                // ── Control Section ──
+                SliverToBoxAdapter(
+                  child: _ControlSection(
+                    presentationMode: _presentationMode,
+                    onModeChanged: (mode) {
+                      setState(() => _presentationMode = mode);
+                    },
+                  ),
+                ),
+
+                if (state is RamadanTasksLoading)
+                  SliverFillRemaining(
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: ColorsManager.primaryPurple,
+                      ),
+                    ),
+                  )
+                else if (state is RamadanTasksError)
+                  SliverFillRemaining(
+                    child: Center(
+                      child: RamadanErrorView(message: state.message),
+                    ),
+                  )
+                else if (state is RamadanTasksLoaded)
+                  SliverFillRemaining(
+                    hasScrollBody: true,
+                    child: _FullScreenContent(
+                      state: state,
+                      mode: _presentationMode,
+                    ),
+                  )
+                else
+                  const SliverToBoxAdapter(child: SizedBox.shrink()),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-// ────────────────────────────────────────────────────────────────
-// Compact App Bar + Toggle
-// ────────────────────────────────────────────────────────────────
-
-class _CompactAppBar extends StatelessWidget {
+class _ControlSection extends StatelessWidget {
   final PresentationMode presentationMode;
   final ValueChanged<PresentationMode> onModeChanged;
 
-  const _CompactAppBar({
+  const _ControlSection({
     required this.presentationMode,
     required this.onModeChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 10.h),
-      decoration: BoxDecoration(
-        color: ColorsManager.primaryBackground,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Title row ──
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    color: ColorsManager.lightGray,
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 20.sp,
-                    color: ColorsManager.primaryText,
-                  ),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'مشكاة في رمضان',
-                      style: TextStyles.titleLarge.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: ColorsManager.primaryText,
-                      ),
-                    ),
-                    Text(
-                      'أنشئ خطتك الخاصة لشهر رمضان',
-                      style: TextStyles.bodySmall.copyWith(
-                        color: ColorsManager.secondaryText,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // ── Stats button ──
-              GestureDetector(
-                onTap:
-                    () => Navigator.of(
-                      context,
-                    ).pushNamed(Routes.ramadanProgressScreen),
-                child: Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        ColorsManager.primaryPurple,
-                        ColorsManager.darkPurple,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Icon(
-                    Icons.bar_chart_rounded,
-                    size: 20.sp,
-                    color: ColorsManager.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          // ── Toggle ──
-          Center(
-            child: PresentationModeToggle(
-              mode: presentationMode,
-              onChanged: onModeChanged,
-            ),
-          ),
-        ],
-      ),
+    return PresentationModeToggle(
+      mode: presentationMode,
+      onChanged: onModeChanged,
     );
   }
 }
-
-// ────────────────────────────────────────────────────────────────
-// Full screen content with animated transitions
-// ────────────────────────────────────────────────────────────────
 
 class _FullScreenContent extends StatelessWidget {
   final RamadanTasksLoaded state;
@@ -237,8 +195,234 @@ class _FullScreenContent extends StatelessWidget {
 }
 
 // ────────────────────────────────────────────────────────────────
-// FAB
+// Stats Header Action - Discoverable labeled button
 // ────────────────────────────────────────────────────────────────
+
+class _StatsHeaderAction extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _StatsHeaderAction({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'عرض إحصائيات الشهر',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20.r),
+          child: Container(
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: 12.w,
+              vertical: 6.h,
+            ),
+            decoration: BoxDecoration(
+              color: ColorsManager.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(
+                color: ColorsManager.white.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.bar_chart_rounded,
+                  color: ColorsManager.white,
+                  size: 18.sp,
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  'الإحصائيات',
+                  style: TextStyles.bodySmall.copyWith(
+                    color: ColorsManager.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12.sp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// Monthly Progress Card - Clickable summary preview
+// ────────────────────────────────────────────────────────────────
+
+class _MonthlyProgressCard extends StatefulWidget {
+  final double overallPercent;
+  final VoidCallback onTap;
+
+  const _MonthlyProgressCard({
+    required this.overallPercent,
+    required this.onTap,
+  });
+
+  @override
+  State<_MonthlyProgressCard> createState() => _MonthlyProgressCardState();
+}
+
+class _MonthlyProgressCardState extends State<_MonthlyProgressCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    _scaleController.forward();
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    _scaleController.reverse();
+  }
+
+  void _onTapCancel() {
+    _scaleController.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final percentInt = widget.overallPercent.round();
+
+    return Padding(
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
+      child: Column(
+        children: [
+          ScaleTransition(
+            scale: _scaleAnimation,
+            child: GestureDetector(
+              onTapDown: _onTapDown,
+              onTapUp: _onTapUp,
+              onTapCancel: _onTapCancel,
+              onTap: widget.onTap,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsetsDirectional.all(20.w),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ColorsManager.primaryPurple.withOpacity(0.08),
+                        ColorsManager.primaryPurple.withOpacity(0.04),
+                      ],
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
+                    ),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(
+                      color: ColorsManager.primaryPurple.withOpacity(0.15),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ColorsManager.primaryPurple.withOpacity(0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      // Circular Progress Indicator
+                  /*    SizedBox(
+                        width: 56.w,
+                        height: 56.w,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              value: widget.overallPercent / 100,
+                              strokeWidth: 5,
+                              backgroundColor: ColorsManager.mediumGray
+                                  .withOpacity(0.2),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                ColorsManager.primaryPurple,
+                              ),
+                            ),
+                            Text(
+                              '$percentInt%',
+                              style: TextStyles.titleMedium.copyWith(
+                                color: ColorsManager.primaryPurple,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      */
+                      // Text Content
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'تقدمك هذا الشهر',
+                              style: TextStyles.titleMedium.copyWith(
+                                color: ColorsManager.primaryText,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              'اضغط لعرض تفاصيل الإحصائيات الكاملة',
+                              style: TextStyles.bodySmall.copyWith(
+                                color: ColorsManager.secondaryText,
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Arrow Icon
+                      Container(
+                        width: 32.w,
+                        height: 32.w,
+                        decoration: BoxDecoration(
+                          color: ColorsManager.primaryPurple.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 14.sp,
+                          color: ColorsManager.primaryPurple,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _AddTaskFab extends StatelessWidget {
   const _AddTaskFab();

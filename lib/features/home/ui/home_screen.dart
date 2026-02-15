@@ -108,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
       slivers: [
         const BuildHeaderAppBar(
           home: true,
+        
           bottomNav: true,
           title: 'مشكاة الأحاديث',
           description: 'نُحْيِي السُّنَّةَ... فَتُحْيِينَا',

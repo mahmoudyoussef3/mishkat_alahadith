@@ -235,6 +235,7 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
     return SingleChildScrollView(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 20.w),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(height: 12.h),
 
@@ -252,9 +253,9 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
 
           SizedBox(height: 16.h),
 
-          // Two columns: calendar (left) + day records (right)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Calendar
               Expanded(
@@ -298,7 +299,7 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
                             onModeChanged:
                                 (m) => setState(() => _recordsMode = m),
                           )
-                          : _buildSelectDayPrompt(),
+                          : Center(child: _buildSelectDayPrompt()),
                 ),
               ),
             ],
@@ -327,6 +328,7 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
             Icons.touch_app_rounded,

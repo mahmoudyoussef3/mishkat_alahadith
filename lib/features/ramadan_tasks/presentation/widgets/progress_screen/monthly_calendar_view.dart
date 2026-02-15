@@ -5,10 +5,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import '../../../domain/entities/ramadan_task_entity.dart';
 
-/// A full monthly calendar widget that shows the 30 days of Ramadan
-/// organized by 4 weeks, with color-coded completion heatmap.
-///
-/// Tapping a day cell calls [onDaySelected] to drill into that day's records.
+
 class MonthlyCalendarView extends StatelessWidget {
   final List<RamadanTaskEntity> allTasks;
   final int todayDay;
@@ -23,7 +20,6 @@ class MonthlyCalendarView extends StatelessWidget {
     required this.onDaySelected,
   });
 
-  // ── Task helpers ──
 
   List<RamadanTaskEntity> get _dailyTasks =>
       allTasks.where((t) => t.type == TaskType.daily).toList();
@@ -197,14 +193,13 @@ class MonthlyCalendarView extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
 
-          // ── Day cells row ──
           Row(
             children: [
               for (int day = start; day <= end; day++)
                 Expanded(child: _buildDayCell(day)),
-              // Fill last row to 7 columns
-              if (end == 30)
-                for (int i = 0; i < 2; i++) const Expanded(child: SizedBox()),
+
+              for (int i = 0; i < 7 - (end - start + 1); i++)
+                const Expanded(child: SizedBox()),
             ],
           ),
         ],
