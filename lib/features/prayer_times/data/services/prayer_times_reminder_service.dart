@@ -5,15 +5,16 @@ import 'package:mishkat_almasabih/core/notification/local_notification.dart';
 /// Signature for the function that actually schedules a single notification.
 /// Defaults to [LocalNotification.scheduleOneTimeNotification] in production.
 /// Replaceable in tests to capture scheduled entries without hitting the OS.
-typedef ScheduleNotificationFn = Future<void> Function({
-  required int id,
-  required String channelId,
-  required String channelName,
-  required String title,
-  required String body,
-  required DateTime scheduledDate,
-  String? payload,
-});
+typedef ScheduleNotificationFn =
+    Future<void> Function({
+      required int id,
+      required String channelId,
+      required String channelName,
+      required String title,
+      required String body,
+      required DateTime scheduledDate,
+      String? payload,
+    });
 
 /// Signature for cancelling a batch of notification ids.
 typedef CancelNotificationsFn = Future<void> Function(Iterable<int> ids);
@@ -42,8 +43,8 @@ class PrayerTimesReminderService {
   PrayerTimesReminderService({
     ScheduleNotificationFn? scheduleFn,
     CancelNotificationsFn? cancelFn,
-  })  : _schedule = scheduleFn ?? LocalNotification.scheduleOneTimeNotification,
-        _cancel = cancelFn ?? LocalNotification.cancelReminders;
+  }) : _schedule = scheduleFn ?? LocalNotification.scheduleOneTimeNotification,
+       _cancel = cancelFn ?? LocalNotification.cancelReminders;
 
   /// Convenience method: calculate today + tomorrow prayer times and schedule
   /// all notifications in one call. Safe to call from [main] at app startup.
