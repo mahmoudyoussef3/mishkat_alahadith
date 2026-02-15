@@ -68,7 +68,7 @@ class _TableCheckboxCellState extends State<TableCheckboxCell>
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 48.w,
-        height: 40.h,
+        height: 48.w,
         child: Center(
           child: AnimatedBuilder(
             animation: _scaleAnimation,
@@ -143,7 +143,7 @@ class TableEmptyCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 48.w,
-      height: 40.h,
+      height: 48.w,
       child: Center(
         child: Container(
           width: 10.w,

@@ -64,6 +64,7 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   hijri: ^3.0.0
+  two_dimensional_scrollables: ^0.3.7
 
 dev_dependencies:
   flutter_test:

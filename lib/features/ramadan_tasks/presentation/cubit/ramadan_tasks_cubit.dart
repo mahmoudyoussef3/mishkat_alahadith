@@ -5,10 +5,12 @@ import '../../domain/repositories/ramadan_tasks_repository.dart';
 import '../../domain/usecases/get_tasks.dart';
 import '../../domain/usecases/add_task.dart';
 import '../../domain/usecases/delete_task.dart';
+import '../../domain/usecases/update_task.dart';
 import '../../domain/usecases/toggle_daily_completion.dart';
 import '../../domain/usecases/set_monthly_completed.dart';
 import '../../domain/usecases/ensure_daily_reset.dart';
 import '../../domain/usecases/compute_progress.dart';
+import '../../domain/worship_templates.dart';
 
 part 'ramadan_tasks_state.dart';
 
@@ -19,6 +21,7 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
   late final GetTasks _getTasks;
   late final AddTask _addTask;
   late final DeleteTask _deleteTask;
+  late final UpdateTask _updateTask;
   late final ToggleDailyCompletion _toggleDaily;
   late final ToggleTodayOnlyCompletion _toggleTodayOnly;
   late final EnsureDailyReset _ensureDailyReset;
@@ -27,18 +30,18 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
   List<RamadanTaskEntity> _allTasks = [];
 
   int _selectedDay = 1;
-  int _selectedWeek = 1; 
+  int _selectedWeek = 1;
   ViewMode _viewMode = ViewMode.today;
 
   RamadanTasksCubit(this._repo) : super(RamadanTasksLoading()) {
     _getTasks = GetTasks(_repo);
     _addTask = AddTask(_repo);
     _deleteTask = DeleteTask(_repo);
+    _updateTask = UpdateTask(_repo);
     _toggleDaily = ToggleDailyCompletion(_repo);
     _toggleTodayOnly = ToggleTodayOnlyCompletion(_repo);
     _ensureDailyReset = EnsureDailyReset(_repo);
   }
-
 
   Future<void> init() async {
     emit(RamadanTasksLoading());
@@ -79,16 +82,31 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     _emitLoaded();
   }
 
-  Future<void> toggleDaily(String id) async {
-    final day = _todayDayNumber();
-    await _toggleDaily(id: id, day: day);
+  Future<void> editTask({
+    required String id,
+    required String title,
+    String description = '',
+  }) async {
+    final existing = _allTasks.firstWhere((t) => t.id == id);
+    final updated = existing.copyWith(
+      title: title.trim(),
+      description: description.trim(),
+    );
+    await _updateTask(updated);
     _allTasks = await _getTasks();
     _emitLoaded();
   }
 
-  Future<void> toggleTodayOnly(String id) async {
-    final day = _todayDayNumber();
-    await _toggleTodayOnly(id: id, day: day);
+  Future<void> toggleDaily(String id, {int? day}) async {
+    final d = day ?? _todayDayNumber();
+    await _toggleDaily(id: id, day: d);
+    _allTasks = await _getTasks();
+    _emitLoaded();
+  }
+
+  Future<void> toggleTodayOnly(String id, {int? day}) async {
+    final d = day ?? _todayDayNumber();
+    await _toggleTodayOnly(id: id, day: d);
     _allTasks = await _getTasks();
     _emitLoaded();
   }
@@ -116,7 +134,6 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     _selectedDay = day.clamp(1, 30);
     _emitLoaded();
   }
-
 
   int _todayDayNumber() {
     final hijri = HijriCalendar.now();
@@ -190,6 +207,7 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
       weekEnd: range.$2,
     );
     final filtered = _filterTasks(_allTasks, todayDay);
+    final suggestions = _availableSuggestions();
 
     String? motivation;
     if (_viewMode == ViewMode.today &&
@@ -202,6 +220,7 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
       RamadanTasksLoaded(
         allTasks: _allTasks,
         filteredTasks: filtered,
+        availableSuggestions: suggestions,
         todayDay: todayDay,
         selectedDay: _selectedDay,
         selectedWeek: _selectedWeek,
@@ -238,5 +257,14 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
       case ViewMode.all:
         return List.unmodifiable(tasks);
     }
+  }
+
+  /// Returns worship sections with already-added task titles removed.
+  List<WorshipSection> _availableSuggestions() {
+    final existingTitles = _allTasks.map((t) => t.title).toSet();
+    return kWorshipSections
+        .map((s) => s.withoutTitles(existingTitles))
+        .where((s) => s.items.isNotEmpty)
+        .toList();
   }
 }

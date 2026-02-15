@@ -9,10 +9,10 @@ class RamadanTasksError extends RamadanTasksState {
   RamadanTasksError(this.message);
 }
 
-
 class RamadanTasksLoaded extends RamadanTasksState {
   final List<RamadanTaskEntity> allTasks;
   final List<RamadanTaskEntity> filteredTasks;
+  final List<WorshipSection> availableSuggestions;
   final int todayDay;
   final int selectedDay;
   final int selectedWeek;
@@ -31,6 +31,7 @@ class RamadanTasksLoaded extends RamadanTasksState {
   RamadanTasksLoaded({
     required this.allTasks,
     required this.filteredTasks,
+    required this.availableSuggestions,
     required this.todayDay,
     required this.selectedDay,
     required this.selectedWeek,
