@@ -5,6 +5,7 @@ import 'package:mishkat_almasabih/core/theming/styles.dart';
 import '../../domain/entities/ramadan_task_entity.dart';
 
 /// A single task card with animated checkbox, type badge, and delete.
+/// Optimized with RepaintBoundary for scrolling performance.
 class RamadanTaskItem extends StatelessWidget {
   final RamadanTaskEntity task;
   final int todayDay;
@@ -27,111 +28,123 @@ class RamadanTaskItem extends StatelessWidget {
     final relevantDay = isDaily ? todayDay : task.createdForDay;
     final isCompleted = task.completedDays.contains(relevantDay);
 
-    final card = Container(
-      decoration: BoxDecoration(
-        color: ColorsManager.cardBackground,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(
-          color:
-              isCompleted
-                  ? ColorsManager.success.withOpacity(0.3)
-                  : ColorsManager.mediumGray.withOpacity(0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: ColorsManager.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+    return RepaintBoundary(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: ColorsManager.cardBackground,
           borderRadius: BorderRadius.circular(14.r),
-          onTap: readOnly ? null : onToggle,
-          child: Padding(
-            padding: EdgeInsetsDirectional.symmetric(
-              horizontal: 14.w,
-              vertical: 14.h,
+          border: Border.all(
+            color:
+                isCompleted
+                    ? ColorsManager.success.withOpacity(0.25)
+                    : ColorsManager.mediumGray.withOpacity(0.2),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: ColorsManager.black.withOpacity(0.02),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
-            child: Row(
-              children: [
-                // ── Animated checkbox ──
-                _AnimatedCheckbox(isCompleted: isCompleted),
-                SizedBox(width: 14.w),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14.r),
+            onTap: readOnly ? null : onToggle,
+            child: Padding(
+              padding: EdgeInsetsDirectional.symmetric(
+                horizontal: 14.w,
+                vertical: 14.h,
+              ),
+              child: Row(
+                children: [
+                  // ── Animated checkbox ──
+                  _AnimatedCheckbox(isCompleted: isCompleted),
+                  SizedBox(width: 14.w),
 
-                // ── Title + meta ──
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        task.title,
-                        style: TextStyles.titleMedium.copyWith(
-                          decoration:
-                              isCompleted ? TextDecoration.lineThrough : null,
-                          color:
-                              isCompleted
-                                  ? ColorsManager.secondaryText
-                                  : ColorsManager.primaryText,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (task.description.isNotEmpty) ...[
-                        SizedBox(height: 2.h),
-                        Text(
-                          task.description,
-                          style: TextStyles.bodySmall.copyWith(
-                            color: ColorsManager.secondaryText,
-                            height: 1.4,
+                  // ── Title + meta ──
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 200),
+                          style: TextStyles.titleMedium.copyWith(
+                            decoration:
+                                isCompleted ? TextDecoration.lineThrough : null,
+                            color:
+                                isCompleted
+                                    ? ColorsManager.secondaryText
+                                    : ColorsManager.primaryText,
+                            decorationColor: ColorsManager.secondaryText,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          child: Text(
+                            task.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ],
-                      SizedBox(height: 4.h),
-                      Row(
-                        children: [
-                          _TypeBadge(task: task),
-                          SizedBox(width: 8.w),
-                          _StatusText(
-                            text: isCompleted ? 'مكتملة' : 'غير مكتملة',
-                            isCompleted: isCompleted,
+                        if (task.description.isNotEmpty) ...[
+                          SizedBox(height: 3.h),
+                          Text(
+                            task.description,
+                            style: TextStyles.bodySmall.copyWith(
+                              color: ColorsManager.secondaryText,
+                              height: 1.4,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ── Delete button ──
-                if (!readOnly)
-                  IconButton(
-                    onPressed: onDelete,
-                    icon: Icon(
-                      Icons.delete_outline_rounded,
-                      color: ColorsManager.error.withOpacity(0.7),
-                      size: 22.sp,
+                        SizedBox(height: 6.h),
+                        Row(
+                          children: [
+                            _TypeBadge(task: task),
+                            if (!readOnly) ...[
+                              SizedBox(width: 8.w),
+                              _StatusIndicator(isCompleted: isCompleted),
+                            ],
+                          ],
+                        ),
+                      ],
                     ),
-                    splashRadius: 20.r,
-                    tooltip: 'حذف',
                   ),
-              ],
+
+                  // ── Delete button ──
+                  if (!readOnly)
+                    IconButton(
+                      onPressed: onDelete,
+                      icon: Icon(
+                        Icons.delete_outline_rounded,
+                        color: ColorsManager.error.withOpacity(0.6),
+                        size: 20.sp,
+                      ),
+                      iconSize: 20.sp,
+                      padding: EdgeInsetsDirectional.all(8.w),
+                      constraints: BoxConstraints(
+                        minWidth: 36.w,
+                        minHeight: 36.w,
+                      ),
+                      tooltip: 'حذف',
+                    ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
-
-    return card;
   }
 }
 
 /// Animated circular checkbox with scale + color transition.
 class _AnimatedCheckbox extends StatelessWidget {
   final bool isCompleted;
+
   const _AnimatedCheckbox({required this.isCompleted});
 
   @override
@@ -161,7 +174,7 @@ class _AnimatedCheckbox extends StatelessWidget {
                   size: 16.sp,
                   color: ColorsManager.white,
                 )
-                : SizedBox(key: const ValueKey('empty'), width: 16.sp),
+                : const SizedBox.shrink(key: ValueKey('empty')),
       ),
     );
   }
@@ -170,6 +183,7 @@ class _AnimatedCheckbox extends StatelessWidget {
 /// Small type badge (daily / today only).
 class _TypeBadge extends StatelessWidget {
   final RamadanTaskEntity task;
+
   const _TypeBadge({required this.task});
 
   @override
@@ -182,7 +196,7 @@ class _TypeBadge extends StatelessWidget {
         color:
             isDaily
                 ? ColorsManager.primaryPurple.withOpacity(0.1)
-                : ColorsManager.primaryGold.withOpacity(0.15),
+                : ColorsManager.primaryGold.withOpacity(0.12),
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
@@ -198,21 +212,39 @@ class _TypeBadge extends StatelessWidget {
   }
 }
 
-/// Completion status text.
-class _StatusText extends StatelessWidget {
-  final String text;
+/// Status indicator with dot
+class _StatusIndicator extends StatelessWidget {
   final bool isCompleted;
-  const _StatusText({required this.text, required this.isCompleted});
+
+  const _StatusIndicator({required this.isCompleted});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyles.bodySmall.copyWith(
-        color:
-            isCompleted ? ColorsManager.success : ColorsManager.secondaryText,
-        fontSize: 11.sp,
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 6.w,
+          height: 6.w,
+          decoration: BoxDecoration(
+            color:
+                isCompleted ? ColorsManager.success : ColorsManager.mediumGray,
+            shape: BoxShape.circle,
+          ),
+        ),
+        SizedBox(width: 4.w),
+        Text(
+          isCompleted ? 'مكتملة' : 'غير مكتملة',
+          style: TextStyles.bodySmall.copyWith(
+            color:
+                isCompleted
+                    ? ColorsManager.success
+                    : ColorsManager.secondaryText,
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }

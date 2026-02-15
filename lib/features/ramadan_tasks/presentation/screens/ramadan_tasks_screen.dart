@@ -33,26 +33,28 @@ class _RamadanTasksScreenState extends State<RamadanTasksScreen> {
         floatingActionButton: const _AddTaskFab(),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         body: BlocBuilder<RamadanTasksCubit, RamadanTasksState>(
+          buildWhen: (previous, current) {
+            // Rebuild when state type changes or key data changes
+            if (previous.runtimeType != current.runtimeType) return true;
+            if (current is RamadanTasksLoaded &&
+                previous is RamadanTasksLoaded) {
+              return previous.allTasks != current.allTasks ||
+                  previous.todayDay != current.todayDay ||
+                  previous.viewMode != current.viewMode ||
+                  previous.overallPercent != current.overallPercent;
+            }
+            return false;
+          },
           builder: (context, state) {
             return CustomScrollView(
               slivers: [
                 BuildHeaderAppBar(
                   home: false,
-                  /*
-                  actions: [
-                    _StatsHeaderAction(
-                      onTap:
-                          () => Navigator.of(
-                            context,
-                          ).pushNamed(Routes.ramadanProgressScreen),
-                    ),
-                  ],
-                  */
                   bottomNav: false,
                   title: 'مشكاة في رمضان',
                   description: 'أنشئ خطتك الخاصة لشهر رمضان',
                 ),
-                SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+                const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
                 // ── Monthly Progress Summary Card ──
                 if (state is RamadanTasksLoaded)
@@ -66,15 +68,14 @@ class _RamadanTasksScreenState extends State<RamadanTasksScreen> {
                     ),
                   ),
 
-                SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+                const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
                 // ── Calendar Button ──
                 if (state is RamadanTasksLoaded)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsetsDirectional.only(
-                        start: 12.w,
-                        end: 12.w,
+                      padding: EdgeInsetsDirectional.symmetric(
+                        horizontal: 12.w,
                       ),
                       child: CalendarButton(
                         onTap:
@@ -87,7 +88,7 @@ class _RamadanTasksScreenState extends State<RamadanTasksScreen> {
                     ),
                   ),
 
-                SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+                const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
                 // ── Control Section ──
                 SliverToBoxAdapter(
@@ -100,8 +101,8 @@ class _RamadanTasksScreenState extends State<RamadanTasksScreen> {
                 ),
 
                 if (state is RamadanTasksLoading)
-                  SliverFillRemaining(
-                    child: const Center(
+                  const SliverFillRemaining(
+                    child: Center(
                       child: CircularProgressIndicator(
                         color: ColorsManager.primaryPurple,
                       ),
@@ -195,63 +196,6 @@ class _FullScreenContent extends StatelessWidget {
 }
 
 // ────────────────────────────────────────────────────────────────
-// Stats Header Action - Discoverable labeled button
-// ────────────────────────────────────────────────────────────────
-
-class _StatsHeaderAction extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _StatsHeaderAction({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'عرض إحصائيات الشهر',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20.r),
-          child: Container(
-            padding: EdgeInsetsDirectional.symmetric(
-              horizontal: 12.w,
-              vertical: 6.h,
-            ),
-            decoration: BoxDecoration(
-              color: ColorsManager.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                color: ColorsManager.white.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.bar_chart_rounded,
-                  color: ColorsManager.white,
-                  size: 18.sp,
-                ),
-                SizedBox(width: 6.w),
-                Text(
-                  'الإحصائيات',
-                  style: TextStyles.bodySmall.copyWith(
-                    color: ColorsManager.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12.sp,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ────────────────────────────────────────────────────────────────
 // Monthly Progress Card - Clickable summary preview
 // ────────────────────────────────────────────────────────────────
 
@@ -305,8 +249,6 @@ class _MonthlyProgressCardState extends State<_MonthlyProgressCard>
 
   @override
   Widget build(BuildContext context) {
-    final percentInt = widget.overallPercent.round();
-
     return Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
       child: Column(
@@ -348,7 +290,7 @@ class _MonthlyProgressCardState extends State<_MonthlyProgressCard>
                   child: Row(
                     children: [
                       // Circular Progress Indicator
-                  /*    SizedBox(
+                      /*    SizedBox(
                         width: 56.w,
                         height: 56.w,
                         child: Stack(

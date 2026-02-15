@@ -40,11 +40,34 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
               // ── Body ──
               Expanded(
                 child: BlocBuilder<RamadanTasksCubit, RamadanTasksState>(
+                  buildWhen: (previous, current) {
+                    // Only rebuild when state type changes or data changes
+                    if (previous.runtimeType != current.runtimeType)
+                      return true;
+                    if (current is RamadanTasksLoaded &&
+                        previous is RamadanTasksLoaded) {
+                      return previous.allTasks != current.allTasks ||
+                          previous.todayDay != current.todayDay;
+                    }
+                    return false;
+                  },
                   builder: (context, state) {
                     if (state is RamadanTasksLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: ColorsManager.primaryPurple,
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(
+                              color: ColorsManager.primaryPurple,
+                            ),
+                            SizedBox(height: 16.h),
+                            Text(
+                              'جاري التحميل...',
+                              style: TextStyles.bodyMedium.copyWith(
+                                color: ColorsManager.secondaryText,
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     }
