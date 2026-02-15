@@ -19,7 +19,32 @@ class PrayerTimesReminderService {
   static const int _maghribTomorrowId = _maghribId + 100;
   static const int _ishaTomorrowId = _ishaId + 100;
 
-  static const _offset = Duration.zero;
+  /// Convenience method: calculate today + tomorrow prayer times and schedule
+  /// all notifications in one call. Safe to call from [main] at app startup.
+  Future<void> scheduleFromNow() async {
+    try {
+      final calculator = PrayerCalculator(
+        latitude: 30.0444,
+        longitude: 31.2357,
+        timezone: 2.0,
+        asrMethod: AsrMethod.hanafi,
+      );
+
+      final now = DateTime.now();
+      final todayTimes = calculator.calculate(now);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
+      final tomorrowTimes = calculator.calculate(tomorrow);
+
+      log('[PrayerReminders] Scheduling from app startup…');
+      await syncPrayerReminders(
+        todayTimes: todayTimes,
+        tomorrowTimes: tomorrowTimes,
+        now: now,
+      );
+    } catch (e) {
+      log('[PrayerReminders] scheduleFromNow failed: $e');
+    }
+  }
 
   Future<void> syncPrayerReminders({
     required PrayerTimes todayTimes,
@@ -86,20 +111,28 @@ class PrayerTimesReminderService {
         _ishaTomorrowId,
       ]);
 
+      log('[PrayerReminders] Scheduling ${schedules.length} notifications…');
+
       for (final schedule in schedules) {
+        log(
+          '[PrayerReminders] → ${schedule.arabicName} '
+          '(id=${schedule.id}) at ${schedule.reminderTime}',
+        );
         await LocalNotification.scheduleOneTimeNotification(
           id: schedule.id,
           channelId: _channelId,
           channelName: _channelName,
-          title: 'تذكير الصلاة',
+          title: 'حان وقت الصلاة 🕌',
           body: 'حان الآن موعد صلاة ${schedule.arabicName}',
           scheduledDate: schedule.reminderTime,
           payload: 'prayer_times:${schedule.prayerName.name}',
         );
       }
+
+      log('[PrayerReminders] All notifications scheduled successfully ✓');
     } catch (e) {
       // Don't crash UI, but log so we can diagnose permission/scheduling issues.
-      log('Failed to sync prayer reminders: $e');
+      log('[PrayerReminders] Failed to sync prayer reminders: $e');
     }
   }
 
@@ -114,26 +147,26 @@ class PrayerTimesReminderService {
     final arabicName = _arabicLabel(prayerName) ?? prayerName.name;
     final result = <_PrayerSchedule>[];
 
-    final todayReminder = todayPrayerTime.subtract(_offset);
-    if (todayReminder.isAfter(now)) {
+    // Schedule for today if the prayer hasn't passed yet.
+    if (todayPrayerTime.isAfter(now)) {
       result.add(
         _PrayerSchedule(
           id: todayId,
           prayerName: prayerName,
           arabicName: arabicName,
-          reminderTime: todayReminder,
+          reminderTime: todayPrayerTime,
         ),
       );
     }
 
-    final tomorrowReminder = tomorrowPrayerTime.subtract(_offset);
-    if (tomorrowReminder.isAfter(now)) {
+    // Always schedule tomorrow (it's always in the future).
+    if (tomorrowPrayerTime.isAfter(now)) {
       result.add(
         _PrayerSchedule(
           id: tomorrowId,
           prayerName: prayerName,
           arabicName: arabicName,
-          reminderTime: tomorrowReminder,
+          reminderTime: tomorrowPrayerTime,
         ),
       );
     }
