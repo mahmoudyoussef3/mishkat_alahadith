@@ -10,7 +10,10 @@ import 'table_checkbox_cell.dart';
 import 'table_day_progress.dart';
 import 'table_overall_progress.dart';
 
-/// The main Ramadan table-view grid widget.
+/// Full-screen Ramadan table-view grid widget.
+///
+/// Designed to fill all available vertical space when used
+/// inside an [Expanded] or given unconstrained height.
 ///
 /// Features:
 /// - Rows = Days (1–30), Columns = Tasks
@@ -20,7 +23,7 @@ import 'table_overall_progress.dart';
 /// - TodayOnly tasks appear only on their specific day row
 /// - Per-day progress indicator at end of each row
 /// - Overall progress summary above the table
-/// - Fully responsive and scrollable both axes
+/// - Responsive: adapts cell sizes on tablet via LayoutBuilder
 class RamadanTableView extends StatefulWidget {
   final List<RamadanTaskEntity> allTasks;
   final int todayDay;
@@ -46,9 +49,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
   @override
   void initState() {
     super.initState();
-    // Sync horizontal scroll between header and body
     _horizontalController.addListener(_syncHorizontalScroll);
-    // Sync vertical scroll between day column and body
     _verticalController.addListener(_syncVerticalScroll);
   }
 
@@ -75,12 +76,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     super.dispose();
   }
 
-  static const double _dayCellWidth = 52;
-  static const double _taskCellWidth = 48;
-  static const double _progressCellWidth = 52;
-  static const double _headerHeight = 64;
-  static const double _rowHeight = 40;
-
   String _toArabicNumerals(int number) {
     const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
     return number
@@ -90,7 +85,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
         .join();
   }
 
-  /// Determine the icon for a task based on title/type.
   IconData _taskIcon(RamadanTaskEntity task) {
     final title = task.title.toLowerCase();
     if (title.contains('صلاة') || title.contains('صلا')) {
@@ -134,102 +128,137 @@ class _RamadanTableViewState extends State<RamadanTableView> {
   Widget build(BuildContext context) {
     final tasks = widget.allTasks;
     if (tasks.isEmpty) {
-      return _EmptyTableState();
+      return const _EmptyTableState();
     }
 
-    // Calculate available height: fill the remaining space
-    // The table will be placed inside a SliverToBoxAdapter, so we
-    // calculate a reasonable max height.
-    final screenHeight = MediaQuery.of(context).size.height;
-    final tableHeight = (screenHeight * 0.55).clamp(300.0, 600.0);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Responsive cell sizing: wider on tablet
+        final isTablet = constraints.maxWidth >= 700;
+        final dayCellW = isTablet ? 64.0 : 52.0;
+        final taskCellW = isTablet ? 60.0 : 48.0;
+        final progressCellW = isTablet ? 60.0 : 52.0;
+        final headerH = isTablet ? 72.0 : 64.0;
+        final rowH = isTablet ? 48.0 : 40.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // ── Overall progress ──
-        TableOverallProgress(
-          overallPercent: widget.overallPercent,
-          todayDay: widget.todayDay,
-        ),
-
-        // ── Table with sticky headers ──
-        Container(
-          height: tableHeight,
-          decoration: BoxDecoration(
-            color: ColorsManager.cardBackground,
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(
-              color: ColorsManager.mediumGray.withOpacity(0.3),
-              width: 1,
+        return Column(
+          children: [
+            // ── Overall progress ──
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
+              child: TableOverallProgress(
+                overallPercent: widget.overallPercent,
+                todayDay: widget.todayDay,
+              ),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: ColorsManager.primaryPurple.withOpacity(0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              // ── Header row (sticky) ──
-              _buildHeaderRow(tasks),
-              Divider(
-                height: 1,
-                color: ColorsManager.mediumGray.withOpacity(0.3),
-              ),
-              // ── Body: day column (sticky) + scrollable grid ──
-              Expanded(
-                child: Row(
-                  children: [
-                    // Sticky day column
-                    _buildDayColumn(),
-                    // Vertical divider
-                    Container(
+
+            // ── Table fills remaining space ──
+            Expanded(
+              child: Padding(
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: ColorsManager.cardBackground,
+                    borderRadius: BorderRadius.circular(18.r),
+                    border: Border.all(
+                      color: ColorsManager.mediumGray.withOpacity(0.25),
                       width: 1,
-                      color: ColorsManager.mediumGray.withOpacity(0.3),
                     ),
-                    // Scrollable grid body
-                    Expanded(child: _buildGridBody(tasks)),
-                  ],
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF0D7C66).withOpacity(0.05),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      // ── Sticky header row ──
+                      _buildHeaderRow(
+                        tasks,
+                        dayCellW: dayCellW,
+                        taskCellW: taskCellW,
+                        progressCellW: progressCellW,
+                        headerH: headerH,
+                      ),
+                      Divider(
+                        height: 1,
+                        color: ColorsManager.mediumGray.withOpacity(0.25),
+                      ),
+                      // ── Body: sticky day column + scrollable grid ──
+                      Expanded(
+                        child: Row(
+                          children: [
+                            _buildDayColumn(
+                              dayCellW: dayCellW,
+                              rowH: rowH,
+                            ),
+                            Container(
+                              width: 1,
+                              color: ColorsManager.mediumGray.withOpacity(0.25),
+                            ),
+                            Expanded(
+                              child: _buildGridBody(
+                                tasks,
+                                taskCellW: taskCellW,
+                                progressCellW: progressCellW,
+                                rowH: rowH,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
 
-        SizedBox(height: 16.h),
+            SizedBox(height: 8.h),
 
-        // ── Legend ──
-        _buildLegend(),
-      ],
+            // ── Legend ──
+            _buildLegend(),
+
+            SizedBox(height: 88.h),
+          ],
+        );
+      },
     );
   }
 
-  /// Builds the sticky header row with task names/icons.
-  Widget _buildHeaderRow(List<RamadanTaskEntity> tasks) {
+  Widget _buildHeaderRow(
+    List<RamadanTaskEntity> tasks, {
+    required double dayCellW,
+    required double taskCellW,
+    required double progressCellW,
+    required double headerH,
+  }) {
     return SizedBox(
-      height: _headerHeight.h,
+      height: headerH,
       child: Row(
         children: [
-          // Top-left corner cell (Day label)
+          // Top-left corner cell
           Container(
-            width: _dayCellWidth.w,
-            height: _headerHeight.h,
+            width: dayCellW,
+            height: headerH,
             decoration: BoxDecoration(
-              color: ColorsManager.primaryPurple.withOpacity(0.08),
+              color: const Color(0xFF0D7C66).withOpacity(0.08),
             ),
             alignment: Alignment.center,
             child: Text(
               'اليوم',
               style: TextStyles.bodySmall.copyWith(
-                color: ColorsManager.primaryPurple,
+                color: const Color(0xFF0D7C66),
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          Container(width: 1, color: ColorsManager.mediumGray.withOpacity(0.3)),
+          Container(
+            width: 1,
+            color: ColorsManager.mediumGray.withOpacity(0.25),
+          ),
           // Scrollable task headers
           Expanded(
             child: SingleChildScrollView(
@@ -241,23 +270,23 @@ class _RamadanTableViewState extends State<RamadanTableView> {
                   ...tasks.map(
                     (task) => _TaskHeaderCell(
                       task: task,
-                      width: _taskCellWidth.w,
-                      height: _headerHeight.h,
+                      width: taskCellW,
+                      height: headerH,
                       icon: _taskIcon(task),
                     ),
                   ),
                   // Progress column header
                   Container(
-                    width: _progressCellWidth.w,
-                    height: _headerHeight.h,
+                    width: progressCellW,
+                    height: headerH,
                     decoration: BoxDecoration(
-                      color: ColorsManager.primaryPurple.withOpacity(0.06),
+                      color: const Color(0xFF0D7C66).withOpacity(0.06),
                     ),
                     alignment: Alignment.center,
                     child: Icon(
                       Icons.pie_chart_rounded,
                       size: 16.sp,
-                      color: ColorsManager.primaryPurple,
+                      color: const Color(0xFF0D7C66),
                     ),
                   ),
                 ],
@@ -269,33 +298,34 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     );
   }
 
-  /// Builds the sticky day number column.
-  Widget _buildDayColumn() {
+  Widget _buildDayColumn({
+    required double dayCellW,
+    required double rowH,
+  }) {
     return SizedBox(
-      width: _dayCellWidth.w,
+      width: dayCellW,
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
         child: ListView.builder(
           controller: _dayColumnVerticalController,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: 30,
-          itemExtent: _rowHeight.h,
+          itemExtent: rowH,
           itemBuilder: (_, dayIndex) {
             final day = dayIndex + 1;
             final isToday = day == widget.todayDay;
             return Container(
-              width: _dayCellWidth.w,
-              height: _rowHeight.h,
+              width: dayCellW,
+              height: rowH,
               decoration: BoxDecoration(
-                color:
-                    isToday
-                        ? ColorsManager.primaryGold.withOpacity(0.12)
-                        : dayIndex.isEven
+                color: isToday
+                    ? ColorsManager.primaryGold.withOpacity(0.12)
+                    : dayIndex.isEven
                         ? ColorsManager.white
-                        : ColorsManager.lightGray.withOpacity(0.4),
+                        : ColorsManager.lightGray.withOpacity(0.35),
                 border: Border(
                   bottom: BorderSide(
-                    color: ColorsManager.mediumGray.withOpacity(0.15),
+                    color: ColorsManager.mediumGray.withOpacity(0.12),
                     width: 0.5,
                   ),
                 ),
@@ -304,10 +334,9 @@ class _RamadanTableViewState extends State<RamadanTableView> {
               child: Text(
                 _toArabicNumerals(day),
                 style: TextStyles.bodySmall.copyWith(
-                  color:
-                      isToday
-                          ? ColorsManager.primaryGold
-                          : ColorsManager.primaryText,
+                  color: isToday
+                      ? ColorsManager.primaryGold
+                      : ColorsManager.primaryText,
                   fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
                 ),
               ),
@@ -318,17 +347,21 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     );
   }
 
-  /// Builds the scrollable grid body (both horizontal and vertical).
-  Widget _buildGridBody(List<RamadanTaskEntity> tasks) {
+  Widget _buildGridBody(
+    List<RamadanTaskEntity> tasks, {
+    required double taskCellW,
+    required double progressCellW,
+    required double rowH,
+  }) {
     return SingleChildScrollView(
       controller: _horizontalController,
       scrollDirection: Axis.horizontal,
       child: SizedBox(
-        width: (tasks.length * _taskCellWidth + _progressCellWidth).w,
+        width: tasks.length * taskCellW + progressCellW,
         child: ListView.builder(
           controller: _verticalController,
           itemCount: 30,
-          itemExtent: _rowHeight.h,
+          itemExtent: rowH,
           itemBuilder: (context, dayIndex) {
             final day = dayIndex + 1;
             final isToday = day == widget.todayDay;
@@ -338,9 +371,9 @@ class _RamadanTableViewState extends State<RamadanTableView> {
               isToday: isToday,
               isEven: dayIndex.isEven,
               tasks: tasks,
-              taskCellWidth: _taskCellWidth.w,
-              progressCellWidth: _progressCellWidth.w,
-              rowHeight: _rowHeight.h,
+              taskCellWidth: taskCellW,
+              progressCellWidth: progressCellW,
+              rowHeight: rowH,
             );
           },
         ),
@@ -362,7 +395,10 @@ class _RamadanTableViewState extends State<RamadanTableView> {
   }
 }
 
-/// A single row for a day in the table, containing checkbox cells and a progress indicator.
+// ────────────────────────────────────────────────────────────────
+// Private helper widgets
+// ────────────────────────────────────────────────────────────────
+
 class _DayRow extends StatelessWidget {
   final int day;
   final bool isToday;
@@ -430,7 +466,6 @@ class _DayRow extends StatelessWidget {
       }
     }
 
-    // Progress cell at end
     cells.add(
       _CellWrapper(
         width: progressCellWidth,
@@ -449,7 +484,7 @@ class _DayRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: ColorsManager.mediumGray.withOpacity(0.15),
+            color: ColorsManager.mediumGray.withOpacity(0.12),
             width: 0.5,
           ),
         ),
@@ -458,15 +493,12 @@ class _DayRow extends StatelessWidget {
     );
   }
 
-  /// Returns true if the task should appear for the given day.
   bool _isTaskApplicableForDay(RamadanTaskEntity task, int day) {
     if (task.type == TaskType.daily) return true;
-    // todayOnly: only show on the specific day it was created for
     return task.createdForDay == day;
   }
 }
 
-/// Wraps a single cell with consistent background decoration.
 class _CellWrapper extends StatelessWidget {
   final double width;
   final double height;
@@ -488,18 +520,16 @@ class _CellWrapper extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      color:
-          isToday
-              ? ColorsManager.primaryGold.withOpacity(0.06)
-              : isEven
+      color: isToday
+          ? ColorsManager.primaryGold.withOpacity(0.06)
+          : isEven
               ? ColorsManager.white
-              : ColorsManager.lightGray.withOpacity(0.4),
+              : ColorsManager.lightGray.withOpacity(0.35),
       child: child,
     );
   }
 }
 
-/// Header cell for a single task column.
 class _TaskHeaderCell extends StatelessWidget {
   final RamadanTaskEntity task;
   final double width;
@@ -519,10 +549,10 @@ class _TaskHeaderCell extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: ColorsManager.primaryPurple.withOpacity(0.06),
+        color: const Color(0xFF0D7C66).withOpacity(0.05),
         border: Border(
           left: BorderSide(
-            color: ColorsManager.mediumGray.withOpacity(0.15),
+            color: ColorsManager.mediumGray.withOpacity(0.12),
             width: 0.5,
           ),
         ),
@@ -535,40 +565,27 @@ class _TaskHeaderCell extends StatelessWidget {
             width: 24.w,
             height: 24.w,
             decoration: BoxDecoration(
-              color:
-                  task.type == TaskType.daily
-                      ? ColorsManager.primaryPurple.withOpacity(0.12)
-                      : ColorsManager.primaryGold.withOpacity(0.12),
+              color: task.type == TaskType.daily
+                  ? const Color(0xFF0D7C66).withOpacity(0.12)
+                  : ColorsManager.primaryGold.withOpacity(0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
               size: 13.sp,
-              color:
-                  task.type == TaskType.daily
-                      ? ColorsManager.primaryPurple
-                      : ColorsManager.primaryGold,
+              color: task.type == TaskType.daily
+                  ? const Color(0xFF0D7C66)
+                  : ColorsManager.primaryGold,
             ),
           ),
           SizedBox(height: 3.h),
           Text(
-              task.title,
-              style: TextStyles.labelSmall.copyWith(
-                fontSize: 7.sp,
-                color: ColorsManager.primaryText,
-                fontWeight: FontWeight.w600,
-              ),
-            /*
-            task.title.length > 5
-                ? '${task.title.substring(0, 5)}..'
-                : task.title,
-                */
-          /*  style: TextStyles.labelSmall.copyWith(
+            task.title,
+            style: TextStyles.labelSmall.copyWith(
               fontSize: 7.sp,
               color: ColorsManager.primaryText,
               fontWeight: FontWeight.w600,
             ),
-            */
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -579,7 +596,6 @@ class _TaskHeaderCell extends StatelessWidget {
   }
 }
 
-/// A legend item (colored circle + label).
 class _LegendItem extends StatelessWidget {
   final Color color;
   final String label;
@@ -613,42 +629,48 @@ class _LegendItem extends StatelessWidget {
   }
 }
 
-/// Shown when there are no tasks to display in the table.
 class _EmptyTableState extends StatelessWidget {
+  const _EmptyTableState();
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsetsDirectional.all(32.w),
-      decoration: BoxDecoration(
-        color: ColorsManager.cardBackground,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: ColorsManager.mediumGray.withOpacity(0.3),
-          width: 1,
+    return Center(
+      child: Container(
+        margin: EdgeInsetsDirectional.all(32.w),
+        padding: EdgeInsetsDirectional.all(32.w),
+        decoration: BoxDecoration(
+          color: ColorsManager.cardBackground,
+          borderRadius: BorderRadius.circular(18.r),
+          border: Border.all(
+            color: ColorsManager.mediumGray.withOpacity(0.25),
+            width: 1,
+          ),
         ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.grid_on_rounded,
-            size: 48.sp,
-            color: ColorsManager.mediumGray,
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            'لا توجد مهام بعد',
-            style: TextStyles.titleMedium.copyWith(
-              color: ColorsManager.secondaryText,
-              fontWeight: FontWeight.w600,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.grid_on_rounded,
+              size: 48.sp,
+              color: ColorsManager.mediumGray,
             ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'أضف مهامك لترى الجدول الشهري',
-            style: TextStyles.bodySmall.copyWith(color: ColorsManager.gray),
-          ),
-        ],
+            SizedBox(height: 12.h),
+            Text(
+              'لا توجد مهام بعد',
+              style: TextStyles.titleMedium.copyWith(
+                color: ColorsManager.secondaryText,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              'أضف مهامك لترى الجدول الشهري',
+              style: TextStyles.bodySmall.copyWith(
+                color: ColorsManager.gray,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

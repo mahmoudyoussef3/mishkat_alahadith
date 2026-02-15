@@ -7,8 +7,13 @@ import 'package:mishkat_almasabih/core/theming/styles.dart';
 /// Presentation display mode for the Ramadan tasks screen.
 enum PresentationMode { card, table }
 
-/// A sleek toggle switch between Card View and Table View modes.
-/// Includes subtle haptic feedback and smooth transitions.
+/// A premium Ramadan-themed toggle switch between Card View and Table View.
+///
+/// Features:
+/// - Islamic-inspired emerald/deep-teal gradient on selected chip
+/// - Smooth animated transitions (300ms)
+/// - Haptic feedback on toggle
+/// - RTL-aware layout
 class PresentationModeToggle extends StatelessWidget {
   final PresentationMode mode;
   final ValueChanged<PresentationMode> onChanged;
@@ -19,16 +24,26 @@ class PresentationModeToggle extends StatelessWidget {
     required this.onChanged,
   });
 
+  // Islamic-inspired palette
+  static const emerald = Color(0xFF0D7C66);
+  static const deepTeal = Color(0xFF0A5E4F);
+  static const softMint = Color(0xFFE8F5F0);
+  static const borderMint = Color(0xFFB2DFDB);
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: ColorsManager.lightGray,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: ColorsManager.mediumGray.withOpacity(0.3),
-          width: 1,
-        ),
+        color: softMint,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: borderMint, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: emerald.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       padding: EdgeInsets.all(3.w),
       child: Row(
@@ -84,46 +99,49 @@ class _ToggleChip extends StatelessWidget {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         padding: EdgeInsetsDirectional.symmetric(
-          horizontal: 12.w,
-          vertical: 7.h,
+          horizontal: 14.w,
+          vertical: 8.h,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? ColorsManager.primaryPurple : Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          boxShadow:
-              isSelected
-                  ? [
-                    BoxShadow(
-                      color: ColorsManager.primaryPurple.withOpacity(0.2),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                  : null,
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [
+                    PresentationModeToggle.emerald,
+                    PresentationModeToggle.deepTeal,
+                  ],
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
+                )
+              : null,
+          color: isSelected ? null : Colors.transparent,
+          borderRadius: BorderRadius.circular(11.r),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: PresentationModeToggle.emerald.withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                icon,
-                key: ValueKey('${icon.hashCode}_$isSelected'),
-                size: 16.sp,
-                color:
-                    isSelected
-                        ? ColorsManager.white
-                        : ColorsManager.secondaryText,
-              ),
+            Icon(
+              icon,
+              size: 16.sp,
+              color: isSelected
+                  ? ColorsManager.white
+                  : ColorsManager.secondaryText,
             ),
-            SizedBox(width: 5.w),
+            SizedBox(width: 6.w),
             Text(
               label,
               style: TextStyles.bodySmall.copyWith(
-                color:
-                    isSelected
-                        ? ColorsManager.white
-                        : ColorsManager.secondaryText,
+                color: isSelected
+                    ? ColorsManager.white
+                    : ColorsManager.secondaryText,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
