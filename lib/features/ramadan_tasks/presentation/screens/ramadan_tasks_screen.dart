@@ -17,6 +17,8 @@ import '../widgets/ramadan_calendar_sheet.dart';
 import '../widgets/ramadan_progress.dart';
 import '../widgets/ramadan_task_item.dart';
 import '../widgets/section_header.dart';
+import '../widgets/table_view/presentation_mode_toggle.dart';
+import '../widgets/table_view/ramadan_table_view.dart';
 import '../widgets/view_mode_tabs.dart';
 import '../widgets/week_selector.dart';
 
@@ -76,7 +78,6 @@ class RamadanTasksScreen extends StatelessWidget {
   }
 }
 
-
 class _AddTaskFab extends StatelessWidget {
   const _AddTaskFab();
 
@@ -107,13 +108,20 @@ class _AddTaskFab extends StatelessWidget {
   }
 }
 
-class _LoadedBody extends StatelessWidget {
+class _LoadedBody extends StatefulWidget {
   final RamadanTasksLoaded state;
   const _LoadedBody({required this.state});
 
   @override
+  State<_LoadedBody> createState() => _LoadedBodyState();
+}
+
+class _LoadedBodyState extends State<_LoadedBody> {
+  PresentationMode _presentationMode = PresentationMode.card;
+
+  @override
   Widget build(BuildContext context) {
-    final s = state;
+    final s = widget.state;
     return SliverList(
       delegate: SliverChildListDelegate([
         RamadanProgress(
@@ -139,6 +147,68 @@ class _LoadedBody extends StatelessWidget {
         ),
         SizedBox(height: 12.h),
 
+        // ── Presentation mode toggle (Card / Table) ──
+        Row(
+          children: [
+            PresentationModeToggle(
+              mode: _presentationMode,
+              onChanged: (mode) {
+                setState(() => _presentationMode = mode);
+              },
+            ),
+            const Spacer(),
+            CalendarButton(
+              onTap:
+                  () => RamadanCalendarSheet.show(
+                    context,
+                    allTasks: s.allTasks,
+                    todayDay: s.todayDay,
+                  ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+
+        // ── Content area: Card View or Table View ──
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeIn,
+          switchOutCurve: Curves.easeOut,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          child:
+              _presentationMode == PresentationMode.table
+                  ? RamadanTableView(
+                    key: const ValueKey('table_view'),
+                    allTasks: s.allTasks,
+                    todayDay: s.todayDay,
+                    overallPercent: s.overallPercent,
+                  )
+                  : _CardViewContent(
+                    key: const ValueKey('card_view'),
+                    state: s,
+                  ),
+        ),
+
+        // Bottom padding for FAB
+        SizedBox(height: 80.h),
+      ]),
+    );
+  }
+}
+
+/// The original card-based task list view, extracted for clarity.
+class _CardViewContent extends StatelessWidget {
+  final RamadanTasksLoaded state;
+  const _CardViewContent({super.key, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final s = state;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         Row(
           children: [
             Expanded(
@@ -147,15 +217,6 @@ class _LoadedBody extends StatelessWidget {
                 onChange:
                     (m) => context.read<RamadanTasksCubit>().setViewMode(m),
               ),
-            ),
-            SizedBox(width: 8.w),
-            CalendarButton(
-              onTap:
-                  () => RamadanCalendarSheet.show(
-                    context,
-                    allTasks: s.allTasks,
-                    todayDay: s.todayDay,
-                  ),
             ),
           ],
         ),
@@ -212,10 +273,7 @@ class _LoadedBody extends StatelessWidget {
               ),
             ),
           ),
-
-        // Bottom padding for FAB
-        SizedBox(height: 80.h),
-      ]),
+      ],
     );
   }
 }
