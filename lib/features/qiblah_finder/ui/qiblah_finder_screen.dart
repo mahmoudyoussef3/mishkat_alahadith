@@ -289,8 +289,24 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
     super.dispose();
   }
 
-  void _checkAlignment(double offset) {
-    final aligned = offset.abs() <= _kAlignmentThreshold;
+  // ── Compute real angular difference between phone heading and Kaaba ──
+  // `data.offset` is the FIXED bearing from GPS to Kaaba (doesn't change with
+  // rotation). We need: how many degrees the user must turn from their current
+  // heading (`data.direction`) to face the Kaaba.
+  double _qiblahDelta(QiblahDirection data) {
+    double diff = data.offset - data.direction;
+    // Normalize to -180 … +180
+    while (diff > 180) {
+      diff -= 360;
+    }
+    while (diff < -180) {
+      diff += 360;
+    }
+    return diff;
+  }
+
+  void _checkAlignment(double delta) {
+    final aligned = delta.abs() <= _kAlignmentThreshold;
     if (aligned && !_wasAligned) {
       HapticFeedback.mediumImpact();
       _wasAligned = true;
@@ -301,8 +317,8 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
 
   // Helpers ───────────────────────────────────────────────────────────────
 
-  Color _progressColor(double offset) {
-    final a = offset.abs();
+  Color _progressColor(double delta) {
+    final a = delta.abs();
     if (a <= 5) return ColorsManager.success;
     if (a <= 15) return const Color(0xFF8BC34A); // light green
     if (a <= 30) return ColorsManager.warning;
@@ -310,18 +326,18 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
     return ColorsManager.error;
   }
 
-  double _progressValue(double offset) =>
-      (1.0 - (offset.abs().clamp(0, 90) / 90));
+  double _progressValue(double delta) =>
+      (1.0 - (delta.abs().clamp(0, 180) / 180));
 
-  String _directionHint(double offset) {
-    if (offset.abs() <= _kAlignmentThreshold) return 'أنت على اتجاه القبلة';
-    if (offset > 0) {
-      if (offset > 45) return 'أدِر الهاتف كثيراً لليمين ←';
-      if (offset > 15) return 'أدِر الهاتف لليمين ←';
+  String _directionHint(double delta) {
+    if (delta.abs() <= _kAlignmentThreshold) return 'أنت على اتجاه القبلة ✓';
+    if (delta > 0) {
+      if (delta > 45) return 'أدِر الهاتف كثيراً لليمين ←';
+      if (delta > 15) return 'أدِر الهاتف لليمين ←';
       return 'أدِر قليلاً لليمين ←';
     } else {
-      if (offset < -45) return '→ أدِر الهاتف كثيراً لليسار';
-      if (offset < -15) return '→ أدِر الهاتف لليسار';
+      if (delta < -45) return '→ أدِر الهاتف كثيراً لليسار';
+      if (delta < -15) return '→ أدِر الهاتف لليسار';
       return '→ أدِر قليلاً لليسار';
     }
   }
@@ -351,11 +367,12 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
         }
 
         final data = snapshot.data!;
-        _checkAlignment(data.offset);
+        final delta = _qiblahDelta(data);
+        _checkAlignment(delta);
 
-        final isAligned = data.offset.abs() <= _kAlignmentThreshold;
-        final color = _progressColor(data.offset);
-        final progress = _progressValue(data.offset);
+        final isAligned = delta.abs() <= _kAlignmentThreshold;
+        final color = _progressColor(delta);
+        final progress = _progressValue(delta);
 
         return Column(
           children: [
@@ -364,7 +381,7 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
             // ── Status banner ──
             _StatusBanner(
               isAligned: isAligned,
-              hint: _directionHint(data.offset),
+              hint: _directionHint(delta),
               color: color,
             ),
 
@@ -394,7 +411,7 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
 
             // ── Offset pill ──
             _OffsetPill(
-              offset: data.offset,
+              offset: delta,
               progress: progress,
               color: color,
               isAligned: isAligned,
