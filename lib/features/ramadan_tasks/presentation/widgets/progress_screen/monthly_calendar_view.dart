@@ -57,7 +57,12 @@ class MonthlyCalendarView extends StatelessWidget {
     return _dailyTasks.length + _todayOnlyForDay(day).length;
   }
 
-  static const _weekLabels = ['الأسبوع ١', 'الأسبوع ٢', 'الأسبوع ٣', 'الأسبوع ٤'];
+  static const _weekLabels = [
+    'الأسبوع ١',
+    'الأسبوع ٢',
+    'الأسبوع ٣',
+    'الأسبوع ٤',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -167,11 +172,13 @@ class MonthlyCalendarView extends StatelessWidget {
                       return LinearProgressIndicator(
                         value: value,
                         minHeight: 4.h,
-                        backgroundColor:
-                            ColorsManager.mediumGray.withOpacity(0.3),
-                        color: weekPercent >= 1.0
-                            ? ColorsManager.success
-                            : ColorsManager.primaryPurple,
+                        backgroundColor: ColorsManager.mediumGray.withOpacity(
+                          0.3,
+                        ),
+                        color:
+                            weekPercent >= 1.0
+                                ? ColorsManager.success
+                                : ColorsManager.primaryPurple,
                       );
                     },
                   ),
@@ -197,8 +204,7 @@ class MonthlyCalendarView extends StatelessWidget {
                 Expanded(child: _buildDayCell(day)),
               // Fill last row to 7 columns
               if (end == 30)
-                for (int i = 0; i < 2; i++)
-                  const Expanded(child: SizedBox()),
+                for (int i = 0; i < 2; i++) const Expanded(child: SizedBox()),
             ],
           ),
         ],
@@ -240,18 +246,20 @@ class MonthlyCalendarView extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? ColorsManager.primaryPurple : bgColor,
           borderRadius: BorderRadius.circular(10.r),
-          border: isToday && !isSelected
-              ? Border.all(color: ColorsManager.primaryPurple, width: 2)
-              : null,
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: ColorsManager.primaryPurple.withOpacity(0.35),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
+          border:
+              isToday && !isSelected
+                  ? Border.all(color: ColorsManager.primaryPurple, width: 2)
+                  : null,
+          boxShadow:
+              isSelected
+                  ? [
+                    BoxShadow(
+                      color: ColorsManager.primaryPurple.withOpacity(0.35),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                  : null,
         ),
         alignment: Alignment.center,
         child: Column(
@@ -261,9 +269,8 @@ class MonthlyCalendarView extends StatelessWidget {
               _toArabicNumerals(day),
               style: TextStyles.titleSmall.copyWith(
                 color: isSelected ? ColorsManager.white : textColor,
-                fontWeight: isToday || isSelected
-                    ? FontWeight.bold
-                    : FontWeight.w500,
+                fontWeight:
+                    isToday || isSelected ? FontWeight.bold : FontWeight.w500,
               ),
             ),
             if (!isFuture && ratio > 0 && ratio < 1.0 && !isSelected)
@@ -289,9 +296,7 @@ class MonthlyCalendarView extends StatelessWidget {
   }
 
   static String _toArabicNumerals(int number) {
-    const arabicDigits = [
-      '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩',
-    ];
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
     return number
         .toString()
         .split('')

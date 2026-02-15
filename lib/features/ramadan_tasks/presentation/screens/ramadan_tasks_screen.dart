@@ -149,9 +149,10 @@ class _CompactAppBar extends StatelessWidget {
               ),
               // ── Stats button ──
               GestureDetector(
-                onTap: () => Navigator.of(context).pushNamed(
-                  Routes.ramadanProgressScreen,
-                ),
+                onTap:
+                    () => Navigator.of(
+                      context,
+                    ).pushNamed(Routes.ramadanProgressScreen),
                 child: Container(
                   width: 36.w,
                   height: 36.w,
@@ -195,10 +196,7 @@ class _FullScreenContent extends StatelessWidget {
   final RamadanTasksLoaded state;
   final PresentationMode mode;
 
-  const _FullScreenContent({
-    required this.state,
-    required this.mode,
-  });
+  const _FullScreenContent({required this.state, required this.mode});
 
   @override
   Widget build(BuildContext context) {
@@ -213,10 +211,7 @@ class _FullScreenContent extends StatelessWidget {
         ).animate(animation);
         return FadeTransition(
           opacity: animation,
-          child: SlideTransition(
-            position: slideOffset,
-            child: child,
-          ),
+          child: SlideTransition(position: slideOffset, child: child),
         );
       },
       layoutBuilder: (currentChild, previousChildren) {
@@ -228,17 +223,15 @@ class _FullScreenContent extends StatelessWidget {
           ],
         );
       },
-      child: mode == PresentationMode.table
-          ? RamadanTableView(
-              key: const ValueKey('table_mode'),
-              allTasks: state.allTasks,
-              todayDay: state.todayDay,
-              overallPercent: state.overallPercent,
-            )
-          : RamadanCardView(
-              key: const ValueKey('card_mode'),
-              state: state,
-            ),
+      child:
+          mode == PresentationMode.table
+              ? RamadanTableView(
+                key: const ValueKey('table_mode'),
+                allTasks: state.allTasks,
+                todayDay: state.todayDay,
+                overallPercent: state.overallPercent,
+              )
+              : RamadanCardView(key: const ValueKey('card_mode'), state: state),
     );
   }
 }

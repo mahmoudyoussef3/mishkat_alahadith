@@ -127,10 +127,7 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
             height: 36.w,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [
-                  ColorsManager.primaryPurple,
-                  ColorsManager.darkPurple,
-                ],
+                colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
               ),
               borderRadius: BorderRadius.circular(10.r),
             ),
@@ -211,17 +208,17 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
               ),
             );
           },
-          child: _selectedDay != null
-              ? DayRecordsView(
-                  key: ValueKey('day_records_$_selectedDay'),
-                  day: _selectedDay!,
-                  todayDay: state.todayDay,
-                  allTasks: state.allTasks,
-                  mode: _recordsMode,
-                  onModeChanged: (m) =>
-                      setState(() => _recordsMode = m),
-                )
-              : _buildSelectDayPrompt(),
+          child:
+              _selectedDay != null
+                  ? DayRecordsView(
+                    key: ValueKey('day_records_$_selectedDay'),
+                    day: _selectedDay!,
+                    todayDay: state.todayDay,
+                    allTasks: state.allTasks,
+                    mode: _recordsMode,
+                    onModeChanged: (m) => setState(() => _recordsMode = m),
+                  )
+                  : _buildSelectDayPrompt(),
         ),
 
         SizedBox(height: 80.h),
@@ -266,8 +263,7 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
                   allTasks: state.allTasks,
                   todayDay: state.todayDay,
                   selectedDay: _selectedDay,
-                  onDaySelected: (day) =>
-                      setState(() => _selectedDay = day),
+                  onDaySelected: (day) => setState(() => _selectedDay = day),
                 ),
               ),
               SizedBox(width: 16.w),
@@ -291,17 +287,18 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
                       ),
                     );
                   },
-                  child: _selectedDay != null
-                      ? DayRecordsView(
-                          key: ValueKey('day_records_$_selectedDay'),
-                          day: _selectedDay!,
-                          todayDay: state.todayDay,
-                          allTasks: state.allTasks,
-                          mode: _recordsMode,
-                          onModeChanged: (m) =>
-                              setState(() => _recordsMode = m),
-                        )
-                      : _buildSelectDayPrompt(),
+                  child:
+                      _selectedDay != null
+                          ? DayRecordsView(
+                            key: ValueKey('day_records_$_selectedDay'),
+                            day: _selectedDay!,
+                            todayDay: state.todayDay,
+                            allTasks: state.allTasks,
+                            mode: _recordsMode,
+                            onModeChanged:
+                                (m) => setState(() => _recordsMode = m),
+                          )
+                          : _buildSelectDayPrompt(),
                 ),
               ),
             ],

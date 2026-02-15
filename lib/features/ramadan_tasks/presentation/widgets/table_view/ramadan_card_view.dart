@@ -52,11 +52,12 @@ class RamadanCardView extends StatelessWidget {
 
         // ── Monthly plan button ──
         _MonthlySheetButton(
-          onTap: () => MonthlyTasksSheet.show(
-            context,
-            allTasks: s.allTasks,
-            todayDay: s.todayDay,
-          ),
+          onTap:
+              () => MonthlyTasksSheet.show(
+                context,
+                allTasks: s.allTasks,
+                todayDay: s.todayDay,
+              ),
         ),
         SizedBox(height: 12.h),
 
@@ -66,17 +67,18 @@ class RamadanCardView extends StatelessWidget {
             Expanded(
               child: ViewModeTabs(
                 viewMode: s.viewMode,
-                onChange: (m) =>
-                    context.read<RamadanTasksCubit>().setViewMode(m),
+                onChange:
+                    (m) => context.read<RamadanTasksCubit>().setViewMode(m),
               ),
             ),
             SizedBox(width: 8.w),
             CalendarButton(
-              onTap: () => RamadanCalendarSheet.show(
-                context,
-                allTasks: s.allTasks,
-                todayDay: s.todayDay,
-              ),
+              onTap:
+                  () => RamadanCalendarSheet.show(
+                    context,
+                    allTasks: s.allTasks,
+                    todayDay: s.todayDay,
+                  ),
             ),
           ],
         ),
@@ -86,8 +88,8 @@ class RamadanCardView extends StatelessWidget {
         if (s.viewMode == ViewMode.history) ...[
           WeekSelector(
             selectedWeek: s.selectedWeek,
-            onSelected: (w) =>
-                context.read<RamadanTasksCubit>().setSelectedWeek(w),
+            onSelected:
+                (w) => context.read<RamadanTasksCubit>().setSelectedWeek(w),
           ),
           SizedBox(height: 10.h),
           DaySelector(
@@ -95,17 +97,18 @@ class RamadanCardView extends StatelessWidget {
             start: s.weekStart,
             end: s.weekEnd,
             todayDay: s.todayDay,
-            onSelect: (d) =>
-                context.read<RamadanTasksCubit>().setSelectedDay(d),
+            onSelect:
+                (d) => context.read<RamadanTasksCubit>().setSelectedDay(d),
           ),
           SizedBox(height: 12.h),
         ],
 
         // ── Section header ──
         SectionHeader(
-          title: s.viewMode == ViewMode.history
-              ? 'سجل اليوم ${s.selectedDay}'
-              : 'قائمة المهام',
+          title:
+              s.viewMode == ViewMode.history
+                  ? 'سجل اليوم ${s.selectedDay}'
+                  : 'قائمة المهام',
           count: s.filteredTasks.length,
         ),
         SizedBox(height: 8.h),

@@ -191,10 +191,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
                       Expanded(
                         child: Row(
                           children: [
-                            _buildDayColumn(
-                              dayCellW: dayCellW,
-                              rowH: rowH,
-                            ),
+                            _buildDayColumn(dayCellW: dayCellW, rowH: rowH),
                             Container(
                               width: 1,
                               color: ColorsManager.mediumGray.withOpacity(0.25),
@@ -298,10 +295,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     );
   }
 
-  Widget _buildDayColumn({
-    required double dayCellW,
-    required double rowH,
-  }) {
+  Widget _buildDayColumn({required double dayCellW, required double rowH}) {
     return SizedBox(
       width: dayCellW,
       child: ScrollConfiguration(
@@ -318,9 +312,10 @@ class _RamadanTableViewState extends State<RamadanTableView> {
               width: dayCellW,
               height: rowH,
               decoration: BoxDecoration(
-                color: isToday
-                    ? ColorsManager.primaryGold.withOpacity(0.12)
-                    : dayIndex.isEven
+                color:
+                    isToday
+                        ? ColorsManager.primaryGold.withOpacity(0.12)
+                        : dayIndex.isEven
                         ? ColorsManager.white
                         : ColorsManager.lightGray.withOpacity(0.35),
                 border: Border(
@@ -334,9 +329,10 @@ class _RamadanTableViewState extends State<RamadanTableView> {
               child: Text(
                 _toArabicNumerals(day),
                 style: TextStyles.bodySmall.copyWith(
-                  color: isToday
-                      ? ColorsManager.primaryGold
-                      : ColorsManager.primaryText,
+                  color:
+                      isToday
+                          ? ColorsManager.primaryGold
+                          : ColorsManager.primaryText,
                   fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
                 ),
               ),
@@ -520,9 +516,10 @@ class _CellWrapper extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      color: isToday
-          ? ColorsManager.primaryGold.withOpacity(0.06)
-          : isEven
+      color:
+          isToday
+              ? ColorsManager.primaryGold.withOpacity(0.06)
+              : isEven
               ? ColorsManager.white
               : ColorsManager.lightGray.withOpacity(0.35),
       child: child,
@@ -565,17 +562,19 @@ class _TaskHeaderCell extends StatelessWidget {
             width: 24.w,
             height: 24.w,
             decoration: BoxDecoration(
-              color: task.type == TaskType.daily
-                  ? const Color(0xFF0D7C66).withOpacity(0.12)
-                  : ColorsManager.primaryGold.withOpacity(0.12),
+              color:
+                  task.type == TaskType.daily
+                      ? const Color(0xFF0D7C66).withOpacity(0.12)
+                      : ColorsManager.primaryGold.withOpacity(0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
               size: 13.sp,
-              color: task.type == TaskType.daily
-                  ? const Color(0xFF0D7C66)
-                  : ColorsManager.primaryGold,
+              color:
+                  task.type == TaskType.daily
+                      ? const Color(0xFF0D7C66)
+                      : ColorsManager.primaryGold,
             ),
           ),
           SizedBox(height: 3.h),
@@ -665,9 +664,7 @@ class _EmptyTableState extends StatelessWidget {
             SizedBox(height: 6.h),
             Text(
               'أضف مهامك لترى الجدول الشهري',
-              style: TextStyles.bodySmall.copyWith(
-                color: ColorsManager.gray,
-              ),
+              style: TextStyles.bodySmall.copyWith(color: ColorsManager.gray),
             ),
           ],
         ),

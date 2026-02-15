@@ -39,16 +39,15 @@ class DayRecordsView extends StatelessWidget {
           .toList();
 
   List<RamadanTaskEntity> get _tasksForDay => [
-        ..._dailyTasks,
-        ..._todayOnlyForDay(day),
-      ];
+    ..._dailyTasks,
+    ..._todayOnlyForDay(day),
+  ];
 
   bool _isCompleted(RamadanTaskEntity task) {
     return task.completedDays.contains(day);
   }
 
-  int get _completedCount =>
-      _tasksForDay.where((t) => _isCompleted(t)).length;
+  int get _completedCount => _tasksForDay.where((t) => _isCompleted(t)).length;
 
   bool get _isFuture => day > todayDay;
 
@@ -136,8 +135,8 @@ class DayRecordsView extends StatelessWidget {
                   _isFuture
                       ? 'لم يأتِ بعد'
                       : day == todayDay
-                          ? '${_toArabicNumerals(_completedCount)} من ${_toArabicNumerals(total)} · اليوم الحالي'
-                          : '${_toArabicNumerals(_completedCount)} من ${_toArabicNumerals(total)} مهمة مكتملة',
+                      ? '${_toArabicNumerals(_completedCount)} من ${_toArabicNumerals(total)} · اليوم الحالي'
+                      : '${_toArabicNumerals(_completedCount)} من ${_toArabicNumerals(total)} مهمة مكتملة',
                   style: TextStyles.bodySmall.copyWith(
                     color: ColorsManager.secondaryText,
                     fontSize: 11.sp,
@@ -148,10 +147,7 @@ class DayRecordsView extends StatelessWidget {
           ),
 
           // Mode toggle
-          _MiniModeToggle(
-            mode: mode,
-            onChanged: onModeChanged,
-          ),
+          _MiniModeToggle(mode: mode, onChanged: onModeChanged),
         ],
       ),
     );
@@ -165,103 +161,110 @@ class DayRecordsView extends StatelessWidget {
     return Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w, vertical: 8.h),
       child: Column(
-        children: tasks.map((task) {
-          final done = _isCompleted(task);
-          return Padding(
-            padding: EdgeInsetsDirectional.only(bottom: 8.h),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: EdgeInsetsDirectional.all(12.w),
-              decoration: BoxDecoration(
-                color: done
-                    ? ColorsManager.success.withOpacity(0.06)
-                    : ColorsManager.lightGray,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: done
-                      ? ColorsManager.success.withOpacity(0.2)
-                      : ColorsManager.mediumGray.withOpacity(0.5),
-                ),
-              ),
-              child: Row(
-                children: [
-                  // Status icon
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: Icon(
-                      done
-                          ? Icons.check_circle_rounded
-                          : Icons.radio_button_unchecked_rounded,
-                      key: ValueKey(done),
-                      color: done
-                          ? ColorsManager.success
-                          : ColorsManager.mediumGray,
-                      size: 22.sp,
+        children:
+            tasks.map((task) {
+              final done = _isCompleted(task);
+              return Padding(
+                padding: EdgeInsetsDirectional.only(bottom: 8.h),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: EdgeInsetsDirectional.all(12.w),
+                  decoration: BoxDecoration(
+                    color:
+                        done
+                            ? ColorsManager.success.withOpacity(0.06)
+                            : ColorsManager.lightGray,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color:
+                          done
+                              ? ColorsManager.success.withOpacity(0.2)
+                              : ColorsManager.mediumGray.withOpacity(0.5),
                     ),
                   ),
-                  SizedBox(width: 10.w),
+                  child: Row(
+                    children: [
+                      // Status icon
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        child: Icon(
+                          done
+                              ? Icons.check_circle_rounded
+                              : Icons.radio_button_unchecked_rounded,
+                          key: ValueKey(done),
+                          color:
+                              done
+                                  ? ColorsManager.success
+                                  : ColorsManager.mediumGray,
+                          size: 22.sp,
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
 
-                  // Task info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          task.title,
-                          style: TextStyles.titleSmall.copyWith(
+                      // Task info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              task.title,
+                              style: TextStyles.titleSmall.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    done
+                                        ? ColorsManager.secondaryText
+                                        : ColorsManager.primaryText,
+                                decoration:
+                                    done ? TextDecoration.lineThrough : null,
+                              ),
+                            ),
+                            if (task.description.isNotEmpty)
+                              Padding(
+                                padding: EdgeInsetsDirectional.only(top: 2.h),
+                                child: Text(
+                                  task.description,
+                                  style: TextStyles.bodySmall.copyWith(
+                                    color: ColorsManager.secondaryText,
+                                    fontSize: 11.sp,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+
+                      // Type badge
+                      Container(
+                        padding: EdgeInsetsDirectional.symmetric(
+                          horizontal: 8.w,
+                          vertical: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              task.type == TaskType.daily
+                                  ? ColorsManager.primaryPurple.withOpacity(0.1)
+                                  : ColorsManager.primaryGold.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          task.type == TaskType.daily ? 'يومية' : 'مرة واحدة',
+                          style: TextStyles.bodySmall.copyWith(
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.w600,
-                            color: done
-                                ? ColorsManager.secondaryText
-                                : ColorsManager.primaryText,
-                            decoration:
-                                done ? TextDecoration.lineThrough : null,
+                            color:
+                                task.type == TaskType.daily
+                                    ? ColorsManager.primaryPurple
+                                    : ColorsManager.primaryGold,
                           ),
                         ),
-                        if (task.description.isNotEmpty)
-                          Padding(
-                            padding: EdgeInsetsDirectional.only(top: 2.h),
-                            child: Text(
-                              task.description,
-                              style: TextStyles.bodySmall.copyWith(
-                                color: ColorsManager.secondaryText,
-                                fontSize: 11.sp,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-
-                  // Type badge
-                  Container(
-                    padding: EdgeInsetsDirectional.symmetric(
-                      horizontal: 8.w,
-                      vertical: 3.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: task.type == TaskType.daily
-                          ? ColorsManager.primaryPurple.withOpacity(0.1)
-                          : ColorsManager.primaryGold.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Text(
-                      task.type == TaskType.daily ? 'يومية' : 'مرة واحدة',
-                      style: TextStyles.bodySmall.copyWith(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w600,
-                        color: task.type == TaskType.daily
-                            ? ColorsManager.primaryPurple
-                            : ColorsManager.primaryGold,
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -276,9 +279,7 @@ class DayRecordsView extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(
-            color: ColorsManager.mediumGray.withOpacity(0.5),
-          ),
+          border: Border.all(color: ColorsManager.mediumGray.withOpacity(0.5)),
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -350,9 +351,10 @@ class DayRecordsView extends StatelessWidget {
               final done = _isCompleted(task);
               final isEven = idx % 2 == 0;
               return Container(
-                color: isEven
-                    ? Colors.transparent
-                    : ColorsManager.lightGray.withOpacity(0.4),
+                color:
+                    isEven
+                        ? Colors.transparent
+                        : ColorsManager.lightGray.withOpacity(0.4),
                 padding: EdgeInsetsDirectional.symmetric(
                   horizontal: 12.w,
                   vertical: 8.h,
@@ -375,11 +377,11 @@ class DayRecordsView extends StatelessWidget {
                       child: Text(
                         task.title,
                         style: TextStyles.bodySmall.copyWith(
-                          color: done
-                              ? ColorsManager.secondaryText
-                              : ColorsManager.primaryText,
-                          decoration:
-                              done ? TextDecoration.lineThrough : null,
+                          color:
+                              done
+                                  ? ColorsManager.secondaryText
+                                  : ColorsManager.primaryText,
+                          decoration: done ? TextDecoration.lineThrough : null,
                           fontWeight: FontWeight.w500,
                           fontSize: 12.sp,
                         ),
@@ -392,9 +394,10 @@ class DayRecordsView extends StatelessWidget {
                       child: Text(
                         task.type == TaskType.daily ? 'يومية' : 'مرة واحدة',
                         style: TextStyles.bodySmall.copyWith(
-                          color: task.type == TaskType.daily
-                              ? ColorsManager.primaryPurple
-                              : ColorsManager.primaryGold,
+                          color:
+                              task.type == TaskType.daily
+                                  ? ColorsManager.primaryPurple
+                                  : ColorsManager.primaryGold,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -407,9 +410,10 @@ class DayRecordsView extends StatelessWidget {
                         done
                             ? Icons.check_circle_rounded
                             : Icons.cancel_outlined,
-                        color: done
-                            ? ColorsManager.success
-                            : ColorsManager.mediumGray,
+                        color:
+                            done
+                                ? ColorsManager.success
+                                : ColorsManager.mediumGray,
                         size: 20.sp,
                       ),
                     ),
@@ -476,9 +480,7 @@ class DayRecordsView extends StatelessWidget {
   }
 
   static String _toArabicNumerals(int number) {
-    const arabicDigits = [
-      '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩',
-    ];
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
     return number
         .toString()
         .split('')
@@ -543,17 +545,13 @@ class _MiniChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.all(6.w),
         decoration: BoxDecoration(
-          color: isSelected
-              ? ColorsManager.primaryPurple
-              : Colors.transparent,
+          color: isSelected ? ColorsManager.primaryPurple : Colors.transparent,
           borderRadius: BorderRadius.circular(6.r),
         ),
         child: Icon(
           icon,
           size: 16.sp,
-          color: isSelected
-              ? ColorsManager.white
-              : ColorsManager.secondaryText,
+          color: isSelected ? ColorsManager.white : ColorsManager.secondaryText,
         ),
       ),
     );

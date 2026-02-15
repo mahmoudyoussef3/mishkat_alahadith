@@ -218,9 +218,7 @@ class ProgressStatsCard extends StatelessWidget {
   }
 
   static String _toArabicNumerals(int number) {
-    const arabicDigits = [
-      '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩',
-    ];
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
     return number
         .toString()
         .split('')

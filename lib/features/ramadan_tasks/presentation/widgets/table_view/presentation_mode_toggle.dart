@@ -103,27 +103,29 @@ class _ToggleChip extends StatelessWidget {
           vertical: 8.h,
         ),
         decoration: BoxDecoration(
-          gradient: isSelected
-              ? const LinearGradient(
-                  colors: [
-                    PresentationModeToggle.emerald,
-                    PresentationModeToggle.deepTeal,
-                  ],
-                  begin: AlignmentDirectional.topStart,
-                  end: AlignmentDirectional.bottomEnd,
-                )
-              : null,
+          gradient:
+              isSelected
+                  ? const LinearGradient(
+                    colors: [
+                      PresentationModeToggle.emerald,
+                      PresentationModeToggle.deepTeal,
+                    ],
+                    begin: AlignmentDirectional.topStart,
+                    end: AlignmentDirectional.bottomEnd,
+                  )
+                  : null,
           color: isSelected ? null : Colors.transparent,
           borderRadius: BorderRadius.circular(11.r),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: PresentationModeToggle.emerald.withOpacity(0.25),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
+          boxShadow:
+              isSelected
+                  ? [
+                    BoxShadow(
+                      color: PresentationModeToggle.emerald.withOpacity(0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                  : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -131,17 +133,19 @@ class _ToggleChip extends StatelessWidget {
             Icon(
               icon,
               size: 16.sp,
-              color: isSelected
-                  ? ColorsManager.white
-                  : ColorsManager.secondaryText,
+              color:
+                  isSelected
+                      ? ColorsManager.white
+                      : ColorsManager.secondaryText,
             ),
             SizedBox(width: 6.w),
             Text(
               label,
               style: TextStyles.bodySmall.copyWith(
-                color: isSelected
-                    ? ColorsManager.white
-                    : ColorsManager.secondaryText,
+                color:
+                    isSelected
+                        ? ColorsManager.white
+                        : ColorsManager.secondaryText,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
