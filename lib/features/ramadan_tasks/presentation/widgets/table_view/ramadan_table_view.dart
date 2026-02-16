@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
-
 import '../../../domain/entities/ramadan_task_entity.dart';
 import '../../cubit/ramadan_tasks_cubit.dart';
 import 'grid_cells/grid_checkbox_cell.dart';
@@ -14,22 +13,16 @@ import 'grid_cells/grid_header_cell.dart';
 import 'grid_cells/grid_progress_cell.dart';
 import 'table_utils.dart';
 
-// ── Layout ────────────────────────────────────────────────────
 const int _kDays = 30;
 
-// ── Visible colour palette (no near-invisible opacities) ──────
 const Color _headerBg = ColorsManager.primaryPurple;
 const Color _headerBorderBottom = Color(0xFF6435CC);
-const Color _oddRowBg = Color(0xFFF8F5FF); // light purple tint
+const Color _oddRowBg = Color(0xFFF8F5FF);
 const Color _evenRowBg = ColorsManager.white;
-const Color _todayRowBg = Color(0xFFFFF8E1); // warm amber tint
+const Color _todayRowBg = Color(0xFFFFF8E1);
 const Color _todayBorder = ColorsManager.primaryGold;
 const Color _gridLine = Color(0xFFEEEEEE);
 const Color _pinnedColLine = Color(0xFFE0E0E0);
-
-// ────────────────────────────────────────────────────────────────
-// RamadanTableView – polished, card-wrapped, RTL grid
-// ────────────────────────────────────────────────────────────────
 
 class RamadanTableView extends StatefulWidget {
   final List<RamadanTaskEntity> allTasks;
@@ -51,14 +44,12 @@ class _RamadanTableViewState extends State<RamadanTableView> {
   final ScrollController _vCtrl = ScrollController();
   bool _scrolled = false;
 
-  // ── Responsive sizes (ScreenUtil-scaled, clamped for extremes) ──
   static const double _minDayCellW = 58;
   static const double _minTaskCellW = 54;
   static const double _minProgressCellW = 66;
   double get _rowHeight => 50.w.clamp(40, 62);
   double get _headerHeight => 58.w.clamp(48, 70);
 
-  // Actual widths that expand to fill screen (computed in build)
   double _dayCellW = 58;
   double _taskCellW = 54;
   double _progressCellW = 66;
@@ -68,8 +59,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     _vCtrl.dispose();
     super.dispose();
   }
-
-  // ── Auto-scroll today to viewport centre ────────────────────
 
   void _autoScrollToToday() {
     if (_scrolled) return;
@@ -95,15 +84,13 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     );
   }
 
-  // ── Build ───────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     final tasks = widget.allTasks;
     if (tasks.isEmpty) return const _EmptyState();
 
-    final colCount = tasks.length + 2; // day + N tasks + progress
-    const rowCount = _kDays + 1; // header + 30 days
+    final colCount = tasks.length + 2;
+    const rowCount = _kDays + 1;
 
     _autoScrollToToday();
 
@@ -111,16 +98,13 @@ class _RamadanTableViewState extends State<RamadanTableView> {
       textDirection: TextDirection.rtl,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Calculate widths to fill the available space
-          final availableW =
-              constraints.maxWidth - 16.w; // minus horizontal padding
+          final availableW = constraints.maxWidth - 16.w;
           final fixedW = _minDayCellW.w + _minProgressCellW.w;
           final taskCount = tasks.length;
           final minTotalTaskW = taskCount * _minTaskCellW.w;
           final minTotalW = fixedW + minTotalTaskW;
 
           if (minTotalW < availableW && taskCount > 0) {
-            // Distribute extra space among task columns
             final extra = availableW - fixedW;
             _taskCellW = extra / taskCount;
             _dayCellW = _minDayCellW.w;
@@ -159,7 +143,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
                 borderRadius: BorderRadius.circular(16.r),
                 child: Stack(
                   children: [
-                    // ── The 2-D grid ──
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TableView.builder(
@@ -173,8 +156,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
                             parent: AlwaysScrollableScrollPhysics(),
                           ),
                         ),
-                        // AxisDirection.left → columns flow right-to-left,
-                        // pinned column 0 (Day) sticks to the RIGHT edge.
+
                         horizontalDetails: const ScrollableDetails(
                           direction: AxisDirection.left,
                           physics: BouncingScrollPhysics(
@@ -188,15 +170,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
                                 _cell(ctx, v, tasks),
                       ),
                     ),
-
-                    // ── Floating "jump to today" pill ──
-                    /*  PositionedDirectional(
-                  bottom: 12.h,
-                  start: 0,
-                  end: 0,
-                  child: Center(child: _JumpTodayPill(onTap: _animateToToday)),
-                ),
-                */
                   ],
                 ),
               ),
@@ -232,10 +205,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     );
   }
 
-  // ── Row spans ───────────────────────────────────────────────
-
   TableSpan _rowSpan(int r) {
-    // Header
     if (r == 0) {
       return TableSpan(
         extent: FixedTableSpanExtent(_headerHeight),
@@ -277,8 +247,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     );
   }
 
-  // ── Cell builder ────────────────────────────────────────────
-
   TableViewCell _cell(
     BuildContext context,
     TableVicinity v,
@@ -287,7 +255,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     final r = v.row;
     final c = v.column;
 
-    // ── Header row ──
     if (r == 0) {
       if (c == 0) return const TableViewCell(child: GridCornerCell());
       if (c <= tasks.length) {
@@ -301,7 +268,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
           ),
         );
       }
-      // Progress column header icon
       return TableViewCell(
         child: Center(
           child: Icon(
@@ -313,7 +279,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
       );
     }
 
-    // ── Data rows ──
     final day = r;
 
     if (c == 0) {
@@ -344,7 +309,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
       );
     }
 
-    // Progress column
     int done = 0, total = 0;
     for (final t in tasks) {
       if (t.type == TaskType.daily || t.createdForDay == day) {
@@ -357,68 +321,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     );
   }
 }
-
-// ────────────────────────────────────────────────────────────────
-// Floating "jump to today" pill
-// ────────────────────────────────────────────────────────────────
-
-/*
-class _JumpTodayPill extends StatelessWidget {
-  final VoidCallback onTap;
-  const _JumpTodayPill({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20.r),
-        child: Container(
-          padding: EdgeInsetsDirectional.symmetric(
-            horizontal: 14.w,
-            vertical: 7.h,
-          ),
-          decoration: BoxDecoration(
-            color: ColorsManager.primaryGold,
-            borderRadius: BorderRadius.circular(20.r),
-            boxShadow: [
-              BoxShadow(
-                color: ColorsManager.primaryGold.withValues(alpha: 0.45),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.today_rounded,
-                size: 16.sp,
-                color: ColorsManager.white,
-              ),
-              SizedBox(width: 6.w),
-              Text(
-                'اليوم',
-                style: TextStyles.labelSmall.copyWith(
-                  color: ColorsManager.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12.sp,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-*/
-
-// ────────────────────────────────────────────────────────────────
-// Empty state
-// ────────────────────────────────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState();

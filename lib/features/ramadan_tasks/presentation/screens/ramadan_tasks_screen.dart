@@ -291,8 +291,8 @@ class _AppBarBackground extends StatelessWidget {
                         children: [
                           // Mini progress ring
                           SizedBox(
-                            width: 28.w,
-                            height: 28.w,
+                            width: 40.w,
+                            height: 33.w,
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
@@ -335,6 +335,7 @@ class _AppBarBackground extends StatelessWidget {
                                     alpha: 0.6,
                                   ),
                                   fontSize: 9.sp,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],

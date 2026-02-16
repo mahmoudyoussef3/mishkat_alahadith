@@ -144,7 +144,6 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
               ],
             ),
           ),
-          // Calendar icon badge
           Container(
             width: 36.w,
             height: 36.w,
@@ -350,30 +349,36 @@ class _RamadanProgressScreenState extends State<RamadanProgressScreen> {
           style: BorderStyle.solid,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Row(
         children: [
-          Icon(
-            Icons.touch_app_rounded,
-            size: 40.sp,
-            color: ColorsManager.primaryPurple.withOpacity(0.4),
+          Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.touch_app_rounded,
+                size: 40.sp,
+                color: ColorsManager.primaryPurple.withOpacity(0.4),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'اختر يومًا من التقويم',
+                style: TextStyles.titleSmall.copyWith(
+                  color: ColorsManager.secondaryText,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                'اضغط على أي يوم لعرض تفاصيل المهام',
+                style: TextStyles.bodySmall.copyWith(
+                  color: ColorsManager.disabledText,
+                  fontSize: 11.sp,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 8.h),
-          Text(
-            'اختر يومًا من التقويم',
-            style: TextStyles.titleSmall.copyWith(
-              color: ColorsManager.secondaryText,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'اضغط على أي يوم لعرض تفاصيل المهام',
-            style: TextStyles.bodySmall.copyWith(
-              color: ColorsManager.disabledText,
-              fontSize: 11.sp,
-            ),
-          ),
+          Spacer(),
         ],
       ),
     );
