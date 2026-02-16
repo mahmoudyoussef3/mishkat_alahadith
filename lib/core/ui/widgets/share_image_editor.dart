@@ -13,15 +13,14 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../../theming/colors.dart';
 import '../../theming/styles.dart';
 
-// Quick-access color presets
 const _kBgPresets = <Color>[
   Colors.white,
-  Color(0xFFFFF8E1), // warm cream
-  Color(0xFFF3E5F5), // lavender
-  Color(0xFFE8F5E9), // mint
-  Color(0xFF263238), // dark slate
-  Color(0xFF1A1A2E), // midnight
-  Color(0xFF0D1B2A), // deep navy
+  Color(0xFFFFF8E1), 
+  Color(0xFFF3E5F5), 
+  Color(0xFFE8F5E9), 
+  Color(0xFF263238), 
+  Color(0xFF1A1A2E), 
+  Color(0xFF0D1B2A), 
   Colors.black,
 ];
 

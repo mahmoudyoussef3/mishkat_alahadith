@@ -132,7 +132,7 @@ class _RamadanSliverAppBar extends StatelessWidget {
     final percentInt = (overallPercent * 100).round().clamp(0, 100);
 
     return SliverAppBar(
-      expandedHeight: 170.h.clamp(130, 200),
+      expandedHeight: 170.h.clamp(140, 210).toDouble(),
       floating: false,
       pinned: true,
       leading: const SizedBox.shrink(),
@@ -222,140 +222,199 @@ class _AppBarBackground extends StatelessWidget {
           // ── Content ──
           SafeArea(
             bottom: false,
-            child: Padding(
-              padding: EdgeInsetsDirectional.symmetric(
-                horizontal: 16.w,
-                vertical: 8.h,
-              ),
-              child: Column(
-                children: [
-                  // Top row: back button + crescent moon accent
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxH = constraints.maxHeight;
+                final isCompact = maxH < 160;
+                final titleSize = 22.sp.clamp(16.0, 24.0);
+                final subtitleSize = 12.sp.clamp(9.0, 14.0);
+                final iconBtnSize = 36.w.clamp(30.0, 42.0);
+
+                return Padding(
+                  padding: EdgeInsetsDirectional.symmetric(
+                    horizontal: 16.w.clamp(10.0, 20.0),
+                    vertical: 6.h.clamp(4.0, 10.0),
+                  ),
+                  child: Column(
                     children: [
-                      _GlassIconButton(
-                        icon: Icons.arrow_back_ios_new_rounded,
-                        onTap: onBack,
-                      ),
-                      Icon(
-                        Icons.nightlight_round,
-                        size: 22.sp,
-                        color: ColorsManager.primaryGold.withValues(alpha: 0.7),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 8.h),
-
-                  // Title + subtitle
-                  Text(
-                    'مشكاة في رمضان',
-                    style: TextStyles.displaySmall.copyWith(
-                      color: ColorsManager.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 22.sp,
-                      letterSpacing: 0.3,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    'أنشئ خطتك الخاصة لشهر رمضان',
-                    style: TextStyles.bodySmall.copyWith(
-                      color: ColorsManager.white.withValues(alpha: 0.75),
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const Spacer(),
-
-                  // ── Frosted progress pill ──
-                  GestureDetector(
-                    onTap: onProgressTap,
-                    child: Container(
-                      padding: EdgeInsetsDirectional.symmetric(
-                        horizontal: 14.w,
-                        vertical: 8.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: ColorsManager.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: ColorsManager.white.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      // Top row: back button + crescent moon accent
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Mini progress ring
-                          SizedBox(
-                            width: 40.w,
-                            height: 33.w,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                CircularProgressIndicator(
-                                  value: overallPercent.clamp(0.0, 1.0),
-                                  strokeWidth: 3,
-                                  strokeCap: StrokeCap.round,
-                                  backgroundColor: ColorsManager.white
-                                      .withValues(alpha: 0.2),
-                                  color: ColorsManager.primaryGold,
-                                ),
-                                Text(
-                                  '$percentInt',
-                                  style: TextStyles.labelSmall.copyWith(
-                                    color: ColorsManager.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 9.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          _GlassIconButton(
+                            icon: Icons.arrow_back_ios_new_rounded,
+                            size: iconBtnSize,
+                            onTap: onBack,
                           ),
-                          SizedBox(width: 10.w),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'تقدمك هذا الشهر',
-                                style: TextStyles.labelSmall.copyWith(
-                                  color: ColorsManager.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11.sp,
-                                ),
-                              ),
-                              Text(
-                                'اضغط للتفاصيل',
-                                style: TextStyles.labelSmall.copyWith(
-                                  color: ColorsManager.white.withValues(
-                                    alpha: 0.6,
-                                  ),
-                                  fontSize: 9.sp,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: 8.w),
                           Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 12.sp,
-                            color: ColorsManager.white.withValues(alpha: 0.6),
+                            Icons.nightlight_round,
+                            size: 20.sp.clamp(16.0, 24.0),
+                            color: ColorsManager.primaryGold.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                         ],
                       ),
-                    ),
+
+                      SizedBox(height: isCompact ? 4.h : 8.h),
+
+                      // Title + subtitle
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'مشكاة في رمضان',
+                          style: TextStyles.displaySmall.copyWith(
+                            color: ColorsManager.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: titleSize,
+                            letterSpacing: 0.3,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      if (!isCompact) ...[
+                        SizedBox(height: 2.h),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'أنشئ خطتك الخاصة لشهر رمضان',
+                            style: TextStyles.bodySmall.copyWith(
+                              color: ColorsManager.white.withValues(
+                                alpha: 0.75,
+                              ),
+                              fontSize: subtitleSize,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+
+                      const Spacer(),
+
+                      // ── Frosted progress pill ──
+                      _ProgressPill(
+                        overallPercent: overallPercent,
+                        percentInt: percentInt,
+                        onTap: onProgressTap,
+                        isCompact: isCompact,
+                      ),
+                      SizedBox(height: isCompact ? 4.h : 8.h),
+                    ],
                   ),
-                  SizedBox(height: 10.h),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// Progress pill — responsive frosted glass widget
+// ────────────────────────────────────────────────────────────────
+
+class _ProgressPill extends StatelessWidget {
+  final double overallPercent;
+  final int percentInt;
+  final VoidCallback onTap;
+  final bool isCompact;
+
+  const _ProgressPill({
+    required this.overallPercent,
+    required this.percentInt,
+    required this.onTap,
+    this.isCompact = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ringSize = isCompact ? 28.0 : 34.w.clamp(26.0, 40.0);
+    final pillH = isCompact ? 6.0 : 8.h.clamp(4.0, 10.0);
+    final pillW = isCompact ? 10.0 : 14.w.clamp(8.0, 18.0);
+    final labelSize = isCompact ? 10.0 : 11.sp.clamp(9.0, 13.0);
+    final subLabelSize = isCompact ? 8.0 : 9.sp.clamp(7.0, 11.0);
+    final percentSize = isCompact ? 8.0 : 9.sp.clamp(7.0, 11.0);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: pillW,
+          vertical: pillH,
+        ),
+        decoration: BoxDecoration(
+          color: ColorsManager.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: ColorsManager.white.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Mini progress ring
+            SizedBox(
+              width: ringSize,
+              height: ringSize,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: overallPercent.clamp(0.0, 1.0),
+                    strokeWidth: 2.5,
+                    strokeCap: StrokeCap.round,
+                    backgroundColor: ColorsManager.white.withValues(alpha: 0.2),
+                    color: ColorsManager.primaryGold,
+                  ),
+                  Text(
+                    '$percentInt',
+                    style: TextStyles.labelSmall.copyWith(
+                      color: ColorsManager.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: percentSize,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 8.w.clamp(4.0, 12.0)),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'تقدمك هذا الشهر',
+                    style: TextStyles.labelSmall.copyWith(
+                      color: ColorsManager.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: labelSize,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'اضغط للتفاصيل',
+                    style: TextStyles.labelSmall.copyWith(
+                      color: ColorsManager.white.withValues(alpha: 0.6),
+                      fontSize: subLabelSize,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 6.w.clamp(2.0, 10.0)),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 12.sp.clamp(8.0, 14.0),
+              color: ColorsManager.white.withValues(alpha: 0.6),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -365,11 +424,17 @@ class _AppBarBackground extends StatelessWidget {
 class _GlassIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final double size;
 
-  const _GlassIconButton({required this.icon, required this.onTap});
+  const _GlassIconButton({
+    required this.icon,
+    required this.onTap,
+    this.size = 40,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final iconSize = (size * 0.5).clamp(14.0, 22.0);
     return Material(
       color: ColorsManager.white.withValues(alpha: 0.12),
       borderRadius: BorderRadius.circular(12.r),
@@ -377,15 +442,15 @@ class _GlassIconButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12.r),
         child: Container(
-          width: 40.w,
-          height: 40.w,
+          width: size,
+          height: size,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: ColorsManager.white.withValues(alpha: 0.18),
             ),
           ),
-          child: Icon(icon, color: ColorsManager.white, size: 20.sp),
+          child: Icon(icon, color: ColorsManager.white, size: iconSize),
         ),
       ),
     );
