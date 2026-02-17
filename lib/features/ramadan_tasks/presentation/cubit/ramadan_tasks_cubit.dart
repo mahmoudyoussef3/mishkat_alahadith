@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hijri/hijri_calendar.dart';
 import '../../domain/entities/ramadan_task_entity.dart';
 import '../../domain/repositories/ramadan_tasks_repository.dart';
+import '../../domain/repositories/ramadan_config_repository.dart';
 import '../../domain/usecases/get_tasks.dart';
 import '../../domain/usecases/add_task.dart';
 import '../../domain/usecases/delete_task.dart';
@@ -18,6 +19,7 @@ enum ViewMode { today, history, all }
 
 class RamadanTasksCubit extends Cubit<RamadanTasksState> {
   final RamadanTasksRepository _repo;
+  final RamadanConfigRepository _configRepo;
   late final GetTasks _getTasks;
   late final AddTask _addTask;
   late final DeleteTask _deleteTask;
@@ -33,7 +35,8 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
   int _selectedWeek = 1;
   ViewMode _viewMode = ViewMode.today;
 
-  RamadanTasksCubit(this._repo) : super(RamadanTasksLoading()) {
+  RamadanTasksCubit(this._repo, this._configRepo)
+    : super(RamadanTasksLoading()) {
     _getTasks = GetTasks(_repo);
     _addTask = AddTask(_repo);
     _deleteTask = DeleteTask(_repo);
@@ -131,17 +134,53 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
   }
 
   Future<void> setSelectedDay(int day) async {
-    _selectedDay = day.clamp(1, 30);
+    final totalDays = _getRamadanTotalDays();
+    _selectedDay = day.clamp(1, totalDays);
     _emitLoaded();
   }
 
+  /// Gets the current Ramadan day number with Remote Config adjustments.
+  ///
+  /// Applies:
+  /// 1. Ramadan start offset (for Shaban moon sighting adjustments)
+  /// 2. Clamps to valid range based on Ramadan total days
   int _todayDayNumber() {
+    final hijri = _getAdjustedHijriDate();
+    final totalDays = _configRepo.getRamadanTotalDays();
+    return hijri.hDay.clamp(1, totalDays);
+  }
+
+  /// Gets the total number of days in Ramadan from Remote Config.
+  /// Returns 29 or 30 based on moon sighting announcement.
+  int _getRamadanTotalDays() {
+    return _configRepo.getRamadanTotalDays();
+  }
+
+  /// Gets the adjusted Hijri date with Remote Config offset applied.
+  ///
+  /// This handles the case where Shaban has 29 days instead of 30,
+  /// causing Ramadan to start earlier than calculated.
+  HijriCalendar _getAdjustedHijriDate() {
     final hijri = HijriCalendar.now();
-    return hijri.hDay.clamp(1, 30);
+    final startOffset = _configRepo.getRamadanStartOffset();
+
+    if (startOffset == 0) {
+      // No adjustment needed
+      return hijri;
+    }
+
+    // Convert to Gregorian, add offset days, convert back to Hijri
+    final gregorianDate = hijri.hijriToGregorian(
+      hijri.hYear,
+      hijri.hMonth,
+      hijri.hDay,
+    );
+    final adjustedGregorian = gregorianDate.add(Duration(days: startOffset));
+    return HijriCalendar.fromDate(adjustedGregorian);
   }
 
   String _hijriDateString() {
-    final hijri = HijriCalendar.now();
+    final hijri = _getAdjustedHijriDate();
     HijriCalendar.setLocal('ar');
     return '${_toArabicNumerals(hijri.hDay)} ${hijri.getLongMonthName()} ${_toArabicNumerals(hijri.hYear)} هـ';
   }
@@ -183,6 +222,7 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
   }
 
   (int, int) _weekRange(int week) {
+    final totalDays = _getRamadanTotalDays();
     switch (week) {
       case 1:
         return (1, 7);
@@ -191,12 +231,14 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
       case 3:
         return (15, 21);
       default:
-        return (22, 30);
+        // Last week: day 22 to end of month (29 or 30)
+        return (22, totalDays);
     }
   }
 
   void _emitLoaded() {
     final todayDay = _todayDayNumber();
+    final totalDays = _getRamadanTotalDays();
     final range = _weekRange(_selectedWeek);
     final dayForProgress =
         _viewMode == ViewMode.history ? _selectedDay : todayDay;
@@ -205,6 +247,7 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
       day: dayForProgress,
       weekStart: range.$1,
       weekEnd: range.$2,
+      totalDays: totalDays,
     );
     final filtered = _filterTasks(_allTasks, todayDay);
     final suggestions = _availableSuggestions();
@@ -235,6 +278,7 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
         motivationalText: motivation,
         hijriDateString: _hijriDateString(),
         gregorianDateString: _gregorianDateString(),
+        totalDays: _getRamadanTotalDays(),
       ),
     );
   }

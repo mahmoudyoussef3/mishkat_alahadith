@@ -57,11 +57,6 @@ import 'package:mishkat_almasabih/features/daily_zekr/data/repo/shared_prefs_per
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_reminder_service.dart';
-import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_location_service.dart';
-import 'package:mishkat_almasabih/features/prayer_times/data/services/aladhan_api_service.dart';
-import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_cache_service.dart';
-import 'package:mishkat_almasabih/features/prayer_times/domain/repositories/prayer_times_repository.dart';
-import 'package:mishkat_almasabih/features/prayer_times/data/repositories/prayer_times_repository_impl.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_tasks_repository.dart';
@@ -219,27 +214,9 @@ Future<void> setUpGetIt() async {
   getIt.registerLazySingleton<PrayerTimesReminderService>(
     () => PrayerTimesReminderService(),
   );
-  getIt.registerLazySingleton<PrayerLocationService>(
-    () => PrayerLocationService(),
-  );
-  getIt.registerLazySingleton<AladhanApiService>(
-    () => AladhanApiService(dio),
-  );
-  getIt.registerLazySingleton<PrayerTimesCacheService>(
-    () => PrayerTimesCacheService(),
-  );
-  getIt.registerLazySingleton<PrayerTimesRepository>(
-    () => PrayerTimesRepositoryImpl(
-      getIt<AladhanApiService>(),
-      getIt<PrayerTimesCacheService>(),
-    ),
-  );
+
   getIt.registerFactory<PrayerTimesCubit>(
-    () => PrayerTimesCubit(
-      getIt<PrayerTimesReminderService>(),
-      getIt<PrayerLocationService>(),
-      getIt<PrayerTimesRepository>(),
-    ),
+    () => PrayerTimesCubit(getIt<PrayerTimesReminderService>()),
   );
 
   getIt.registerFactory<QiblahCubit>(() => QiblahCubit());

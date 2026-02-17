@@ -28,6 +28,9 @@ class RamadanTasksLoaded extends RamadanTasksState {
   final String hijriDateString;
   final String gregorianDateString;
 
+  /// Total days in Ramadan (29 or 30) from Remote Config
+  final int totalDays;
+
   RamadanTasksLoaded({
     required this.allTasks,
     required this.filteredTasks,
@@ -46,6 +49,7 @@ class RamadanTasksLoaded extends RamadanTasksState {
     this.motivationalText,
     required this.hijriDateString,
     required this.gregorianDateString,
+    required this.totalDays,
   });
 
   bool get isReadOnly => viewMode == ViewMode.history;

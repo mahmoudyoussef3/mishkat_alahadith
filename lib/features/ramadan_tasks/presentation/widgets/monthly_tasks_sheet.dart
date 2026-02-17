@@ -100,10 +100,10 @@ class MonthlyTasksSheet extends StatelessWidget {
                     padding: EdgeInsetsDirectional.only(
                       start: 16.w,
                       end: 16.w,
-                      bottom: 32.h,
+                      bottom: 24.h,
                     ),
                     itemCount: 30,
-                    separatorBuilder: (_, __) => SizedBox(height: 12.h),
+                    separatorBuilder: (_, __) => SizedBox(height: 8.h),
                     itemBuilder: (_, index) {
                       final day = index + 1;
                       final tasks = _tasksForDay(day);
@@ -318,7 +318,7 @@ class _DayCard extends StatelessWidget {
           if (tasks.isEmpty)
             Padding(
               padding: EdgeInsetsDirectional.symmetric(
-                vertical: 20.h,
+                vertical: 12.h,
                 horizontal: 16.w,
               ),
               child: Row(
@@ -326,14 +326,15 @@ class _DayCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.inbox_rounded,
-                    size: 18.sp,
+                    size: 16.sp,
                     color: ColorsManager.mediumGray,
                   ),
-                  SizedBox(width: 8.w),
+                  SizedBox(width: 6.w),
                   Text(
                     'لا توجد مهام',
                     style: TextStyles.bodyMedium.copyWith(
                       color: ColorsManager.mediumGray,
+                      fontSize: 13.sp,
                     ),
                   ),
                 ],
@@ -344,7 +345,8 @@ class _DayCard extends StatelessWidget {
               padding: EdgeInsetsDirectional.only(
                 start: 12.w,
                 end: 12.w,
-                bottom: 12.h,
+                top: 4.h,
+                bottom: 8.h,
               ),
               child: Column(
                 children: [
@@ -400,8 +402,8 @@ class _DayHeaderBar extends StatelessWidget {
 
     return Container(
       padding: EdgeInsetsDirectional.symmetric(
-        horizontal: 16.w,
-        vertical: 12.h,
+        horizontal: 14.w,
+        vertical: 10.h,
       ),
       decoration: BoxDecoration(
         color: headerColor.withOpacity(isToday ? 0.12 : 0.06),
@@ -411,11 +413,11 @@ class _DayHeaderBar extends StatelessWidget {
         children: [
           // Day badge
           Container(
-            width: 36.w,
-            height: 36.w,
+            width: 32.w,
+            height: 32.w,
             decoration: BoxDecoration(
               color: headerColor.withOpacity(isToday ? 1.0 : 0.15),
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(9.r),
             ),
             alignment: Alignment.center,
             child: Text(
@@ -423,10 +425,11 @@ class _DayHeaderBar extends StatelessWidget {
               style: TextStyles.titleMedium.copyWith(
                 color: isToday ? ColorsManager.white : headerColor,
                 fontWeight: FontWeight.w700,
+                fontSize: 14.sp,
               ),
             ),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 10.w),
 
           // Day label
           Expanded(
@@ -446,21 +449,21 @@ class _DayHeaderBar extends StatelessWidget {
                       ),
                     ),
                     if (isToday) ...[
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 6.w),
                       Container(
                         padding: EdgeInsetsDirectional.symmetric(
-                          horizontal: 8.w,
+                          horizontal: 7.w,
                           vertical: 2.h,
                         ),
                         decoration: BoxDecoration(
                           color: ColorsManager.primaryPurple,
-                          borderRadius: BorderRadius.circular(6.r),
+                          borderRadius: BorderRadius.circular(5.r),
                         ),
                         child: Text(
                           'اليوم',
                           style: TextStyles.bodySmall.copyWith(
                             color: ColorsManager.white,
-                            fontSize: 10.sp,
+                            fontSize: 9.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -469,16 +472,16 @@ class _DayHeaderBar extends StatelessWidget {
                   ],
                 ),
                 if (totalCount > 0) ...[
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 3.h),
                   // Mini progress bar
                   Row(
                     children: [
                       Expanded(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(3.r),
+                          borderRadius: BorderRadius.circular(2.5.r),
                           child: LinearProgressIndicator(
                             value: ratio.clamp(0.0, 1.0),
-                            minHeight: 4.h,
+                            minHeight: 3.h,
                             color:
                                 isFullyCompleted
                                     ? ColorsManager.success
@@ -487,12 +490,12 @@ class _DayHeaderBar extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 6.w),
                       Text(
                         '$completedCount / $totalCount',
                         style: TextStyles.bodySmall.copyWith(
                           color: ColorsManager.secondaryText,
-                          fontSize: 11.sp,
+                          fontSize: 10.sp,
                         ),
                       ),
                     ],
@@ -534,20 +537,20 @@ class _TaskRow extends StatelessWidget {
     final isCompleted = task.completedDays.contains(relevantDay);
 
     return Padding(
-      padding: EdgeInsetsDirectional.symmetric(vertical: 10.h, horizontal: 4.w),
+      padding: EdgeInsetsDirectional.symmetric(vertical: 7.h, horizontal: 4.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Checkbox ──
           Padding(
-            padding: EdgeInsetsDirectional.only(top: 2.h),
+            padding: EdgeInsetsDirectional.only(top: 1.h),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 22.w,
-              height: 22.w,
+              width: 20.w,
+              height: 20.w,
               decoration: BoxDecoration(
                 color: isCompleted ? ColorsManager.success : Colors.transparent,
-                borderRadius: BorderRadius.circular(6.r),
+                borderRadius: BorderRadius.circular(5.r),
                 border: Border.all(
                   color:
                       isCompleted
@@ -560,13 +563,13 @@ class _TaskRow extends StatelessWidget {
                   isCompleted
                       ? Icon(
                         Icons.check_rounded,
-                        size: 14.sp,
+                        size: 13.sp,
                         color: ColorsManager.white,
                       )
                       : null,
             ),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 10.w),
 
           // ── Task content ──
           Expanded(
@@ -589,12 +592,13 @@ class _TaskRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (task.description.isNotEmpty) ...[
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 2.h),
                   Text(
                     task.description,
                     style: TextStyles.bodySmall.copyWith(
                       color: ColorsManager.secondaryText.withOpacity(0.8),
-                      height: 1.3,
+                      height: 1.2,
+                      fontSize: 12.sp,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -608,20 +612,20 @@ class _TaskRow extends StatelessWidget {
           // ── Type badge ──
           Container(
             padding: EdgeInsetsDirectional.symmetric(
-              horizontal: 6.w,
-              vertical: 3.h,
+              horizontal: 5.w,
+              vertical: 2.5.h,
             ),
             decoration: BoxDecoration(
               color:
                   isDaily
                       ? ColorsManager.primaryPurple.withOpacity(0.08)
                       : ColorsManager.primaryGold.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(5.r),
+              borderRadius: BorderRadius.circular(4.r),
             ),
             child: Text(
               isDaily ? 'يومية' : 'مخصصة',
               style: TextStyles.bodySmall.copyWith(
-                fontSize: 10.sp,
+                fontSize: 9.sp,
                 color:
                     isDaily
                         ? ColorsManager.primaryPurple

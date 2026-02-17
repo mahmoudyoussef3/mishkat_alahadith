@@ -90,10 +90,10 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Text('إضافة مهمة جديدة', style: TextStyles.headlineSmall),
-          SizedBox(height: 16.h),
-      
+          SizedBox(height: 12.h),
+
           // Title field
           TextField(
             controller: widget.titleController,
@@ -119,12 +119,12 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
               ),
               contentPadding: EdgeInsetsDirectional.symmetric(
                 horizontal: 16.w,
-                vertical: 14.h,
+                vertical: 12.h,
               ),
             ),
           ),
-          SizedBox(height: 12.h),
-      
+          SizedBox(height: 10.h),
+
           // Description field
           TextField(
             controller: widget.descriptionController,
@@ -152,15 +152,15 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
               ),
               contentPadding: EdgeInsetsDirectional.symmetric(
                 horizontal: 16.w,
-                vertical: 14.h,
+                vertical: 12.h,
               ),
             ),
           ),
-          SizedBox(height: 16.h),
-      
+          SizedBox(height: 10.h),
+
           // Type selector — pill buttons
           Text('نوع المهمة', style: TextStyles.titleMedium),
-          SizedBox(height: 10.h),
+          SizedBox(height: 8.h),
           Row(
             children: [
               Expanded(
@@ -179,13 +179,14 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
                   subtitle: 'لهذا اليوم فقط',
                   icon: Icons.today_rounded,
                   isSelected: _selectedType == TaskType.todayOnly,
-                  onTap: () => setState(() => _selectedType = TaskType.todayOnly),
+                  onTap:
+                      () => setState(() => _selectedType = TaskType.todayOnly),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 20.h),
-      
+          SizedBox(height: 16.h),
+
           // Add button
           SizedBox(
             width: double.infinity,
@@ -244,7 +245,7 @@ class _TypePill extends StatelessWidget {
         curve: Curves.easeOutCubic,
         padding: EdgeInsetsDirectional.symmetric(
           horizontal: 12.w,
-          vertical: 12.h,
+          vertical: 10.h,
         ),
         decoration: BoxDecoration(
           color:
@@ -268,9 +269,9 @@ class _TypePill extends StatelessWidget {
                   isSelected
                       ? ColorsManager.primaryPurple
                       : ColorsManager.secondaryText,
-              size: 24.sp,
+              size: 22.sp,
             ),
-            SizedBox(height: 6.h),
+            SizedBox(height: 5.h),
             Text(
               label,
               style: TextStyles.titleSmall.copyWith(
@@ -278,14 +279,17 @@ class _TypePill extends StatelessWidget {
                     isSelected
                         ? ColorsManager.primaryPurple
                         : ColorsManager.primaryText,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 2.h),
+            SizedBox(height: 3.h),
             Text(
               subtitle,
+              textAlign: TextAlign.center,
               style: TextStyles.bodySmall.copyWith(
                 color: ColorsManager.secondaryText,
-                fontSize: 11.sp,
+                fontSize: 10.sp,
+                height: 1.2,
               ),
             ),
           ],

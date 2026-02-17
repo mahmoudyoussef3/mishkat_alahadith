@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hijri/hijri_calendar.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
@@ -14,6 +13,7 @@ class RamadanProgress extends StatelessWidget {
   final int dailyCompleted;
   final int dailyTotal;
   final String? motivationalText;
+  final String hijriDateString;
 
   const RamadanProgress({
     super.key,
@@ -24,14 +24,10 @@ class RamadanProgress extends StatelessWidget {
     required this.dailyCompleted,
     required this.dailyTotal,
     this.motivationalText,
+    required this.hijriDateString,
   });
 
-    String _hijriDateString() {
-    final hijri = HijriCalendar.now();
-    HijriCalendar.setLocal('ar');
-    return '${_toArabicNumerals(hijri.hDay)} ${hijri.getLongMonthName()} ${_toArabicNumerals(hijri.hYear)} هـ';
-  }
-    String _toArabicNumerals(int number) {
+  String _toArabicNumerals(int number) {
     const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
     return number
         .toString()
@@ -113,9 +109,7 @@ class RamadanProgress extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'اليوم ${_hijriDateString()}'
-                      ,
-                     // 'اليوم ${_toArabicNumerals(todayDay)} من رمضان',
+                      'اليوم $hijriDateString',
                       style: TextStyles.titleLarge.copyWith(
                         color: ColorsManager.white,
                       ),

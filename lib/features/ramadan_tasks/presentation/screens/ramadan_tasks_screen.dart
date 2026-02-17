@@ -65,6 +65,7 @@ class _RamadanTasksScreenState extends State<RamadanTasksScreen> {
                           horizontal: 14.w,
                         ),
                         child: CalendarButton(
+                          hijriDateString: state.hijriDateString,
                           onTap:
                               () => RamadanCalendarSheet.show(
                                 context,

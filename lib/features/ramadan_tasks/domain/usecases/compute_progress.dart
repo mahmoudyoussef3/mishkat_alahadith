@@ -17,13 +17,13 @@ class ProgressResult {
   });
 }
 
-
 class ComputeProgress {
   ProgressResult call({
     required List<RamadanTaskEntity> tasks,
     required int day,
     required int weekStart,
     required int weekEnd,
+    required int totalDays,
   }) {
     final dailyTasks = tasks.where((t) => t.type == TaskType.daily).toList();
     final todayOnlyForDay =
@@ -43,7 +43,7 @@ class ComputeProgress {
     final completedForDay = dailyCompletedCount + todayOnlyCompletedCount;
     final dailyPercent = totalForDay == 0 ? 0.0 : completedForDay / totalForDay;
 
-    final daysSoFar = day.clamp(1, 30);
+    final daysSoFar = day.clamp(1, totalDays);
     final totalSlots = (daysSoFar * dailyTasks.length) + allTodayOnly.length;
     int completedSlots = 0;
     for (final t in dailyTasks) {
@@ -54,7 +54,7 @@ class ComputeProgress {
     }
     final overallPercent = totalSlots == 0 ? 0.0 : completedSlots / totalSlots;
 
-    final weekDays = (weekEnd - weekStart + 1).clamp(1, 30);
+    final weekDays = (weekEnd - weekStart + 1).clamp(1, totalDays);
     final totalWeeklySlots = dailyTasks.length * weekDays;
     int weeklyCompleted = 0;
     for (final t in dailyTasks) {
