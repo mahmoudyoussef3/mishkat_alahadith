@@ -43,38 +43,42 @@ class MishkatAlmasabih extends StatelessWidget {
     log("Start screen: $startScreen");
 
     return 
-       ScreenUtilInit(
-        designSize: const Size(375, 812),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (context, child) {
-          return MaterialApp(
-            navigatorObservers: [analytics],
-            navigatorKey: navigatorKey,
-            title: 'مشكاة الأحاديث',
-            theme: ThemeData(
-              fontFamily: 'Cairo',
-              useMaterial3: true, // إضافة Material 3
-            ),
-            debugShowCheckedModeBanner: false,
-            initialRoute: _getStartScreen(),
-            onGenerateRoute: appRouter.generateRoute,
-      
-            onUnknownRoute: (settings) {
-              log("Unknown route: ${settings.name}");
-              return MaterialPageRoute(
-                builder:
-                    (context) => Scaffold(
-                      appBar: AppBar(title: const Text('خطأ')),
-                      body: const Center(child: Text('الصفحة غير موجودة')),
-                    ),
-              );
-            },
-      
-            home: null, 
-          );
-        },
-      
-    );
+       DevicePreview(
+      enabled: kDebugMode,
+      builder: (context) => 
+        ScreenUtilInit(
+          designSize: const Size(375, 812),
+          minTextAdapt: true,
+          splitScreenMode: true,
+          builder: (context, child) {
+            return MaterialApp(
+              navigatorObservers: [analytics],
+              navigatorKey: navigatorKey,
+              title: 'مشكاة الأحاديث',
+              theme: ThemeData(
+                fontFamily: 'Cairo',
+                useMaterial3: true, // إضافة Material 3
+              ),
+              debugShowCheckedModeBanner: false,
+              initialRoute: _getStartScreen(),
+              onGenerateRoute: appRouter.generateRoute,
+               
+              onUnknownRoute: (settings) {
+                log("Unknown route: ${settings.name}");
+                return MaterialPageRoute(
+                  builder:
+                      (context) => Scaffold(
+                        appBar: AppBar(title: const Text('خطأ')),
+                        body: const Center(child: Text('الصفحة غير موجودة')),
+                      ),
+                );
+              },
+               
+              home: null, 
+            );
+          },
+               
+             ),
+       );
   }
 }
