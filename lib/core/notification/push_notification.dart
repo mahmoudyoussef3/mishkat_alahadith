@@ -80,6 +80,8 @@ class PushNotification {
 
     // الاشتراك في topics
     await messaging.subscribeToTopic('daily_hadith');
+        await messaging.subscribeToTopic('ramadan');
+
     await messaging.subscribeToTopic('update');
 
     log("📌 Subscribed to topics: daily_hadith, update");

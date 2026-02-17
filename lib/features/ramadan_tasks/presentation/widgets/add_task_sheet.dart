@@ -91,7 +91,7 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
             ),
           ),
           SizedBox(height: 12.h),
-          Text('إضافة مهمة جديدة', style: TextStyles.headlineSmall),
+          Text('إضافة عبادة', style: TextStyles.headlineSmall),
           SizedBox(height: 12.h),
 
           // Title field

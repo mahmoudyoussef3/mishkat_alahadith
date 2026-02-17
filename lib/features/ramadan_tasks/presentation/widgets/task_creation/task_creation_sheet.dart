@@ -41,19 +41,23 @@ class _TaskCreationSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive sizing based on screen width
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600;
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
-        initialChildSize: 0.88,
+        initialChildSize: isTablet ? 0.75 : 0.85,
         minChildSize: 0.5,
-        maxChildSize: 0.95,
+        maxChildSize: isTablet ? 0.85 : 0.92,
         snap: true,
-        snapSizes: const [0.5, 0.88, 0.95],
+        snapSizes: isTablet ? [0.5, 0.75, 0.85] : [0.5, 0.85, 0.92],
         builder:
             (context, scrollCtrl) => Container(
               decoration: BoxDecoration(
                 color: ColorsManager.primaryBackground,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
               ),
               child: Column(
                 children: [
@@ -84,8 +88,8 @@ class _SheetHeader extends StatelessWidget {
       padding: EdgeInsetsDirectional.only(
         start: 20.w,
         end: 20.w,
-        top: 10.h,
-        bottom: 4.h,
+        top: 6.h,
+        bottom: 2.h,
       ),
       child: Column(
         children: [
@@ -98,15 +102,15 @@ class _SheetHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
-          SizedBox(height: 14.h),
+          SizedBox(height: 10.h),
 
           // Title + close
           Row(
             children: [
               // Icon badge
               Container(
-                width: 40.w,
-                height: 40.w,
+                width: 36.w,
+                height: 36.w,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -116,15 +120,15 @@ class _SheetHeader extends StatelessWidget {
                     begin: AlignmentDirectional.topStart,
                     end: AlignmentDirectional.bottomEnd,
                   ),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(
                   Icons.add_task_rounded,
-                  size: 22.sp,
+                  size: 20.sp,
                   color: ColorsManager.primaryPurple,
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 10.w),
 
               // Titles
               Expanded(
@@ -135,15 +139,15 @@ class _SheetHeader extends StatelessWidget {
                       'إضافة عبادة',
                       style: TextStyles.headlineSmall.copyWith(
                         fontWeight: FontWeight.w700,
-                        fontSize: 18.sp,
+                        fontSize: 17.sp,
                       ),
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 1.h),
                     Text(
                       'اختر من العبادات أو أضف عبادة مخصصة',
                       style: TextStyles.bodySmall.copyWith(
                         color: ColorsManager.secondaryText,
-                        fontSize: 12.sp,
+                        fontSize: 11.sp,
                       ),
                     ),
                   ],
@@ -158,7 +162,7 @@ class _SheetHeader extends StatelessWidget {
                   customBorder: const CircleBorder(),
                   onTap: () => Navigator.pop(context),
                   child: Padding(
-                    padding: EdgeInsetsDirectional.all(8.w),
+                    padding: EdgeInsetsDirectional.all(6.w),
                     child: Icon(
                       Icons.close_rounded,
                       size: 20.sp,
@@ -169,7 +173,7 @@ class _SheetHeader extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 6.h),
 
           // Subtle divider
           Divider(
@@ -253,6 +257,10 @@ class _SheetBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive padding
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = screenWidth >= 600 ? 32.w : 20.w;
+    
     return BlocBuilder<RamadanTasksCubit, RamadanTasksState>(
       buildWhen: (prev, curr) {
         if (curr is! RamadanTasksLoaded || prev is! RamadanTasksLoaded) {
@@ -269,10 +277,10 @@ class _SheetBody extends StatelessWidget {
         return ListView(
           controller: scrollController,
           padding: EdgeInsetsDirectional.only(
-            start: 20.w,
-            end: 20.w,
-            top: 12.h,
-            bottom: 32.h,
+            start: horizontalPadding,
+            end: horizontalPadding,
+            top: 8.h,
+            bottom: 24.h,
           ),
           children: [
             // ── Worship sections ──
@@ -285,10 +293,10 @@ class _SheetBody extends StatelessWidget {
                   section: sections[i],
                   onItemTap: (t) => _addTemplateTask(context, t),
                 ),
-                if (i < sections.length - 1) SizedBox(height: 6.h),
+                if (i < sections.length - 1) SizedBox(height: 4.h),
               ],
 
-            SizedBox(height: 28.h),
+            SizedBox(height: 16.h),
 
             // ── Divider ──
             Row(
@@ -299,11 +307,12 @@ class _SheetBody extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w),
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w),
                   child: Text(
                     'أو',
                     style: TextStyles.bodySmall.copyWith(
                       color: ColorsManager.secondaryText,
+                      fontSize: 11.sp,
                     ),
                   ),
                 ),
@@ -315,12 +324,12 @@ class _SheetBody extends StatelessWidget {
               ],
             ),
 
-            SizedBox(height: 20.h),
+            SizedBox(height: 12.h),
 
             // ── Custom task button ──
             _CustomTaskButton(onTap: () => _openCustomDialog(context)),
 
-            SizedBox(height: 16.h),
+            SizedBox(height: 12.h),
           ],
         );
       },
@@ -391,7 +400,7 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
       child: FadeTransition(
         opacity: animation,
         child: Padding(
-          padding: EdgeInsetsDirectional.only(bottom: 6.h),
+          padding: EdgeInsetsDirectional.only(bottom: 4.h),
           child: WorshipTile(
             title: item.title,
             icon: item.icon,
@@ -407,36 +416,31 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section header
-        Padding(
-          padding: EdgeInsetsDirectional.only(
-            start: 4.w,
-            bottom: 10.h,
-            top: 4.h,
+      children: [6.h,
+            top: 2.h,
           ),
           child: Row(
             children: [
               Container(
-                width: 30.w,
-                height: 30.w,
+                width: 28.w,
+                height: 28.w,
                 decoration: BoxDecoration(
                   color: widget.section.accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(7.r),
                 ),
                 child: Icon(
                   widget.section.icon,
-                  size: 16.sp,
+                  size: 15.sp,
                   color: widget.section.accentColor,
                 ),
               ),
-              SizedBox(width: 10.w),
+              SizedBox(width: 8.w),
               Text(
                 widget.section.title,
                 style: TextStyles.headlineSmall.copyWith(
                   color: ColorsManager.primaryText,
                   fontWeight: FontWeight.w700,
-                  fontSize: 16.sp,
+                  fontSize: 15.sp,
                 ),
               ),
             ],
@@ -453,6 +457,11 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
             final item = _items[i];
             return SizeTransition(
               sizeFactor: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOut,
+              ),
+              child: Padding(
+                padding: EdgeInsetsDirectional.only(bottom: 4
                 parent: animation,
                 curve: Curves.easeOut,
               ),
@@ -478,32 +487,34 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
 // ══════════════════════════════════════════════════════════════
 
 class _AllAddedBanner extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsetsDirectional.symmetric(
-        horizontal: 20.w,
-        vertical: 28.h,
+  @override0.h,
       ),
       decoration: BoxDecoration(
         color: ColorsManager.success.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: Column(
         children: [
           Icon(
             Icons.check_circle_rounded,
-            size: 40.sp,
+            size: 36.sp,
             color: ColorsManager.success,
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
           Text(
             'ما شاء الله!',
             style: TextStyles.headlineSmall.copyWith(
               fontWeight: FontWeight.w700,
+              fontSize: 16.sp,
               color: ColorsManager.success,
             ),
           ),
+          SizedBox(height: 3.h),
+          Text(
+            'تمت إضافة جميع العبادات المقترحة',
+            style: TextStyles.bodyMedium.copyWith(
+              color: ColorsManager.secondaryText,
+              fontSize: 13.sp
           SizedBox(height: 4.h),
           Text(
             'تمت إضافة جميع العبادات المقترحة',
@@ -525,21 +536,14 @@ class _AllAddedBanner extends StatelessWidget {
 class _CustomTaskButton extends StatelessWidget {
   final VoidCallback onTap;
   const _CustomTaskButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
+4.r),
         child: Container(
           padding: EdgeInsetsDirectional.symmetric(
-            horizontal: 16.w,
-            vertical: 16.h,
+            horizontal: 14.w,
+            vertical: 12.h,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(14.r),
             border: Border.all(
               color: ColorsManager.primaryPurple.withValues(alpha: 0.25),
               width: 1.5,
@@ -549,19 +553,19 @@ class _CustomTaskButton extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 42.w,
-                height: 42.w,
+                width: 38.w,
+                height: 38.w,
                 decoration: BoxDecoration(
                   color: ColorsManager.primaryPurple.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.edit_note_rounded,
-                  size: 22.sp,
+                  size: 20.sp,
                   color: ColorsManager.primaryPurple,
                 ),
               ),
-              SizedBox(width: 14.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -570,16 +574,24 @@ class _CustomTaskButton extends StatelessWidget {
                       'إضافة عبادة مخصصة',
                       style: TextStyles.titleSmall.copyWith(
                         fontWeight: FontWeight.w700,
+                        fontSize: 14.sp,
                         color: ColorsManager.primaryPurple,
                       ),
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 1.h),
                     Text(
                       'أضف عبادتك الخاصة بعنوان ووصف',
                       style: TextStyles.bodySmall.copyWith(
                         color: ColorsManager.secondaryText,
                         fontSize: 11.sp,
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14
                     ),
                   ],
                 ),
