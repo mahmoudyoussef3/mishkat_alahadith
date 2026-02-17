@@ -57,12 +57,21 @@ import 'package:mishkat_almasabih/features/daily_zekr/data/repo/shared_prefs_per
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_reminder_service.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_location_service.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/services/aladhan_api_service.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_cache_service.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/repositories/prayer_times_repository.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/repositories/prayer_times_repository_impl.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_tasks_repository.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/data/datasources/ramadan_tasks_local_datasource.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/data/repositories/ramadan_tasks_repository_impl.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/cubit/ramadan_tasks_cubit.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/data/datasources/ramadan_config_remote_datasource.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/data/repositories/ramadan_config_repository_impl.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_config_repository.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 final getIt = GetIt.instance;
 final customGetIt = GetIt.instance;
@@ -210,20 +219,56 @@ Future<void> setUpGetIt() async {
   getIt.registerLazySingleton<PrayerTimesReminderService>(
     () => PrayerTimesReminderService(),
   );
+  getIt.registerLazySingleton<PrayerLocationService>(
+    () => PrayerLocationService(),
+  );
+  getIt.registerLazySingleton<AladhanApiService>(
+    () => AladhanApiService(dio),
+  );
+  getIt.registerLazySingleton<PrayerTimesCacheService>(
+    () => PrayerTimesCacheService(),
+  );
+  getIt.registerLazySingleton<PrayerTimesRepository>(
+    () => PrayerTimesRepositoryImpl(
+      getIt<AladhanApiService>(),
+      getIt<PrayerTimesCacheService>(),
+    ),
+  );
   getIt.registerFactory<PrayerTimesCubit>(
-    () => PrayerTimesCubit(getIt<PrayerTimesReminderService>()),
+    () => PrayerTimesCubit(
+      getIt<PrayerTimesReminderService>(),
+      getIt<PrayerLocationService>(),
+      getIt<PrayerTimesRepository>(),
+    ),
   );
 
   getIt.registerFactory<QiblahCubit>(() => QiblahCubit());
 
-  // Ramadan Tasks feature (Hive-based)
+  // Firebase Remote Config (shared instance)
+  getIt.registerLazySingleton<FirebaseRemoteConfig>(
+    () => FirebaseRemoteConfig.instance,
+  );
+
+  // Ramadan Tasks feature with Remote Config
   getIt.registerLazySingleton<RamadanTasksLocalDataSource>(
     () => RamadanTasksLocalDataSource(),
   );
   getIt.registerLazySingleton<RamadanTasksRepository>(
     () => RamadanTasksRepositoryImpl(getIt<RamadanTasksLocalDataSource>()),
   );
+
+  // Ramadan Configuration from Remote Config
+  getIt.registerLazySingleton<RamadanConfigRemoteDataSource>(
+    () => RamadanConfigRemoteDataSourceImpl(remoteConfig: getIt()),
+  );
+  getIt.registerLazySingleton<RamadanConfigRepository>(
+    () => RamadanConfigRepositoryImpl(remoteDataSource: getIt()),
+  );
+
   getIt.registerFactory<RamadanTasksCubit>(
-    () => RamadanTasksCubit(getIt<RamadanTasksRepository>()),
+    () => RamadanTasksCubit(
+      getIt<RamadanTasksRepository>(),
+      getIt<RamadanConfigRepository>(),
+    ),
   );
 }

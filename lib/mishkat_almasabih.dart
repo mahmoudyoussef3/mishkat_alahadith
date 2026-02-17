@@ -42,9 +42,7 @@ class MishkatAlmasabih extends StatelessWidget {
     final startScreen = _getStartScreen();
     log("Start screen: $startScreen");
 
-    return DevicePreview(
-      enabled: !kReleaseMode,
-       builder: (context)=>
+    return 
        ScreenUtilInit(
         designSize: const Size(375, 812),
         minTextAdapt: true,
@@ -76,7 +74,7 @@ class MishkatAlmasabih extends StatelessWidget {
             home: null, 
           );
         },
-      ),
+      
     );
   }
 }
