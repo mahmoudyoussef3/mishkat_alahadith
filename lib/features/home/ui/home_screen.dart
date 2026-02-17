@@ -108,15 +108,19 @@ class _HomeScreenState extends State<HomeScreen> {
       slivers: [
         const BuildHeaderAppBar(
           home: true,
-        
+
           bottomNav: true,
           title: 'مشكاة الأحاديث',
           description: 'نُحْيِي السُّنَّةَ... فَتُحْيِينَا',
         ),
         SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+   
         const HomeSearchBarSection(),
         SliverToBoxAdapter(child: const HadithOfTheDayCard()),
         const SectionDivider(),
+        // Ramadan Greeting Banner
+      
+        SliverToBoxAdapter(child: SizedBox(height: 8.h)),
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -152,80 +156,293 @@ class _HomeScreenState extends State<HomeScreen> {
   // Section widgets extracted into separate files for better structure and fewer rebuilds.
 }
 
+// ══════════════════════════════════════════════════════════════
+// Ramadan Greeting Banner - Welcoming message with Islamic decor
+// ══════════════════════════════════════════════════════════════
+
+class _RamadanGreetingBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF6B4FA3).withOpacity(0.1),
+            Color(0xFF2D9B9B).withOpacity(0.1),
+          ],
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+        ),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Color(0xFF6B4FA3).withOpacity(0.2), width: 1),
+      ),
+      child: Row(
+        children: [
+          // Decorative moon icon
+          Container(
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF6B4FA3), Color(0xFF2D9B9B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFF6B4FA3).withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.nightlight_round,
+              color: Colors.white,
+              size: 20.sp,
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'رمضان مبارك',
+                  style: TextStyles.titleMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF6B4FA3),
+                    fontSize: 15.sp,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  'بارك الله لك في الشهر الفضيل',
+                  style: TextStyles.bodySmall.copyWith(
+                    color: ColorsManager.secondaryText,
+                    fontSize: 11.sp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Small star decoration
+          Icon(
+            Icons.star,
+            color: Color(0xFFFFD700).withOpacity(0.7),
+            size: 16.sp,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Ramadan Tasks Card - Main entry with Ramadan theme
+// ══════════════════════════════════════════════════════════════
+
 class _RamadanTasksEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: InkWell(
         onTap: () => Navigator.pushNamed(context, Routes.ramadanTasksScreen),
+        borderRadius: BorderRadius.circular(16.r),
         child: Container(
-          padding: EdgeInsets.all(12.w),
+          padding: EdgeInsets.all(isTablet ? 18.w : 16.w),
           decoration: BoxDecoration(
-            color: ColorsManager.primaryGreen,
-            borderRadius: BorderRadius.circular(12.w),
-            gradient: const LinearGradient(
-              transform: GradientRotation(45 * 3.1415926535 / 180),
+            borderRadius: BorderRadius.circular(16.r),
+            gradient: LinearGradient(
               colors: [
-                ColorsManager.primaryGreen,
-                ColorsManager.primaryGreen,
+                Color(0xFF1A1A3E), // Deep night blue
+                Color(0xFF2D1B4E), // Deep purple
+                Color(0xFF1A3E3E), // Deep teal
               ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
             ),
             boxShadow: [
               BoxShadow(
-                color: ColorsManager.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+                color: Color(0xFF6B4FA3).withOpacity(0.25),
+                blurRadius: 12,
+                offset: Offset(0, 4),
               ),
             ],
           ),
-          child: Row(
+          child: Stack(
             children: [
-              Container(
-                width: 48.w,
-                height: 48.w,
-                decoration: BoxDecoration(
-                  color: ColorsManager.secondaryBackground,
-                  borderRadius: BorderRadius.circular(12.w),
-                ),
-                child: Icon(
-                  Icons.mosque_outlined,
-                  color: ColorsManager.primaryGreen,
-                  size: 28.sp,
-                ),
+              // Decorative background elements
+              Positioned(
+                top: -20,
+                right: -20,
+                child: _DecorativeMoon(size: 80),
               ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'مهام رمضان',
-                      style: TextStyles.titleLarge.copyWith(
-                        color: ColorsManager.secondaryBackground,
-                        fontWeight: FontWeight.bold,
+              Positioned(
+                bottom: -10,
+                left: 10,
+                child: _DecorativeStar(size: 24),
+              ),
+              Positioned(top: 20, left: 30, child: _DecorativeStar(size: 16)),
+              Positioned(
+                bottom: 30,
+                right: 60,
+                child: _DecorativeStar(size: 12),
+              ),
+
+              // Main content
+              Row(
+                children: [
+                  // Lantern icon with glow
+                  Container(
+                    width: isTablet ? 60.w : 52.w,
+                    height: isTablet ? 60.w : 52.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xFFFFD700).withOpacity(0.3),
+                          blurRadius: 12,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.mosque_outlined,
+                      color: Color(0xFFFFD700),
+                      size: isTablet ? 32.sp : 28.sp,
+                    ),
+                  ),
+                  SizedBox(width: 14.w),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'مهام رمضان',
+                              style: TextStyles.titleLarge.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: isTablet ? 20.sp : 18.sp,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    offset: Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 6.w),
+                            Icon(
+                              Icons.star,
+                              color: Color(0xFFFFD700),
+                              size: 14.sp,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 6.h),
+                        Text(
+                          'أضف مهامك وتابع تقدّمك اليومي والشهري',
+                          style: TextStyles.bodySmall.copyWith(
+                            color: Colors.white.withOpacity(0.85),
+                            fontSize: isTablet ? 13.sp : 12.sp,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(width: 8.w),
+
+                  // Arrow with glow
+                  Container(
+                    width: 32.w,
+                    height: 32.w,
+                    decoration: BoxDecoration(
+                      color: ColorsManager.secondaryBackground,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: ColorsManager.hadithWeak.withOpacity(0.3),
+                        width: 1,
                       ),
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      'أضف مهامك وتابع تقدّمك اليومي والشهري',
-                      style: TextStyles.bodySmall.copyWith(
-                        color: ColorsManager.secondaryBackground,
-                      ),
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color:  Color(0xFFFFD700),
+                      size: 20.sp,
                     ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: ColorsManager.secondaryBackground,
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Decorative Elements
+// ══════════════════════════════════════════════════════════════
+
+class _DecorativeMoon extends StatelessWidget {
+  final double size;
+  const _DecorativeMoon({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            Color(0xFFFFD700).withOpacity(0.15),
+            Color(0xFFFFD700).withOpacity(0.05),
+            Colors.transparent,
+          ],
+          stops: [0.0, 0.5, 1.0],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.nightlight_round,
+          color: Colors.white.withOpacity(0.2),
+          size: size * 0.5,
+        ),
+      ),
+    );
+  }
+}
+
+class _DecorativeStar extends StatelessWidget {
+  final double size;
+  const _DecorativeStar({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(
+      Icons.star,
+      color: Color(0xFFFFD700).withOpacity(0.4),
+      size: size,
     );
   }
 }

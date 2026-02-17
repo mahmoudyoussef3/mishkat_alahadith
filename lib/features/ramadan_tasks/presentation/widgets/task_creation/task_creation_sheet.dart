@@ -44,31 +44,34 @@ class _TaskCreationSheet extends StatelessWidget {
     // Responsive sizing based on screen width
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600;
-    
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: DraggableScrollableSheet(
-        initialChildSize: isTablet ? 0.75 : 0.85,
-        minChildSize: 0.5,
-        maxChildSize: isTablet ? 0.85 : 0.92,
-        snap: true,
-        snapSizes: isTablet ? [0.5, 0.75, 0.85] : [0.5, 0.85, 0.92],
-        builder:
-            (context, scrollCtrl) => Container(
-              decoration: BoxDecoration(
-                color: ColorsManager.primaryBackground,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-              ),
-              child: Column(
-                children: [
-                  // ── Handle + header (non-scrollable) ──
-                  _SheetHeader(scrollController: scrollCtrl),
 
-                  // ── Scrollable content ──
-                  Expanded(child: _SheetBody(scrollController: scrollCtrl)),
-                ],
+    return SafeArea(
+      top: false,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: DraggableScrollableSheet(
+          initialChildSize: isTablet ? 0.75 : 0.85,
+          minChildSize: 0.5,
+          maxChildSize: isTablet ? 0.85 : 0.92,
+          snap: true,
+          snapSizes: isTablet ? [0.5, 0.75, 0.85] : [0.5, 0.85, 0.92],
+          builder:
+              (context, scrollCtrl) => Container(
+                decoration: BoxDecoration(
+                  color: ColorsManager.primaryBackground,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+                ),
+                child: Column(
+                  children: [
+                    // ── Handle + header (non-scrollable) ──
+                    _SheetHeader(scrollController: scrollCtrl),
+      
+                    // ── Scrollable content ──
+                    Expanded(child: _SheetBody(scrollController: scrollCtrl)),
+                  ],
+                ),
               ),
-            ),
+        ),
       ),
     );
   }
@@ -260,7 +263,7 @@ class _SheetBody extends StatelessWidget {
     // Responsive padding
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth >= 600 ? 32.w : 20.w;
-    
+
     return BlocBuilder<RamadanTasksCubit, RamadanTasksState>(
       buildWhen: (prev, curr) {
         if (curr is! RamadanTasksLoaded || prev is! RamadanTasksLoaded) {
@@ -416,7 +419,12 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [6.h,
+      children: [
+        // Section header
+        Padding(
+          padding: EdgeInsetsDirectional.only(
+            start: 4.w,
+            bottom: 6.h,
             top: 2.h,
           ),
           child: Row(
@@ -461,12 +469,7 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
                 curve: Curves.easeOut,
               ),
               child: Padding(
-                padding: EdgeInsetsDirectional.only(bottom: 4
-                parent: animation,
-                curve: Curves.easeOut,
-              ),
-              child: Padding(
-                padding: EdgeInsetsDirectional.only(bottom: 6.h),
+                padding: EdgeInsetsDirectional.only(bottom: 4.h),
                 child: WorshipTile(
                   title: item.title,
                   icon: item.icon,
@@ -487,7 +490,12 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
 // ══════════════════════════════════════════════════════════════
 
 class _AllAddedBanner extends StatelessWidget {
-  @override0.h,
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsetsDirectional.symmetric(
+        horizontal: 20.w,
+        vertical: 20.h,
       ),
       decoration: BoxDecoration(
         color: ColorsManager.success.withValues(alpha: 0.08),
@@ -514,12 +522,7 @@ class _AllAddedBanner extends StatelessWidget {
             'تمت إضافة جميع العبادات المقترحة',
             style: TextStyles.bodyMedium.copyWith(
               color: ColorsManager.secondaryText,
-              fontSize: 13.sp
-          SizedBox(height: 4.h),
-          Text(
-            'تمت إضافة جميع العبادات المقترحة',
-            style: TextStyles.bodyMedium.copyWith(
-              color: ColorsManager.secondaryText,
+              fontSize: 13.sp,
             ),
             textAlign: TextAlign.center,
           ),
@@ -536,7 +539,14 @@ class _AllAddedBanner extends StatelessWidget {
 class _CustomTaskButton extends StatelessWidget {
   final VoidCallback onTap;
   const _CustomTaskButton({required this.onTap});
-4.r),
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14.r),
         child: Container(
           padding: EdgeInsetsDirectional.symmetric(
             horizontal: 14.w,
@@ -591,14 +601,7 @@ class _CustomTaskButton extends StatelessWidget {
               ),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                size: 14
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 16.sp,
+                size: 14.sp,
                 color: ColorsManager.primaryPurple.withValues(alpha: 0.5),
               ),
             ],
