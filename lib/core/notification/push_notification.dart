@@ -77,12 +77,16 @@ class PushNotification {
     // الحصول على الـ FCM Token
    // fcmToken = await messaging.getToken();
     //log('📱 FCM Token: ${fcmToken ?? "Failed to get FCM token"}');
-
-    // الاشتراك في topics
+try {
     await messaging.subscribeToTopic('daily_hadith');
         await messaging.subscribeToTopic('ramadan');
 
-    await messaging.subscribeToTopic('update');
+    await messaging.subscribeToTopic('update');} catch (e) {
+  log('Retry subscribe later: $e');
+}
+
+    // الاشتراك في topics
+
 
     log("📌 Subscribed to topics: daily_hadith, update");
 

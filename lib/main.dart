@@ -29,7 +29,6 @@ Future<void> main() async {
   final FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(
     analytics: analytics,
   );
-
   await LocalNotification.init();
 
   PushNotification.setupOnTapNotification();
