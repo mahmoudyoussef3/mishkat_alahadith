@@ -52,6 +52,7 @@ class RamadanConfigRepositoryImpl implements RamadanConfigRepository {
     // For production, use DateTime.now():
      final today = DateTime.now();
 
+
     final todayMidnight = DateTime(today.year, today.month, today.day);
 
     // Calculate difference in days
