@@ -12,6 +12,7 @@ import '../../domain/usecases/set_monthly_completed.dart';
 import '../../domain/usecases/ensure_daily_reset.dart';
 import '../../domain/usecases/compute_progress.dart';
 import '../../domain/worship_templates.dart';
+import 'dart:developer';
 
 part 'ramadan_tasks_state.dart';
 
@@ -52,8 +53,9 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
       final todayDay = _todayDayNumber();
       await _ensureDailyReset(todayDay);
       _allTasks = await _getTasks();
-      _selectedDay = todayDay;
-      _selectedWeek = _weekForDay(todayDay);
+      // If Ramadan hasn't started (day 0), default selected day to 1 for UI
+      _selectedDay = todayDay == 0 ? 1 : todayDay;
+      _selectedWeek = _weekForDay(_selectedDay);
       _emitLoaded();
     } catch (e) {
       emit(RamadanTasksError('حدث خطأ أثناء تحميل المهام'));
@@ -118,7 +120,9 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     _viewMode = mode;
 
     if (mode == ViewMode.history) {
-      _selectedDay = _todayDayNumber();
+      final todayDay = _todayDayNumber();
+      // If Ramadan hasn't started (day 0), default selected day to 1 for UI
+      _selectedDay = todayDay == 0 ? 1 : todayDay;
       _selectedWeek = _weekForDay(_selectedDay);
     }
     _emitLoaded();
@@ -139,15 +143,17 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     _emitLoaded();
   }
 
-  /// Gets the current Ramadan day number with Remote Config adjustments.
+  /// Gets the current Ramadan day number based on Gregorian date calculation.
   ///
-  /// Applies:
-  /// 1. Ramadan start offset (for Shaban moon sighting adjustments)
-  /// 2. Clamps to valid range based on Ramadan total days
+  /// Uses the Gregorian start date from Remote Config to calculate the current
+  /// Ramadan day, eliminating country-specific discrepancies from Hijri calculations.
+  ///
+  /// Returns:
+  /// - 0: If Ramadan hasn't started yet
+  /// - 1-30: Current day during Ramadan
+  /// - 1: Fallback if Remote Config is not configured
   int _todayDayNumber() {
-    final hijri = _getAdjustedHijriDate();
-    final totalDays = _configRepo.getRamadanTotalDays();
-    return hijri.hDay.clamp(1, totalDays);
+    return _configRepo.calculateCurrentRamadanDay();
   }
 
   /// Gets the total number of days in Ramadan from Remote Config.
@@ -156,15 +162,21 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     return _configRepo.getRamadanTotalDays();
   }
 
-  /// Gets the adjusted Hijri date with Remote Config offset applied.
+  /// Gets the adjusted Hijri date for display purposes only.
   ///
-  /// This handles the case where Shaban has 29 days instead of 30,
-  /// causing Ramadan to start earlier than calculated.
+  /// Note: This method is used ONLY for displaying the Hijri date string to users.
+  /// It does NOT affect Ramadan day calculations, which now use Gregorian dates.
+  ///
+  /// The adjustment compensates for Shaban length variations (29 vs 30 days)
+  /// to ensure the displayed Hijri date matches official announcements.
   HijriCalendar _getAdjustedHijriDate() {
     final hijri = HijriCalendar.now();
     final startOffset = _configRepo.getRamadanStartOffset();
 
     if (startOffset == 0) {
+      log(
+        'No Ramadan start offset. Using calculated Hijri date: ${hijri.toString()}',
+      );
       // No adjustment needed
       return hijri;
     }
@@ -179,10 +191,33 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
     return HijriCalendar.fromDate(adjustedGregorian);
   }
 
-  String _hijriDateString() {
+  String _hijriDateString(int todayDay) {
     final hijri = _getAdjustedHijriDate();
     HijriCalendar.setLocal('ar');
-    return '${_toArabicNumerals(hijri.hDay)} ${hijri.getLongMonthName()} ${_toArabicNumerals(hijri.hYear)} هـ';
+
+    // If Ramadan hasn't started yet according to Gregorian date
+    if (todayDay == 0) {
+      return 'قبل رمضان';
+    }
+
+    // During Ramadan, use the Gregorian-based day number
+    return '${_toArabicNumerals(todayDay)} رمضان ${_toArabicNumerals(hijri.hYear)} هـ';
+  }
+
+  /// Helper to parse Gregorian date from Remote Config
+  DateTime? _parseStartDate(String dateString) {
+    try {
+      final parts = dateString.split('-');
+      if (parts.length != 3) return null;
+
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final day = int.parse(parts[2]);
+
+      return DateTime(year, month, day);
+    } catch (e) {
+      return null;
+    }
   }
 
   String _gregorianDateString() {
@@ -276,7 +311,7 @@ class RamadanTasksCubit extends Cubit<RamadanTasksState> {
         dailyCompleted: progress.dailyCompleted,
         dailyTotal: progress.dailyTotal,
         motivationalText: motivation,
-        hijriDateString: _hijriDateString(),
+        hijriDateString: _hijriDateString(todayDay),
         gregorianDateString: _gregorianDateString(),
         totalDays: _getRamadanTotalDays(),
       ),

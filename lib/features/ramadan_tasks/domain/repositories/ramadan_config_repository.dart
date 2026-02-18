@@ -33,4 +33,27 @@ abstract class RamadanConfigRepository {
   ///
   /// Returns 30 if Remote Config is unavailable (safe default).
   int getRamadanTotalDays();
+
+  /// Gets the Gregorian start date of Ramadan.
+  ///
+  /// Format: 'yyyy-MM-dd' (e.g., '2026-03-19')
+  ///
+  /// This eliminates country-specific Hijri calculation discrepancies
+  /// by using a universal Gregorian reference date.
+  ///
+  /// Returns empty string if not configured.
+  String getRamadanStartGregorian();
+
+  /// Calculates the current Ramadan day number based on Gregorian dates.
+  ///
+  /// Algorithm:
+  /// 1. Get Gregorian start date from Remote Config
+  /// 2. Calculate days since start: diff = today.difference(startDate).inDays + 1
+  /// 3. Return 0 if Ramadan hasn't started yet (diff < 1)
+  /// 4. Otherwise clamp between 1 and total Ramadan days
+  ///
+  /// Fallback: If Gregorian start date is not configured or invalid, returns 1
+  ///
+  /// Returns: 0 if Ramadan hasn't started, 1-29 or 1-30 during Ramadan
+  int calculateCurrentRamadanDay();
 }

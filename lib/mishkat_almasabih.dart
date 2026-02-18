@@ -44,7 +44,7 @@ class MishkatAlmasabih extends StatelessWidget {
 
     return 
        DevicePreview(
-      enabled: kDebugMode,
+      enabled: !kDebugMode,
       builder: (context) => 
         ScreenUtilInit(
           designSize: const Size(375, 812),

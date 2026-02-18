@@ -38,6 +38,16 @@ abstract class RamadanConfigRemoteDataSource {
   ///
   /// Default: 30 days
   int getRamadanTotalDays();
+
+  /// Gets the Gregorian start date of Ramadan.
+  ///
+  /// Returns:
+  /// - A date string in 'yyyy-MM-dd' format (e.g., '2026-03-19')
+  /// - Empty string if not configured
+  ///
+  /// This is the primary method for determining Ramadan timing,
+  /// eliminating country-specific Hijri calculation discrepancies.
+  String getRamadanStartGregorian();
 }
 
 class RamadanConfigRemoteDataSourceImpl
@@ -50,9 +60,13 @@ class RamadanConfigRemoteDataSourceImpl
   /// Key for total days in Ramadan
   static const String _ramadanTotalDaysKey = 'ramadan_total_days';
 
+  /// Key for Gregorian start date of Ramadan
+  static const String _ramadanStartGregorianKey = 'ramadan_start_gregorian';
+
   /// Default values for safe fallback
   static const int _defaultStartOffset = 0;
   static const int _defaultTotalDays = 30;
+  static const String _defaultStartGregorian = '';
 
   RamadanConfigRemoteDataSourceImpl({
     required FirebaseRemoteConfig remoteConfig,
@@ -92,6 +106,19 @@ class RamadanConfigRemoteDataSourceImpl
       // ignore: avoid_print
       print('Failed to read ramadan_total_days: $e');
       return _defaultTotalDays;
+    }
+  }
+
+  @override
+  String getRamadanStartGregorian() {
+    try {
+      final startDate = _remoteConfig.getString(_ramadanStartGregorianKey);
+      // Return empty string if not configured
+      return startDate;
+    } catch (e) {
+      // ignore: avoid_print
+      print('Failed to read ramadan_start_gregorian: $e');
+      return _defaultStartGregorian;
     }
   }
 }

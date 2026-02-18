@@ -31,6 +31,14 @@ class CalendarButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            hijriDateString == 'قبل رمضان'
+                ? Text(
+              'اليوم المتمم لشهر شعبان',
+              style: TextStyles.titleLarge.copyWith(
+                color: ColorsManager.primaryGreen,
+              ),
+            )
+                :
             Text(
               'اليوم $hijriDateString',
               style: TextStyles.titleLarge.copyWith(
