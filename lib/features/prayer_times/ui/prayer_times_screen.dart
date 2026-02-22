@@ -6,6 +6,7 @@ import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.
 import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/ui/widgets/next_prayer_card.dart';
 import 'package:mishkat_almasabih/features/prayer_times/ui/widgets/prayer_times_grid.dart';
+import 'package:mishkat_almasabih/features/prayer_times/ui/widgets/asr_method_picker.dart';
 import 'package:mishkat_almasabih/core/theming/prayer_times_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/prayer_times_styles.dart';
 
@@ -70,6 +71,23 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   SliverToBoxAdapter(child: SizedBox(height: 16.h)),
                   SliverToBoxAdapter(child: _buildDivider()),
                   SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+
+                  // Asr method picker
+                  if (state is PrayerTimesLoaded)
+                    SliverToBoxAdapter(
+                      child: AsrMethodPicker(
+                        selected: state.asrMethod,
+                        onChanged: (method) {
+                          context.read<PrayerTimesCubit>().changeAsrMethod(
+                            method,
+                          );
+                        },
+                      ),
+                    ),
+                  SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+                  SliverToBoxAdapter(child: _buildDivider()),
+                  SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsetsDirectional.only(

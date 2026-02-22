@@ -8,6 +8,7 @@ import 'package:mishkat_almasabih/core/theming/daily_zekr_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/daily_zekr_styles.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/models/personal_task.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/data/models/zekr_item.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/services/asr_method_preference.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
 import 'package:mishkat_almasabih/features/daily_zekr/ui/widgets/zekr_card.dart';
@@ -17,12 +18,13 @@ class DailyZekrScreen extends StatelessWidget {
   const DailyZekrScreen({super.key});
 
   // Uses same default Cairo settings as PrayerTimesScreen.
+  // Reads cached Asr method preference (loaded at app startup).
   PrayerCalculator _buildPrayerCalculator() {
     return PrayerCalculator(
       latitude: 30.0444,
       longitude: 31.2357,
       timezone: 2.0,
-      asrMethod: AsrMethod.hanafi,
+      asrMethod: AsrMethodPreference.cached,
     );
   }
 

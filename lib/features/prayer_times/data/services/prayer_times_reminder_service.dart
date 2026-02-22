@@ -48,13 +48,18 @@ class PrayerTimesReminderService {
 
   /// Convenience method: calculate today + tomorrow prayer times and schedule
   /// all notifications in one call. Safe to call from [main] at app startup.
-  Future<void> scheduleFromNow() async {
+  ///
+  /// [asrMethod] — the juristic method the user has chosen; defaults to
+  /// [AsrMethod.standard] when not provided.
+  Future<void> scheduleFromNow({
+    AsrMethod asrMethod = AsrMethod.standard,
+  }) async {
     try {
       final calculator = PrayerCalculator(
         latitude: 30.0444,
         longitude: 31.2357,
         timezone: 2.0,
-        asrMethod: AsrMethod.hanafi,
+        asrMethod: asrMethod,
       );
 
       final now = DateTime.now();

@@ -140,7 +140,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   },
                 ),
                 */
-/*
+
                                       _buildDrawerItem(
                   context,
                   icon: Icons.access_time_rounded,
@@ -150,7 +150,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.prayerTimesScreen);
                   },
                 ),
-                */
+                
 
                    _buildDrawerItem(
                   context,
@@ -217,7 +217,6 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
     );
   }
 
-  // 🟣 Drawer item builder
   Widget _buildDrawerItem(
     BuildContext context, {
     required IconData icon,

@@ -5,6 +5,7 @@ import 'package:mishkat_almasabih/features/daily_zekr/data/models/zekr_item.dart
 import 'package:mishkat_almasabih/features/daily_zekr/data/repo/zekr_repository.dart';
 import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/services/asr_method_preference.dart';
 
 part 'daily_zekr_state.dart';
 
@@ -64,7 +65,7 @@ class DailyZekrCubit extends Cubit<DailyZekrState> {
 
     // Respect availability windows for morning/evening adhkar.
     final now = DateTime.now();
-    final isAvailable = _isAvailableNow(item.section, now);
+    final isAvailable = await _isAvailableNow(item.section, now);
 
     if (!isAvailable) {
       // Outside valid window: ensure no active periodic reminder.
@@ -99,17 +100,18 @@ class DailyZekrCubit extends Cubit<DailyZekrState> {
   }
 
   // Determines if a section is currently "available" based on prayer times.
-  bool _isAvailableNow(ZekrSection section, DateTime now) {
+  Future<bool> _isAvailableNow(ZekrSection section, DateTime now) async {
     if (section != ZekrSection.morningAdhkar &&
         section != ZekrSection.eveningAdhkar) {
       return true; // Always available for others
     }
 
+    final asrMethod = await AsrMethodPreference.load();
     final calc = PrayerCalculator(
       latitude: 30.0444,
       longitude: 31.2357,
       timezone: 2.0,
-      asrMethod: AsrMethod.hanafi,
+      asrMethod: asrMethod,
     );
     final dayStart = DateTime(now.year, now.month, now.day);
     final today = calc.calculate(dayStart);
