@@ -50,9 +50,9 @@ class PrayerTimesReminderService {
   /// all notifications in one call. Safe to call from [main] at app startup.
   ///
   /// [asrMethod] — the juristic method the user has chosen; defaults to
-  /// [AsrMethod.standard] when not provided.
+  /// [AsrMethod.shafi] when not provided.
   Future<void> scheduleFromNow({
-    AsrMethod asrMethod = AsrMethod.standard,
+    AsrMethod asrMethod = AsrMethod.shafi,
   }) async {
     try {
       final calculator = PrayerCalculator(

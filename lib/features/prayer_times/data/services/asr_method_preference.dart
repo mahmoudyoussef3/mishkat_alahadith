@@ -6,10 +6,10 @@ class AsrMethodPreference {
   static const _key = 'prayer_times_asr_method';
 
   /// Cached value after the first [load] or [save] call.
-  /// Falls back to [AsrMethod.standard] before any async call completes.
-  static AsrMethod _cached = AsrMethod.standard;
+  /// Falls back to [AsrMethod.shafi] before any async call completes.
+  static AsrMethod _cached = AsrMethod.shafi;
 
-  /// Returns the stored [AsrMethod], defaulting to [AsrMethod.standard].
+  /// Returns the stored [AsrMethod], defaulting to [AsrMethod.shafi].
   static Future<AsrMethod> load() async {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getString(_key);
@@ -34,21 +34,21 @@ class AsrMethodPreference {
         return AsrMethod.hanafi;
       case 'shafi':
         return AsrMethod.shafi;
-      case 'standard':
       default:
-        return AsrMethod.standard;
+        return AsrMethod.shafi;
     }
   }
 
   /// Arabic display label for each method.
   static String arabicLabel(AsrMethod method) {
     switch (method) {
-      case AsrMethod.standard:
-        return 'قياسي (Standard)';
+    
       case AsrMethod.shafi:
         return 'شافعي';
       case AsrMethod.hanafi:
         return 'حنفي';
+
+       
     }
   }
 
