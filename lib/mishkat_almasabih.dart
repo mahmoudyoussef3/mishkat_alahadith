@@ -51,8 +51,9 @@ class MishkatAlmasabih extends StatelessWidget {
              navigatorKey: navigatorKey,
              title: 'مشكاة الأحاديث',
              theme: ThemeData(
+              
                fontFamily: 'Cairo',
-               useMaterial3: true, // إضافة Material 3
+               useMaterial3: true,    
              ),
              debugShowCheckedModeBanner: false,
              initialRoute: _getStartScreen(),
