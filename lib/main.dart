@@ -6,6 +6,7 @@ import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/notification/local_notification.dart';
+import 'package:mishkat_almasabih/core/notification/notification_helper.dart';
 import 'package:mishkat_almasabih/core/notification/push_notification.dart';
 import 'package:mishkat_almasabih/core/routing/app_router.dart';
 import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
@@ -30,6 +31,7 @@ Future<void> main() async {
   final FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(
     analytics: analytics,
   );
+   await NotificationHelper.init();
   await LocalNotification.init();
 
   PushNotification.setupOnTapNotification();

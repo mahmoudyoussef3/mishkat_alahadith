@@ -69,11 +69,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                     const SliverToBoxAdapter(child: SizedBox.shrink()),
 
                   SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-                  SliverToBoxAdapter(child: _buildDivider()),
-                  SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+              //    SliverToBoxAdapter(child: _buildDivider()),
+               //   SliverToBoxAdapter(child: SizedBox(height: 8.h)),
 
                   // Asr method picker
-                  if (state is PrayerTimesLoaded)
+                /*  if (state is PrayerTimesLoaded)
                     SliverToBoxAdapter(
                       child: AsrMethodPicker(
                         selected: state.asrMethod,
@@ -84,6 +84,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                         },
                       ),
                     ),
+                    */
                   SliverToBoxAdapter(child: SizedBox(height: 12.h)),
                   SliverToBoxAdapter(child: _buildDivider()),
                   SliverToBoxAdapter(child: SizedBox(height: 8.h)),
