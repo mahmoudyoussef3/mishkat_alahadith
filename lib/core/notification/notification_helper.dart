@@ -7,7 +7,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 /// Default custom notification sound name (without extension).
-const String kDefaultSoundName = 'yaamsallyallaelnaby';
+//const String kDefaultSoundName = 'yaamsallyallaelnaby.mp3';
 
 /// Helper class for managing local notifications across platforms.
 class NotificationHelper {
@@ -33,7 +33,7 @@ class NotificationHelper {
     try {
       // Android initialization settings
       const androidSettings = AndroidInitializationSettings(
-        '@mipmap/ic_launcher',
+        '@mipmap/launcher_icon',
       );
 
       // iOS initialization settings
@@ -59,9 +59,18 @@ class NotificationHelper {
       );
 
       // Initialize timezone data
-      tz.initializeTimeZones();
+     // tz.initializeTimeZones();
 
-      _isInitialized = true;
+      //_isInitialized = true;
+
+
+
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
+
+  _isInitialized = true;
+  log('NotificationHelper initialized successfully');
+
       log('NotificationHelper initialized successfully');
     } catch (e) {
       log('Error initializing notifications: $e');
@@ -198,7 +207,7 @@ class NotificationHelper {
           importance: importance,
           priority: priority,
           silent: silent,
-          soundName: soundName ?? kDefaultSoundName,
+      //    soundName: soundName ?? kDefaultSoundName,
         ),
         payload: payload,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -234,6 +243,7 @@ class NotificationHelper {
     String? soundName,
   }) async {
     try {
+      log(  'Attempting to schedule notification at: $dateTime');
       final scheduledDate = tz.TZDateTime.from(dateTime, tz.local);
 
       if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
@@ -253,13 +263,15 @@ class NotificationHelper {
           importance: importance,
           priority: priority,
           silent: silent,
-          soundName: soundName ?? kDefaultSoundName,
+       //   soundName: soundName ?? kDefaultSoundName,
         ),
         payload: payload,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
+            log(  'Attempting to schedule notification at:ccccime');
+
       log('Scheduled notification at: $scheduledDate');
     } catch (e) {
       log('Error scheduling notification: $e');
@@ -335,7 +347,7 @@ class NotificationHelper {
         importance: Importance.max,
         priority: Priority.high,
         styleInformation: bigPictureStyle,
-        icon: '@mipmap/ic_launcher',
+        icon: '@mipmap/launcher_icon',
       );
 
       final iosDetails = DarwinNotificationDetails(
@@ -384,7 +396,7 @@ class NotificationHelper {
         priority: Priority.high,
         styleInformation: bigPictureStyle,
         largeIcon: DrawableResourceAndroidBitmap(drawableName),
-        icon: '@mipmap/ic_launcher',
+        icon: '@mipmap/launcher_icon',
       );
 
       final iosDetails = DarwinNotificationDetails(
@@ -429,7 +441,7 @@ class NotificationHelper {
         indeterminate: indeterminate,
         ongoing: progress < maxProgress,
         autoCancel: progress >= maxProgress,
-        icon: '@mipmap/ic_launcher',
+        icon: '@mipmap/launcher_icon',
       );
 
       final iosDetails = DarwinNotificationDetails(
@@ -506,7 +518,7 @@ class NotificationHelper {
         importance: Importance.max,
         priority: Priority.high,
         actions: actions,
-        icon: '@mipmap/ic_launcher',
+        icon: '@mipmap/launcher_icon',
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -569,7 +581,7 @@ class NotificationHelper {
         groupKey: groupKey,
         setAsGroupSummary: isSummary,
         styleInformation: styleInformation,
-        icon: '@mipmap/ic_launcher',
+        icon: '@mipmap/launcher_icon',
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -698,11 +710,11 @@ class NotificationHelper {
           htmlFormatContent: true,
           htmlFormatTitle: true,
         ),
-        icon: '@mipmap/ic_launcher',
+        icon: '@mipmap/launcher_icon',
         largeIcon:
             albumArt != null
                 ? FilePathAndroidBitmap(albumArt)
-                : const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+                : const DrawableResourceAndroidBitmap('@mipmap/launcher_icon'),
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -751,7 +763,7 @@ class NotificationHelper {
           htmlFormatContent: true,
           htmlFormatTitle: true,
         ),
-        icon: '@mipmap/ic_launcher',
+        icon: '@mipmap/launcher_icon',
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -798,7 +810,7 @@ class NotificationHelper {
               ? RawResourceAndroidNotificationSound(soundName)
               : null,
       enableVibration: !silent,
-      icon: '@mipmap/ic_launcher',
+      icon: '@mipmap/launcher_icon',
     );
 
     // iOS notification details

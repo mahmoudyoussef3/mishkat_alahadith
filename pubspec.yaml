@@ -98,6 +98,7 @@ flutter:
     - assets/images/moon-light-shine-through-window-into-islamic-mosque-interior.jpg
     - assets/images/book_covers/riyadiah40.jpeg
     - shorebird.yaml
+    - assets/audio/yaamsallyallaelnaby.mp3
 
   fonts:
   - family: Amiri

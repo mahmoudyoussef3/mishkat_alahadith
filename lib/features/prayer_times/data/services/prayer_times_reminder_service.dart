@@ -1,18 +1,16 @@
 import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
 import 'dart:developer';
-import 'package:mishkat_almasabih/core/notification/local_notification.dart';
+import 'package:mishkat_almasabih/core/notification/notification_helper.dart';
 
 /// Signature for the function that actually schedules a single notification.
-/// Defaults to [LocalNotification.scheduleOneTimeNotification] in production.
+/// Defaults to [NotificationHelper.scheduleNotificationAt] in production.
 /// Replaceable in tests to capture scheduled entries without hitting the OS.
 typedef ScheduleNotificationFn =
     Future<void> Function({
       required int id,
-      required String channelId,
-      required String channelName,
       required String title,
       required String body,
-      required DateTime scheduledDate,
+      required DateTime dateTime,
       String? payload,
     });
 
@@ -20,9 +18,6 @@ typedef ScheduleNotificationFn =
 typedef CancelNotificationsFn = Future<void> Function(Iterable<int> ids);
 
 class PrayerTimesReminderService {
-  static const channelId = 'prayer_times_reminders';
-  static const channelName = 'Prayer Times Reminders';
-
   // Stable notification IDs — exposed for testing.
   static const int fajrId = 9001;
   static const int dhuhrId = 9002;
@@ -36,24 +31,46 @@ class PrayerTimesReminderService {
   static const int maghribTomorrowId = maghribId + 100;
   static const int ishaTomorrowId = ishaId + 100;
 
-  /// Injectable scheduler — uses the real local-notification plugin by default.
+  /// Injectable scheduler — uses [NotificationHelper] by default.
   final ScheduleNotificationFn _schedule;
   final CancelNotificationsFn _cancel;
 
   PrayerTimesReminderService({
     ScheduleNotificationFn? scheduleFn,
     CancelNotificationsFn? cancelFn,
-  }) : _schedule = scheduleFn ?? LocalNotification.scheduleOneTimeNotification,
-       _cancel = cancelFn ?? LocalNotification.cancelReminders;
+  }) : _schedule = scheduleFn ?? _defaultSchedule,
+       _cancel = cancelFn ?? _defaultCancel;
+
+  /// Default scheduling implementation that delegates to [NotificationHelper].
+  static Future<void> _defaultSchedule({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime dateTime,
+    String? payload,
+  }) async {
+    await NotificationHelper.scheduleNotificationAt(
+      id: id,
+      title: title,
+      body: body,
+      dateTime: dateTime,
+      payload: payload,
+    );
+  }
+
+  /// Default cancel implementation that delegates to [NotificationHelper].
+  static Future<void> _defaultCancel(Iterable<int> ids) async {
+    for (final id in ids) {
+      await NotificationHelper.cancelNotification(id);
+    }
+  }
 
   /// Convenience method: calculate today + tomorrow prayer times and schedule
   /// all notifications in one call. Safe to call from [main] at app startup.
   ///
   /// [asrMethod] — the juristic method the user has chosen; defaults to
   /// [AsrMethod.shafi] when not provided.
-  Future<void> scheduleFromNow({
-    AsrMethod asrMethod = AsrMethod.shafi,
-  }) async {
+  Future<void> scheduleFromNow({AsrMethod asrMethod = AsrMethod.shafi}) async {
     try {
       final calculator = PrayerCalculator(
         latitude: 30.0444,
@@ -90,7 +107,9 @@ class PrayerTimesReminderService {
         todayId: fajrId,
         tomorrowId: fajrTomorrowId,
         prayerName: PrayerName.fajr,
-        todayPrayerTime: todayTimes.fajr,
+        //todayPrayerTime: todayTimes.fajr,
+                todayPrayerTime: DateTime.now().add(const Duration(minutes: 1)),
+
         tomorrowPrayerTime: tomorrowTimes.fajr,
         now: current,
       ),
@@ -98,7 +117,7 @@ class PrayerTimesReminderService {
         todayId: dhuhrId,
         tomorrowId: dhuhrTomorrowId,
         prayerName: PrayerName.dhuhr,
-        todayPrayerTime: todayTimes.dhuhr,
+        todayPrayerTime: DateTime.now().add(const Duration(minutes: 2)),
         tomorrowPrayerTime: tomorrowTimes.dhuhr,
         now: current,
       ),
@@ -106,7 +125,7 @@ class PrayerTimesReminderService {
         todayId: asrId,
         tomorrowId: asrTomorrowId,
         prayerName: PrayerName.asr,
-        todayPrayerTime: todayTimes.asr,
+        todayPrayerTime: DateTime.now().add(const Duration(minutes: 3)),
         tomorrowPrayerTime: tomorrowTimes.asr,
         now: current,
       ),
@@ -114,7 +133,7 @@ class PrayerTimesReminderService {
         todayId: maghribId,
         tomorrowId: maghribTomorrowId,
         prayerName: PrayerName.maghrib,
-        todayPrayerTime: todayTimes.maghrib,
+        todayPrayerTime: DateTime.now().add(const Duration(minutes: 4)),
         tomorrowPrayerTime: tomorrowTimes.maghrib,
         now: current,
       ),
@@ -122,7 +141,7 @@ class PrayerTimesReminderService {
         todayId: ishaId,
         tomorrowId: ishaTomorrowId,
         prayerName: PrayerName.isha,
-        todayPrayerTime: todayTimes.isha,
+        todayPrayerTime: DateTime.now().add(const Duration(minutes: 5)),
         tomorrowPrayerTime: tomorrowTimes.isha,
         now: current,
       ),
@@ -152,11 +171,12 @@ class PrayerTimesReminderService {
         );
         await _schedule(
           id: schedule.id,
-          channelId: channelId,
-          channelName: channelName,
           title: 'حان وقت الصلاة 🕌',
           body: 'حان الآن موعد صلاة ${schedule.arabicName}',
-          scheduledDate: schedule.reminderTime,
+        //  dateTime: schedule.reminderTime,
+        //This second line for testing to trigger immediately until we confirm scheduling works as expected. Will switch back to schedule.reminderTime after that.
+                  dateTime: schedule.reminderTime,
+
           payload: 'prayer_times:${schedule.prayerName.name}',
         );
       }
@@ -239,5 +259,6 @@ class PrayerSchedule {
     required this.reminderTime,
   });
 }
+
 //
 //test jira
