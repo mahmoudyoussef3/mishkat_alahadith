@@ -57,6 +57,12 @@
   <key>NSCalendarsUsageDescription</key>
   <string>We use your calendar for scheduling notifications</string>
 
+  <key>NSLocationWhenInUseUsageDescription</key>
+  <string>نحتاج إلى موقعك لحساب مواقيت الصلاة الدقيقة في منطقتك</string>
+
+  <key>NSLocationAlwaysUsageDescription</key>
+  <string>نحتاج إلى موقعك لحساب مواقيت الصلاة الدقيقة في منطقتك</string>
+
   <key>FirebaseAppDelegateProxyEnabled</key>
   <false/>
 

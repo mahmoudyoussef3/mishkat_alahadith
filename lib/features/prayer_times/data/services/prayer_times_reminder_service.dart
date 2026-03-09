@@ -1,10 +1,10 @@
-import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
 import 'dart:developer';
 import 'package:mishkat_almasabih/core/notification/notification_helper.dart';
 
 /// Signature for the function that actually schedules a single notification.
 /// Defaults to [NotificationHelper.scheduleNotificationAt] in production.
 /// Replaceable in tests to capture scheduled entries without hitting the OS.
+/*
 typedef ScheduleNotificationFn =
     Future<void> Function({
       required int id,
@@ -70,13 +70,12 @@ class PrayerTimesReminderService {
   ///
   /// [asrMethod] — the juristic method the user has chosen; defaults to
   /// [AsrMethod.shafi] when not provided.
-  Future<void> scheduleFromNow({AsrMethod asrMethod = AsrMethod.shafi}) async {
+  Future<void> scheduleFromNow() async {
     try {
       final calculator = PrayerCalculator(
         latitude: 30.0444,
         longitude: 31.2357,
         timezone: 2.0,
-        asrMethod: asrMethod,
       );
 
       final now = DateTime.now();
@@ -262,3 +261,4 @@ class PrayerSchedule {
 
 //
 //test jira
+*/

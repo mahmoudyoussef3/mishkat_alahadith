@@ -13,7 +13,12 @@ class WhoAreWe extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionTitle(title: "من نحن"),
+         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+ const SectionTitle(title: "من نحن"),
+ IconButton(onPressed: ()=> Navigator.pop(context), icon: Icon(Icons.arrow_forward))
+         ],),
           SizedBox(height: 12.h),
           BuildInfoSection(
             icon: Icons.info_outline,

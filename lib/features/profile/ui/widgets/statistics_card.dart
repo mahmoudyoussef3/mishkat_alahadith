@@ -6,6 +6,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/ui/widgets/stats_card.dart';
+import 'package:mishkat_almasabih/features/profile/ui/widgets/statistics_shimmer.dart';
 import 'last_activity_card.dart';
 
 class StatisticsSection extends StatelessWidget {
@@ -30,10 +31,7 @@ class StatisticsSection extends StatelessWidget {
   }
 
   Widget _buildLoading() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 40.h),
-      child: const Center(child: CircularProgressIndicator()),
-    );
+    return const StatisticsShimmer();
   }
 
   Widget _buildError(String message) {

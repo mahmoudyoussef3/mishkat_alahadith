@@ -133,7 +133,7 @@ class _ShareImageEditorBottomSheetState
           borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
         child: SafeArea(
-          top: false,
+          top: true,
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             child: Column(

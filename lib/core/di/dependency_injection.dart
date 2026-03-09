@@ -49,14 +49,7 @@ import '../../features/authentication/login/logic/cubit/login_cubit.dart';
 import '../networking/api_service.dart';
 import '../networking/dio_factory.dart';
 import '../../features/authentication/login/data/repo/login_repo.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/data/repo/zekr_repository.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/data/repo/shared_prefs_zekr_repository.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/data/repo/personal_tasks_repository.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/data/repo/shared_prefs_personal_tasks_repository.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
-import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_reminder_service.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_tasks_repository.dart';
@@ -195,28 +188,11 @@ Future<void> setUpGetIt() async {
     () => SearchHistoryCubit(getIt()),
   );
 
-  // Daily Zekr feature
-  getIt.registerLazySingleton<ZekrRepository>(
-    () => const SharedPrefsZekrRepository(),
-  );
-  getIt.registerFactory<DailyZekrCubit>(
-    () => DailyZekrCubit(getIt<ZekrRepository>()),
-  );
 
-  getIt.registerLazySingleton<PersonalTasksRepository>(
-    () => const SharedPrefsPersonalTasksRepository(),
-  );
-  getIt.registerFactory<PersonalTasksCubit>(
-    () => PersonalTasksCubit(getIt<PersonalTasksRepository>()),
-  );
 
-  // Prayer Times feature
-  getIt.registerLazySingleton<PrayerTimesReminderService>(
-    () => PrayerTimesReminderService(),
-  );
 
   getIt.registerFactory<PrayerTimesCubit>(
-    () => PrayerTimesCubit(getIt<PrayerTimesReminderService>()),
+    () => PrayerTimesCubit(),
   );
 
   getIt.registerFactory<QiblahCubit>(() => QiblahCubit());

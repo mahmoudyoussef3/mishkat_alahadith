@@ -27,7 +27,7 @@ class BuildHeaderAppBar extends StatelessWidget {
     return SliverAppBar(
       leading: const SizedBox.shrink(),
       automaticallyImplyLeading: false,
-      expandedHeight: 100.h,
+      expandedHeight: 110.h,
       floating: true,
       pinned: pinned,
       backgroundColor: ColorsManager.primaryPurple,
@@ -113,7 +113,7 @@ class BuildHeaderAppBar extends StatelessWidget {
                               style: TextStyles.displaySmall.copyWith(
                                 color: ColorsManager.white,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 24.sp,
+                                fontSize: 22.sp,
                                 letterSpacing: 0.5,
                               ),
                               textAlign: TextAlign.center,
@@ -121,7 +121,7 @@ class BuildHeaderAppBar extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SizedBox(height: 4.h),
+                          SizedBox(height: 2.h),
                           if (description != null &&
                               description!.isNotEmpty) ...[
                             //   SizedBox(height: 3.h),

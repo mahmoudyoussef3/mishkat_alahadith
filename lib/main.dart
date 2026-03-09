@@ -11,9 +11,6 @@ import 'package:mishkat_almasabih/core/notification/push_notification.dart';
 import 'package:mishkat_almasabih/core/routing/app_router.dart';
 import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
 import 'package:mishkat_almasabih/features/onboarding/sava_date_for_first_time.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
-import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_reminder_service.dart';
-import 'package:mishkat_almasabih/features/prayer_times/data/services/asr_method_preference.dart';
 import 'package:mishkat_almasabih/mishkat_almasabih.dart';
 import 'package:mishkat_almasabih/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -47,18 +44,9 @@ Future<void> main() async {
   // This allows controlling Ramadan start and duration without app updates
   await _initializeRamadanRemoteConfig();
 
-  try {
-    await DailyZekrCubit(getIt()).init();
-  } catch (_) {}
+  
 
-  // Schedule prayer-time notifications for today + tomorrow on every app launch.
-  // Load user's Asr method preference first so it's cached for sync access.
-  try {
-    final asrMethod = await AsrMethodPreference.load();
-    await getIt<PrayerTimesReminderService>().scheduleFromNow(
-      asrMethod: asrMethod,
-    );
-  } catch (_) {}
+
 
   await initializeDateFormatting('ar', null);
 

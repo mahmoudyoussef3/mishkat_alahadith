@@ -66,7 +66,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(
-          top: false,
+          top: true,
           bottom: true,
           child: Scaffold(
             backgroundColor: ColorsManager.secondaryBackground,

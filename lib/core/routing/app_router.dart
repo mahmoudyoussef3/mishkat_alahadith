@@ -48,9 +48,7 @@ import '../../features/authentication/login/logic/cubit/login_cubit.dart';
 import '../../features/authentication/login/ui/screens/login_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/splash/splash_screen.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/ui/screen/daily_zekr_screen.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
+
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/screens/ramadan_tasks_screen.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/cubit/ramadan_tasks_cubit.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/screens/ramadan_progress_screen.dart';
@@ -319,22 +317,6 @@ class AppRouter {
               ),
         );
 
-      case Routes.dailyZekrScreen:
-        _logScreenView('DailyZekrScreen');
-        return MaterialPageRoute(
-          builder:
-              (_) => MultiBlocProvider(
-                providers: [
-                  BlocProvider(
-                    create: (context) => getIt<DailyZekrCubit>()..init(),
-                  ),
-                  BlocProvider(
-                    create: (context) => getIt<PersonalTasksCubit>()..init(),
-                  ),
-                ],
-                child: const DailyZekrScreen(),
-              ),
-        );
       case Routes.prayerTimesScreen:
         _logScreenView('PrayerTimesScreen');
         return MaterialPageRoute(

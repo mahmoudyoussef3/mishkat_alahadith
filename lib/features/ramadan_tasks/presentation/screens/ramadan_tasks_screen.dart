@@ -25,7 +25,7 @@ class _RamadanTasksScreenState extends State<RamadanTasksScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-        top: false,
+          top: true,
         child: Scaffold(
           backgroundColor: ColorsManager.secondaryBackground,
           floatingActionButton: const _AddTaskFab(),

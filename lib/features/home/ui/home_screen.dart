@@ -2,19 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
-// import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/widgets/double_tap_to_exot.dart';
 import 'package:mishkat_almasabih/core/widgets/miskat_drawer.dart';
-// import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
-// import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
+
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 import 'package:mishkat_almasabih/features/home/logic/cubit/get_library_statistics_cubit.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/daily_hadith_card.dart';
-// import 'package:mishkat_almasabih/features/home/ui/widgets/search_bar_widget.dart';
 import 'package:mishkat_almasabih/features/library_books_screen.dart';
-// import 'package:mishkat_almasabih/features/library/ui/widgets/book_card.dart';
-// import 'package:mishkat_almasabih/features/library/ui/widgets/book_card_shimmer.dart';
+
 import 'package:mishkat_almasabih/features/random_ahadith/ui/widgets/random_ahadith_bloc_builder.dart';
 import 'package:mishkat_almasabih/features/search/search_screen/logic/cubit/search_history_cubit.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/section_divider.dart';
@@ -50,8 +46,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
-  // Moved search bar to its own widget; no longer need this key here.
-  // final GlobalKey _searchKey = GlobalKey();
+
 
   @override
   void dispose() {
@@ -67,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: RefreshIndicator(
           onRefresh: () => context.read<DailyHadithCubit>().load(),
           child: SafeArea(
-            top: false,
+            top: true,
             bottom: true,
             child: Scaffold(
               drawer: const MishkatDrawer(),
