@@ -17,7 +17,8 @@ class LocationSelectionDialog extends StatefulWidget {
   });
 
   @override
-  State<LocationSelectionDialog> createState() => _LocationSelectionDialogState();
+  State<LocationSelectionDialog> createState() =>
+      _LocationSelectionDialogState();
 }
 
 class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
@@ -27,7 +28,7 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
     setState(() {
       _isLoadingLocation = true;
     });
-    
+
     Navigator.pop(context);
     widget.onUseCurrentLocation();
   }
@@ -74,11 +75,11 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
 
               // Current Location Button
               _buildCurrentLocationButton(context),
-              
+
               SizedBox(height: 16.h),
-              
+
               Divider(color: ColorsManager.mediumGray),
-              
+
               SizedBox(height: 8.h),
 
               // City List Header
@@ -92,7 +93,7 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
                   ),
                 ),
               ),
-              
+
               SizedBox(height: 12.h),
 
               // Cities List
@@ -102,7 +103,8 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
                   itemCount: LocationModel.egyptianCities.length,
                   itemBuilder: (context, index) {
                     final city = LocationModel.egyptianCities[index];
-                    final isSelected = city.cityName == widget.currentLocation.cityName;
+                    final isSelected =
+                        city.cityName == widget.currentLocation.cityName;
                     return _buildCityTile(context, city, isSelected);
                   },
                 ),
@@ -121,7 +123,9 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         decoration: BoxDecoration(
-          color: ColorsManager.primaryGreen.withOpacity(_isLoadingLocation ? 0.05 : 0.1),
+          color: ColorsManager.primaryGreen.withOpacity(
+            _isLoadingLocation ? 0.05 : 0.1,
+          ),
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: ColorsManager.primaryGreen.withOpacity(0.3),
@@ -133,23 +137,28 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
             Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: ColorsManager.primaryGreen.withOpacity(_isLoadingLocation ? 0.5 : 1),
+                color: ColorsManager.primaryGreen.withOpacity(
+                  _isLoadingLocation ? 0.5 : 1,
+                ),
                 borderRadius: BorderRadius.circular(8.r),
               ),
-              child: _isLoadingLocation
-                  ? SizedBox(
-                      width: 20.sp,
-                      height: 20.sp,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              child:
+                  _isLoadingLocation
+                      ? SizedBox(
+                        width: 20.sp,
+                        height: 20.sp,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                      : Icon(
+                        Icons.my_location,
+                        color: Colors.white,
+                        size: 20.sp,
                       ),
-                    )
-                  : Icon(
-                      Icons.my_location,
-                      color: Colors.white,
-                      size: 20.sp,
-                    ),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -157,7 +166,9 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _isLoadingLocation ? 'جاري تحديد الموقع...' : 'استخدام الموقع الحالي',
+                    _isLoadingLocation
+                        ? 'جاري تحديد الموقع...'
+                        : 'استخدام الموقع الحالي',
                     style: TextStyles.bodyLarge.copyWith(
                       color: ColorsManager.primaryText,
                       fontWeight: FontWeight.bold,
@@ -184,7 +195,11 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
     );
   }
 
-  Widget _buildCityTile(BuildContext context, LocationModel city, bool isSelected) {
+  Widget _buildCityTile(
+    BuildContext context,
+    LocationModel city,
+    bool isSelected,
+  ) {
     return InkWell(
       onTap: () {
         Navigator.pop(context);
@@ -194,14 +209,16 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
         margin: EdgeInsets.only(bottom: 8.h),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: isSelected
-              ? ColorsManager.primaryPurple.withOpacity(0.1)
-              : Colors.transparent,
+          color:
+              isSelected
+                  ? ColorsManager.primaryPurple.withOpacity(0.1)
+                  : Colors.transparent,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isSelected
-                ? ColorsManager.primaryPurple
-                : ColorsManager.mediumGray,
+            color:
+                isSelected
+                    ? ColorsManager.primaryPurple
+                    : ColorsManager.mediumGray,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -209,9 +226,10 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
           children: [
             Icon(
               Icons.location_city,
-              color: isSelected
-                  ? ColorsManager.primaryPurple
-                  : ColorsManager.secondaryText,
+              color:
+                  isSelected
+                      ? ColorsManager.primaryPurple
+                      : ColorsManager.secondaryText,
               size: 20.sp,
             ),
             SizedBox(width: 12.w),
@@ -219,9 +237,10 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
               child: Text(
                 city.cityName,
                 style: TextStyles.bodyLarge.copyWith(
-                  color: isSelected
-                      ? ColorsManager.primaryPurple
-                      : ColorsManager.primaryText,
+                  color:
+                      isSelected
+                          ? ColorsManager.primaryPurple
+                          : ColorsManager.primaryText,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),

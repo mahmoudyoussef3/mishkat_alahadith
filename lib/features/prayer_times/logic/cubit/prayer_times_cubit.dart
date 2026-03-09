@@ -22,7 +22,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     try {
       // Load saved location or use default
       await _loadSavedLocation();
-      
+
       final times = _calculatePrayerTimes(_currentLocation);
       final date = DateTime.now();
       final loaded = _buildLoaded(date, times);
@@ -39,7 +39,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     final coordinates = Coordinates(location.latitude, location.longitude);
     final params = CalculationMethod.egyptian.getParameters();
     params.madhab = Madhab.shafi;
-    
+
     final prayerTimes = PrayerTimes.today(coordinates, params);
     _prayerTimes = prayerTimes;
     return prayerTimes;
@@ -90,7 +90,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
   Future<void> useCurrentLocation() async {
     try {
       debugPrint('🔍 Starting location request...');
-      
+
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -104,12 +104,12 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
       // Check permissions
       LocationPermission permission = await Geolocator.checkPermission();
       debugPrint('📍 Current permission: $permission');
-      
+
       if (permission == LocationPermission.denied) {
         debugPrint('🔐 Requesting permission...');
         permission = await Geolocator.requestPermission();
         debugPrint('📍 Permission after request: $permission');
-        
+
         if (permission == LocationPermission.denied) {
           debugPrint('❌ Permission denied');
           emit(PrayerTimesError('يجب السماح بالوصول إلى الموقع'));
@@ -119,20 +119,26 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
 
       if (permission == LocationPermission.deniedForever) {
         debugPrint('❌ Permission denied forever');
-        emit(PrayerTimesError('تم رفض الوصول إلى الموقع بشكل دائم. الرجاء تفعيله من الإعدادات'));
+        emit(
+          PrayerTimesError(
+            'تم رفض الوصول إلى الموقع بشكل دائم. الرجاء تفعيله من الإعدادات',
+          ),
+        );
         return;
       }
 
       debugPrint('✅ Permission granted, getting position...');
       emit(PrayerTimesLoading());
-      
+
       // Get position with timeout
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 10),
       );
 
-      debugPrint('✅ Position obtained: ${position.latitude}, ${position.longitude}');
+      debugPrint(
+        '✅ Position obtained: ${position.latitude}, ${position.longitude}',
+      );
 
       // Calculate timezone offset (simplified - using device timezone)
       final timezoneOffset = DateTime.now().timeZoneOffset.inHours;
@@ -141,7 +147,8 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
         latitude: position.latitude,
         longitude: position.longitude,
         cityName: 'موقعك الحالي',
-        timezone: timezoneOffset >= 0 ? '+$timezoneOffset.0' : '$timezoneOffset.0',
+        timezone:
+            timezoneOffset >= 0 ? '+$timezoneOffset.0' : '$timezoneOffset.0',
       );
 
       debugPrint('📍 Updating location to: ${location.cityName}');
@@ -212,13 +219,14 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
   PrayerTimesLoaded _buildLoaded(DateTime date, PrayerTimes times) {
     final now = DateTime.now();
     final nextPrayer = _getNextPrayer(now);
-    
+
     return PrayerTimesLoaded(
       date: DateTime(date.year, date.month, date.day),
       times: times,
       nextPrayerLabel: nextPrayer != null ? _arabicLabel(nextPrayer.$1) : null,
       nextPrayerTime: nextPrayer?.$2,
-      remaining: nextPrayer != null ? _calculateRemaining(nextPrayer, now) : null,
+      remaining:
+          nextPrayer != null ? _calculateRemaining(nextPrayer, now) : null,
     );
   }
 

@@ -32,15 +32,16 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     final cubit = context.read<PrayerTimesCubit>();
     showDialog(
       context: context,
-      builder: (context) => LocationSelectionDialog(
-        currentLocation: cubit.currentLocation,
-        onLocationSelected: (location) {
-          cubit.updateLocation(location);
-        },
-        onUseCurrentLocation: () {
-          cubit.useCurrentLocation();
-        },
-      ),
+      builder:
+          (context) => LocationSelectionDialog(
+            currentLocation: cubit.currentLocation,
+            onLocationSelected: (location) {
+              cubit.updateLocation(location);
+            },
+            onUseCurrentLocation: () {
+              cubit.useCurrentLocation();
+            },
+          ),
     );
   }
 
@@ -76,8 +77,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             child: BlocBuilder<PrayerTimesCubit, PrayerTimesState>(
               builder: (context, state) {
                 DateTime? currentDate;
-                String cityName = context.read<PrayerTimesCubit>().currentLocation.cityName;
-                
+                String cityName =
+                    context.read<PrayerTimesCubit>().currentLocation.cityName;
+
                 if (state is PrayerTimesLoaded) currentDate = state.date;
 
                 return CustomScrollView(
@@ -87,52 +89,49 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                       description:
                           'مواقيت اليوم في $cityName – ${_formatDate(currentDate ?? DateTime.now())}',
                       pinned: true,
-                      actions: [
-                        _buildLocationButton(),
-                      ],
+                      actions: [_buildLocationButton()],
                     ),
-                  SliverToBoxAdapter(child: SizedBox(height: 16.h)),
+                    SliverToBoxAdapter(child: SizedBox(height: 16.h)),
 
-                  if (state is PrayerTimesLoaded &&
-                      state.nextPrayerLabel != null &&
-                      state.nextPrayerTime != null &&
-                      state.remaining != null)
+                    if (state is PrayerTimesLoaded &&
+                        state.nextPrayerLabel != null &&
+                        state.nextPrayerTime != null &&
+                        state.remaining != null)
+                      SliverToBoxAdapter(
+                        child: NextPrayerCard(
+                          nextPrayerLabel: state.nextPrayerLabel!,
+                          nextPrayerTime: state.nextPrayerTime!,
+                          remaining: state.remaining!,
+                        ),
+                      )
+                    else
+                      const SliverToBoxAdapter(child: SizedBox.shrink()),
+
+                    SliverToBoxAdapter(child: SizedBox(height: 24.h)),
+                    SliverToBoxAdapter(child: _buildDivider()),
+                    SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+
                     SliverToBoxAdapter(
-                      child: NextPrayerCard(
-                        nextPrayerLabel: state.nextPrayerLabel!,
-                        nextPrayerTime: state.nextPrayerTime!,
-                        remaining: state.remaining!,
-                      ),
-                    )
-                  else
-                    const SliverToBoxAdapter(child: SizedBox.shrink()),
-
-       
-                  SliverToBoxAdapter(child: SizedBox(height: 24.h)),
-                  SliverToBoxAdapter(child: _buildDivider()),
-                  SliverToBoxAdapter(child: SizedBox(height: 8.h)),
-
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.only(
-                        start: 16.w,
-                        end: 16.w,
-                      ),
-                      child: Text(
-                        'مواقيت اليوم',
-                        style: PrayerTimesTextStyles.sectionHeaderLabel,
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.only(
+                          start: 16.w,
+                          end: 16.w,
+                        ),
+                        child: Text(
+                          'مواقيت اليوم',
+                          style: PrayerTimesTextStyles.sectionHeaderLabel,
+                        ),
                       ),
                     ),
-                  ),
-                  SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+                    SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
-                  if (state is PrayerTimesLoaded)
-                    SliverToBoxAdapter(
-                      child: PrayerTimesGrid(times: state.times),
-                    )
-                  else
-                    const SliverToBoxAdapter(child: SizedBox.shrink()),
-                ],
+                    if (state is PrayerTimesLoaded)
+                      SliverToBoxAdapter(
+                        child: PrayerTimesGrid(times: state.times),
+                      )
+                    else
+                      const SliverToBoxAdapter(child: SizedBox.shrink()),
+                  ],
                 );
               },
             ),
@@ -166,16 +165,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
           ),
-          child: Icon(
-            Icons.location_on,
-            color: Colors.white,
-            size: 20.sp,
-          ),
+          child: Icon(Icons.location_on, color: Colors.white, size: 20.sp),
         ),
       ),
     );
