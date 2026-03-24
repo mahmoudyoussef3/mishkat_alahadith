@@ -17,6 +17,7 @@ class Routes {
   static const String searchScreen = '/searchScreen';
   static const String libraryScreen = '/libraryScreen';
   static const String hadithDetail = '/hadith';
+  static const String deepLinkHadith = '/deepLinkHadith';
 
   static const String homeScreen = '/homeScreen';
   static const String usersSuggestions = '/usersSuggestions';

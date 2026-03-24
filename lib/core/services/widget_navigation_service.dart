@@ -9,8 +9,31 @@ class WidgetNavigationService {
 
   static void initialize() {
     platform.setMethodCallHandler((call) async {
-        await _navigateToHadithOfTheDay();
-    
+      switch (call.method) {
+        case 'openHadithOfTheDay':
+          await _navigateToHadithOfTheDay();
+          return;
+        case 'openHadithLink':
+          final link = call.arguments as String?;
+          if (link == null || link.trim().isEmpty) return;
+          try {
+            // Let the shared deep-link pipeline handle it.
+            // We only route; the OS-level deep link is handled by app_links.
+            final uri = Uri.parse(link);
+            navigatorKey.currentState?.pushNamed(
+              Routes.deepLinkHadith,
+              arguments:
+                  uri.pathSegments.isNotEmpty
+                      ? uri.pathSegments.last
+                      : (uri.queryParameters['id'] ?? ''),
+            );
+          } catch (_) {
+            // Ignore invalid URIs.
+          }
+          return;
+        default:
+          return;
+      }
     });
   }
 

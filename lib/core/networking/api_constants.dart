@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// API Constants for Mishkat Al-Masabih Islamic Library App
 /// Contains all endpoint URLs and configuration constants
 class ApiConstants {
@@ -13,7 +11,6 @@ class ApiConstants {
   // -----------------------------
   // Navigator Key
   // -----------------------------
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   // -----------------------------
   // Authentication

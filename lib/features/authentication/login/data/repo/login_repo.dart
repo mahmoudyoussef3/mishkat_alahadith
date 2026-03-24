@@ -34,7 +34,7 @@ class LoginRepo {
             "479373165372-d9vr3f1c1b2aodv4kjngi5ra1diug1v6.apps.googleusercontent.com",
       );
 
-      await googleSignIn.signOut();
+     // await googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         return Left(ErrorHandler.handle('UnKnown error happened.'));
@@ -52,6 +52,7 @@ class LoginRepo {
 
       return Right(response);
     } catch (error) {
+      print(error.toString());
       log(error.toString());
       return Left(ErrorHandler.handle(error));
     }

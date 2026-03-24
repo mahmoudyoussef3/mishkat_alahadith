@@ -52,6 +52,7 @@ import '../../features/splash/splash_screen.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/screens/ramadan_tasks_screen.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/cubit/ramadan_tasks_cubit.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/screens/ramadan_progress_screen.dart';
+import 'package:mishkat_almasabih/core/deep_links/ui/deep_link_hadith_screen.dart';
 
 class AppRouter {
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -240,6 +241,21 @@ class AppRouter {
                           ..fetchEnhancedSearchResults(query),
 
                 child: PublicSearchResult(searchQuery: query),
+              ),
+        );
+
+      case Routes.deepLinkHadith:
+        _logScreenView('DeepLinkHadith');
+
+        final hadithId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<EnhancedSearchCubit>()
+                          ..fetchEnhancedSearchResults(hadithId),
+                child: DeepLinkHadithScreen(hadithId: hadithId),
               ),
         );
 
