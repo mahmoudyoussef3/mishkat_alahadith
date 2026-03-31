@@ -101,6 +101,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   title: 'الرئيسية',
                   onTap: () => Navigator.pop(context),
                 ),
+                /*
                 _buildDrawerItem(
                   context,
                   icon: Icons.search_rounded,
@@ -110,6 +111,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.searchScreen);
                   },
                 ),
+                */
                 _buildDrawerItem(
                   context,
                   icon: Icons.bookmark_rounded,
@@ -139,7 +141,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.dailyZekrScreen);
                   },
                 ),
-                */
+              
 
                                       _buildDrawerItem(
                   context,
@@ -150,6 +152,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.prayerTimesScreen);
                   },
                 ),
+                */
                 
 
                    _buildDrawerItem(

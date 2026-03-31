@@ -190,11 +190,11 @@ Future<void> setUpGetIt() async {
 
 
 
-
+/*
   getIt.registerFactory<PrayerTimesCubit>(
     () => PrayerTimesCubit(),
   );
-
+*/
   getIt.registerFactory<QiblahCubit>(() => QiblahCubit());
 
   // Firebase Remote Config (shared instance)

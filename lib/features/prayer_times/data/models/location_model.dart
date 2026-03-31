@@ -1,4 +1,4 @@
-class LocationModel {
+/*class LocationModel {
   final double latitude;
   final double longitude;
   final String cityName;
@@ -92,3 +92,4 @@ class LocationModel {
   @override
   String toString() => cityName;
 }
+*/

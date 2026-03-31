@@ -333,7 +333,7 @@ class AppRouter {
               ),
         );
 
-      case Routes.prayerTimesScreen:
+   /*   case Routes.prayerTimesScreen:
         _logScreenView('PrayerTimesScreen');
         return MaterialPageRoute(
           builder:
@@ -342,6 +342,7 @@ class AppRouter {
                 child: const PrayerTimesScreen(),
               ),
         );
+        */
       case Routes.qiblahFinder:
         _logScreenView('QiblahFinderScreen');
         return MaterialPageRoute(
