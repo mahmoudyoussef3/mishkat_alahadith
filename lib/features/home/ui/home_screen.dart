@@ -112,16 +112,17 @@ class _HomeScreenState extends State<HomeScreen> {
    
         const HomeSearchBarSection(),
         SliverToBoxAdapter(child: const HadithOfTheDayCard()),
-        const SectionDivider(),
+      /*    const SectionDivider(),
         // Ramadan Greeting Banner
       
         SliverToBoxAdapter(child: SizedBox(height: 8.h)),
-        SliverToBoxAdapter(
+      SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: _RamadanTasksEntry(),
           ),
         ),
+        */
         const SectionDivider(),
         const TopBooksSection(),
         const SectionDivider(),
@@ -238,7 +239,7 @@ class _RamadanGreetingBanner extends StatelessWidget {
 // ══════════════════════════════════════════════════════════════
 // Ramadan Tasks Card - Main entry with Ramadan theme
 // ══════════════════════════════════════════════════════════════
-
+/*
 class _RamadanTasksEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -392,6 +393,7 @@ class _RamadanTasksEntry extends StatelessWidget {
     );
   }
 }
+*/
 
 // ══════════════════════════════════════════════════════════════
 // Decorative Elements

@@ -352,7 +352,7 @@ class AppRouter {
               ),
         );
 
-      case Routes.ramadanTasksScreen:
+    /*  case Routes.ramadanTasksScreen:
         _logScreenView('RamadanTasksScreen');
         return MaterialPageRoute(
           builder:
@@ -371,6 +371,7 @@ class AppRouter {
                 child: const RamadanProgressScreen(),
               ),
         );
+        */
 
       default:
         return null;
