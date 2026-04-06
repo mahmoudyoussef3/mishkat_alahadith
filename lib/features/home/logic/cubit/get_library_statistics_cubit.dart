@@ -14,15 +14,53 @@ class GetLibraryStatisticsCubit extends Cubit<GetLibraryStatisticsState> {
     : super(GetLibraryStatisticsInitial());
 
   Future<void> emitGetStatisticsCubit() async {
-    emit(GetLivraryStatisticsLoading());
-    final response = await _getLibraryStatisticsRepo.getLibraryStatistics();
+    // Try cache first
+    final cached = await _getLibraryStatisticsRepo.getCachedStatistics();
 
+    if (cached != null) {
+      // Emit cached data immediately
+      emit(
+        GetLivraryStatisticsSuccess(
+          statisticsResponse: cached,
+          isFromCache: true,
+          isRefreshing: true,
+        ),
+      );
+
+      // Background refresh
+      _backgroundRefresh(cached);
+    } else {
+      // No cache, fetch from API
+      emit(GetLivraryStatisticsLoading());
+      final response = await _getLibraryStatisticsRepo.getLibraryStatistics();
+      response.fold(
+        (error) => emit(GetLivraryStatisticsError(error.getAllErrorMessages())),
+        (data) => emit(GetLivraryStatisticsSuccess(statisticsResponse: data)),
+      );
+    }
+  }
+
+  Future<void> _backgroundRefresh(StatisticsResponse cached) async {
+    final response = await _getLibraryStatisticsRepo.getLibraryStatistics();
     response.fold(
-      (error) =>
-          emit(GetLivraryStatisticsError(error.getAllErrorMessages())),
+      (error) {
+        // Background refresh failed, keep cached data
+        if (state is GetLivraryStatisticsSuccess) {
+          emit(
+            (state as GetLivraryStatisticsSuccess).copyWith(
+              isRefreshing: false,
+            ),
+          );
+        }
+      },
       (data) {
-        log(data.toString());
-        emit(GetLivraryStatisticsSuccess(statisticsResponse: data));
+        emit(
+          GetLivraryStatisticsSuccess(
+            statisticsResponse: data,
+            isFromCache: false,
+            isRefreshing: false,
+          ),
+        );
       },
     );
   }

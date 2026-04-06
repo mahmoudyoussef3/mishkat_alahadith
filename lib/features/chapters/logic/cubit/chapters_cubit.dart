@@ -10,20 +10,69 @@ class ChaptersCubit extends Cubit<ChaptersState> {
   final BookChaptersRepo _bookChaptersRepo;
   ChaptersCubit(this._bookChaptersRepo) : super(ChaptersInitial());
 
-  Future<void> emitGetBookChapters({
-    required String bookSlug,
+  Future<void> emitGetBookChapters({required String bookSlug}) async {
+    // Try cache first
+    final cached = await _bookChaptersRepo.getCachedChapters(bookSlug);
 
-  }) async {
-    emit(ChaptersLoading());
+    if (cached != null && (cached.chapters?.isNotEmpty ?? false)) {
+      // Emit cached data immediately
+      emit(
+        ChaptersSuccess(
+          allChapters: cached.chapters!,
+          filteredChapters: cached.chapters!,
+          isFromCache: true,
+          isRefreshing: true,
+        ),
+      );
+
+      // Background refresh
+      _backgroundRefresh(bookSlug, cached.chapters!);
+    } else {
+      // No cache, fetch from API
+      emit(ChaptersLoading());
+      final result = await _bookChaptersRepo.getBookChapters(bookSlug);
+      result.fold(
+        (l) => emit(ChaptersFailure(l.getAllErrorMessages())),
+        (r) => emit(
+          ChaptersSuccess(
+            allChapters: r.chapters ?? [],
+            filteredChapters: r.chapters ?? [],
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _backgroundRefresh(
+    String bookSlug,
+    List<Chapter> cachedChapters,
+  ) async {
     final result = await _bookChaptersRepo.getBookChapters(bookSlug);
     result.fold(
-      (l) => emit(ChaptersFailure(l.getAllErrorMessages())),
-      (r) => emit(
-        ChaptersSuccess(
-          allChapters: r.chapters ?? [],
-          filteredChapters: r.chapters ?? [],
-        ),
-      ),
+      (error) {
+        // Background refresh failed, keep cached data
+        if (state is ChaptersSuccess) {
+          emit((state as ChaptersSuccess).copyWith(isRefreshing: false));
+        }
+      },
+      (response) {
+        final newChapters = response.chapters ?? [];
+        if (newChapters.isEmpty) {
+          if (state is ChaptersSuccess) {
+            emit((state as ChaptersSuccess).copyWith(isRefreshing: false));
+          }
+          return;
+        }
+
+        emit(
+          ChaptersSuccess(
+            allChapters: newChapters,
+            filteredChapters: newChapters,
+            isFromCache: false,
+            isRefreshing: false,
+          ),
+        );
+      },
     );
   }
 
@@ -49,19 +98,11 @@ class ChaptersCubit extends Cubit<ChaptersState> {
   }
 
   String normalizeArabic(String text) {
-    // 1. شيل التشكيل (كل الحركات + التنوين + السكون + الشدة)
     final diacritics = RegExp(r'[\u0617-\u061A\u064B-\u0652]');
     String result = text.replaceAll(diacritics, '');
-
-    // 2. توحيد الهمزات: أ إ آ -> ا
     result = result.replaceAll(RegExp('[إأآ]'), 'ا');
-
-    // 3. شيل المدّة "ـ"
     result = result.replaceAll('ـ', '');
-
-    // 4. lowercase (لو فيه انجليزي)
     result = result.toLowerCase();
-
     return result;
   }
 }

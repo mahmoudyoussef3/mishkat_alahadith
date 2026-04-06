@@ -12,13 +12,48 @@ class ProfileCubit extends Cubit<ProfileState> {
   ProfileCubit(this.userResponseRepo) : super(ProfileInitial());
 
   Future<void> getUserProfile() async {
-    emit(ProfileLoading());
+    // Try cache first
+    final cached = await userResponseRepo.getCachedProfile();
+
+    if (cached != null) {
+      // Emit cached data immediately
+      emit(ProfileLoaded(cached, isFromCache: true, isRefreshing: true));
+
+      // Background refresh
+      _backgroundRefresh(cached);
+    } else {
+      // No cache, fetch from API
+      emit(ProfileLoading());
+      final result = await userResponseRepo.getUserProfile();
+      result.fold(
+        (error) => emit(ProfileError(error.getAllErrorMessages())),
+        (user) => emit(ProfileLoaded(user)),
+      );
+    }
+  }
+
+  Future<void> _backgroundRefresh(UserResponseModel cached) async {
     final result = await userResponseRepo.getUserProfile();
     result.fold(
-      (error) => emit(ProfileError(error.getAllErrorMessages() )),
-      (user) => emit(ProfileLoaded(user)),
+      (error) {
+        // Background refresh failed, keep cached data
+        if (state is ProfileLoaded) {
+          emit((state as ProfileLoaded).copyWith(isRefreshing: false));
+        }
+      },
+      (user) {
+        emit(ProfileLoaded(user, isFromCache: false, isRefreshing: false));
+      },
     );
   }
 
-
+  /// Force refresh profile (clears cache)
+  Future<void> refreshProfile() async {
+    emit(ProfileLoading());
+    final result = await userResponseRepo.getUserProfile();
+    result.fold(
+      (error) => emit(ProfileError(error.getAllErrorMessages())),
+      (user) => emit(ProfileLoaded(user)),
+    );
+  }
 }

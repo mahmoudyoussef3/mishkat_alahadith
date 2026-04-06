@@ -11,20 +11,55 @@ class GetBookmarksCubit extends Cubit<GetBookmarksState> {
   GetBookmarksCubit(this._bookMarkRepo) : super(GetBookmarksInitial());
 
   Future<void> getUserBookmarks() async {
-    emit(GetBookmarksLoading());
-    final result = await _bookMarkRepo.getUserBookMarks();
+    // Try cache first
+    final cached = await _bookMarkRepo.getCachedBookmarks();
 
+    if (cached != null && cached.bookmarks != null) {
+      // Emit cached data immediately
+      emit(
+        UserBookmarksSuccess(
+          cached.bookmarks!,
+          isFromCache: true,
+          isRefreshing: true,
+        ),
+      );
+
+      // Background refresh
+      _backgroundRefresh(cached.bookmarks!);
+    } else {
+      // No cache, fetch from API
+      emit(GetBookmarksLoading());
+      final result = await _bookMarkRepo.getUserBookMarks();
+      result.fold(
+        (l) => emit(GetBookmarksFailure(l.getAllErrorMessages())),
+        (r) => emit(UserBookmarksSuccess(r.bookmarks ?? [])),
+      );
+    }
+  }
+
+  Future<void> _backgroundRefresh(List<Bookmark> cached) async {
+    final result = await _bookMarkRepo.getUserBookMarks();
     result.fold(
-      (l) => emit(GetBookmarksFailure(l.getAllErrorMessages())),
-      (r) => emit(UserBookmarksSuccess(r.bookmarks!)),
+      (error) {
+        // Background refresh failed, keep cached data
+        if (state is UserBookmarksSuccess) {
+          emit((state as UserBookmarksSuccess).copyWith(isRefreshing: false));
+        }
+      },
+      (response) {
+        emit(
+          UserBookmarksSuccess(
+            response.bookmarks ?? [],
+            isFromCache: false,
+            isRefreshing: false,
+          ),
+        );
+      },
     );
   }
 
-
-
   Future<void> deleteBookmark(int hadithId) async {
     final result = await _bookMarkRepo.deleteBookMark(hadithId);
-
     result.fold(
       (l) => emit(GetBookmarksFailure(l.getAllErrorMessages())),
       (r) => getUserBookmarks(),

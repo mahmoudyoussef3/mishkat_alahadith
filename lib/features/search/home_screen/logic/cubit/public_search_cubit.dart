@@ -11,12 +11,44 @@ class PublicSearchCubit extends Cubit<PublicSearchState> {
   PublicSearchCubit(this._publicSearchRepo) : super(PublicSearchInitial());
 
   Future<void> emitPublicSearch(String query) async {
-    emit(PublicSearchLoading());
+    // Try cache first
+    final cached = await _publicSearchRepo.getCachedSearch(query);
+
+    if (cached != null) {
+      // Emit cached data immediately
+      emit(PublicSearchSuccess(cached, isFromCache: true, isRefreshing: true));
+
+      // Background refresh
+      _backgroundRefresh(query, cached);
+    } else {
+      // No cache, fetch from API
+      emit(PublicSearchLoading());
+      final result = await _publicSearchRepo.getPublicSearchRepo(query);
+      result.fold(
+        (error) => emit(PublicSearchFailure(error.getAllErrorMessages())),
+        (searchResult) => emit(PublicSearchSuccess(searchResult)),
+      );
+    }
+  }
+
+  Future<void> _backgroundRefresh(String query, SearchResponse cached) async {
     final result = await _publicSearchRepo.getPublicSearchRepo(query);
     result.fold(
-      (error) =>
-          emit(PublicSearchFailure(error.getAllErrorMessages() )),
-      (searchResult) => emit(PublicSearchSuccess(searchResult)),
+      (error) {
+        // Background refresh failed, keep cached data
+        if (state is PublicSearchSuccess) {
+          emit((state as PublicSearchSuccess).copyWith(isRefreshing: false));
+        }
+      },
+      (searchResult) {
+        emit(
+          PublicSearchSuccess(
+            searchResult,
+            isFromCache: false,
+            isRefreshing: false,
+          ),
+        );
+      },
     );
   }
 }

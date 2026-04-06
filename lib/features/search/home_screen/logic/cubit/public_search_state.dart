@@ -9,7 +9,26 @@ final class PublicSearchLoading extends PublicSearchState {}
 
 final class PublicSearchSuccess extends PublicSearchState {
   final SearchResponse searchResponse;
-  PublicSearchSuccess(this.searchResponse);
+  final bool isRefreshing;
+  final bool isFromCache;
+
+  PublicSearchSuccess(
+    this.searchResponse, {
+    this.isRefreshing = false,
+    this.isFromCache = false,
+  });
+
+  PublicSearchSuccess copyWith({
+    SearchResponse? searchResponse,
+    bool? isRefreshing,
+    bool? isFromCache,
+  }) {
+    return PublicSearchSuccess(
+      searchResponse ?? this.searchResponse,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
+      isFromCache: isFromCache ?? this.isFromCache,
+    );
+  }
 }
 
 final class PublicSearchFailure extends PublicSearchState {
