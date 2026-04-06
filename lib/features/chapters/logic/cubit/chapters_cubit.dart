@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
@@ -11,10 +12,13 @@ class ChaptersCubit extends Cubit<ChaptersState> {
   ChaptersCubit(this._bookChaptersRepo) : super(ChaptersInitial());
 
   Future<void> emitGetBookChapters({required String bookSlug}) async {
+    log('📚 [ChaptersCubit] Fetching chapters for: $bookSlug');
+    
     // Try cache first
     final cached = await _bookChaptersRepo.getCachedChapters(bookSlug);
 
     if (cached != null && (cached.chapters?.isNotEmpty ?? false)) {
+      log('✅ [ChaptersCubit] CACHE HIT - ${cached.chapters!.length} chapters');
       // Emit cached data immediately
       emit(
         ChaptersSuccess(
@@ -28,17 +32,24 @@ class ChaptersCubit extends Cubit<ChaptersState> {
       // Background refresh
       _backgroundRefresh(bookSlug, cached.chapters!);
     } else {
+      log('❌ [ChaptersCubit] CACHE MISS - Fetching from API');
       // No cache, fetch from API
       emit(ChaptersLoading());
       final result = await _bookChaptersRepo.getBookChapters(bookSlug);
       result.fold(
-        (l) => emit(ChaptersFailure(l.getAllErrorMessages())),
-        (r) => emit(
-          ChaptersSuccess(
-            allChapters: r.chapters ?? [],
-            filteredChapters: r.chapters ?? [],
-          ),
-        ),
+        (l) {
+          log('🔴 [ChaptersCubit] API ERROR: ${l.getAllErrorMessages()}');
+          emit(ChaptersFailure(l.getAllErrorMessages()));
+        },
+        (r) {
+          log('🟢 [ChaptersCubit] API SUCCESS - ${r.chapters?.length ?? 0} chapters');
+          emit(
+            ChaptersSuccess(
+              allChapters: r.chapters ?? [],
+              filteredChapters: r.chapters ?? [],
+            ),
+          );
+        },
       );
     }
   }
@@ -47,9 +58,11 @@ class ChaptersCubit extends Cubit<ChaptersState> {
     String bookSlug,
     List<Chapter> cachedChapters,
   ) async {
+    log('🔄 [ChaptersCubit] Background refresh started for: $bookSlug');
     final result = await _bookChaptersRepo.getBookChapters(bookSlug);
     result.fold(
       (error) {
+        log('⚠️ [ChaptersCubit] Background refresh FAILED: ${error.getAllErrorMessages()}');
         // Background refresh failed, keep cached data
         if (state is ChaptersSuccess) {
           emit((state as ChaptersSuccess).copyWith(isRefreshing: false));
@@ -57,6 +70,7 @@ class ChaptersCubit extends Cubit<ChaptersState> {
       },
       (response) {
         final newChapters = response.chapters ?? [];
+        log('🟢 [ChaptersCubit] Background refresh SUCCESS - ${newChapters.length} chapters');
         if (newChapters.isEmpty) {
           if (state is ChaptersSuccess) {
             emit((state as ChaptersSuccess).copyWith(isRefreshing: false));

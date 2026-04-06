@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
@@ -66,8 +67,11 @@ class AhadithsCubit extends Cubit<AhadithsState> {
     required bool isArbainBooks,
     required int paginate,
   }) async {
+    log('📖 [AhadithsCubit] Loading first page - book: $bookSlug, chapter: $chapterId');
+    
     // Local books don't use cache/pagination
     if (isArbainBooks || hadithLocal) {
+      log('📚 [AhadithsCubit] Local/Arbain book - skipping cache');
       emit(AhadithsLoading());
       await _loadLocalBooks(
         bookSlug: bookSlug,
@@ -84,6 +88,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
     );
 
     if (cached != null && cached.ahadith.isNotEmpty) {
+      log('✅ [AhadithsCubit] CACHE HIT - ${cached.ahadith.length} ahadith, page ${cached.lastPage}');
       // Emit cached data immediately
       _currentPage = cached.lastPage;
       _hasMore = cached.ahadith.length < cached.totalCount;
@@ -106,6 +111,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
         cachedAhadith: cached.ahadith,
       );
     } else {
+      log('❌ [AhadithsCubit] CACHE MISS - Fetching from API');
       // No cache, fetch from API
       emit(AhadithsLoading());
       await _fetchFromApi(
@@ -124,6 +130,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
     required int paginate,
     required List<Hadith> cachedAhadith,
   }) async {
+    log('🔄 [AhadithsCubit] Background refresh started - book: $bookSlug, chapter: $chapterId');
     final result = await _chapterAhadithsRepo.getAhadith(
       bookSlug: bookSlug,
       chapterId: chapterId,
@@ -133,6 +140,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
 
     result.fold(
       (error) {
+        log('⚠️ [AhadithsCubit] Background refresh FAILED: ${error.getAllErrorMessages()}');
         // Background refresh failed, keep cached data
         if (state is AhadithsSuccess) {
           emit((state as AhadithsSuccess).copyWith(isRefreshing: false));
@@ -142,6 +150,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
         final newAhadith = response.hadiths?.data ?? [];
         final totalPages = response.hadiths?.last_page ?? 1;
         final total = response.hadiths?.total ?? 0;
+        log('🟢 [AhadithsCubit] Background refresh SUCCESS - ${newAhadith.length} ahadith, total: $total');
 
         if (newAhadith.isEmpty) {
           if (state is AhadithsSuccess) {
@@ -152,6 +161,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
 
         // Merge with cache (new data takes precedence by checking IDs)
         final merged = _mergeWithPriority(newAhadith, cachedAhadith);
+        log('📊 [AhadithsCubit] Merged: ${merged.length} ahadith (new: ${newAhadith.length}, cached: ${cachedAhadith.length})');
         _hasMore = 1 < totalPages;
         _currentPage = 1;
 
@@ -192,9 +202,13 @@ class AhadithsCubit extends Cubit<AhadithsState> {
     required int page,
     required int paginate,
   }) async {
-    if (_isLoadingMore || !_hasMore) return;
+    if (_isLoadingMore || !_hasMore) {
+      log('⏸️ [AhadithsCubit] Load more skipped - loading: $_isLoadingMore, hasMore: $_hasMore');
+      return;
+    }
     if (hadithLocal || isArbainBooks) return; // No pagination for local books
 
+    log('📖 [AhadithsCubit] Loading more - page $page');
     _isLoadingMore = true;
 
     // Emit loading more state
@@ -223,6 +237,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
     required int paginate,
     required List<Hadith> existingAhadith,
   }) async {
+    log('🌐 [AhadithsCubit] API fetch - page: $page, book: $bookSlug, chapter: $chapterId');
     final result = await _chapterAhadithsRepo.getAhadith(
       bookSlug: bookSlug,
       chapterId: chapterId,
@@ -232,6 +247,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
 
     result.fold(
       (error) {
+        log('🔴 [AhadithsCubit] API ERROR: ${error.getAllErrorMessages()}');
         _isLoadingMore = false;
         if (existingAhadith.isEmpty) {
           emit(AhadithsFailure(error.getAllErrorMessages()));
@@ -251,6 +267,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
         final newAhadith = response.hadiths?.data ?? [];
         final totalPages = response.hadiths?.last_page ?? 1;
         final total = response.hadiths?.total ?? 0;
+        log('🟢 [AhadithsCubit] API SUCCESS - page $page/$totalPages, got ${newAhadith.length} ahadith');
 
         if (newAhadith.isEmpty) {
           _hasMore = false;
@@ -262,6 +279,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
           existingAhadith,
           newAhadith,
         );
+        log('📊 [AhadithsCubit] Merged: ${merged.length} total (existing: ${existingAhadith.length}, new: ${newAhadith.length})');
         _currentPage = page;
         _isLoadingMore = false;
 
