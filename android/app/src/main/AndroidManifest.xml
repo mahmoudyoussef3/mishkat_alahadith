@@ -78,15 +78,17 @@
             </intent-filter>
 
             <!-- HTTPS App Link (requires domain verification via assetlinks.json) -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="api.hadith-shareef.com"
-                    android:pathPrefix="/hadith" />
-            </intent-filter>
+           <intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+
+    <data
+        android:scheme="https"
+        android:host="api.hadith-shareef.com"
+        android:pathPrefix="/api/hadith" />
+</intent-filter>
 
         </activity>
     </application>
