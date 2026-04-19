@@ -28,8 +28,5 @@ class HadithResponseEntity {
   final List<HadithEntity> data;
   final MetaEntity meta;
 
-  HadithResponseEntity({
-    required this.data,
-    required this.meta,
-  });
+  HadithResponseEntity({required this.data, required this.meta});
 }
