@@ -121,6 +121,14 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.bookmarkScreen);
                   },
                 ),
+                   _buildDrawerItem(
+                  context,
+                  icon: Icons.bookmark_rounded,
+                  title: 'تصنيفات الأحاديث',
+                  onTap: () {
+                    context.pushNamed(Routes.categoriesScreen);
+                  },
+                ),
                 _buildDrawerItem(
                   context,
                   icon: Icons.menu_book_rounded,

@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mishkat_almasabih/core/networking/categories_api_service.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_ahadith_by_category_usecase.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
 
 import 'package:mishkat_almasabih/features/authentication/signup/data/repo/signup_repo.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
@@ -60,6 +63,11 @@ import 'package:mishkat_almasabih/features/ramadan_tasks/data/datasources/ramada
 import 'package:mishkat_almasabih/features/ramadan_tasks/data/repositories/ramadan_config_repository_impl.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_config_repository.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/data/datasources/categories_datasource.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/data/repositories/categories_repository_impl.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/repositories/categories_repository.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_categories_usecase.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/categories_cubit/categories_cubit.dart';
 
 final getIt = GetIt.instance;
 final customGetIt = GetIt.instance;
@@ -68,6 +76,9 @@ Future<void> setUpGetIt() async {
   final Dio dio = DioFactory.getDio();
 
   getIt.registerLazySingleton<ApiService>(() => ApiService(dio));
+  getIt.registerLazySingleton<CategoryApiService>(
+    () => CategoryApiService(dio),
+  );
 
   getIt.registerLazySingleton<LoginRepo>(() => LoginRepo(getIt()));
   getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt()));
@@ -188,9 +199,7 @@ Future<void> setUpGetIt() async {
     () => SearchHistoryCubit(getIt()),
   );
 
-
-
-/*
+  /*
   getIt.registerFactory<PrayerTimesCubit>(
     () => PrayerTimesCubit(),
   );
@@ -223,5 +232,25 @@ Future<void> setUpGetIt() async {
       getIt<RamadanTasksRepository>(),
       getIt<RamadanConfigRepository>(),
     ),
+  );
+
+  // Categories feature
+  getIt.registerLazySingleton<CategoriesDatasource>(
+    () => CategoriesDatasourceImpl(getIt<CategoryApiService>()),
+  );
+  getIt.registerLazySingleton<CategoriesRepository>(
+    () => CategoriesRepositoryImpl(getIt<CategoriesDatasource>()),
+  );
+  getIt.registerLazySingleton<GetCategoriesUseCase>(
+    () => GetCategoriesUseCase(getIt<CategoriesRepository>()),
+  );
+  getIt.registerLazySingleton<GetAhadithByCategoryUseCase>(
+    () => GetAhadithByCategoryUseCase(getIt<CategoriesRepository>()),
+  );
+  getIt.registerFactory<CategoriesCubit>(
+    () => CategoriesCubit(getIt<GetCategoriesUseCase>()),
+  );
+  getIt.registerFactory<HadithByCategoryCubit>(
+    () => HadithByCategoryCubit(getIt<GetAhadithByCategoryUseCase>()),
   );
 }

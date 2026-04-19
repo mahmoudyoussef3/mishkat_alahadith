@@ -27,6 +27,8 @@ class Routes {
   static const String dailyZekrScreen = '/dailyZekr';
   static const String prayerTimesScreen = '/prayerTimes';
   static const String qiblahFinder = '/qiblahFinder';
+  static const String categoriesScreen = '/categoriesScreen';
+  static const String ahadithListScreen = '/ahadithListScreen';
   //static const String ramadanTasksScreen = '/ramadanTasks';
   //static const String ramadanProgressScreen = '/ramadanProgress';
 }

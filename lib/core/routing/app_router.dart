@@ -3,6 +3,10 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/features/about_us/ui/screens/about_us_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/categories_cubit/categories_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/screens/ahadith_categories_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/screens/categories_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/ui/screens/signup_screen.dart';
 import 'package:mishkat_almasabih/features/book_data/logic/cubit/book_data_cubit.dart';
@@ -333,7 +337,7 @@ class AppRouter {
               ),
         );
 
-   /*   case Routes.prayerTimesScreen:
+      /*   case Routes.prayerTimesScreen:
         _logScreenView('PrayerTimesScreen');
         return MaterialPageRoute(
           builder:
@@ -352,8 +356,34 @@ class AppRouter {
                 child: const QiblahFinderScreen(),
               ),
         );
-
-    /*  case Routes.ramadanTasksScreen:
+      case Routes.categoriesScreen:
+        _logScreenView('CategoriesScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<CategoriesCubit>()..getCategories(),
+                child: const CategoriesScreen(),
+              ),
+        );
+      case Routes.ahadithListScreen:
+        _logScreenView('AhadithListScreen');
+        final args = settings.arguments as Map<String, dynamic>;
+        final categoryId = args['categoryId'] as String;
+        final categoryTitle = args['categoryTitle'] as String?;
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<HadithByCategoryCubit>()
+                          ..getAhadithByCategory(categoryId),
+                child: AhadithListScreen(
+                  categoryId: categoryId,
+                  categoryTitle: categoryTitle,
+                ),
+              ),
+        );
+      /*  case Routes.ramadanTasksScreen:
         _logScreenView('RamadanTasksScreen');
         return MaterialPageRoute(
           builder:

@@ -7,7 +7,8 @@ class ApiConstants {
   static const String apiBaseUrl = "https://api.hadith-shareef.com/api/";
   static const String customBaseUrl = "https://api.hadith-shareef.com/api/";
   static const String randomAhadith = "hadith/random";
-
+  static const String hadithCategoriesBaseApi =
+      "https://hadeethenc.com/api/v1/";
   // -----------------------------
   // Navigator Key
   // -----------------------------
@@ -81,6 +82,13 @@ class ApiConstants {
   static const String getSearchHistory = "/search-history/user";
   static const String deleteSearch = "/search-history"; // /:id
   static const String deleteAllSearch = "/search-history/user";
+
+  // -----------------------------
+  // Ahadith Categories
+  // -----------------------------
+  static const String getCategories = "categories/roots/";
+
+  static const String getAhadithByCategory = "hadeeths/list/";
 }
 
 const Map<String, String> bookWriters = {

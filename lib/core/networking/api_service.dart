@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/data/models/category_model.dart';
 import 'package:mishkat_almasabih/features/authentication/login/data/models/login_response_body.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/models/sign_up_request_body.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/models/sign_up_response_body.dart';
@@ -54,10 +55,7 @@ abstract class ApiService {
   Future<CategoryResponse> getBookData(@Path("categoryId") String categoryId);
 
   @GET(ApiConstants.getBookChapters)
-  Future<ChaptersModel> getBookChapters(
-    @Path("bookSlug") String bookSlug,
-
-  );
+  Future<ChaptersModel> getBookChapters(@Path("bookSlug") String bookSlug);
 
   @GET(ApiConstants.getChapterAhadiths)
   Future<HadithResponse> getChapterAhadiths(
@@ -71,18 +69,15 @@ abstract class ApiService {
   Future<LocalHadithResponse> getLocalChapterAhadiths(
     @Path("bookSlug") String bookSlug,
     @Path("chapterId") int chapterId,
-
   );
 
   @GET(ApiConstants.getLocalChapterAhadiths)
   Future<LocalHadithResponse> getThreeBooksLocalChapterAhadiths(
     @Path("bookSlug") String bookSlug,
     @Path("chapterId") int chapterId,
-
   );
 
   @GET(ApiConstants.getBookmarks)
-
   Future<BookmarksResponse> getUserBookmarks(
     @Header("x-auth-token") String token,
   );
@@ -192,9 +187,7 @@ abstract class ApiService {
 
   // 3. جلب إحصائيات المستخدم
   @GET(ApiConstants.getUserStats)
-  Future<StatsModel> getUserStats(
-    @Header("x-auth-token") String token,
-  );
+  Future<StatsModel> getUserStats(@Header("x-auth-token") String token);
 
   // 4. حذف بحث محدد
   @DELETE("${ApiConstants.deleteSearch}/{id}")
@@ -209,4 +202,5 @@ abstract class ApiService {
     @Header("x-auth-token") String token,
     @Body() Map<String, dynamic> body,
   );
+
 }
