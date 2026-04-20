@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mishkat_almasabih/core/networking/categories_api_service.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/repositories/hadith_by_category_details_repo.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_ahadith_by_category_usecase.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_details_cubit/cubit/hadith_by_category_details_cubit.dart';
 
 import 'package:mishkat_almasabih/features/authentication/signup/data/repo/signup_repo.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
@@ -253,4 +255,14 @@ Future<void> setUpGetIt() async {
   getIt.registerFactory<HadithByCategoryCubit>(
     () => HadithByCategoryCubit(getIt<GetAhadithByCategoryUseCase>()),
   );
+
+
+    getIt.registerLazySingleton<HadithByCategoryDetailsRepo>(
+    () => HadithByCategoryDetailsRepo(),
+  );
+  getIt.registerFactory<HadithByCategoryDetailsCubit>(
+    () => HadithByCategoryDetailsCubit(getIt()),
+  );
+
+  
 }

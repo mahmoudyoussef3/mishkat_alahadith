@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/helpers/functions.dart';
+import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/empty_search_state.dart';
 import 'package:mishkat_almasabih/core/widgets/hadith_card_shimer.dart';
+import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/features/ahadith/ui/widgets/separator.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_state.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_details_cubit/cubit/hadith_by_category_details_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/widgets/hadith_category_card.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/widgets/error_widget.dart';
 import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
@@ -53,43 +56,60 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: ColorsManager.primaryBackground,
-        body: SafeArea(
-          child: RefreshIndicator(
-            color: ColorsManager.primaryPurple,
-            onRefresh: () async {
-              await context.read<HadithByCategoryCubit>().getAhadithByCategory(
-                widget.categoryId,
-                refresh: true,
+      child: BlocProvider(
+        create: (context) => getIt<HadithByCategoryDetailsCubit>(),
+        child: BlocListener<
+          HadithByCategoryDetailsCubit,
+          HadithByCategoryDetailsState
+        >(
+          listener: (context, state) {
+            if (state is HadithByCategoryDetailsLoaded) {
+              Navigator.pushNamed(
+                context,
+                Routes.hadithOfTheDay,
+                arguments: state.dailyHadithModel,
               );
-            },
-            child: BlocBuilder<HadithByCategoryCubit, HadithByCategoryState>(
-              builder: (context, state) {
-                return CustomScrollView(
-                  controller: _scrollController,
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    BuildHeaderAppBar(
-                      title:
-                          widget.categoryTitle?.isNotEmpty == true
-                              ? widget.categoryTitle!
-                              : 'أحاديث التصنيف',
+            } else if (state is HadithByCategoryDetailsError) {
+              showErrorSnackbar(context, state.message);
+            }
+          },
+          child: Scaffold(
+            backgroundColor: ColorsManager.primaryBackground,
+            body: SafeArea(
+              child: RefreshIndicator(
+                color: ColorsManager.primaryPurple,
+                onRefresh: () async {
+                  await context
+                      .read<HadithByCategoryCubit>()
+                      .getAhadithByCategory(widget.categoryId, refresh: true);
+                },
+                child:
+                    BlocBuilder<HadithByCategoryCubit, HadithByCategoryState>(
+                      builder: (context, state) {
+                        return CustomScrollView(
+                          controller: _scrollController,
+                          physics: const BouncingScrollPhysics(),
+                          slivers: [
+                            BuildHeaderAppBar(
+                              title:
+                                  widget.categoryTitle?.isNotEmpty == true
+                                      ? widget.categoryTitle!
+                                      : 'أحاديث التصنيف',
+                            ),
+                            SliverToBoxAdapter(child: SizedBox(height: 6.h)),
+                            ..._buildContentSlivers(context, state),
+                            SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+                          ],
+                        );
+                      },
                     ),
-                    SliverToBoxAdapter(child: SizedBox(height: 6.h)),
-                    ..._buildContentSlivers(context, state),
-                    SliverToBoxAdapter(child: SizedBox(height: 20.h)),
-                  ],
-                );
-              },
+              ),
             ),
           ),
         ),
       ),
     );
   }
-
-  
 
   List<Widget> _buildContentSlivers(
     BuildContext context,
@@ -98,8 +118,9 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
     return switch (state) {
       HadithByCategoryInitial() ||
       HadithByCategoryLoading() => _buildLoadingSlivers(),
-      HadithByCategoryLoaded() =>
-        _buildLoadedSlivers(state as HadithByCategoryLoaded),
+      HadithByCategoryLoaded() => _buildLoadedSlivers(
+        state as HadithByCategoryLoaded,
+      ),
       HadithByCategoryError(message: final message) => [
         SliverToBoxAdapter(
           child: SizedBox(
@@ -147,9 +168,12 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
             final hadith = state.ahadith[index];
             return Column(
               children: [
-                HadithCategoryCard(hadith: hadith, index: index + 1),
-                if (index != state.ahadith.length - 1)
-                  const IslamicSeparator(),
+                InkWell(
+                  onTap:
+                      () => navigateToHadithDetailsScreen(context, hadith.id),
+                  child: HadithCategoryCard(hadith: hadith, index: index + 1),
+                ),
+                if (index != state.ahadith.length - 1) const IslamicSeparator(),
               ],
             );
           }, childCount: state.ahadith.length),
@@ -182,9 +206,7 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
             decoration: BoxDecoration(
               color: ColorsManager.error.withAlpha(16),
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: ColorsManager.error.withAlpha(60),
-              ),
+              border: Border.all(color: ColorsManager.error.withAlpha(60)),
             ),
             child: Row(
               textDirection: TextDirection.rtl,
@@ -250,5 +272,12 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
     }
 
     return const SliverToBoxAdapter(child: SizedBox.shrink());
+  }
+
+  Future<void> navigateToHadithDetailsScreen(
+    BuildContext context,
+    String hadithId,
+  ) async {
+    await context.read<HadithByCategoryDetailsCubit>().fetchById(hadithId);
   }
 }
