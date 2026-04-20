@@ -6,7 +6,6 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/empty_search_state.dart';
 import 'package:mishkat_almasabih/core/widgets/hadith_card_shimer.dart';
 import 'package:mishkat_almasabih/features/ahadith/ui/widgets/separator.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/hadith_entity.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_state.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/widgets/hadith_category_card.dart';
@@ -76,7 +75,6 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
                           widget.categoryTitle?.isNotEmpty == true
                               ? widget.categoryTitle!
                               : 'أحاديث التصنيف',
-                      description: _buildDescription(state),
                     ),
                     SliverToBoxAdapter(child: SizedBox(height: 6.h)),
                     ..._buildContentSlivers(context, state),
@@ -91,15 +89,7 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
     );
   }
 
-  String? _buildDescription(HadithByCategoryState state) {
-    return switch (state) {
-      HadithByCategoryLoaded(ahadith: final ahadith, meta: final meta) =>
-        'عدد الأحاديث: ${convertToArabicNumber(ahadith.length)} • صفحة ${convertToArabicNumber(meta.currentPage)} من ${convertToArabicNumber(meta.lastPage)}',
-      HadithByCategoryLoading() => 'جارٍ تحميل الأحاديث...',
-      HadithByCategoryError() => 'تعذر تحميل الأحاديث',
-      _ => null,
-    };
-  }
+  
 
   List<Widget> _buildContentSlivers(
     BuildContext context,
