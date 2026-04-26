@@ -63,9 +63,10 @@ class _CategoryApiService implements CategoryApiService {
     final queryParameters = <String, dynamic>{
       r'language': language,
       r'category_id': categoryId,
-      if (page != null) r'page': page,
-      if (perPage != null) r'per_page': perPage,
+      r'page': page,
+      r'per_page': perPage,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<HadithByCategoryResponseModel>(
