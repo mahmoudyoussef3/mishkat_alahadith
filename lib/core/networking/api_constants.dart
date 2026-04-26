@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// API Constants for Mishkat Al-Masabih Islamic Library App
 /// Contains all endpoint URLs and configuration constants
 class ApiConstants {
@@ -9,11 +7,11 @@ class ApiConstants {
   static const String apiBaseUrl = "https://api.hadith-shareef.com/api/";
   static const String customBaseUrl = "https://api.hadith-shareef.com/api/";
   static const String randomAhadith = "hadith/random";
-
+  static const String hadithCategoriesBaseApi =
+      "https://hadeethenc.com/api/v1/";
   // -----------------------------
   // Navigator Key
   // -----------------------------
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   // -----------------------------
   // Authentication
@@ -84,6 +82,13 @@ class ApiConstants {
   static const String getSearchHistory = "/search-history/user";
   static const String deleteSearch = "/search-history"; // /:id
   static const String deleteAllSearch = "/search-history/user";
+
+  // -----------------------------
+  // Ahadith Categories
+  // -----------------------------
+  static const String getCategories = "categories/roots/";
+
+  static const String getAhadithByCategory = "hadeeths/list/";
 }
 
 const Map<String, String> bookWriters = {

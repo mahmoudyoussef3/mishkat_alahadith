@@ -17,6 +17,7 @@ class Routes {
   static const String searchScreen = '/searchScreen';
   static const String libraryScreen = '/libraryScreen';
   static const String hadithDetail = '/hadith';
+  static const String deepLinkHadith = '/deepLinkHadith';
 
   static const String homeScreen = '/homeScreen';
   static const String usersSuggestions = '/usersSuggestions';
@@ -26,6 +27,8 @@ class Routes {
   static const String dailyZekrScreen = '/dailyZekr';
   static const String prayerTimesScreen = '/prayerTimes';
   static const String qiblahFinder = '/qiblahFinder';
-  static const String ramadanTasksScreen = '/ramadanTasks';
-  static const String ramadanProgressScreen = '/ramadanProgress';
+  static const String categoriesScreen = '/categoriesScreen';
+  static const String ahadithListScreen = '/ahadithListScreen';
+  //static const String ramadanTasksScreen = '/ramadanTasks';
+  //static const String ramadanProgressScreen = '/ramadanProgress';
 }

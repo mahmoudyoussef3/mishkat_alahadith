@@ -1,42 +1,52 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mishkat_almasabih.app">
 
-    <!-- Basic Internet Permission -->
+    <!-- Basic Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
-
-    
-    <!-- Exact alarm permissions for prayer time notifications (Android 12+) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
-    
         android:label="مشكاة الأحاديث"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:allowBackup="false"
         android:fullBackupContent="false">
-<meta-data
-        android:name="firebase_performance_logcat_enabled"
-        android:value="true" />
-<receiver
-    android:name=".HadithWidgetProvider"
-    android:exported="true">
-    <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-    </intent-filter>
 
-    <meta-data
-        android:name="android.appwidget.provider"
-        android:resource="@xml/hadith_widget_info" />
-</receiver>
+        <!-- Firebase -->
+        <meta-data
+            android:name="firebase_performance_logcat_enabled"
+            android:value="true" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
 
+        <!-- Flutter embedding -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+        <meta-data
+            android:name="flutter_deeplinking_enabled"
+            android:value="true" />
 
+        <!-- App Widget -->
+        <receiver
+            android:name=".HadithWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/hadith_widget_info" />
+        </receiver>
 
         <!-- Main Activity -->
         <activity
@@ -52,35 +62,43 @@
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
 
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_channel_id"
-                android:value="high_importance_channel" />
-
-            <intent-filter android:autoVerify="true">
+            <!-- Launcher -->
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <!-- Deep link intent filter for custom scheme mishkat://hadith -->
+            <!-- Custom scheme deep link (works only when app is installed) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="mishkat" android:host="hadith" />
+                <data
+                    android:scheme="mishkat"
+                    android:host="hadith" />
             </intent-filter>
-        </activity>
 
-        <!-- Flutter Embedding -->
-        <meta-data
-            android:name="flutterEmbedding"
-            android:value="2" />
+            <!-- HTTPS App Link (requires domain verification via assetlinks.json) -->
+           <intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+
+    <data
+        android:scheme="https"
+        android:host="api.hadith-shareef.com"
+        android:pathPrefix="/api/hadith" />
+</intent-filter>
+
+        </activity>
     </application>
 
-    <!-- Queries for web links if needed -->
+    <!-- Queries for web links -->
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
         </intent>
     </queries>
+
 </manifest>

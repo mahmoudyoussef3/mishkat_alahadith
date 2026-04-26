@@ -1,5 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mishkat_almasabih/core/networking/categories_api_service.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/repositories/hadith_by_category_details_repo.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_ahadith_by_category_usecase.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_details_cubit/cubit/hadith_by_category_details_cubit.dart';
 
 import 'package:mishkat_almasabih/features/authentication/signup/data/repo/signup_repo.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
@@ -49,14 +54,7 @@ import '../../features/authentication/login/logic/cubit/login_cubit.dart';
 import '../networking/api_service.dart';
 import '../networking/dio_factory.dart';
 import '../../features/authentication/login/data/repo/login_repo.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/data/repo/zekr_repository.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/data/repo/shared_prefs_zekr_repository.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/data/repo/personal_tasks_repository.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/data/repo/shared_prefs_personal_tasks_repository.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
-import 'package:mishkat_almasabih/features/prayer_times/data/services/prayer_times_reminder_service.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_tasks_repository.dart';
@@ -67,6 +65,11 @@ import 'package:mishkat_almasabih/features/ramadan_tasks/data/datasources/ramada
 import 'package:mishkat_almasabih/features/ramadan_tasks/data/repositories/ramadan_config_repository_impl.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_config_repository.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/data/datasources/categories_datasource.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/data/repositories/categories_repository_impl.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/repositories/categories_repository.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_categories_usecase.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/categories_cubit/categories_cubit.dart';
 
 final getIt = GetIt.instance;
 final customGetIt = GetIt.instance;
@@ -75,6 +78,9 @@ Future<void> setUpGetIt() async {
   final Dio dio = DioFactory.getDio();
 
   getIt.registerLazySingleton<ApiService>(() => ApiService(dio));
+  getIt.registerLazySingleton<CategoryApiService>(
+    () => CategoryApiService(dio),
+  );
 
   getIt.registerLazySingleton<LoginRepo>(() => LoginRepo(getIt()));
   getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt()));
@@ -195,30 +201,11 @@ Future<void> setUpGetIt() async {
     () => SearchHistoryCubit(getIt()),
   );
 
-  // Daily Zekr feature
-  getIt.registerLazySingleton<ZekrRepository>(
-    () => const SharedPrefsZekrRepository(),
-  );
-  getIt.registerFactory<DailyZekrCubit>(
-    () => DailyZekrCubit(getIt<ZekrRepository>()),
-  );
-
-  getIt.registerLazySingleton<PersonalTasksRepository>(
-    () => const SharedPrefsPersonalTasksRepository(),
-  );
-  getIt.registerFactory<PersonalTasksCubit>(
-    () => PersonalTasksCubit(getIt<PersonalTasksRepository>()),
-  );
-
-  // Prayer Times feature
-  getIt.registerLazySingleton<PrayerTimesReminderService>(
-    () => PrayerTimesReminderService(),
-  );
-
+  /*
   getIt.registerFactory<PrayerTimesCubit>(
-    () => PrayerTimesCubit(getIt<PrayerTimesReminderService>()),
+    () => PrayerTimesCubit(),
   );
-
+*/
   getIt.registerFactory<QiblahCubit>(() => QiblahCubit());
 
   // Firebase Remote Config (shared instance)
@@ -248,4 +235,34 @@ Future<void> setUpGetIt() async {
       getIt<RamadanConfigRepository>(),
     ),
   );
+
+  // Categories feature
+  getIt.registerLazySingleton<CategoriesDatasource>(
+    () => CategoriesDatasourceImpl(getIt<CategoryApiService>()),
+  );
+  getIt.registerLazySingleton<CategoriesRepository>(
+    () => CategoriesRepositoryImpl(getIt<CategoriesDatasource>()),
+  );
+  getIt.registerLazySingleton<GetCategoriesUseCase>(
+    () => GetCategoriesUseCase(getIt<CategoriesRepository>()),
+  );
+  getIt.registerLazySingleton<GetAhadithByCategoryUseCase>(
+    () => GetAhadithByCategoryUseCase(getIt<CategoriesRepository>()),
+  );
+  getIt.registerFactory<CategoriesCubit>(
+    () => CategoriesCubit(getIt<GetCategoriesUseCase>()),
+  );
+  getIt.registerFactory<HadithByCategoryCubit>(
+    () => HadithByCategoryCubit(getIt<GetAhadithByCategoryUseCase>()),
+  );
+
+
+    getIt.registerLazySingleton<HadithByCategoryDetailsRepo>(
+    () => HadithByCategoryDetailsRepo(),
+  );
+  getIt.registerFactory<HadithByCategoryDetailsCubit>(
+    () => HadithByCategoryDetailsCubit(getIt()),
+  );
+
+  
 }

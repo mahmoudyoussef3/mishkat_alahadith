@@ -7,7 +7,12 @@ plugins {
     id 'kotlin-android'
     id 'dev.flutter.flutter-gradle-plugin'
 }
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
 
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 android {
     namespace "com.mishkat_almasabih.app"
 
@@ -16,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId "com.mishkat_almasabih.app"
-        minSdkVersion 23
+        minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutter.versionCode
         versionName flutter.versionName
@@ -33,13 +38,13 @@ android {
     }
 
     signingConfigs {
-        release {
-            storeFile file(MY_STORE_FILE)
-            storePassword MY_STORE_PASSWORD
-            keyAlias MY_KEY_ALIAS
-            keyPassword MY_KEY_PASSWORD
-        }
+    release {
+        storeFile file(keystoreProperties['storeFile'])
+        storePassword keystoreProperties['storePassword']
+        keyAlias keystoreProperties['keyAlias']
+        keyPassword keystoreProperties['keyPassword']
     }
+}
 
     buildTypes {
         release {

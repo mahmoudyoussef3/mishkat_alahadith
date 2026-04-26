@@ -43,7 +43,6 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   int _page = 1;
-  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -56,6 +55,7 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
   }
 
   void _fetchInitialData() {
+    _page = 1;
     _cubit.emitAhadiths(
       page: _page,
       paginate: 10,
@@ -67,18 +67,19 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
   }
 
   void _onScroll() {
+    final state = _cubit.state;
+    final isLoadingMore = state is AhadithsSuccess && state.isLoadingMore;
+
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 200 &&
-        !_isLoadingMore &&
+        !isLoadingMore &&
         _cubit.hasMore) {
       _loadMore();
     }
   }
 
   Future<void> _loadMore() async {
-    setState(() => _isLoadingMore = true);
     _page++;
-
     await _cubit.emitAhadiths(
       page: _page,
       paginate: 10,
@@ -87,8 +88,6 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
       isArbainBooks: checkThreeBooks(widget.bookSlug),
       hadithLocal: checkBookSlug(widget.bookSlug),
     );
-
-    setState(() => _isLoadingMore = false);
   }
 
   @override
@@ -103,7 +102,7 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-        top: false,
+        top: true,
         bottom: true,
         child: Scaffold(
           backgroundColor: ColorsManager.primaryBackground,
@@ -130,14 +129,6 @@ class _ChapterAhadithScreenState extends State<ChapterAhadithScreen> {
                 arabicBookName: widget.arabicBookName,
                 pageNumber: _page,
               ),
-
-              if (_isLoadingMore)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
-                ),
             ],
           ),
         ),

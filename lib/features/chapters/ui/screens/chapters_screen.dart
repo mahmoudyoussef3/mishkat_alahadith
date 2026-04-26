@@ -13,7 +13,7 @@ class BookChaptersScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-        top: false,
+          top: true,
         bottom: true,
         child: Scaffold(
           backgroundColor: ColorsManager.secondaryBackground,

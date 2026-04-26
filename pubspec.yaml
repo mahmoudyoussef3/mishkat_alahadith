@@ -2,7 +2,7 @@ name: mishkat_almasabih
 description: "A new Flutter project."
 publish_to: 'none' 
 
-version: 3.0.9+16
+version: 3.0.9+17
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -59,13 +59,14 @@ dependencies:
   firebase_analytics: ^12.0.3
   firebase_performance: ^0.11.1+2
   firebase_performance_dio: ^0.7.1
-  egyptian_prayer_times: ^1.0.0
+  adhan: ^2.0.0
   flutter_qiblah: ^3.1.0+1
   geolocator: ^13.0.2
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   hijri: ^3.0.0
   two_dimensional_scrollables: ^0.3.7
+  app_links: ^7.0.0
 
 dev_dependencies:
   flutter_test:
@@ -98,6 +99,7 @@ flutter:
     - assets/images/moon-light-shine-through-window-into-islamic-mosque-interior.jpg
     - assets/images/book_covers/riyadiah40.jpeg
     - shorebird.yaml
+    - assets/audio/yaamsallyallaelnaby.mp3
 
   fonts:
   - family: Amiri

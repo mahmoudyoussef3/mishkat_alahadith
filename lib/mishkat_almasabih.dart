@@ -58,7 +58,7 @@ class MishkatAlmasabih extends StatelessWidget {
              debugShowCheckedModeBanner: false,
              initialRoute: _getStartScreen(),
              onGenerateRoute: appRouter.generateRoute,
-              
+        /*      
              onUnknownRoute: (settings) {
                log("Unknown route: ${settings.name}");
                return MaterialPageRoute(
@@ -69,6 +69,8 @@ class MishkatAlmasabih extends StatelessWidget {
                      ),
                );
              },
+             */
+             
               
              home: null, 
            );

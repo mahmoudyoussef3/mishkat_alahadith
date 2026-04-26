@@ -7,7 +7,26 @@ final class GetLibraryStatisticsInitial extends GetLibraryStatisticsState {}
 
 final class GetLivraryStatisticsSuccess extends GetLibraryStatisticsState {
   final StatisticsResponse statisticsResponse;
-  GetLivraryStatisticsSuccess({required this.statisticsResponse});
+  final bool isRefreshing;
+  final bool isFromCache;
+
+  GetLivraryStatisticsSuccess({
+    required this.statisticsResponse,
+    this.isRefreshing = false,
+    this.isFromCache = false,
+  });
+
+  GetLivraryStatisticsSuccess copyWith({
+    StatisticsResponse? statisticsResponse,
+    bool? isRefreshing,
+    bool? isFromCache,
+  }) {
+    return GetLivraryStatisticsSuccess(
+      statisticsResponse: statisticsResponse ?? this.statisticsResponse,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
+      isFromCache: isFromCache ?? this.isFromCache,
+    );
+  }
 }
 
 final class GetLivraryStatisticsLoading extends GetLibraryStatisticsState {}

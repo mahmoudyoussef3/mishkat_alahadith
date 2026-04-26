@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
-import 'package:mishkat_almasabih/features/profile/ui/widgets/notification_system.dart';
 import 'package:mishkat_almasabih/features/profile/ui/widgets/profile_screen_shimmer.dart';
 import 'package:mishkat_almasabih/features/profile/ui/widgets/statistics_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,9 +21,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String? _token;
-  bool _dailyHadithNotification = true;
-  bool _azkarNotification = false;
-  bool _werdNotification = false;
+
 
   @override
   void initState() {
@@ -38,7 +33,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _initializeScreen() async {
     await _checkToken();
-    await _loadNotificationSettings();
   }
 
   Future<void> _checkToken() async {
@@ -59,29 +53,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _loadNotificationSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!mounted) return;
+ 
 
-    setState(() {
-      _dailyHadithNotification =
-          prefs.getBool('daily_hadith_notification') ?? true;
-      _azkarNotification = prefs.getBool('azkar_notification') ?? false;
-      _werdNotification = prefs.getBool('werd_notification') ?? false;
-    });
-  }
-
-  Future<void> _saveNotificationSetting(String key, bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
-  }
-
-  Future<void> _resyncDailyZekrReminders() async {
-    try {
-      // Keep reminders consistent with current profile toggles + checked state.
-      await DailyZekrCubit(getIt()).init();
-    } catch (_) {}
-  }
 
   Future<void> _onRefresh() async {
     if (_token != null && mounted) {
@@ -90,25 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _onNotificationChanged(String key, bool value) {
-    setState(() {
-      switch (key) {
-        case 'daily_hadith_notification':
-          _dailyHadithNotification = value;
-          break;
-        case 'azkar_notification':
-          _azkarNotification = value;
-          break;
-        case 'werd_notification':
-          _werdNotification = value;
-          break;
-      }
-    });
-    _saveNotificationSetting(key, value);
 
-    // Apply the change immediately to local reminders.
-    _resyncDailyZekrReminders();
-  }
 
   @override
   Widget build(BuildContext context) {

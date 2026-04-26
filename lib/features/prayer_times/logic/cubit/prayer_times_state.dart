@@ -1,4 +1,4 @@
-part of 'prayer_times_cubit.dart';
+/*part of 'prayer_times_cubit.dart';
 
 @immutable
 sealed class PrayerTimesState {}
@@ -13,7 +13,6 @@ final class PrayerTimesLoaded extends PrayerTimesState {
   final String? nextPrayerLabel;
   final DateTime? nextPrayerTime;
   final Duration? remaining;
-  final AsrMethod asrMethod;
 
   PrayerTimesLoaded({
     required this.date,
@@ -21,7 +20,6 @@ final class PrayerTimesLoaded extends PrayerTimesState {
     required this.nextPrayerLabel,
     required this.nextPrayerTime,
     required this.remaining,
-    required this.asrMethod,
   });
 
   PrayerTimesLoaded copyWith({
@@ -30,7 +28,6 @@ final class PrayerTimesLoaded extends PrayerTimesState {
     String? nextPrayerLabel,
     DateTime? nextPrayerTime,
     Duration? remaining,
-    AsrMethod? asrMethod,
   }) {
     return PrayerTimesLoaded(
       date: date ?? this.date,
@@ -38,7 +35,6 @@ final class PrayerTimesLoaded extends PrayerTimesState {
       nextPrayerLabel: nextPrayerLabel ?? this.nextPrayerLabel,
       nextPrayerTime: nextPrayerTime ?? this.nextPrayerTime,
       remaining: remaining ?? this.remaining,
-      asrMethod: asrMethod ?? this.asrMethod,
     );
   }
 }
@@ -47,3 +43,4 @@ final class PrayerTimesError extends PrayerTimesState {
   final String message;
   PrayerTimesError(this.message);
 }
+*/

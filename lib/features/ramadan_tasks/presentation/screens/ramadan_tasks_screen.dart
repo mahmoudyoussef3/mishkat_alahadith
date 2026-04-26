@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+ /* import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
@@ -25,7 +25,7 @@ class _RamadanTasksScreenState extends State<RamadanTasksScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
-        top: false,
+          top: true,
         child: Scaffold(
           backgroundColor: ColorsManager.secondaryBackground,
           floatingActionButton: const _AddTaskFab(),
@@ -511,3 +511,5 @@ class _AddTaskFab extends StatelessWidget {
     );
   }
 }
+
+*/

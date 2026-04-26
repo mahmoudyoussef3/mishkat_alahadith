@@ -3,6 +3,10 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/features/about_us/ui/screens/about_us_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/categories_cubit/categories_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/screens/ahadith_categories_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/screens/categories_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/ui/screens/signup_screen.dart';
 import 'package:mishkat_almasabih/features/book_data/logic/cubit/book_data_cubit.dart';
@@ -48,12 +52,11 @@ import '../../features/authentication/login/logic/cubit/login_cubit.dart';
 import '../../features/authentication/login/ui/screens/login_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/splash/splash_screen.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/ui/screen/daily_zekr_screen.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/daily_zekr_cubit.dart';
-import 'package:mishkat_almasabih/features/daily_zekr/logic/cubit/personal_tasks_cubit.dart';
+
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/screens/ramadan_tasks_screen.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/cubit/ramadan_tasks_cubit.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/screens/ramadan_progress_screen.dart';
+import 'package:mishkat_almasabih/core/deep_links/ui/deep_link_hadith_screen.dart';
 
 class AppRouter {
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -245,6 +248,21 @@ class AppRouter {
               ),
         );
 
+      case Routes.deepLinkHadith:
+        _logScreenView('DeepLinkHadith');
+
+        final hadithId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<EnhancedSearchCubit>()
+                          ..fetchEnhancedSearchResults(hadithId),
+                child: DeepLinkHadithScreen(hadithId: hadithId),
+              ),
+        );
+
       case Routes.filterResultSearch:
         _logScreenView('FilterResultSearch');
 
@@ -319,23 +337,7 @@ class AppRouter {
               ),
         );
 
-      case Routes.dailyZekrScreen:
-        _logScreenView('DailyZekrScreen');
-        return MaterialPageRoute(
-          builder:
-              (_) => MultiBlocProvider(
-                providers: [
-                  BlocProvider(
-                    create: (context) => getIt<DailyZekrCubit>()..init(),
-                  ),
-                  BlocProvider(
-                    create: (context) => getIt<PersonalTasksCubit>()..init(),
-                  ),
-                ],
-                child: const DailyZekrScreen(),
-              ),
-        );
-      case Routes.prayerTimesScreen:
+      /*   case Routes.prayerTimesScreen:
         _logScreenView('PrayerTimesScreen');
         return MaterialPageRoute(
           builder:
@@ -344,6 +346,7 @@ class AppRouter {
                 child: const PrayerTimesScreen(),
               ),
         );
+        */
       case Routes.qiblahFinder:
         _logScreenView('QiblahFinderScreen');
         return MaterialPageRoute(
@@ -353,8 +356,34 @@ class AppRouter {
                 child: const QiblahFinderScreen(),
               ),
         );
-
-      case Routes.ramadanTasksScreen:
+      case Routes.categoriesScreen:
+        _logScreenView('CategoriesScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<CategoriesCubit>()..getCategories(),
+                child: const CategoriesScreen(),
+              ),
+        );
+      case Routes.ahadithListScreen:
+        _logScreenView('AhadithListScreen');
+        final args = settings.arguments as Map<String, dynamic>;
+        final categoryId = args['categoryId'] as String;
+        final categoryTitle = args['categoryTitle'] as String?;
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<HadithByCategoryCubit>()
+                          ..getAhadithByCategory(categoryId),
+                child: AhadithListScreen(
+                  categoryId: categoryId,
+                  categoryTitle: categoryTitle,
+                ),
+              ),
+        );
+      /*  case Routes.ramadanTasksScreen:
         _logScreenView('RamadanTasksScreen');
         return MaterialPageRoute(
           builder:
@@ -373,6 +402,7 @@ class AppRouter {
                 child: const RamadanProgressScreen(),
               ),
         );
+        */
 
       default:
         return null;

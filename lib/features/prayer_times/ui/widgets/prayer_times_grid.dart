@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:egyptian_prayer_times/egyptian_prayer_times.dart';
+import 'package:adhan/adhan.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/prayer_times_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/prayer_times_styles.dart';

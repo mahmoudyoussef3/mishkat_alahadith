@@ -56,7 +56,7 @@ class _HadithDailyScreenState extends State<HadithResultDetails> {
       child: Builder(
         builder: (context) {
           return SafeArea(
-            top: false,
+          top: true,
             bottom: true,
             child: Directionality(
               textDirection: TextDirection.rtl,

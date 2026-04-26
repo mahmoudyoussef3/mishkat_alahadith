@@ -256,7 +256,9 @@ class CacheKeys {
   static const String libraryStatistics = 'library_statistics';
   static const String booksWithCategories = 'books_with_categories';
   static const String userProfile = 'user_profile';
+  static const String userStats = 'user_stats';
   static const String bookmarks = 'bookmarks';
+  static const String bookmarkCollections = 'bookmark_collections';
   static const String localHadithResponse = 'localHadithRespose';
   static const String adabHadithResponse = 'adabHadithResponse';
 
@@ -269,8 +271,39 @@ class CacheKeys {
   static const String chaptersResponse = 'chaptersResponse';
   static const String hadithDaily = 'hadithDaily';
   static const String library = 'library';
+  static const String hadithCategories = 'hadith_categories';
 
-  // Add more cache keys as needed for your app
+  /// Paginated ahadith cache key generator
+  static String paginatedAhadith(String bookSlug, int chapterId) =>
+      'ahadith_${bookSlug}_$chapterId';
+
+  /// Chapters cache key generator
+  static String chapters(String bookSlug) => 'chapters_$bookSlug';
+
+  /// Book data cache key generator
+  static String bookData(String categoryId) => 'book_data_$categoryId';
+
+  /// Navigation cache key generator
+  static String navigation(
+    String bookSlug,
+    int chapterNumber,
+    String hadithNumber,
+  ) => 'nav_${bookSlug}_${chapterNumber}_$hadithNumber';
+
+  /// Search cache key generator
+  static String search(String query) => 'search_${query.hashCode}';
+
+  /// Enhanced search cache key generator
+  static String enhancedSearch(String query) =>
+      'enhanced_search_${query.hashCode}';
+
+  /// Search with filters cache key generator
+  static String searchWithFilters(String query, String? bookSlug) =>
+      'search_filtered_${query.hashCode}_${bookSlug ?? 'all'}';
+
+  /// Ahadith by category cache key generator
+  static String ahadithByCategory(String categoryId, int page, int perPage) =>
+      'ahadith_by_category_${categoryId}_${page}_$perPage';
 }
 
 // =========================== TYPE-SAFE CACHE EXTENSIONS ===========================
