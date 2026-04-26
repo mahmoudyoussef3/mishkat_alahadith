@@ -10,21 +10,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ======================
+      # 1. Checkout
+      # ======================
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # ======================
+      # 2. Setup Java
+      # ======================
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
+      # ======================
+      # 3. Setup Flutter
+      # ======================
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
+      # ======================
+      # 4. Flutter dependencies
+      # ======================
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      # ======================
+      # 5. Setup Android local.properties (IMPORTANT FIX)
+      # ======================
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+
+      # ======================
+      # 6. Install Ruby (Fastlane)
+      # ======================
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -32,10 +57,22 @@ jobs:
           bundler-cache: true
           working-directory: android
 
+      # ======================
+      # 7. Install Fastlane dependencies
+      # ======================
       - name: Install dependencies
         working-directory: android
         run: bundle install
 
+      # ======================
+      # 8. Build APK (avoids Gradle missing config issues)
+      # ======================
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      # ======================
+      # 9. Run Fastlane
+      # ======================
       - name: Run Fastlane
         working-directory: android
         env:
