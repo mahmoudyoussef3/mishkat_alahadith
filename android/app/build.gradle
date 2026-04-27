@@ -47,15 +47,15 @@ android {
     // =======================
     signingConfigs {
         release {
-            if (keystorePropertiesFile.exists()
-                    && keystoreProperties['storeFile'] != null
-                    && keystoreProperties['storeFile'].toString().isNotEmpty()) {
+        if (keystorePropertiesFile.exists()
+        && keystoreProperties['storeFile'] != null
+        && !keystoreProperties['storeFile'].toString().isEmpty()) {
 
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-            }
+    storeFile file(keystoreProperties['storeFile'])
+    storePassword keystoreProperties['storePassword']
+    keyAlias keystoreProperties['keyAlias']
+    keyPassword keystoreProperties['keyPassword']
+}
         }
     }
 
