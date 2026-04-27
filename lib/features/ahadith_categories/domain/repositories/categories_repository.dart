@@ -7,6 +7,7 @@ abstract class CategoriesRepository {
   Future<Either<ApiErrorModel, List<CategoryEntity>>> getCategories();
   Future<Either<ApiErrorModel, HadithResponseEntity>> getAhadithByCategory(
     String categoryId, {
+      
     int? page,
     int? perPage,
   });
