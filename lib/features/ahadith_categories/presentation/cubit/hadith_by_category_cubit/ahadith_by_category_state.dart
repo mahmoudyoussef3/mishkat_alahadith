@@ -1,4 +1,4 @@
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/hadith_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/hadith_entity.dart';
 
 sealed class HadithByCategoryState {
   const HadithByCategoryState();

@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/hadith_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/hadith_entity.dart';
 
 class HadithCategoryCard extends StatelessWidget {
   final HadithEntity hadith;

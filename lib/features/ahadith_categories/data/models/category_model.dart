@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/category_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/category_entity.dart';
 part 'category_model.g.dart';
 @JsonSerializable()
 class CategoryModel {

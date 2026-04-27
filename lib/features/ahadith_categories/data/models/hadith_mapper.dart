@@ -1,6 +1,6 @@
 import 'package:mishkat_almasabih/features/ahadith_categories/data/models/hadith_by_category_model.dart';
 
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/hadith_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/hadith_entity.dart';
 
 extension HadithResponseMapper on HadithByCategoryResponseModel {
   HadithResponseEntity toEntity() {

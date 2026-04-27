@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/hadith_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/hadith_entity.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_ahadith_by_category_usecase.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_state.dart';
 
