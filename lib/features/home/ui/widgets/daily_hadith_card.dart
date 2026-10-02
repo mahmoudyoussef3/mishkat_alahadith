@@ -6,12 +6,9 @@ import 'package:mishkat_almasabih/core/notification/hadith_refresh_notifier.dart
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
-import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:transparent_image/transparent_image.dart';
-import 'package:home_widget/home_widget.dart';
 import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
 
@@ -24,7 +21,6 @@ class HadithOfTheDayCard extends StatefulWidget {
 
 class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
   final HadithRefreshNotifier _notifier = HadithRefreshNotifier();
-  String? _lastPushedToWidget;
 
   @override
   void initState() {
@@ -51,7 +47,8 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
   void _onHadithRefresh() {
     debugPrint('🔄 HadithCard: Refresh triggered from notification');
     if (!mounted) return;
-    // Reload current hadith (cache-first) and update the native widget via builder
+    // Reload current hadith (cache-first). The native home widget is updated
+    // by SaveHadithDailyRepo whenever a new hadith is saved.
     context.read<DailyHadithCubit>().load();
   }
 
@@ -105,14 +102,6 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
 
         final NewDailyHadithModel hadith =
             (state as DailyHadithSuccess).dailyHadithModel;
-
-        // Push to HomeWidget if changed
-        if (hadith.hadeeth != null &&
-            hadith.hadeeth!.isNotEmpty &&
-            hadith.hadeeth != _lastPushedToWidget) {
-          _lastPushedToWidget = hadith.hadeeth;
-          _updateHadithWidget(hadithText: hadith.hadeeth);
-        }
 
         debugPrint('📖 HadithCard: Displaying hadith - ${hadith.title}');
         return GestureDetector(
@@ -213,34 +202,5 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
         );
       },
     );
-  }
-
-  Future<void> _updateHadithWidget({String? hadithText}) async {
-    // Only update if a hadith text is provided or can be fetched
-    if (hadithText != null) {
-      await HomeWidget.saveWidgetData<String>('hadith_text', hadithText);
-      await HomeWidget.updateWidget(
-        name: 'HadithWidgetProvider',
-        iOSName: 'HadithWidget',
-      );
-      debugPrint(
-        '⬆️ HomeWidget: Data saved and widget updated with: $hadithText',
-      );
-    } else {
-      final currentHadith = await getIt<SaveHadithDailyRepo>().getHadith();
-      if (currentHadith != null) {
-        await HomeWidget.saveWidgetData<String>(
-          'hadith_text',
-          currentHadith.hadeeth,
-        );
-        await HomeWidget.updateWidget(
-          name: 'HadithWidgetProvider',
-          iOSName: 'HadithWidget',
-        );
-        debugPrint(
-          '⬆️ HomeWidget: Data saved and widget updated with current hadith: ${currentHadith.hadeeth}',
-        );
-      }
-    }
   }
 }
