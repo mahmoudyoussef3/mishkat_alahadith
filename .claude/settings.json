@@ -1,0 +1,94 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -H 'apikey: sb_publishable_EHODbNyFC_qJI1fZuETNKA_uu9hUU8Z' 'https://nbwzourpbnmewwklewyr.supabase.co/rest/v1/transport_packages?select=id,office:public_offices\\(name\\)&limit=1')",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(curl -s -H 'apikey: sb_publishable_EHODbNyFC_qJI1fZuETNKA_uu9hUU8Z' 'https://nbwzourpbnmewwklewyr.supabase.co/rest/v1/drivers?select=id,office:public_offices\\(name\\)&limit=1')",
+      "Bash(python3 q.py \"select grantee, privilege_type from information_schema.role_table_grants where table_name='captain_messages' and grantee in \\('anon','authenticated'\\) order by grantee, privilege_type\")",
+      "Bash(python3 q.py ' *)",
+      "Bash(python3 q.py \"select policyname, cmd, roles::text, qual from pg_policies where tablename='captain_messages'\")",
+      "Bash(python3 q.py \"select prosrc from pg_proc where proname='link_current_captain_driver'\")",
+      "Bash(supabase db *)",
+      "Bash(python3 q.py \"select version, name from supabase_migrations.schema_migrations order by version desc limit 3\")",
+      "Bash(python3 q.py \"delete from supabase_migrations.schema_migrations where version='20260721130000'; drop function if exists public.captain_link_current_driver\\(\\);\")",
+      "Bash(python3 q.py -f /Users/mahmoud/bmt_app/supabase/tests/captain_session_and_messages_regression.sql)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(git restore *)",
+      "Bash(git commit *)",
+      "Bash(grep -n '^#\\\\{1,3\\\\} ' docs/architecture/MULTI_OFFICE_MIGRATION_AUDIT.md)",
+      "Bash(cd /Users/mahmoud/bmt_app && ls test/apps/dashboard/features/office_profile/ && sed -n 1,80p test/apps/dashboard/features/office_profile/*.dart | head -100)",
+      "Bash(deno check *)",
+      "Bash(xargs sed -n 160,195p)",
+      "Bash(env)",
+      "Bash(flutter --version)",
+      "Bash(awk '{print $2}')",
+      "Bash(supabase --help)",
+      "Bash(security dump-keychain *)",
+      "Bash(chmod +x /private/tmp/claude-501/-Users-mahmoud-bmt-app/b83b1ca3-487e-4b96-80f1-21202bc6a663/scratchpad/q.sh)",
+      "Bash(/private/tmp/claude-501/-Users-mahmoud-bmt-app/b83b1ca3-487e-4b96-80f1-21202bc6a663/scratchpad/q.sh \"select count\\(*\\) as n from public.offices\")",
+      "Bash(/private/tmp/claude-501/-Users-mahmoud-bmt-app/b83b1ca3-487e-4b96-80f1-21202bc6a663/scratchpad/q.sh 'select jsonb_pretty\\(jsonb_build_object\\( *)",
+      "Bash(python3 -c \"import json,sys;print\\(json.load\\(sys.stdin\\)[0]['i']\\)\")",
+      "Bash(supabase db query --linked ' *)",
+      "Bash(grep -inE \"service_role|eyJ[A-Za-z0-9_-]{10,}|secret|password *= *['\\\\\"]|api[_-]?key|bearer \")",
+      "Bash(awk -F'-' '/^[0-9]+:[0-9]+ \\\\+[0-9]+ -[0-9]+:/ {n=$2+0; if \\(n>prev\\) {print; prev=n}}' /private/tmp/claude-501/-Users-mahmoud-bmt-app/b6d3bb12-06f7-46a8-a599-0a1c104cf123/tasks/btnocjqea.output)",
+      "Bash(python3 -c ' *)",
+      "Bash(sed -n '/android_12/,/^## /p' ~/.pub-cache/hosted/pub.dev/flutter_native_splash-2.4.4/README.md | head -60)",
+      "Bash(python3 tool/generate_splash_assets.py)",
+      "Bash(xcrun simctl *)",
+      "Bash(open -a Simulator)",
+      "Bash(pkill -f \"flutter_tools.snapshot run\")",
+      "Bash(echo \"ANALYZE EXIT: $?\")",
+      "Bash(echo \"CAPTAIN TESTS EXIT: $?\")",
+      "Bash(timeout 90 supabase db query --linked \"select prosrc like '%status_not_allowed_for_captain%' as allowlist_applied from pg_proc where proname='captain_update_trip_status';\")",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(python3 -c \"import sys,json; d=sys.stdin.read\\(\\); i=d.index\\('{'\\); print\\(json.loads\\(d[i:d.rindex\\('}'\\)+1]\\)['rows'][0]['def']\\)\")",
+      "Bash(grep -n \"matchTextDirection\" -A12 /Users/mahmoud/Downloads/flutter/packages/flutter/lib/src/widgets/icon.dart | grep -A12 \"if \\(icon.matchTextDirection\\\\|icon!.matchTextDirection\" | head -20)",
+      "Read(//Users/mahmoud/Downloads/flutter/packages/flutter/lib/src/widgets/**)",
+      "Bash(awk 'NR>=990&&NR<=1010' lib/l10n/app_en.arb)",
+      "Bash(awk 'NR>=35&&NR<=75' lib/apps/client/features/tracking/presentation/screens/tracking_screen.dart)",
+      "Bash(awk 'NR>=25&&NR<=65' lib/apps/client/features/communication/presentation/screens/chat_thread_screen.dart)",
+      "Bash(awk 'NR>=1&&NR<=50' lib/apps/client/features/trips/presentation/screens/my_trips_screen.dart)",
+      "Bash(awk 'NR>=40&&NR<=90' lib/apps/client/features/booking/presentation/screens/route_overview_screen.dart)",
+      "Bash(awk 'NR>=95&&NR<=130' test/apps/client/features/payments/payment_widgets_test.dart)",
+      "Bash(awk 'NR>=200&&NR<=220' lib/apps/client/features/payments/presentation/widgets/checkout/checkout_promo_field.dart)",
+      "Bash(awk 'NR>=75&&NR<=110' lib/apps/client/features/payments/presentation/widgets/checkout/checkout_method_tile.dart)",
+      "Bash(awk 'NR>=178&&NR<=200' lib/apps/client/features/payments/presentation/widgets/checkout/checkout_method_tile.dart)",
+      "Bash(awk 'NR>=25&&NR<=50' test/apps/client/features/trips/trip_details_view_test.dart)",
+      "Bash(awk 'NR>=118&&NR<=135' test/apps/client/features/trips/trip_details_view_test.dart)",
+      "Bash(awk 'NR>=45&&NR<=100' lib/apps/client/features/trips/presentation/widgets/trip_details/trip_driver_card.dart)",
+      "Bash(awk 'NR>=36&&NR<=100' lib/apps/client/features/trips/presentation/widgets/trip_live_tracking_card.dart)",
+      "Bash(grep -rn \"height: [0-9]\\\\{3,\\\\}\" --include='*.dart' features core)",
+      "Bash(sort -t: -k2 -rn)",
+      "Bash(cd /Users/mahmoud/bmt_app/lib/apps/dashboard/features *)",
+      "Read(//Users/mahmoud/**)",
+      "Bash(git rm *)",
+      "Bash(awk 'NR>=60&&NR<=80' test/client_auth_error_surfacing_test.dart)",
+      "Bash(python3 /private/tmp/claude-501/-Users-mahmoud-bmt-app/9933e7c4-aeb6-496a-8f4b-8d134efada0f/scratchpad/scan_overflow.py)",
+      "Bash(grep -rA2 --include='*.dart' -E \"\\\\.rpc\\\\\\($\" .)",
+      "Bash(cd /Users/mahmoud/bmt_app/lib/apps/dashboard *)",
+      "Bash(timeout 90 supabase db query --linked \"select vehicle_type, capacity, count\\(*\\) from public.vehicles group by 1,2 order by 3 desc;\")",
+      "Bash(supabase migration *)",
+      "Bash(node -e \"console.log\\(require.resolve\\('playwright-core'\\)\\)\")",
+      "Bash(chromium-cli --help)"
+    ],
+    "additionalDirectories": [
+      "/Users/mahmoud/bmt_app/lib/apps/dashboard/features/office_profile/presentation/test/apps/dashboard/features/office_profile",
+      "/Users/mahmoud/.pub-cache/hosted/pub.dev/flutter_native_splash-2.4.4",
+      "/Users/mahmoud/bmt_app/lib/apps/dashboard/features/reports/data/services"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/codegen_reminder.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
