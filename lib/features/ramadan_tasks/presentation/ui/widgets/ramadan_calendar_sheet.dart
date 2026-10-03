@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../domain/entities/ramadan_task_entity.dart';
+import '../../../domain/entities/ramadan_task_entity.dart';
 
 class RamadanCalendarSheet extends StatefulWidget {
   final List<RamadanTaskEntity> allTasks;
@@ -35,18 +35,14 @@ class RamadanCalendarSheet extends StatefulWidget {
 class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
   int? _selectedDay;
 
-  // ── Computed data ──
-
   List<RamadanTaskEntity> get _dailyTasks =>
       widget.allTasks.where((t) => t.type == TaskType.daily).toList();
 
-  /// TodayOnly tasks that belong to a specific day.
   List<RamadanTaskEntity> _todayOnlyForDay(int day) =>
       widget.allTasks
           .where((t) => t.type == TaskType.todayOnly && t.createdForDay == day)
           .toList();
 
-  /// All todayOnly tasks across the month.
   List<RamadanTaskEntity> get _allTodayOnly =>
       widget.allTasks.where((t) => t.type == TaskType.todayOnly).toList();
 
@@ -82,7 +78,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
               ),
               child: Column(
                 children: [
-                  // ── Drag handle ──
                   Padding(
                     padding: EdgeInsetsDirectional.only(top: 12.h, bottom: 8.h),
                     child: Container(
@@ -95,7 +90,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
                     ),
                   ),
       
-                  // ── Title ──
                   Padding(
                     padding: EdgeInsetsDirectional.symmetric(horizontal: 20.w),
                     child: Row(
@@ -108,7 +102,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
                         SizedBox(width: 8.w),
                         Text('تقويم رمضان', style: TextStyles.headlineSmall),
                         const Spacer(),
-                        // Legend
                         _LegendDot(color: ColorsManager.success, label: 'مكتمل'),
                         SizedBox(width: 10.w),
                         _LegendDot(
@@ -139,10 +132,8 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
       
                   SizedBox(height: 16.h),
       
-                  // ── Weekday header row ──
                   SizedBox(height: 8.h),
       
-                  // ── Calendar grid ──
                   Expanded(
                     child: ListView(
                       controller: scrollController,
@@ -151,19 +142,16 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
                         _buildCalendarGrid(),
                         SizedBox(height: 12.h),
       
-                        // ── Today-only tasks overview ──
                         if (_allTodayOnly.isNotEmpty) ...[
                           _buildTodayOnlySection(),
                           SizedBox(height: 12.h),
                         ],
       
-                        // ── Day detail card (shown on tap) ──
                         if (_selectedDay != null) ...[
                           _buildDayDetail(_selectedDay!),
                           SizedBox(height: 16.h),
                         ],
       
-                        // ── Stats summary ──
                         _buildStatsSummary(),
                         SizedBox(height: 24.h),
                       ],
@@ -178,11 +166,7 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Calendar Grid
-  // ─────────────────────────────────────────────────────────────
   Widget _buildCalendarGrid() {
-    // 30 days in a 7-column grid → 5 rows (last row has 2 cells).
     final rows = <Widget>[];
     for (int rowStart = 1; rowStart <= 30; rowStart += 7) {
       final rowEnd = (rowStart + 6).clamp(1, 30);
@@ -205,7 +189,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
           ),
         );
       }
-      // Fill remaining cells in the last row with empty Expanded
       while (cells.length < 7) {
         cells.add(const Expanded(child: SizedBox()));
       }
@@ -219,9 +202,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
     return Column(children: rows);
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Today-Only Tasks Section
-  // ─────────────────────────────────────────────────────────────
   Widget _buildTodayOnlySection() {
     final completed =
         _allTodayOnly
@@ -305,9 +285,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Day Detail Card
-  // ─────────────────────────────────────────────────────────────
   Widget _buildDayDetail(int day) {
     final todayOnlyForDay = _todayOnlyForDay(day);
     final allTasksForDay = [..._dailyTasks, ...todayOnlyForDay];
@@ -378,7 +355,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
           ),
           if (!isFuture && allTasksForDay.isNotEmpty) ...[
             SizedBox(height: 12.h),
-            // Per-task completion list
             ...allTasksForDay.map((t) {
               final relevantDay =
                   t.type == TaskType.daily ? day : t.createdForDay;
@@ -439,11 +415,7 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Stats Summary
-  // ─────────────────────────────────────────────────────────────
   Widget _buildStatsSummary() {
-    // Count "perfect days" (all daily tasks completed)
     int perfectDays = 0;
     int totalCompletions = 0;
     for (int d = 1; d <= widget.todayDay; d++) {
@@ -454,7 +426,6 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
       }
     }
 
-    // Streak: consecutive perfect days ending at todayDay
     int streak = 0;
     for (int d = widget.todayDay; d >= 1; d--) {
       if (_dailyTasks.isNotEmpty &&
@@ -505,14 +476,9 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-// HELPER WIDGETS
-// ══════════════════════════════════════════════════════════════
-
-/// A single day cell in the calendar grid.
 class _DayCell extends StatelessWidget {
   final int day;
-  final double ratio; // 0.0 – 1.0
+  final double ratio;
   final bool isToday;
   final bool isFuture;
   final bool isSelected;
@@ -529,7 +495,6 @@ class _DayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine cell color based on completion
     Color bgColor;
     Color textColor;
     if (isFuture) {
@@ -605,7 +570,6 @@ class _DayCell extends StatelessWidget {
   }
 }
 
-/// Small legend dot + label.
 class _LegendDot extends StatelessWidget {
   final Color color;
   final String label;
@@ -637,7 +601,6 @@ class _LegendDot extends StatelessWidget {
   }
 }
 
-/// Mini circular progress ring used in the day detail card.
 class _MiniProgressRing extends StatelessWidget {
   final double ratio;
   const _MiniProgressRing({required this.ratio});
@@ -681,7 +644,6 @@ class _MiniProgressRing extends StatelessWidget {
   }
 }
 
-/// Single stat item for the bottom summary.
 class _StatItem extends StatelessWidget {
   final IconData icon;
   final Color iconColor;

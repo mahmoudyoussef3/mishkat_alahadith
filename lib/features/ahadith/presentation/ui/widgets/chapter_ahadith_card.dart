@@ -38,7 +38,6 @@ class ChapterAhadithCard extends StatelessWidget {
       decoration: HadithDecorations.chapterCard(gradeColor),
       child: Stack(
         children: [
-          // Islamic pattern overlay
           Positioned(
             top: -15,
             right: -15,
@@ -49,18 +48,15 @@ class ChapterAhadithCard extends StatelessWidget {
             ),
           ),
 
-          // Main content
           Padding(
             padding: EdgeInsets.all(20.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Enhanced header with Islamic design
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      // ✅ Added
                       child: Row(
                         children: [
                           Container(
@@ -105,7 +101,6 @@ class ChapterAhadithCard extends StatelessWidget {
 
                 SizedBox(height: 8.h),
 
-                // Enhanced hadith text
                 if (text.isNotEmpty)
                   Container(
                     padding: EdgeInsets.all(8.w),
@@ -123,7 +118,6 @@ class ChapterAhadithCard extends StatelessWidget {
 
                 SizedBox(height: 18.h),
 
-                // Enhanced book and chapter pills
                 Row(
                   children: [
                     if (reference != null && reference!.isNotEmpty)
@@ -152,7 +146,6 @@ class ChapterAhadithCard extends StatelessWidget {
                   ],
                 ),
 
-                // Decorative bottom line
                 SizedBox(height: 16.h),
                 Container(
                   height: 2.h,

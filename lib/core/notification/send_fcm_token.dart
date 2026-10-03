@@ -3,17 +3,15 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mishkat_almasabih/core/networking/api_constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
 class UpdateFcmToken {
   static Future<void> sendFcmToken(String newFcmToken) async {
-    final prefs = await SharedPreferences.getInstance();
-
     Response response;
     String url = '${ApiConstants.apiBaseUrl}/fcm-token';
 
     var data = {'fcm_token': newFcmToken};
-    String? token = prefs.getString('token');
+    final String? token = await TokenStorage().getToken();
     var header = {
       "Accept": "application/json",
       "Authorization": "Bearer $token",

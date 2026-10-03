@@ -3,13 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../domain/entities/ramadan_task_entity.dart';
-import '../cubit/ramadan_tasks_cubit.dart';
+import '../../../domain/entities/ramadan_task_entity.dart';
+import '../../logic/ramadan_tasks_cubit.dart';
 
-/// Opens the add-task bottom sheet.
-///
-/// Call this from the parent page — it reads the [RamadanTasksCubit]
-/// from [parentContext] so the sheet can add tasks.
 void showAddTaskSheet(BuildContext parentContext) {
   final cubit = parentContext.read<RamadanTasksCubit>();
   final titleController = TextEditingController();
@@ -53,11 +49,6 @@ void showAddTaskSheet(BuildContext parentContext) {
   );
 }
 
-// ══════════════════════════════════════════════════════════════
-// Sheet body & type pill (private to this file)
-// ══════════════════════════════════════════════════════════════
-
-/// Bottom sheet body with title/description fields and type selector.
 class _AddTaskSheetBody extends StatefulWidget {
   final TextEditingController titleController;
   final TextEditingController descriptionController;
@@ -94,7 +85,6 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
           Text('إضافة عبادة', style: TextStyles.headlineSmall),
           SizedBox(height: 12.h),
 
-          // Title field
           TextField(
             controller: widget.titleController,
             textDirection: TextDirection.rtl,
@@ -112,7 +102,7 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
-                borderSide: const BorderSide(
+                borderSide: BorderSide(
                   color: ColorsManager.primaryPurple,
                   width: 1.5,
                 ),
@@ -125,7 +115,6 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
           ),
           SizedBox(height: 10.h),
 
-          // Description field
           TextField(
             controller: widget.descriptionController,
             textDirection: TextDirection.rtl,
@@ -145,7 +134,7 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
-                borderSide: const BorderSide(
+                borderSide: BorderSide(
                   color: ColorsManager.primaryPurple,
                   width: 1.5,
                 ),
@@ -158,7 +147,6 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
           ),
           SizedBox(height: 10.h),
 
-          // Type selector — pill buttons
           Text('نوع المهمة', style: TextStyles.titleMedium),
           SizedBox(height: 8.h),
           Row(
@@ -187,7 +175,6 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
           ),
           SizedBox(height: 16.h),
 
-          // Add button
           SizedBox(
             width: double.infinity,
             height: 48.h,
@@ -220,7 +207,6 @@ class _AddTaskSheetBodyState extends State<_AddTaskSheetBody> {
   }
 }
 
-/// Pill-style type selector for the add-task sheet.
 class _TypePill extends StatelessWidget {
   final String label;
   final String subtitle;

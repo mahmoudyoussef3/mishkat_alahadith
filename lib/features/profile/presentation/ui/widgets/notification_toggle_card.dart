@@ -46,7 +46,7 @@ class NotificationToggleCard extends StatelessWidget {
       child: Icon(
         icon,
         size: 24.sp,
-        color: value ? ColorsManager.primaryPurple : Colors.grey.shade600,
+        color: value ? ColorsManager.primaryPurple : ColorsManager.secondaryText,
       ),
     );
   }

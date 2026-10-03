@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A single predefined worship item the user can tap to create a task.
 class WorshipTemplate {
   final String title;
   final IconData icon;
@@ -8,7 +7,6 @@ class WorshipTemplate {
   const WorshipTemplate({required this.title, required this.icon});
 }
 
-/// A labelled group of worship templates.
 class WorshipSection {
   final String title;
   final IconData icon;
@@ -22,7 +20,6 @@ class WorshipSection {
     required this.items,
   });
 
-  /// Returns a copy with only items whose titles are NOT in [exclude].
   WorshipSection withoutTitles(Set<String> exclude) {
     final filtered = items.where((i) => !exclude.contains(i.title)).toList();
     return WorshipSection(
@@ -34,9 +31,7 @@ class WorshipSection {
   }
 }
 
-/// All predefined Ramadan worship sections.
 const List<WorshipSection> kWorshipSections = [
-  // ── الصلاة ──
   WorshipSection(
     title: 'الصلاة',
     icon: Icons.mosque_rounded,
@@ -55,7 +50,6 @@ const List<WorshipSection> kWorshipSections = [
     ],
   ),
 
-  // ── الأذكار ──
   WorshipSection(
     title: 'الأذكار',
     icon: Icons.auto_awesome_rounded,
@@ -70,7 +64,6 @@ const List<WorshipSection> kWorshipSections = [
     ],
   ),
 
-  // ── القرآن ──
   WorshipSection(
     title: 'القرآن الكريم',
     icon: Icons.menu_book_rounded,
@@ -82,7 +75,6 @@ const List<WorshipSection> kWorshipSections = [
     ],
   ),
 
-  // ── الخيرات ──
   WorshipSection(
     title: 'الخيرات',
     icon: Icons.volunteer_activism_rounded,

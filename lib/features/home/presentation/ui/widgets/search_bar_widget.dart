@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theming/colors.dart';
-import '../../../../core/theming/styles.dart';
-import '../../../../core/helpers/spacing.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 

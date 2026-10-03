@@ -1,97 +1,69 @@
-import 'package:dartz/dartz.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
-import 'package:mishkat_almasabih/features/search_with_filters/data/models/search_with_filters_model.dart';
+import 'package:mishkat_almasabih/core/networking/network_info.dart';
+import 'package:mishkat_almasabih/core/domain/entities/chapter_hadith.dart';
 
-class SearchWithFiltersRepo {
+import '../../domain/entities/hadith_search_filters.dart';
+import '../../domain/repos/search_with_filters_repo.dart';
+import '../mappers/search_with_filters_mapper.dart';
+import '../models/search_with_filters_model.dart';
+
+class SearchWithFiltersRepoImpl implements SearchWithFiltersRepo {
   final ApiService _apiService;
-  final _cacheService = GenericCacheService.instance;
+  final GenericCacheService _cacheService;
+  final NetworkInfo _networkInfo;
 
-  SearchWithFiltersRepo(this._apiService);
+  SearchWithFiltersRepoImpl(
+    this._apiService,
+    this._cacheService,
+    this._networkInfo,
+  );
 
-  /// Get cached search results
-  Future<SearchWithFiltersModel?> getCachedSearchResults({
-    required String searchQuery,
-    required String bookSlug,
-    required String narrator,
-    required String grade,
-    required String chapter,
-    required String category,
-  }) async {
-    final cacheKey = CacheKeys.searchWithFilters(
-      searchQuery,
-      bookSlug,
-      narrator,
-      grade,
-      chapter,
-      category,
-    );
-    return await _cacheService.getData<SearchWithFiltersModel>(
-      key: cacheKey,
+  String _cacheKey(HadithSearchFilters f) => CacheKeys.searchWithFilters(
+    f.query,
+    f.bookSlug,
+    f.narrator,
+    f.grade,
+    f.chapter,
+    f.category,
+  );
+
+  @override
+  Future<List<ChapterHadith>?> getCachedResults(
+    HadithSearchFilters filters,
+  ) async {
+    final cached = await _cacheService.getData<SearchWithFiltersModel>(
+      key: _cacheKey(filters),
       fromJson: SearchWithFiltersModel.fromJson,
     );
+    return cached?.toEntities();
   }
 
-  /// Save search results to cache
-  Future<void> cacheSearchResults({
-    required String searchQuery,
-    required String bookSlug,
-    required String narrator,
-    required String grade,
-    required String chapter,
-    required String category,
-    required SearchWithFiltersModel data,
-  }) async {
-    final cacheKey = CacheKeys.searchWithFilters(
-      searchQuery,
-      bookSlug,
-      narrator,
-      grade,
-      chapter,
-      category,
-    );
-    await _cacheService.saveData<SearchWithFiltersModel>(
-      key: cacheKey,
-      data: data,
-      toJson: (d) => d.toJson(),
-      cacheExpirationHours: 6, // Cache search results for 6 hours
-    );
-  }
-
-  Future<Either<ApiErrorModel, SearchWithFiltersModel>> searchWithFilters({
-    required String searchQuery,
-    required String bookSlug,
-    required String narrator,
-    required String grade,
-    required String chapter,
-    required String category
-  }) async {
+  @override
+  Future<ApiResult<List<ChapterHadith>>> search(
+    HadithSearchFilters filters,
+  ) async {
     try {
+      await _networkInfo.ensureConnected();
       final response = await _apiService.searchWithFilters(
-        searchQuery,
-        bookSlug,
-        narrator,
-        grade,
-        chapter,
-        category
+        filters.query,
+        filters.bookSlug,
+        filters.narrator,
+        filters.grade,
+        filters.chapter,
+        filters.category,
       );
-
-      // Cache the response
-      await cacheSearchResults(
-        searchQuery: searchQuery,
-        bookSlug: bookSlug,
-        narrator: narrator,
-        grade: grade,
-        chapter: chapter,
-        category: category,
+      await _cacheService.saveData<SearchWithFiltersModel>(
+        key: _cacheKey(filters),
         data: response,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 6,
       );
-
-      return Right(response);
+      return ApiResult.success(response.toEntities());
     } catch (error) {
-      return Left(ErrorHandler.handle(error));
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 }

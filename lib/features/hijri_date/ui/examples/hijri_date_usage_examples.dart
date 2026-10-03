@@ -5,12 +5,6 @@ import 'package:mishkat_almasabih/features/hijri_date/logic/states/hijri_date_st
 import 'package:mishkat_almasabih/features/hijri_date/domain/usecases/get_hijri_date_usecase.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 
-/// Example 1: Using Hijri Date with BlocBuilder (Recommended for reactive UI)
-///
-/// This approach is best when:
-/// - You need the UI to update when date changes
-/// - You want loading/error states
-/// - You need pull-to-refresh functionality
 class HijriDateWithCubitExample extends StatelessWidget {
   const HijriDateWithCubitExample({super.key});
 
@@ -22,7 +16,6 @@ class HijriDateWithCubitExample extends StatelessWidget {
         appBar: AppBar(
           title: const Text('تاريخ هجري'),
           actions: [
-            // Refresh button to fetch latest offset from Remote Config
             BlocBuilder<HijriDateCubit, HijriDateState>(
               builder: (context, state) {
                 return IconButton(
@@ -74,7 +67,6 @@ class HijriDateWithCubitExample extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Display Hijri date in Arabic
                     Text(
                       '${hijriDate.hDay}',
                       style: const TextStyle(
@@ -96,7 +88,6 @@ class HijriDateWithCubitExample extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // Show offset info (for debugging/admin)
                     if (offset != 0)
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -125,21 +116,13 @@ class HijriDateWithCubitExample extends StatelessWidget {
   }
 }
 
-/// Example 2: Direct UseCase Usage (For simple one-time date display)
-///
-/// This approach is best when:
-/// - You just need the date once
-/// - No need for loading states
-/// - Building a simple widget
 class HijriDateDirectExample extends StatelessWidget {
   const HijriDateDirectExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Get the use case from DI
     final getHijriDate = getIt<GetHijriDateUseCase>();
 
-    // Get the current Hijri date with offset applied
     final hijriDate = getHijriDate.call();
 
     return Card(
@@ -164,7 +147,6 @@ class HijriDateDirectExample extends StatelessWidget {
   }
 }
 
-/// Example 3: Using in AppBar subtitle
 class HijriDateInAppBarExample extends StatelessWidget {
   const HijriDateInAppBarExample({super.key});
 
@@ -191,7 +173,6 @@ class HijriDateInAppBarExample extends StatelessWidget {
   }
 }
 
-/// Example 4: Helper widget for reusable Hijri date display
 class HijriDateWidget extends StatelessWidget {
   final TextStyle? style;
   final bool showYear;
@@ -211,8 +192,6 @@ class HijriDateWidget extends StatelessWidget {
   }
 }
 
-/// Example 5: Using in Home Screen
-/// This is how you might integrate it into your existing home screen
 class HomeScreenHijriExample extends StatelessWidget {
   const HomeScreenHijriExample({super.key});
 
@@ -222,7 +201,6 @@ class HomeScreenHijriExample extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Header with Hijri date
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -250,7 +228,6 @@ class HomeScreenHijriExample extends StatelessWidget {
                 ],
               ),
             ),
-            // Rest of your home screen content
             Expanded(child: Center(child: Text('محتوى الشاشة الرئيسية'))),
           ],
         ),

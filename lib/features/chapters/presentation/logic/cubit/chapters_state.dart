@@ -8,8 +8,8 @@ final class ChaptersInitial extends ChaptersState {}
 final class ChaptersLoading extends ChaptersState {}
 
 final class ChaptersSuccess extends ChaptersState {
-  final List<Chapter> allChapters;
-  final List<Chapter> filteredChapters;
+  final List<BookChapter> allChapters;
+  final List<BookChapter> filteredChapters;
   final bool isRefreshing;
   final bool isFromCache;
 
@@ -21,8 +21,8 @@ final class ChaptersSuccess extends ChaptersState {
   });
 
   ChaptersSuccess copyWith({
-    List<Chapter>? allChapters,
-    List<Chapter>? filteredChapters,
+    List<BookChapter>? allChapters,
+    List<BookChapter>? filteredChapters,
     bool? isRefreshing,
     bool? isFromCache,
   }) {

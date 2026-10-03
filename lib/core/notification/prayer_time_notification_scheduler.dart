@@ -2,25 +2,22 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:adhan/adhan.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mishkat_almasabih/core/prayer/prayer_location_store.dart';
+import 'package:mishkat_almasabih/core/prayer/prayer_times_calculator.dart';
 import 'package:mishkat_almasabih/core/services/prayer_times_home_widget_sync.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/core/prayer/prayer_defaults.dart';
 
 class PrayerNotificationScheduler {
   static const MethodChannel _channel = MethodChannel(
     'com.mishkat_almasabih.app/prayer_notifications',
   );
 
-  // Source of truth is "did the user explicitly turn the feature OFF?", not
-  // "did the user turn it ON". This makes prayer notifications active by
-  // default for anyone who has granted OS notification permission — no manual
-  // toggle is ever required — while still honoring an explicit opt-out.
   static const String _userDisabledKey = 'prayer_notifications_user_disabled';
-  static const String _locationKey = 'prayer_notification_location';
-  static const String _legacyLocationKey = 'prayer_location';
+  static const PrayerTimesCalculator _calculator = PrayerTimesCalculator();
   static const String _scheduleKey = 'prayer_notification_schedule';
   static const int _daysAhead = 366;
 
@@ -30,20 +27,10 @@ class PrayerNotificationScheduler {
     if (_bootstrapped) return;
     _bootstrapped = true;
 
-    // No auto-enable step and no permission prompt here: bootstrap runs in the
-    // background after the first frame, so it must never show a dialog. If the
-    // OS already granted notification permission and the user hasn't opted out,
-    // [isEnabled] is already true and we schedule automatically.
     if (!await isEnabled()) return;
     await refreshSchedule();
   }
 
-  /// Whether prayer notifications should be active right now: the OS has
-  /// granted notification permission AND the user has not explicitly turned
-  /// the feature off. Keeping the check in one place means scheduling starts
-  /// automatically once permission exists, the app never keeps arming alarms
-  /// the user can no longer see, and the Profile toggle always reflects the
-  /// real, current state.
   static Future<bool> isEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     final userDisabled = prefs.getBool(_userDisabledKey) ?? false;
@@ -81,9 +68,6 @@ class PrayerNotificationScheduler {
       );
     }
 
-    // A transient refresh failure must not silently re-disable the feature:
-    // the user opted in, so leave it enabled and let the periodic safety-net
-    // resync retry rather than forcing the user to toggle again.
     final refreshResult = await refreshSchedule();
     if (!refreshResult.success) {
       return refreshResult;
@@ -209,11 +193,6 @@ class PrayerNotificationScheduler {
     await _channel.invokeMethod<void>('openPrayerNotificationSettings');
   }
 
-  /// Whether the app is exempt from OEM battery optimization. Aggressive
-  /// battery managers (MIUI, EMUI, ColorOS, One UI "deep sleep", ...) can
-  /// kill the app process and silently drop otherwise-exact alarms even
-  /// when [hasExactAlarmPermission] is true, which is a common cause of
-  /// prayer notifications working one day and silently failing the next.
   static Future<bool> hasBatteryOptimizationExemption() async {
     if (!Platform.isAndroid) return true;
 
@@ -228,11 +207,6 @@ class PrayerNotificationScheduler {
     }
   }
 
-  /// Opens the system battery-optimization settings so the user can exempt the
-  /// app themselves. This is an explicit, user-initiated action (surfaced as an
-  /// optional button in Profile) — it is intentionally never triggered
-  /// automatically, and it opens the standard settings list rather than the
-  /// restricted "allow" dialog, so no Play-restricted permission is needed.
   static Future<void> openBatteryOptimizationSettings() async {
     if (!Platform.isAndroid) return;
 
@@ -262,11 +236,6 @@ class PrayerNotificationScheduler {
         );
       }
 
-      // Exact-alarm capability is part of the core feature, so we still request
-      // it here. Battery-optimization exemption is NOT requested automatically —
-      // it is offered as an optional reliability button in Profile so the app
-      // never shows an unexpected system dialog and avoids the Play-restricted
-      // REQUEST_IGNORE_BATTERY_OPTIMIZATIONS permission.
       final exactAlarmGranted = await hasExactAlarmPermission();
       if (!exactAlarmGranted) {
         await requestExactAlarmPermission();
@@ -282,13 +251,10 @@ class PrayerNotificationScheduler {
   static Future<PrayerNotificationLocation> _resolveLocation(
     SharedPreferences prefs,
   ) async {
-    final storedLocationJson =
-        prefs.getString(_locationKey) ?? prefs.getString(_legacyLocationKey);
-    if (storedLocationJson != null && storedLocationJson.isNotEmpty) {
+    final storedLocation = PrayerLocationStore.read(prefs);
+    if (storedLocation != null) {
       try {
-        return PrayerNotificationLocation.fromJson(
-          jsonDecode(storedLocationJson) as Map<String, dynamic>,
-        );
+        return PrayerNotificationLocation.fromJson(storedLocation);
       } catch (e) {
         log('Failed to parse stored prayer notification location: $e');
       }
@@ -330,28 +296,24 @@ class PrayerNotificationScheduler {
     DateTime? currentTime,
     int daysAhead = _daysAhead,
   }) {
-    final coordinates = Coordinates(location.latitude, location.longitude);
-    final calculationParameters = CalculationMethod.egyptian.getParameters();
-    calculationParameters.madhab = Madhab.shafi;
-
     final now = currentTime ?? DateTime.now();
     final startOfToday = DateTime(now.year, now.month, now.day);
     final entries = <PrayerNotificationScheduleEntry>[];
 
     for (var offset = 0; offset < daysAhead; offset++) {
       final day = startOfToday.add(Duration(days: offset));
-      final prayerTimes = PrayerTimes(
-        coordinates,
-        DateComponents.from(day),
-        calculationParameters,
+      final prayerTimes = _calculator.calculate(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        date: day,
       );
 
       entries.addAll([
-        _entryForPrayer(day, 'fajr', prayerTimes.fajr, 'الفجر'),
-        _entryForPrayer(day, 'dhuhr', prayerTimes.dhuhr, 'الظهر'),
-        _entryForPrayer(day, 'asr', prayerTimes.asr, 'العصر'),
-        _entryForPrayer(day, 'maghrib', prayerTimes.maghrib, 'المغرب'),
-        _entryForPrayer(day, 'isha', prayerTimes.isha, 'العشاء'),
+        _entryForPrayer(day, 'fajr', prayerTimes.fajr, PrayerNames.fajr),
+        _entryForPrayer(day, 'dhuhr', prayerTimes.dhuhr, PrayerNames.dhuhr),
+        _entryForPrayer(day, 'asr', prayerTimes.asr, PrayerNames.asr),
+        _entryForPrayer(day, 'maghrib', prayerTimes.maghrib, PrayerNames.maghrib),
+        _entryForPrayer(day, 'isha', prayerTimes.isha, PrayerNames.isha),
       ]);
     }
 
@@ -396,7 +358,7 @@ class PrayerNotificationScheduler {
     SharedPreferences prefs,
     PrayerNotificationLocation location,
   ) async {
-    await prefs.setString(_locationKey, jsonEncode(location.toJson()));
+    await PrayerLocationStore.write(prefs, location.toJson());
   }
 
   static Future<void> _persistSchedule(
@@ -435,16 +397,16 @@ class PrayerNotificationLocation {
 
   static const PrayerNotificationLocation defaultLocation =
       PrayerNotificationLocation(
-        latitude: 30.0444,
-        longitude: 31.2357,
-        cityName: 'القاهرة، مصر',
+        latitude: PrayerDefaults.latitude,
+        longitude: PrayerDefaults.longitude,
+        cityName: PrayerDefaults.cityName,
       );
 
   factory PrayerNotificationLocation.fromJson(Map<String, dynamic> json) {
     return PrayerNotificationLocation(
-      latitude: (json['latitude'] as num?)?.toDouble() ?? 30.0444,
-      longitude: (json['longitude'] as num?)?.toDouble() ?? 31.2357,
-      cityName: json['cityName'] as String? ?? 'القاهرة، مصر',
+      latitude: (json['latitude'] as num?)?.toDouble() ?? PrayerDefaults.latitude,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? PrayerDefaults.longitude,
+      cityName: json['cityName'] as String? ?? PrayerDefaults.cityName,
     );
   }
 

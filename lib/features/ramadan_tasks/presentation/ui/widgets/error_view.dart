@@ -3,10 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../cubit/ramadan_tasks_cubit.dart';
+import '../../logic/ramadan_tasks_cubit.dart';
 
-/// Error state view with message and retry button.
-/// Enhanced with animations and better visual feedback.
 class RamadanErrorView extends StatelessWidget {
   final String message;
 
@@ -22,7 +20,6 @@ class RamadanErrorView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Animated error icon
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
                 duration: const Duration(milliseconds: 600),
@@ -49,7 +46,6 @@ class RamadanErrorView extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20.h),
-              // Error message
               Text(
                 'حدث خطأ',
                 style: TextStyles.titleLarge.copyWith(
@@ -67,7 +63,6 @@ class RamadanErrorView extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24.h),
-              // Retry button
               _RetryButton(),
             ],
           ),
@@ -77,7 +72,6 @@ class RamadanErrorView extends StatelessWidget {
   }
 }
 
-/// Animated retry button with hover effect
 class _RetryButton extends StatefulWidget {
   @override
   State<_RetryButton> createState() => _RetryButtonState();
@@ -105,7 +99,7 @@ class _RetryButtonState extends State<_RetryButton> {
               vertical: 12.h,
             ),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
               ),
               borderRadius: BorderRadius.circular(12.r),

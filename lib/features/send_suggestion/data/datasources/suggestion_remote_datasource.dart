@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-class SuggestionService {
+class SuggestionRemoteDataSource {
   final Dio _dio = Dio();
 
-  SuggestionService() {
+  SuggestionRemoteDataSource() {
     _dio.interceptors.add(
       PrettyDioLogger(
         requestBody: true,

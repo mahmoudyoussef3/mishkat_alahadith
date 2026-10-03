@@ -1,43 +1,33 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/models/enhanced_search_response_model.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/repos/enhanced_search_repo.dart';
-import 'package:mishkat_almasabih/core/networking/network_info.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/domain/usecases/enhanced_search_use_case.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/domain/usecases/get_cached_enhanced_search_use_case.dart';
 
 part 'enhanced_search_state.dart';
 
 class EnhancedSearchCubit extends Cubit<EnhancedSearchState> {
-  final EnhancedSearchRepo enhancedSearchRepo;
-  final NetworkInfo _networkInfo;
+  final GetCachedEnhancedSearchUseCase _getCachedResults;
+  final EnhancedSearchUseCase _search;
 
-  EnhancedSearchCubit(this.enhancedSearchRepo, this._networkInfo) : super(EnhancedSearchInitial());
+  EnhancedSearchCubit(this._getCachedResults, this._search)
+    : super(EnhancedSearchInitial());
 
   Future<void> fetchEnhancedSearchResults(String searchTerm) async {
-    final cached = await enhancedSearchRepo.getCachedSearch(searchTerm);
+    final cached = await _getCachedResults(searchTerm);
 
     if (cached != null) {
-      emit(EnhancedSearchLoaded(cached, isFromCache: true, isRefreshing: false));
+      emit(
+        EnhancedSearchLoaded(cached, isFromCache: true, isRefreshing: false),
+      );
       return;
     }
 
-    final hasInternet = await _networkInfo.isConnected;
-
-    if (hasInternet) {
-      emit(EnhancedSearchLoading());
-      _fetchFromServer(searchTerm);
-    } else {
-      emit(EnhancedSearchError('لا يوجد اتصال بالإنترنت'));
-    }
-  }
-
-  Future<void> _fetchFromServer(String searchTerm) async {
-    final result = await enhancedSearchRepo.fetchEnhancedSearchResults(
-      searchTerm,
-    );
-    result.fold(
-      (error) => emit(EnhancedSearchError(error.getAllErrorMessages())),
-      (enhancedSearch) => emit(EnhancedSearchLoaded(enhancedSearch)),
+    emit(EnhancedSearchLoading());
+    final result = await _search(searchTerm);
+    result.when(
+      success: (results) => emit(EnhancedSearchLoaded(results)),
+      failure: (failure) => emit(EnhancedSearchError(failure.message)),
     );
   }
 }

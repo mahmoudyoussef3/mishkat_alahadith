@@ -1,50 +1,53 @@
-import 'dart:developer';
-
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/home/data/models/library_statistics_model.dart';
-import 'package:mishkat_almasabih/features/home/data/repos/get_library_statistics_repo.dart';
+import 'package:mishkat_almasabih/features/library/domain/entities/library_statistics.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_cached_library_statistics_use_case.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_library_statistics_use_case.dart';
 
 part 'get_library_statistics_state.dart';
 
 class GetLibraryStatisticsCubit extends Cubit<GetLibraryStatisticsState> {
-  GetLibraryStatisticsRepo _getLibraryStatisticsRepo;
-  GetLibraryStatisticsCubit(this._getLibraryStatisticsRepo)
+  final GetCachedLibraryStatisticsUseCase _getCachedStatistics;
+  final GetLibraryStatisticsUseCase _getStatistics;
+  GetLibraryStatisticsCubit(this._getCachedStatistics, this._getStatistics)
     : super(GetLibraryStatisticsInitial());
 
   Future<void> emitGetStatisticsCubit() async {
-    // Try cache first
-    final cached = await _getLibraryStatisticsRepo.getCachedStatistics();
+    final cached = await _getCachedStatistics();
 
     if (cached != null) {
-      // Emit cached data immediately
       emit(
         GetLivraryStatisticsSuccess(
-          statisticsResponse: cached,
+          statistics: cached,
           isFromCache: true,
           isRefreshing: true,
         ),
       );
 
-      // Background refresh
-      _backgroundRefresh(cached);
+      _backgroundRefresh();
     } else {
-      // No cache, fetch from API
       emit(GetLivraryStatisticsLoading());
-      final response = await _getLibraryStatisticsRepo.getLibraryStatistics();
-      response.fold(
-        (error) => emit(GetLivraryStatisticsError(error.getAllErrorMessages())),
-        (data) => emit(GetLivraryStatisticsSuccess(statisticsResponse: data)),
+      final response = await _getStatistics();
+      response.when(
+        success: (data) => emit(GetLivraryStatisticsSuccess(statistics: data)),
+        failure: (failure) => emit(GetLivraryStatisticsError(failure.message)),
       );
     }
   }
 
-  Future<void> _backgroundRefresh(StatisticsResponse cached) async {
-    final response = await _getLibraryStatisticsRepo.getLibraryStatistics();
-    response.fold(
-      (error) {
-        // Background refresh failed, keep cached data
+  Future<void> _backgroundRefresh() async {
+    final response = await _getStatistics();
+    response.when(
+      success: (data) {
+        emit(
+          GetLivraryStatisticsSuccess(
+            statistics: data,
+            isFromCache: false,
+            isRefreshing: false,
+          ),
+        );
+      },
+      failure: (_) {
         if (state is GetLivraryStatisticsSuccess) {
           emit(
             (state as GetLivraryStatisticsSuccess).copyWith(
@@ -52,15 +55,6 @@ class GetLibraryStatisticsCubit extends Cubit<GetLibraryStatisticsState> {
             ),
           );
         }
-      },
-      (data) {
-        emit(
-          GetLivraryStatisticsSuccess(
-            statisticsResponse: data,
-            isFromCache: false,
-            isRefreshing: false,
-          ),
-        );
       },
     );
   }

@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/networking/api_constants.dart';
 import 'package:mishkat_almasabih/core/theming/home_styles.dart';
-import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
-import 'package:mishkat_almasabih/features/home/logic/cubit/get_library_statistics_cubit.dart';
-import 'package:mishkat_almasabih/features/library/ui/widgets/book_card.dart';
-import 'package:mishkat_almasabih/features/library/ui/widgets/book_card_shimmer.dart';
+import 'package:mishkat_almasabih/features/library/domain/entities/library_book.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/library_statistics/get_library_statistics_cubit.dart';
+import 'package:mishkat_almasabih/features/library/presentation/ui/widgets/book_card.dart';
+import 'package:mishkat_almasabih/features/library/presentation/ui/widgets/book_card_shimmer.dart';
 
 class TopBooksSection extends StatelessWidget {
   const TopBooksSection({super.key});
@@ -35,7 +35,7 @@ class TopBooksSection extends StatelessWidget {
               ),
             );
           } else if (state is GetLivraryStatisticsSuccess) {
-            final books = state.statisticsResponse.statistics.topBooks;
+            final books = state.statistics.topBooks;
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               child: Column(
@@ -58,13 +58,13 @@ class TopBooksSection extends StatelessWidget {
                         return SizedBox(
                           width: 170.w,
                           child: BookCard(
-                            book: Book(
+                            book: LibraryBook(
                               bookName: book.name,
                               bookSlug:
                                   booksMap[bookNamesArabic[book.name]] ?? '',
                               writerName: book.name,
-                              chapters_count: book.chapters,
-                              hadiths_count: book.hadiths,
+                              chaptersCount: book.chapters,
+                              hadithsCount: book.hadiths,
                             ),
                           ),
                         );

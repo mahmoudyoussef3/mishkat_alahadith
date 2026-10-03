@@ -12,7 +12,7 @@ void setupErrorState(BuildContext context, String error) {
   showDialog(
     context: context,
     builder: (context) => Dialog(
-      backgroundColor: ColorsManager.white,
+      backgroundColor: ColorsManager.elevatedSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -28,7 +28,7 @@ void setupErrorState(BuildContext context, String error) {
                 color: ColorsManager.primaryPurple.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.info_outline_rounded,
                 color: ColorsManager.primaryPurple,
                 size: 32,
@@ -120,13 +120,10 @@ String convertToArabicNumber(int number) {
     final diacritics = RegExp(r'[\u0617-\u061A\u064B-\u0652]');
     String result = text.replaceAll(diacritics, '');
 
-    // 2. توحيد الهمزات: أ إ آ -> ا
     result = result.replaceAll(RegExp('[إأآ]'), 'ا');
 
-    // 3. شيل المدّة "ـ"
     result = result.replaceAll('ـ', '');
 
-    // 4. Optional: lowercase (عشان لو فيه انجليزي)
     result = result.toLowerCase();
 
     return result.trim();

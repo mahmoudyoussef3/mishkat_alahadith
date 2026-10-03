@@ -8,7 +8,7 @@ final class GetBookmarksInitial extends GetBookmarksState {}
 final class GetBookmarksLoading extends GetBookmarksState {}
 
 final class UserBookmarksSuccess extends GetBookmarksState {
-  final List<Bookmark> bookmarks;
+  final List<UserBookmark> bookmarks;
   final bool isRefreshing;
   final bool isFromCache;
 
@@ -19,7 +19,7 @@ final class UserBookmarksSuccess extends GetBookmarksState {
   });
 
   UserBookmarksSuccess copyWith({
-    List<Bookmark>? bookmarks,
+    List<UserBookmark>? bookmarks,
     bool? isRefreshing,
     bool? isFromCache,
   }) {

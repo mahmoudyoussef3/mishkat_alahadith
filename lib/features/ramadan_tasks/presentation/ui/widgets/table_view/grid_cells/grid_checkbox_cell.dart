@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../table_checkbox_cell.dart';
 
-/// Stateless cell widget: shows a checkbox or an empty placeholder
-/// depending on whether the task applies to the given day.
 class GridCheckboxCell extends StatelessWidget {
   final bool isApplicable;
   final bool isCompleted;

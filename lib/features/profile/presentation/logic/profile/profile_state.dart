@@ -8,7 +8,7 @@ final class ProfileInitial extends ProfileState {}
 final class ProfileLoading extends ProfileState {}
 
 final class ProfileLoaded extends ProfileState {
-  final UserResponseModel user;
+  final UserProfile user;
   final bool isRefreshing;
   final bool isFromCache;
 
@@ -19,7 +19,7 @@ final class ProfileLoaded extends ProfileState {
   });
 
   ProfileLoaded copyWith({
-    UserResponseModel? user,
+    UserProfile? user,
     bool? isRefreshing,
     bool? isFromCache,
   }) {

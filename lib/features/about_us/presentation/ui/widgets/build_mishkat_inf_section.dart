@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/decorations.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/about_us/ui/widgets/social_icons_row.dart';
+import 'package:mishkat_almasabih/features/about_us/presentation/ui/widgets/social_icons_row.dart';
 
 class BuildMishkatInfSection extends StatelessWidget {
   const BuildMishkatInfSection({super.key});
@@ -35,7 +35,7 @@ class BuildMishkatInfSection extends StatelessWidget {
             Text(
               'منصة رقمية متكاملة لدراسة الأحاديث النبوية الشريفة مع تحليل ذكي وفوائد عملية',
               style: TextStyles.bodyMedium.copyWith(
-                color: ColorsManager.secondaryBackground,
+                color: ColorsManager.white,
               ),
               textAlign: TextAlign.center,
             ),

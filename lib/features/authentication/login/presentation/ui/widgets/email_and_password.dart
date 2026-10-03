@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../../core/theming/colors.dart';
-import '../../../../../core/theming/auth_styles.dart';
-import '../../../../../core/widgets/app_text_form_field.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/auth_styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_text_form_field.dart';
 import '../../logic/cubit/login_cubit.dart';
 
 class EmailAndPassword extends StatefulWidget {
@@ -31,7 +31,6 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
       key: context.read<LoginCubit>().formKey,
       child: Column(
         children: [
-          // Email Field
           AppTextFormField(
                 backgroundColor: ColorsManager.lightGray,
                 suffixIcon: Icon(
@@ -59,7 +58,6 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
 
           SizedBox(height: 20.h),
 
-          // Password Field
           AppTextFormField(
                 backgroundColor: ColorsManager.lightGray,
                 hintStyle: AuthTextStyles.inputHint,
@@ -94,11 +92,5 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    passwordController.dispose();
-    super.dispose();
   }
 }

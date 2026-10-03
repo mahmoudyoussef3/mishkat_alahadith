@@ -4,12 +4,11 @@ import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/home/data/models/search_history_models.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/data/models/history_search_model.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/entities/search_history_entry.dart';
 import 'history_list_item.dart';
 
 class HistoryList extends StatelessWidget {
-  final List<SearchHistoryItem> items;
+  final List<SearchHistoryEntry> items;
   final Function(int) onRemove;
   final VoidCallback onClearAll;
 

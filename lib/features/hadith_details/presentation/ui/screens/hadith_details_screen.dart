@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/logic/cubit/hadith_analysis_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/ui/widgets/hadith_analysis.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/hadith_books_section.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/hadith_grade_title.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/logic/cubit/hadith_analysis_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/ui/widgets/hadith_analysis.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_books_section.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_grade_title.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/hadith_text_card.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/navigation/logic/cubit/navigation_cubit.dart';
-import 'package:mishkat_almasabih/features/navigation/logic/local/cubit/local_hadith_navigation_cubit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/hadith_header_info.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/divider_section.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/navigation_container.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/bookmark_appbar_action.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/serag_fab_button.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_text_card.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/navigation/presentation/logic/remote/navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/navigation/presentation/logic/local/local_hadith_navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_header_info.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/divider_section.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/navigation_container.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/bookmark_appbar_action.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/serag_fab_button.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 // ignore: must_be_immutable
@@ -74,19 +74,10 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
   @override
   void initState() {
     _currentHadithId = widget.hadithNumber ?? '';
-    getToken();
     super.initState();
+    context.read<SessionCubit>().checkSession();
   }
 
-  String? token;
-  Future<void> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedToken = prefs.getString('token');
-
-    setState(() {
-      token = storedToken;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +110,6 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
           bottom: true,
           child: Scaffold(
             floatingActionButton: SeragFabButton(
-              token: token,
               hadithText:
                   (isNavigated && newTextOfHadith.isNotEmpty)
                       ? newTextOfHadith
@@ -138,7 +128,6 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
                           ? []
                           : [
                             BookmarkAppBarAction(
-                              token: token,
                               bookName: widget.bookName ?? '',
                               bookSlug: widget.bookSlug ?? '',
                               chapter: widget.chapter ?? '',
@@ -276,7 +265,6 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
     );
   }
 
-  /// Local Navigation
   Widget _buildLocalNavigation() {
     return BlocConsumer<LocalHadithNavigationCubit, LocalHadithNavigationState>(
       listener: (context, state) {
@@ -297,15 +285,15 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
             isNavigated = true;
             final hadith =
                 prev
-                    ? state.navigationHadithResponse.prevHadith
-                    : state.navigationHadithResponse.nextHadith;
+                    ? state.navigation.prevHadith
+                    : state.navigation.nextHadith;
 
             if (hadith != null) {
               newTextOfHadith = hadith.title ?? "الحديث غير متوفر";
               newHadithId = hadith.id.toString();
               _currentHadithId = newHadithId;
-              _hasPrev = state.navigationHadithResponse.prevHadith != null;
-              _hasNext = state.navigationHadithResponse.nextHadith != null;
+              _hasPrev = state.navigation.prevHadith != null;
+              _hasNext = state.navigation.nextHadith != null;
             }
           });
         }
@@ -343,7 +331,6 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
     );
   }
 
-  /// Remote Navigation
   Widget _buildRemoteNavigation() {
     return BlocConsumer<NavigationCubit, NavigationState>(
       listener: (context, state) {
@@ -364,15 +351,15 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
             isNavigated = true;
             final hadith =
                 prev
-                    ? state.navigationHadithResponse.prevHadith
-                    : state.navigationHadithResponse.nextHadith;
+                    ? state.navigation.prevHadith
+                    : state.navigation.nextHadith;
 
             if (hadith != null) {
               newTextOfHadith = hadith.title ?? "الحديث غير متوفر";
               newHadithId = hadith.id!;
               _currentHadithId = newHadithId;
-              _hasPrev = state.navigationHadithResponse.prevHadith != null;
-              _hasNext = state.navigationHadithResponse.nextHadith != null;
+              _hasPrev = state.navigation.prevHadith != null;
+              _hasNext = state.navigation.nextHadith != null;
             }
           });
         }

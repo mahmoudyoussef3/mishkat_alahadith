@@ -5,7 +5,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/auth_styles.dart';
 import 'package:mishkat_almasabih/core/theming/auth_decorations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mishkat_almasabih/features/authentication/login/logic/cubit/login_cubit.dart';
+import 'package:mishkat_almasabih/features/authentication/login/presentation/logic/cubit/login_cubit.dart';
 
 class LoginWithGoogle extends StatelessWidget {
   const LoginWithGoogle({super.key});
@@ -17,7 +17,7 @@ class LoginWithGoogle extends StatelessWidget {
         context.read<LoginCubit>().emitGoogleLoginStates();
       },
       child: Card(
-        color: ColorsManager.white,
+        color: ColorsManager.cardBackground,
         elevation: 5,
         shape:
             (AuthDecorations.socialCardShape().shape

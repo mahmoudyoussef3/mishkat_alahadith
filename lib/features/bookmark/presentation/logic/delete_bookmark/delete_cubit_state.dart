@@ -8,7 +8,7 @@ final class DeleteCubitInitial extends DeleteCubitState {}
 final class DeleteLoading extends DeleteCubitState {}
 
 final class DeleteSuccess extends DeleteCubitState {
-  final AddBookmarkResponse addBookmarkResponse;
+  final BookmarkActionResult addBookmarkResponse;
   DeleteSuccess(this.addBookmarkResponse);
 }
 

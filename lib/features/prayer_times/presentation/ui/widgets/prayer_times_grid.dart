@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:adhan/adhan.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/entities/daily_prayer_times.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/prayer_times_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/prayer_times_styles.dart';
+import 'package:mishkat_almasabih/core/prayer/prayer_defaults.dart';
 
 class PrayerTimesGrid extends StatelessWidget {
-  final PrayerTimes times;
+  final DailyPrayerTimes times;
   const PrayerTimesGrid({super.key, required this.times});
 
   String _fmt(DateTime t) {
@@ -18,11 +19,11 @@ class PrayerTimesGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <_PrayerItem>[
-      _PrayerItem('الفجر', times.fajr, Icons.nightlight_round),
-      _PrayerItem('الظهر', times.dhuhr, Icons.wb_sunny),
-      _PrayerItem('العصر', times.asr, Icons.sunny_snowing),
-      _PrayerItem('المغرب', times.maghrib, Icons.nightlight_outlined),
-      _PrayerItem('العشاء', times.isha, Icons.brightness_2_outlined),
+      _PrayerItem(PrayerNames.fajr, times.fajr, Icons.nightlight_round),
+      _PrayerItem(PrayerNames.dhuhr, times.dhuhr, Icons.wb_sunny),
+      _PrayerItem(PrayerNames.asr, times.asr, Icons.sunny_snowing),
+      _PrayerItem(PrayerNames.maghrib, times.maghrib, Icons.nightlight_outlined),
+      _PrayerItem(PrayerNames.isha, times.isha, Icons.brightness_2_outlined),
     ];
 
     return Padding(

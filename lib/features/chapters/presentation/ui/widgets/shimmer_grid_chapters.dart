@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/features/chapters/ui/widgets/chapter_card_shimmer.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/widgets/chapter_card_shimmer.dart';
 
 class ChapterGridShimmer extends StatelessWidget {
   const ChapterGridShimmer({super.key});

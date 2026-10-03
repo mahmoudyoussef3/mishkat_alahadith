@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
-import '../../core/theming/splash_styles.dart';
-import '../../core/theming/splash_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/splash_styles.dart';
+import 'package:mishkat_almasabih/core/theming/splash_decorations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -126,7 +126,6 @@ class _SplashScreenState extends State<SplashScreen>
   Widget _buildAppNameSection() {
     return Column(
       children: [
-        // Arabic app name
         Text(
               SplashTextStyles.appNameText,
               style: SplashTextStyles.appNameArabic,
@@ -164,7 +163,6 @@ class _SplashScreenState extends State<SplashScreen>
   Widget _buildLoadingIndicator() {
     return Column(
       children: [
-        // Animated dots
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(3, (index) {

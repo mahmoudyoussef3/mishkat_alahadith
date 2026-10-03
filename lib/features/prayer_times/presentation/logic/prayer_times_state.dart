@@ -9,7 +9,7 @@ final class PrayerTimesLoading extends PrayerTimesState {}
 
 final class PrayerTimesLoaded extends PrayerTimesState {
   final DateTime date;
-  final PrayerTimes times;
+  final DailyPrayerTimes times;
   final String? nextPrayerLabel;
   final DateTime? nextPrayerTime;
   final Duration? remaining;
@@ -24,7 +24,7 @@ final class PrayerTimesLoaded extends PrayerTimesState {
 
   PrayerTimesLoaded copyWith({
     DateTime? date,
-    PrayerTimes? times,
+    DailyPrayerTimes? times,
     String? nextPrayerLabel,
     DateTime? nextPrayerTime,
     Duration? remaining,

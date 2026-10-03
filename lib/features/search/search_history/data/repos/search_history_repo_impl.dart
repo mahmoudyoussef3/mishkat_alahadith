@@ -1,61 +1,59 @@
-import 'package:dartz/dartz.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
-import 'package:mishkat_almasabih/features/home/data/models/search_history_models.dart';
+import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
-class SearchHistoryRepo {
-  final ApiService api;
+import '../../domain/entities/search_history_entry.dart';
+import '../../domain/repos/search_history_repo.dart';
+import '../mappers/search_history_mapper.dart';
 
-  SearchHistoryRepo(this.api);
+class SearchHistoryRepoImpl implements SearchHistoryRepo {
+  final ApiService _apiService;
+  final TokenStorage _tokenStorage;
 
-  Future<Either<dynamic, List<SearchHistoryItem>>> getSearchHistory({
-    required String token,
-   
-  }) async {
+  SearchHistoryRepoImpl(this._apiService, this._tokenStorage);
+
+  @override
+  Future<ApiResult<List<SearchHistoryEntry>>> getHistory() async {
     try {
-      final response = await api.getSearchHistory(
-        token,
-    
-      );
-      return Right(response.data);
-    } catch (e) {
-      return Left(e);
+      final token = await _tokenStorage.requireToken();
+      final response = await _apiService.getSearchHistory(token);
+      return ApiResult.success(response.data.map((e) => e.toEntity()).toList());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
-  Future<Either<dynamic, AddSearchData>> addSearch({
-    required String token,
-    required AddSearchRequest body,
-  }) async {
+  @override
+  Future<ApiResult<void>> addEntry(NewSearchHistoryEntry entry) async {
     try {
-      final response = await api.addSearch(token, body);
-      return Right(response.data);
-    } catch (e) {
-      return Left(e);
+      final token = await _tokenStorage.requireToken();
+      await _apiService.addSearch(token, entry.toRequest());
+      return const ApiResult.success(null);
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
-  Future<Either<dynamic, void>> deleteSearch({
-    required String token,
-    required int searchId,
-  }) async {
+  @override
+  Future<ApiResult<void>> deleteEntry(int id) async {
     try {
-      await api.deleteSearch(token, searchId);
-      return const Right(null);
-    } catch (e) {
-      return Left(e);
+      final token = await _tokenStorage.requireToken();
+      await _apiService.deleteSearch(token, id);
+      return const ApiResult.success(null);
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
-  Future<Either<dynamic, void>> deleteAllSearch({
-    required String token,
-    required Map<String, dynamic> body,
-  }) async {
+  @override
+  Future<ApiResult<void>> clearHistory() async {
     try {
-      await api.deleteAllSearch(token, body);
-      return const Right(null);
-    } catch (e) {
-      return Left(e);
+      final token = await _tokenStorage.requireToken();
+      await _apiService.deleteAllSearch(token, {"confirm": true});
+      return const ApiResult.success(null);
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
-
 }

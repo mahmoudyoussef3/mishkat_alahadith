@@ -1,43 +1,24 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
-import 'package:mishkat_almasabih/features/serag/data/repos/serag_repo.dart';
-import 'package:mishkat_almasabih/features/serag/logic/cubit/serag_state.dart';
+import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
+import 'package:mishkat_almasabih/features/serag/domain/usecases/ask_serag_use_case.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_state.dart';
 
 class SeragCubit extends Cubit<SeragState> {
-  final SeragRepo _seragRepo;
+  final AskSeragUseCase _askSerag;
 
-  SeragCubit(this._seragRepo) : super(SeragInitial());
+  SeragCubit(this._askSerag) : super(SeragInitial());
 
   Future<void> sendMessage({
-    required String hadeeth,
-    required String grade_ar,
-    required String source,
-    required String takhrij_ar,
+    required SeragHadithContext hadith,
     required String content,
   }) async {
     emit(SeragLoading());
 
-    final result = await _seragRepo.serag(
-      SeragRequestModel(
-        hadith: Hadith(
-          hadeeth: hadeeth,
-          grade_ar: grade_ar,
-          source: source,
-          takhrij_ar: takhrij_ar,
-        ),
-        messages: [Message(role: 'user', content: content)],
-      ),
-    );
+    final result = await _askSerag(hadith: hadith, question: content);
 
-    result.fold(
-      (failure) => emit(
-        SeragFailure(failure.getAllErrorMessages() ),
-      ),
-      (response) {
-        emit(SeragSuccess(response));
-      },
+    result.when(
+      success: (response) => emit(SeragSuccess(response)),
+      failure: (failure) => emit(SeragFailure(failure.message)),
     );
   }
 }

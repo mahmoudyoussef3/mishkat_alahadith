@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class EmptyHistory extends StatelessWidget {
@@ -16,12 +17,15 @@ class EmptyHistory extends StatelessWidget {
             SizedBox(height: 12.h),
             Text(
               "لا يوجد سجل بحث بعد",
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500, color: Colors.grey.shade600),
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                color: ColorsManager.secondaryText,
+              ),
             ),
           ],
         ),
       ),
     );
   }
-    
 }

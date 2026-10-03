@@ -1,62 +1,46 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/authentication/login/data/models/login_request_body.dart';
-import 'package:mishkat_almasabih/features/authentication/login/data/repo/login_repo.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/features/authentication/login/domain/usecases/google_login_use_case.dart';
+import 'package:mishkat_almasabih/features/authentication/login/domain/usecases/login_use_case.dart';
 import 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
-  final LoginRepo _loginRepo;
+  final LoginUseCase _login;
+  final GoogleLoginUseCase _googleLogin;
 
   final formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  LoginCubit(this._loginRepo) : super(LoginInitial());
+  LoginCubit(this._login, this._googleLogin) : super(LoginInitial());
 
   Future<void> emitLoginStates() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
     emit(LoginLoading());
-    final response = await _loginRepo.login(
-      LoginRequestBody(
-        email: emailController.text,
-        password: passwordController.text,
-      ),
+    final response = await _login(
+      email: emailController.text,
+      password: passwordController.text,
     );
 
-    response.fold((error) => emit(LoginError(error.getAllErrorMessages())), (
-      data,
-    ) async {
-      await sharedPreferences.setString("token", data.token!);
-      log("📌 Saved token: ${data.token}");
-      emit(LoginSuccess(data));
-    });
+    response.when(
+      success: (session) => emit(LoginSuccess(session)),
+      failure: (failure) => emit(LoginError(failure.message)),
+    );
   }
 
-  /// Google login
   Future<void> emitGoogleLoginStates() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
     emit(LoginLoading());
-    final response = await _loginRepo.googleLogin();
+    final response = await _googleLogin();
 
-    response.fold((error) => emit(LoginError(error.getAllErrorMessages())), (
-      data,
-    ) async {
-      if (data.token != null) {
-        await sharedPreferences.setString("token", data.token!);
-      }
-      log("📌 Google login token: ${data.token}");
-      emit(LoginSuccess(data));
-    });
+    response.when(
+      success: (session) => emit(LoginSuccess(session)),
+      failure: (failure) => emit(LoginError(failure.message)),
+    );
   }
 
-  Future<String?> getSavedToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("token");
+  @override
+  Future<void> close() {
+    emailController.dispose();
+    passwordController.dispose();
+    return super.close();
   }
 }

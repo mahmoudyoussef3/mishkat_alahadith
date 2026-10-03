@@ -3,9 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// Top-right corner cell (RTL pinned header intersection).
-///
-/// Sits on the solid-purple header row, so text is white.
 class GridCornerCell extends StatelessWidget {
   const GridCornerCell({super.key});
 

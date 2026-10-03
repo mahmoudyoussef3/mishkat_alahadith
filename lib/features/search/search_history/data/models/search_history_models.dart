@@ -2,9 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'search_history_models.g.dart';
 
-/// -----------------------------
-/// إضافة بحث جديد (Request)
-/// -----------------------------
 @JsonSerializable()
 class AddSearchRequest {
   final String title;
@@ -29,9 +26,6 @@ class AddSearchRequest {
   Map<String, dynamic> toJson() => _$AddSearchRequestToJson(this);
 }
 
-/// -----------------------------
-/// إضافة بحث جديد (Response)
-/// -----------------------------
 @JsonSerializable()
 class AddSearchResponse {
   final bool success;
@@ -62,20 +56,15 @@ class AddSearchData {
   Map<String, dynamic> toJson() => _$AddSearchDataToJson(this);
 }
 
-/// -----------------------------
-/// عنصر من تاريخ البحث
-/// -----------------------------
 @JsonSerializable()
 class SearchHistoryItem {
   final int id;
   final String title;
 
-
   final String time;
   final String date;
   @JsonKey(name: 'created_at')
   final String createdAt;
-
 
   SearchHistoryItem({
     required this.id,
@@ -92,9 +81,6 @@ class SearchHistoryItem {
   Map<String, dynamic> toJson() => _$SearchHistoryItemToJson(this);
 }
 
-/// -----------------------------
-/// Pagination model
-/// -----------------------------
 @JsonSerializable()
 class Pagination {
   final int total;
@@ -116,9 +102,6 @@ class Pagination {
   Map<String, dynamic> toJson() => _$PaginationToJson(this);
 }
 
-/// -----------------------------
-/// Response جلب تاريخ البحث
-/// -----------------------------
 @JsonSerializable()
 class GetSearchHistoryResponse {
   final bool success;
@@ -137,9 +120,6 @@ class GetSearchHistoryResponse {
   Map<String, dynamic> toJson() => _$GetSearchHistoryResponseToJson(this);
 }
 
-/// -----------------------------
-/// إحصائيات البحث
-/// -----------------------------
 @JsonSerializable()
 class SearchStatsResponse {
   final bool success;
@@ -223,18 +203,12 @@ class DailyStat {
   Map<String, dynamic> toJson() => _$DailyStatToJson(this);
 }
 
-/// -----------------------------
-/// حذف بحث محدد
-/// -----------------------------
 @JsonSerializable()
 class DeleteSearchResponse {
   final bool success;
   final String message;
 
-  DeleteSearchResponse({
-    required this.success,
-    required this.message,
-  });
+  DeleteSearchResponse({required this.success, required this.message});
 
   factory DeleteSearchResponse.fromJson(Map<String, dynamic> json) =>
       _$DeleteSearchResponseFromJson(json);
@@ -242,9 +216,6 @@ class DeleteSearchResponse {
   Map<String, dynamic> toJson() => _$DeleteSearchResponseToJson(this);
 }
 
-/// -----------------------------
-/// حذف كل تاريخ البحث
-/// -----------------------------
 @JsonSerializable()
 class DeleteAllSearchResponse {
   final bool success;

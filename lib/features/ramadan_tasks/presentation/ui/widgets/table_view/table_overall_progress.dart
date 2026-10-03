@@ -3,8 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// Displays a small overall progress summary above the table grid.
-/// Shows a gradient bar with percentage and completed/total counts.
 class TableOverallProgress extends StatelessWidget {
   final double overallPercent;
   final int todayDay;
@@ -75,7 +73,6 @@ class TableOverallProgress extends StatelessWidget {
             ],
           ),
           SizedBox(height: 10.h),
-          // Progress bar
           TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: percent),
             duration: const Duration(milliseconds: 600),
@@ -89,7 +86,6 @@ class TableOverallProgress extends StatelessWidget {
                       height: 8.h,
                       child: Stack(
                         children: [
-                          // Background
                           Container(
                             decoration: BoxDecoration(
                               color: ColorsManager.primaryPurple.withOpacity(
@@ -98,12 +94,11 @@ class TableOverallProgress extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                           ),
-                          // Fill
                           FractionallySizedBox(
                             widthFactor: value,
                             child: Container(
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(
+                                gradient: LinearGradient(
                                   colors: [
                                     ColorsManager.primaryPurple,
                                     ColorsManager.darkPurple,

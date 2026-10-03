@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/onboarding_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/onboarding_styles.dart';
 
-import 'sava_date_for_first_time.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mishkat_almasabih/features/onboarding/presentation/logic/onboarding_cubit.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -79,10 +81,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     }
   }
 
-  void _getStarted() async {
-    await SaveDataForFirstTime.setNotFirstTime();
-
-    context.pushNamed(Routes.loginScreen);
+  void _getStarted() {
+    context.read<OnboardingCubit>().complete();
   }
 
   void _onPageChanged(int index) {
@@ -97,28 +97,35 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          decoration: OnboardingDecorations.scaffoldBackgroundDecoration(
-            _onboardingPages[_currentPage].gradient,
-          ),
-          child: Column(
-            children: [
-              _buildHeader(),
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: _onPageChanged,
-                  itemCount: _onboardingPages.length,
-                  itemBuilder: (context, index) {
-                    return _buildOnboardingPage(_onboardingPages[index]);
-                  },
+    return BlocListener<OnboardingCubit, OnboardingState>(
+      listener: (context, state) {
+        if (state is OnboardingCompleted) {
+          context.pushNamed(Routes.loginScreen);
+        }
+      },
+      child: SafeArea(
+        child: Scaffold(
+          body: Container(
+            decoration: OnboardingDecorations.scaffoldBackgroundDecoration(
+              _onboardingPages[_currentPage].gradient,
+            ),
+            child: Column(
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: _onPageChanged,
+                    itemCount: _onboardingPages.length,
+                    itemBuilder: (context, index) {
+                      return _buildOnboardingPage(_onboardingPages[index]);
+                    },
+                  ),
                 ),
-              ),
 
-              _buildBottomNavigation(),
-            ],
+                _buildBottomNavigation(),
+              ],
+            ),
           ),
         ),
       ),
@@ -131,7 +138,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Logo and app name
           Row(
             children: [
               Container(
@@ -154,7 +160,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             ],
           ),
 
-          // Skip button
           TextButton(
             onPressed: _getStarted,
             style: OnboardingDecorations.skipButtonStyle(),
@@ -192,7 +197,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Background decorative circles
         Positioned(
           top: OnboardingDecorations.largeCircleTop,
           right: OnboardingDecorations.largeCircleRight,
@@ -216,7 +220,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ),
         ),
 
-        // Islamic pattern background
         Container(
           width: double.infinity,
           decoration: OnboardingDecorations.islamicPatternContainerDecoration(),
@@ -226,14 +229,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             ),
             child: Stack(
               children: [
-                // Pattern overlay
-
-                // Main content
                 Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Main image container
                       Container(
                         width: OnboardingDecorations.mainImageWidth,
                         height: OnboardingDecorations.mainImageHeight,
@@ -247,10 +246,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           ),
                           child: Stack(
                             children: [
-                              // Image
                               Container(
                                 width: double.infinity,
-                                //    height: double.infinity,
                                 decoration: BoxDecoration(
                                   image: DecorationImage(
                                     image:
@@ -262,17 +259,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 ),
                               ),
 
-                              // Gradient overlay
                               Container(
                                 width: double.infinity,
-                                //  height: double.infinity,
                                 decoration:
                                     OnboardingDecorations.imageGradientOverlayDecoration(
                                       page.gradient,
                                     ),
                               ),
 
-                              // Icon overlay
                               Positioned(
                                 bottom: OnboardingDecorations.iconOverlayBottom,
                                 right: OnboardingDecorations.iconOverlayRight,
@@ -374,7 +368,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       padding: OnboardingDecorations.bottomNavigationPadding,
       child: Column(
         children: [
-          // Page indicators
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
@@ -387,11 +380,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             height: OnboardingDecorations.spacingBetweenIndicatorsAndButtons,
           ),
 
-          // Navigation buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Back button
               if (_currentPage > 0)
                 TextButton.icon(
                   onPressed: () {
@@ -403,7 +394,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   icon: Icon(
                     OnboardingDecorations.backButtonIcon,
                     size: OnboardingDecorations.backButtonIconSize,
-                    color: Colors.grey.shade600,
+                    color: ColorsManager.secondaryText,
                   ),
                   label: Text(
                     'السابق',

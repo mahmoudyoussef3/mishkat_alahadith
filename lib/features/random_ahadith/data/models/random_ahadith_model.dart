@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/hadith_daily_response.dart';
+import 'package:mishkat_almasabih/core/data/models/hadith_daily_response.dart';
 
 part 'random_ahadith_model.g.dart';
 

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/category_entity.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/section_card.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/category_entity.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/section_card.dart';
 
 class HadithCategoriesSection extends StatelessWidget {
   final List<String> categoryIds;

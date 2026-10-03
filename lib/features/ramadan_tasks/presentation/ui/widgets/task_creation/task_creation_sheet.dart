@@ -5,19 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-import '../../../domain/entities/ramadan_task_entity.dart';
-import '../../../domain/worship_templates.dart';
-import '../../cubit/ramadan_tasks_cubit.dart';
+import '../../../../domain/entities/ramadan_task_entity.dart';
+import '../../../logic/worship_templates.dart';
+import '../../../logic/ramadan_tasks_cubit.dart';
 import 'custom_task_dialog.dart';
 import 'worship_tile.dart';
 
-// ══════════════════════════════════════════════════════════════
-// Public entry point — call from FAB / button
-// ══════════════════════════════════════════════════════════════
-
-/// Opens the Ramadan task-creation sheet.
-///
-/// [parentContext] must have [RamadanTasksCubit] in scope.
 void showTaskCreationSheet(BuildContext parentContext) {
   showModalBottomSheet(
     context: parentContext,
@@ -32,16 +25,11 @@ void showTaskCreationSheet(BuildContext parentContext) {
   );
 }
 
-// ══════════════════════════════════════════════════════════════
-// Root sheet widget
-// ══════════════════════════════════════════════════════════════
-
 class _TaskCreationSheet extends StatelessWidget {
   const _TaskCreationSheet();
 
   @override
   Widget build(BuildContext context) {
-    // Responsive sizing based on screen width
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600;
 
@@ -63,10 +51,8 @@ class _TaskCreationSheet extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // ── Handle + header (non-scrollable) ──
                     _SheetHeader(scrollController: scrollCtrl),
       
-                    // ── Scrollable content ──
                     Expanded(child: _SheetBody(scrollController: scrollCtrl)),
                   ],
                 ),
@@ -76,10 +62,6 @@ class _TaskCreationSheet extends StatelessWidget {
     );
   }
 }
-
-// ══════════════════════════════════════════════════════════════
-// Sheet header — handle bar + title row
-// ══════════════════════════════════════════════════════════════
 
 class _SheetHeader extends StatelessWidget {
   final ScrollController scrollController;
@@ -96,7 +78,6 @@ class _SheetHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Drag handle
           Container(
             width: 40.w,
             height: 4.h,
@@ -107,10 +88,8 @@ class _SheetHeader extends StatelessWidget {
           ),
           SizedBox(height: 10.h),
 
-          // Title + close
           Row(
             children: [
-              // Icon badge
               Container(
                 width: 36.w,
                 height: 36.w,
@@ -133,7 +112,6 @@ class _SheetHeader extends StatelessWidget {
               ),
               SizedBox(width: 10.w),
 
-              // Titles
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +135,6 @@ class _SheetHeader extends StatelessWidget {
                 ),
               ),
 
-              // Close button
               Material(
                 color: ColorsManager.lightGray,
                 shape: const CircleBorder(),
@@ -178,7 +155,6 @@ class _SheetHeader extends StatelessWidget {
           ),
           SizedBox(height: 6.h),
 
-          // Subtle divider
           Divider(
             height: 1,
             color: ColorsManager.mediumGray.withValues(alpha: 0.5),
@@ -188,10 +164,6 @@ class _SheetHeader extends StatelessWidget {
     );
   }
 }
-
-// ══════════════════════════════════════════════════════════════
-// Scrollable body — worship sections + custom button
-// ══════════════════════════════════════════════════════════════
 
 class _SheetBody extends StatelessWidget {
   final ScrollController scrollController;
@@ -260,7 +232,6 @@ class _SheetBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Responsive padding
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth >= 600 ? 32.w : 20.w;
 
@@ -286,7 +257,6 @@ class _SheetBody extends StatelessWidget {
             bottom: 24.h,
           ),
           children: [
-            // ── Worship sections ──
             if (sections.isEmpty)
               _AllAddedBanner()
             else
@@ -301,7 +271,6 @@ class _SheetBody extends StatelessWidget {
 
             SizedBox(height: 16.h),
 
-            // ── Divider ──
             Row(
               children: [
                 Expanded(
@@ -329,7 +298,6 @@ class _SheetBody extends StatelessWidget {
 
             SizedBox(height: 12.h),
 
-            // ── Custom task button ──
             _CustomTaskButton(onTap: () => _openCustomDialog(context)),
 
             SizedBox(height: 12.h),
@@ -339,10 +307,6 @@ class _SheetBody extends StatelessWidget {
     );
   }
 }
-
-// ══════════════════════════════════════════════════════════════
-// Animated section — tracks item additions and animates removal
-// ══════════════════════════════════════════════════════════════
 
 class _AnimatedSection extends StatefulWidget {
   final WorshipSection section;
@@ -371,7 +335,6 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
   @override
   void didUpdateWidget(covariant _AnimatedSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Find removed items and animate them out
     final newTitles = widget.section.items.map((i) => i.title).toSet();
     for (int i = _items.length - 1; i >= 0; i--) {
       if (!newTitles.contains(_items[i].title)) {
@@ -383,7 +346,6 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
         );
       }
     }
-    // Find newly added items (if task was deleted and reappears)
     final oldTitles = _items.map((i) => i.title).toSet();
     for (final item in widget.section.items) {
       if (!oldTitles.contains(item.title)) {
@@ -420,7 +382,6 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section header
         Padding(
           padding: EdgeInsetsDirectional.only(
             start: 4.w,
@@ -454,7 +415,6 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
             ],
           ),
         ),
-        // Animated items list
         AnimatedList(
           key: _listKey,
           shrinkWrap: true,
@@ -484,10 +444,6 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
     );
   }
 }
-
-// ══════════════════════════════════════════════════════════════
-// All-added banner — shown when every template has been added
-// ══════════════════════════════════════════════════════════════
 
 class _AllAddedBanner extends StatelessWidget {
   @override
@@ -531,10 +487,6 @@ class _AllAddedBanner extends StatelessWidget {
     );
   }
 }
-
-// ══════════════════════════════════════════════════════════════
-// Custom task CTA button
-// ══════════════════════════════════════════════════════════════
 
 class _CustomTaskButton extends StatelessWidget {
   final VoidCallback onTap;

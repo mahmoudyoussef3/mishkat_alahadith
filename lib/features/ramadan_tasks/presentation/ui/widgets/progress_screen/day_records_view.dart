@@ -2,16 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../../domain/entities/ramadan_task_entity.dart';
+import '../../../../domain/entities/ramadan_task_entity.dart';
 
-/// Display modes for day records.
 enum DayRecordsMode { card, table }
 
-/// Shows the task records for a selected day.
-///
-/// Has two display modes:
-/// - **Card** — each task in its own decorated card with status badge
-/// - **Table** — compact table with task/status columns
 class DayRecordsView extends StatelessWidget {
   final int day;
   final int todayDay;
@@ -27,8 +21,6 @@ class DayRecordsView extends StatelessWidget {
     required this.mode,
     required this.onModeChanged,
   });
-
-  // ── Task helpers ──
 
   List<RamadanTaskEntity> get _dailyTasks =>
       allTasks.where((t) => t.type == TaskType.daily).toList();
@@ -71,12 +63,10 @@ class DayRecordsView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ──
           _buildHeader(total),
 
           Divider(height: 1, color: ColorsManager.mediumGray.withOpacity(0.5)),
 
-          // ── Content ──
           if (_isFuture)
             _buildFutureState()
           else if (tasks.isEmpty)
@@ -95,12 +85,11 @@ class DayRecordsView extends StatelessWidget {
       padding: EdgeInsetsDirectional.fromSTEB(16.w, 12.h, 12.w, 10.h),
       child: Row(
         children: [
-          // Day badge
           Container(
             width: 38.w,
             height: 38.w,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -118,7 +107,6 @@ class DayRecordsView extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
 
-          // Title + subtitle
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,16 +134,11 @@ class DayRecordsView extends StatelessWidget {
             ),
           ),
 
-          // Mode toggle
           _MiniModeToggle(mode: mode, onChanged: onModeChanged),
         ],
       ),
     );
   }
-
-  // ─────────────────────────────────────────────────────────────
-  // Card mode
-  // ─────────────────────────────────────────────────────────────
 
   Widget _buildCardList(List<RamadanTaskEntity> tasks) {
     return Padding(
@@ -184,7 +167,6 @@ class DayRecordsView extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      // Status icon
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 250),
                         child: Icon(
@@ -201,7 +183,6 @@ class DayRecordsView extends StatelessWidget {
                       ),
                       SizedBox(width: 10.w),
 
-                      // Task info
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,7 +216,6 @@ class DayRecordsView extends StatelessWidget {
                         ),
                       ),
 
-                      // Type badge
                       Container(
                         padding: EdgeInsetsDirectional.symmetric(
                           horizontal: 8.w,
@@ -269,10 +249,6 @@ class DayRecordsView extends StatelessWidget {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Table mode
-  // ─────────────────────────────────────────────────────────────
-
   Widget _buildTable(List<RamadanTaskEntity> tasks) {
     return Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w, vertical: 8.h),
@@ -284,7 +260,6 @@ class DayRecordsView extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: Column(
           children: [
-            // Header row
             Container(
               color: ColorsManager.primaryPurple.withOpacity(0.07),
               padding: EdgeInsetsDirectional.symmetric(
@@ -344,7 +319,6 @@ class DayRecordsView extends StatelessWidget {
               ),
             ),
 
-            // Data rows
             ...tasks.asMap().entries.map((entry) {
               final idx = entry.key;
               final task = entry.value;
@@ -427,10 +401,6 @@ class DayRecordsView extends StatelessWidget {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Empty & future states
-  // ─────────────────────────────────────────────────────────────
-
   Widget _buildFutureState() {
     return Padding(
       padding: EdgeInsetsDirectional.all(24.w),
@@ -488,10 +458,6 @@ class DayRecordsView extends StatelessWidget {
         .join();
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// Mini Card/Table toggle
-// ─────────────────────────────────────────────────────────────
 
 class _MiniModeToggle extends StatelessWidget {
   final DayRecordsMode mode;

@@ -1,8 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 part 'hadith_daily_response.g.dart';
 
-
-
 @JsonSerializable()
 class HadithData {
   final String? title;

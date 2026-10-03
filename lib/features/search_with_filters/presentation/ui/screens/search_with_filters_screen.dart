@@ -5,12 +5,12 @@ import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/home/data/models/search_history_models.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/search_bar_widget.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/logic/cubit/search_history_cubit.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/ui/widgets/empty_history.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/ui/widgets/history_list.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/ui/widgets/history_shimmer.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/entities/search_history_entry.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/search_bar_widget.dart';
+import 'package:mishkat_almasabih/features/search/search_history/presentation/logic/search_history_cubit.dart';
+import 'package:mishkat_almasabih/features/search/search_history/presentation/ui/widgets/empty_history.dart';
+import 'package:mishkat_almasabih/features/search/search_history/presentation/ui/widgets/history_list.dart';
+import 'package:mishkat_almasabih/features/search/search_history/presentation/ui/widgets/history_shimmer.dart';
 
 class SearchWithFiltersScreen extends StatefulWidget {
   const SearchWithFiltersScreen({super.key});
@@ -39,7 +39,7 @@ class _SearchWithFiltersScreenState extends State<SearchWithFiltersScreen> {
 
   Future<void> addItemToHistory(String query) async {
     final now = DateTime.now();
-    final item = AddSearchRequest(
+    final item = NewSearchHistoryEntry(
       title: query.trim(),
       date:
           "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}",
@@ -71,7 +71,6 @@ class _SearchWithFiltersScreenState extends State<SearchWithFiltersScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Container(
                   height: 100.h,
                   width: double.infinity,
@@ -107,7 +106,6 @@ class _SearchWithFiltersScreenState extends State<SearchWithFiltersScreen> {
 
                 SizedBox(height: 20.h),
 
-                // Search Bar & Filters
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12.w),
                   child: Column(
@@ -155,7 +153,7 @@ class _SearchWithFiltersScreenState extends State<SearchWithFiltersScreen> {
                     if (state is SearchHistoryLoading) {
                       return const HistoryShimmer();
                     }  else if (state is SearchHistorySuccess) {
-                      final List<SearchHistoryItem> items = List.from(
+                      final List<SearchHistoryEntry> items = List.from(
                         state.historyItems,
                       );
                       return items.isNotEmpty

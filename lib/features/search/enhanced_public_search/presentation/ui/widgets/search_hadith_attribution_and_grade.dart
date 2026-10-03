@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
 import 'package:mishkat_almasabih/core/theming/enhanced_search_decorations.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/models/enhanced_search_response_model.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
 
 class searchHadithAttributionAndGrade extends StatelessWidget {
-  final EnhancedHadithModel enhancedHadithModel;
+  final ExplainedHadith enhancedHadithModel;
   const searchHadithAttributionAndGrade({
     super.key,
     required this.enhancedHadithModel,

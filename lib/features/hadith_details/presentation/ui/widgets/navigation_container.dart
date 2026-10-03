@@ -30,7 +30,7 @@ class NavigationContainer extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: onPrev,
-            color: onPrev == null ? Colors.grey : ColorsManager.primaryPurple,
+            color: onPrev == null ? ColorsManager.gray : ColorsManager.primaryPurple,
           ),
           isLoading
               ? Row(
@@ -50,7 +50,7 @@ class NavigationContainer extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.arrow_forward_ios),
             onPressed: onNext,
-            color: onNext == null ? Colors.grey : ColorsManager.primaryPurple,
+            color: onNext == null ? ColorsManager.gray : ColorsManager.primaryPurple,
           ),
         ],
       ),

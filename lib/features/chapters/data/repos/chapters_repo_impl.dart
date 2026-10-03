@@ -1,48 +1,44 @@
 import 'dart:developer';
-import 'package:dartz/dartz.dart';
+
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
-import 'package:mishkat_almasabih/features/chapters/data/models/chapters_model.dart';
 
-class BookChaptersRepo {
+import '../../domain/entities/book_chapter.dart';
+import '../../domain/repos/chapters_repo.dart';
+import '../mappers/chapters_mapper.dart';
+import '../models/chapters_model.dart';
+
+class ChaptersRepoImpl implements ChaptersRepo {
   final ApiService _apiService;
-  final _cacheService = GenericCacheService.instance;
+  final GenericCacheService _cacheService;
 
-  BookChaptersRepo(this._apiService);
+  ChaptersRepoImpl(this._apiService, this._cacheService);
 
-  /// Get cached chapters for a book
-  Future<ChaptersModel?> getCachedChapters(String bookSlug) async {
-    final cacheKey = CacheKeys.chapters(bookSlug);
-    return await _cacheService.getData<ChaptersModel>(
-      key: cacheKey,
+  @override
+  Future<List<BookChapter>?> getCachedChapters(String bookSlug) async {
+    final cached = await _cacheService.getData<ChaptersModel>(
+      key: CacheKeys.chapters(bookSlug),
       fromJson: ChaptersModel.fromJson,
     );
+    return cached?.toEntities();
   }
 
-  /// Save chapters to cache
-  Future<void> cacheChapters(String bookSlug, ChaptersModel data) async {
-    final cacheKey = CacheKeys.chapters(bookSlug);
-    await _cacheService.saveData<ChaptersModel>(
-      key: cacheKey,
-      data: data,
-      toJson: (d) => d.toJson(),
-      cacheExpirationHours: 24,
-    );
-  }
-
-  Future<Either<ApiErrorModel, ChaptersModel>> getBookChapters(
-    String bookSlug,
-  ) async {
+  @override
+  Future<ApiResult<List<BookChapter>>> getChapters(String bookSlug) async {
     try {
       final response = await _apiService.getBookChapters(bookSlug);
-      // Cache the response
-      await cacheChapters(bookSlug, response);
-      return Right(response);
+      await _cacheService.saveData<ChaptersModel>(
+        key: CacheKeys.chapters(bookSlug),
+        data: response,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 24,
+      );
+      return ApiResult.success(response.toEntities());
     } catch (error) {
       log(error.toString());
-      return Left(ErrorHandler.handle(error));
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 }

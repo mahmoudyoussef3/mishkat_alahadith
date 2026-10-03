@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'colors.dart';
 
 class HadithAnalysisDecorations {
-  // Analyze button container with press state
   static BoxDecoration analyzeButton({required bool pressed}) => BoxDecoration(
     color:
         pressed
@@ -19,23 +18,21 @@ class HadithAnalysisDecorations {
     ],
   );
 
-  // Result card background (allows override)
   static BoxDecoration resultCard({Color? background}) => BoxDecoration(
     borderRadius: BorderRadius.circular(12.r),
     color: background ?? ColorsManager.primaryGreen.withOpacity(0.05),
   );
 
-  // Shimmer container and parts
   static BoxDecoration shimmerContainer() => BoxDecoration(
     borderRadius: BorderRadius.circular(12.r),
-    color: Colors.white,
+    color: ColorsManager.cardBackground,
   );
 
   static BoxDecoration shimmerIconSquare() => BoxDecoration(
-    color: Colors.grey.shade300,
+    color: ColorsManager.mediumGray,
     borderRadius: BorderRadius.circular(6.r),
   );
 
   static BoxDecoration shimmerLine() =>
-      BoxDecoration(color: Colors.grey.shade300);
+      BoxDecoration(color: ColorsManager.mediumGray);
 }

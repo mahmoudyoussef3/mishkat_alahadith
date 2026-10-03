@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_button_old.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/collection_choice_chips.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/dialog_header.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/input_label.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/styled_text_field.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/add_button_old.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/collection_choice_chips.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/dialog_header.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/input_label.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/styled_text_field.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
 
@@ -47,9 +47,9 @@ class CollectionsView extends StatelessWidget {
         } else if (state is GetCollectionsBookmarkError) {
           return Center(child: Text("خطأ: ${state.errMessage}"));
         } else if (state is GetCollectionsBookmarkSuccess) {
-          final collections = state.collectionsResponse.collections;
+          final collections = state.collections;
           final uniqueCollections =
-              collections!
+              collections
                   .where(
                     (c) => c.collection != null && c.collection!.isNotEmpty,
                   )

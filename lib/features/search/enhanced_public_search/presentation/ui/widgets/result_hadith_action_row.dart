@@ -8,11 +8,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/enhanced_search_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_bookmark_dialogs.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/add_bookmark_dialogs.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 
 class ResultHadithActionRow extends StatefulWidget {
   final String hadith;
@@ -44,20 +44,11 @@ class ResultHadithActionRow extends StatefulWidget {
 }
 
 class _ResultHadithActionRowState extends State<ResultHadithActionRow> {
-  String? token;
-  Future<void> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedToken = prefs.getString('token');
-
-    setState(() {
-      token = storedToken;
-    });
-  }
 
   @override
   void initState() {
-    getToken();
     super.initState();
+    context.read<SessionCubit>().checkSession();
   }
 
   @override
@@ -129,10 +120,9 @@ class _ResultHadithActionRowState extends State<ResultHadithActionRow> {
                   icon: Icons.bookmark,
                   label: "حفظ",
                   onTap: () {
-                    token == null
+                    !context.read<SessionCubit>().isSignedIn
                         ? ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            //  behavior: SnackBarBehavior.floating,
                             content: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -200,7 +190,6 @@ class _ResultHadithActionRowState extends State<ResultHadithActionRow> {
   }) {
     return GestureDetector(
       onTap: onTap,
-      //   borderRadius: BorderRadius.circular(12.r),
       child: Column(
         children: [
           CircleAvatar(

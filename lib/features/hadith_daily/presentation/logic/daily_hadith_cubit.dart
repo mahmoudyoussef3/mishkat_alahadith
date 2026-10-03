@@ -1,60 +1,48 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
-import 'package:mishkat_almasabih/core/networking/network_info.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
+import 'package:mishkat_almasabih/core/errors/failures.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/fetch_daily_hadith_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/get_saved_daily_hadith_use_case.dart';
 
 part 'daily_hadith_state.dart';
 
 class DailyHadithCubit extends Cubit<DailyHadithState> {
-  final SaveHadithDailyRepo _repo;
-  final NetworkInfo _networkInfo;
+  static const String _defaultHadithId = '65060';
+  static const String _loadFailedMessage = 'تعذر تحميل حديث اليوم';
 
-  DailyHadithCubit(this._repo, this._networkInfo) : super(DailyHadithInitial());
+  final GetSavedDailyHadithUseCase _getSavedHadith;
+  final FetchDailyHadithUseCase _fetchHadith;
 
-  /// Loads hadith from local cache; if missing, fetches a default one and saves it.
+  DailyHadithCubit(this._getSavedHadith, this._fetchHadith)
+    : super(DailyHadithInitial());
+
   Future<void> load() async {
-    final hasInternet = await _networkInfo.isConnected;
-    final cached = await _repo.getHadith();
-    
-    if (hasInternet) {
-      if (cached != null) {
-        emit(DailyHadithSuccess(cached));
-        // Optional background refresh could go here
-      } else {
-        emit(DailyHadithLoading());
-        _fetchFromServer('65060');
-      }
+    final cached = await _getSavedHadith();
+
+    if (cached != null) {
+      emit(DailyHadithSuccess(cached));
     } else {
-      if (cached != null) {
-        emit(DailyHadithSuccess(cached));
-      } else {
-        emit(DailyHadithFailure('لا يوجد اتصال بالإنترنت'));
-      }
+      emit(DailyHadithLoading());
+      await _fetchFromServer(_defaultHadithId);
     }
   }
 
   Future<void> fetchById(String id) async {
-    final hasInternet = await _networkInfo.isConnected;
-    if (!hasInternet) {
-      emit(DailyHadithFailure('لا يوجد اتصال بالإنترنت'));
-      return;
-    }
     emit(DailyHadithLoading());
-    _fetchFromServer(id);
+    await _fetchFromServer(id);
   }
 
   Future<void> _fetchFromServer(String id) async {
-    try {
-      final fetched = await _repo.fetchHadith(id);
-      if (fetched != null) {
-        emit(DailyHadithSuccess(fetched));
-      } else {
-        emit(DailyHadithFailure('تعذر تحميل حديث اليوم'));
-      }
-    } catch (e) {
-      emit(DailyHadithFailure('تعذر تحميل حديث اليوم'));
-    }
+    final result = await _fetchHadith(id);
+    result.when(
+      success: (hadith) => emit(DailyHadithSuccess(hadith)),
+      failure: (failure) => emit(
+        DailyHadithFailure(
+          failure is NetworkFailure ? failure.message : _loadFailedMessage,
+        ),
+      ),
+    );
   }
 }

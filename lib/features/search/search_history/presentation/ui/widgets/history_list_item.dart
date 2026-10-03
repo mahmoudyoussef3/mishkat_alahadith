@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/home/data/models/search_history_models.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/entities/search_history_entry.dart';
 
 class HistoryListItem extends StatelessWidget {
-  final SearchHistoryItem item;
+  final SearchHistoryEntry item;
   final VoidCallback onRemove;
   final VoidCallback onTap;
 
@@ -19,7 +19,7 @@ class HistoryListItem extends StatelessWidget {
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return DateFormat('yyyy-MM-dd').format(date); // or 'd MMM yyyy' for nice style
+      return DateFormat('yyyy-MM-dd').format(date);
     } catch (_) {
       return dateString;
     }
@@ -34,7 +34,7 @@ class HistoryListItem extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: ColorsManager.cardBackground,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: ColorsManager.mediumGray.withOpacity(0.3)),
           boxShadow: [
@@ -47,7 +47,6 @@ class HistoryListItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Search icon
             Container(
               width: 36.w,
               height: 36.w,
@@ -63,7 +62,6 @@ class HistoryListItem extends StatelessWidget {
             ),
             SizedBox(width: 12.w),
 
-            // Title & Date
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,11 +88,10 @@ class HistoryListItem extends StatelessWidget {
               ),
             ),
 
-            // Remove button
             IconButton(
               icon: Icon(
                 Icons.close_rounded,
-                color: Colors.grey[400],
+                color: ColorsManager.disabledText,
                 size: 18.r,
               ),
               onPressed: onRemove,

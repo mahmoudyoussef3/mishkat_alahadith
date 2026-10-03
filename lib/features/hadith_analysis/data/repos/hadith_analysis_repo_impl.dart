@@ -1,35 +1,43 @@
 import 'dart:developer';
 
-import 'package:dartz/dartz.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/data/models/hadith_analysis_request.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/data/models/hadith_analysis_response.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
-class HadithAnalysisRepo {
-  final ApiService apiService;
-  HadithAnalysisRepo(this.apiService);
-  Future<Either<ApiErrorModel, HadithAnalysisResponse>> analyzeHadith(HadithAnalysisRequest request) async {
+import '../../domain/entities/hadith_analysis_result.dart';
+import '../../domain/repos/hadith_analysis_repo.dart';
+import '../mappers/hadith_analysis_mapper.dart';
+import '../models/hadith_analysis_request.dart';
+
+class HadithAnalysisRepoImpl implements HadithAnalysisRepo {
+  final ApiService _apiService;
+  final TokenStorage _tokenStorage;
+
+  HadithAnalysisRepoImpl(this._apiService, this._tokenStorage);
+
+  @override
+  Future<ApiResult<HadithAnalysisResult>> analyzeHadith({
+    required String hadith,
+    required String attribution,
+    required String grade,
+    required String reference,
+  }) async {
     try {
-      final String token = await _getUserToken();
-      final response = await apiService.hadithAnalysis(request,token);
-      return Right(response);
-    } catch (e) {
-      log(e.toString());
-      return Left(ErrorHandler.handle(e));
+      final token = await _tokenStorage.requireToken();
+      final response = await _apiService.hadithAnalysis(
+        HadithAnalysisRequest(
+          hadeeth: hadith,
+          attribution: attribution,
+          grade: grade,
+          reference: reference,
+        ),
+        token,
+      );
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
-  }
-
-
-      Future<String> _getUserToken() async {
-    final sharedPref = await SharedPreferences.getInstance();
-    final token = sharedPref.getString('token');
-
-    if (token == null || token.isEmpty) {
-      throw Exception("No token found, user not logged in");
-    }
-    return token;
   }
 }

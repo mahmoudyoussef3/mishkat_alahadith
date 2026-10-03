@@ -8,23 +8,23 @@ final class EnhancedSearchInitial extends EnhancedSearchState {}
 final class EnhancedSearchLoading extends EnhancedSearchState {}
 
 final class EnhancedSearchLoaded extends EnhancedSearchState {
-  final EnhancedSearch enhancedSearch;
+  final List<ExplainedHadith> results;
   final bool isRefreshing;
   final bool isFromCache;
 
   EnhancedSearchLoaded(
-    this.enhancedSearch, {
+    this.results, {
     this.isRefreshing = false,
     this.isFromCache = false,
   });
 
   EnhancedSearchLoaded copyWith({
-    EnhancedSearch? enhancedSearch,
+    List<ExplainedHadith>? results,
     bool? isRefreshing,
     bool? isFromCache,
   }) {
     return EnhancedSearchLoaded(
-      enhancedSearch ?? this.enhancedSearch,
+      results ?? this.results,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       isFromCache: isFromCache ?? this.isFromCache,
     );

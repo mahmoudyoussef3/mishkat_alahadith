@@ -39,8 +39,8 @@ class _ShimmerBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: ColorsManager.mediumGray,
-      highlightColor: ColorsManager.lightGray,
+      baseColor: ColorsManager.shimmerBase,
+      highlightColor: ColorsManager.shimmerHighlight,
       child: Container(
         height: height,
         decoration: BoxDecoration(

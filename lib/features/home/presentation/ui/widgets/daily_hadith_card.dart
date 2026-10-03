@@ -5,8 +5,8 @@ import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/notification/hadith_refresh_notifier.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_cubit.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:mishkat_almasabih/core/theming/home_styles.dart';
@@ -25,11 +25,9 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
   @override
   void initState() {
     super.initState();
-    // ✅ ربط الكارد بالـ Notifier عشان تسمع التحديثات
     _notifier.addListener(_onHadithRefresh);
 
     debugPrint('🎧 HadithCard: Listening for notification updates');
-    // Trigger initial load if needed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DailyHadithCubit>().load();
     });
@@ -37,22 +35,17 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
 
   @override
   void dispose() {
-    // ✅ إزالة الـ Listener قبل الـ dispose
     _notifier.removeListener(_onHadithRefresh);
     debugPrint('👋 HadithCard: Stopped listening');
     super.dispose();
   }
 
-  /// يتم استدعاؤها تلقائياً لما notification تيجي
   void _onHadithRefresh() {
     debugPrint('🔄 HadithCard: Refresh triggered from notification');
     if (!mounted) return;
-    // Reload current hadith (cache-first). The native home widget is updated
-    // by SaveHadithDailyRepo whenever a new hadith is saved.
     context.read<DailyHadithCubit>().load();
   }
 
-  /// دالة refresh يدوية (لو حابب تستخدمها من أي مكان)
   void refresh() {
     debugPrint('🔄 HadithCard: Manual refresh');
     context.read<DailyHadithCubit>().load();
@@ -64,8 +57,8 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
       builder: (context, state) {
         if (state is DailyHadithLoading || state is DailyHadithInitial) {
           return Shimmer.fromColors(
-            baseColor: Colors.grey.shade300,
-            highlightColor: Colors.grey.shade100,
+            baseColor: ColorsManager.shimmerBase,
+            highlightColor: ColorsManager.shimmerHighlight,
             child: Container(
               margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
               height: 200.h,
@@ -87,20 +80,20 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
             height: 180.h,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: ColorsManager.lightGray,
               borderRadius: BorderRadius.circular(24.r),
             ),
             child: Center(
               child: Text(
                 "حصل خطأ أثناء تحميل الحديث",
-                style: TextStyle(fontSize: 16.sp, color: Colors.grey.shade600),
+                style: TextStyle(fontSize: 16.sp, color: ColorsManager.secondaryText),
                 textAlign: TextAlign.center,
               ),
             ),
           );
         }
 
-        final NewDailyHadithModel hadith =
+        final ExplainedHadith hadith =
             (state as DailyHadithSuccess).dailyHadithModel;
 
         debugPrint('📖 HadithCard: Displaying hadith - ${hadith.title}');
@@ -146,7 +139,7 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
                         children: [
                           Icon(
                             Icons.auto_stories,
-                            color: ColorsManager.secondaryBackground,
+                            color: ColorsManager.white,
                             size: 18.sp,
                           ),
                           SizedBox(width: 6.w),
@@ -191,7 +184,7 @@ class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
                     decoration: HomeDecorations.dailyHadithCornerQuote(),
                     child: Icon(
                       Icons.format_quote,
-                      color: ColorsManager.secondaryBackground,
+                      color: ColorsManager.white,
                       size: 24.sp,
                     ),
                   ),

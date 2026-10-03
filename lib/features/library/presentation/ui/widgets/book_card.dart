@@ -4,13 +4,13 @@ import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/networking/api_constants.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
-import 'package:mishkat_almasabih/features/library/ui/widgets/book_stat.dart';
+import 'package:mishkat_almasabih/features/library/domain/entities/library_book.dart';
+import 'package:mishkat_almasabih/features/library/presentation/ui/widgets/book_stat.dart';
 import 'package:mishkat_almasabih/core/theming/library_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/library_styles.dart';
 
 class BookCard extends StatelessWidget {
-  final Book book;
+  final LibraryBook book;
 
   const BookCard({super.key, required this.book});
 
@@ -25,8 +25,8 @@ class BookCard extends StatelessWidget {
               {
                 "bookName": bookNamesArabic[book.bookName],
                 "writerName": bookWriters[book.bookName],
-                "noOfChapters": book.chapters_count.toString(),
-                "noOfHadith": book.hadiths_count.toString(),
+                "noOfChapters": book.chaptersCount.toString(),
+                "noOfHadith": book.hadithsCount.toString(),
               },
             ],
           ),
@@ -67,11 +67,11 @@ class BookCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         BookStat(
-                          value: '${book.chapters_count} باب',
+                          value: '${book.chaptersCount} باب',
                           color: ColorsManager.accentPurple,
                         ),
                         BookStat(
-                          value: '${book.hadiths_count} حديث',
+                          value: '${book.hadithsCount} حديث',
                           color: ColorsManager.hadithAuthentic,
                         ),
                       ],

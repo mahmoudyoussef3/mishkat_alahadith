@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/ahadith/data/models/local_books_model.dart';
+import 'package:mishkat_almasabih/features/ahadith/domain/entities/local_book_hadith.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_styles.dart';
 
@@ -13,7 +13,7 @@ class LocalHadithCard extends StatelessWidget {
     required this.chapterName,
   });
 
-  final LocalHadith hadith;
+  final LocalBookHadith hadith;
   final String bookName;
   final String chapterName;
 
@@ -26,7 +26,6 @@ class LocalHadithCard extends StatelessWidget {
       decoration: HadithDecorations.chapterCard(ColorsManager.hadithAuthentic),
       child: Stack(
         children: [
-          // Islamic pattern overlay
           Positioned(
             top: -15,
             right: -15,
@@ -40,13 +39,11 @@ class LocalHadithCard extends StatelessWidget {
             ),
           ),
 
-          // Main content
           Padding(
             padding: EdgeInsets.all(20.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Enhanced header with Islamic design
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -75,7 +72,6 @@ class LocalHadithCard extends StatelessWidget {
 
                 SizedBox(height: 8.h),
 
-                // Enhanced hadith text
                 Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: HadithDecorations.hadithTextContainer(
@@ -92,7 +88,6 @@ class LocalHadithCard extends StatelessWidget {
 
                 SizedBox(height: 18.h),
 
-                // Enhanced book and chapter pills
                 Row(
                   children: [
                     Flexible(
@@ -106,7 +101,6 @@ class LocalHadithCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 12.w),
-                    // TODO: replace with chapter name when available
                     Flexible(
                       child: _buildGradientPill(
                         text: bookName,
@@ -120,7 +114,6 @@ class LocalHadithCard extends StatelessWidget {
                   ],
                 ),
 
-                // Decorative bottom line
                 SizedBox(height: 16.h),
                 Container(
                   height: 2.h,

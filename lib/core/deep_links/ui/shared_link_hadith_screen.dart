@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_details_cubit/cubit/hadith_by_category_details_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_details/hadith_by_category_details_cubit.dart';
 
 class SharedLinkHadithScreen extends StatefulWidget {
   final String hadithId;
@@ -59,7 +59,7 @@ class _SharedLinkHadithScreenState extends State<SharedLinkHadithScreen> {
           );
         }
 
-        return const Directionality(
+        return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
             backgroundColor: ColorsManager.primaryBackground,

@@ -1,60 +1,79 @@
 import 'dart:developer';
 
-import 'package:dartz/dartz.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/core/errors/failures.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
+import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
-import '../../../../../core/networking/api_error_handler.dart';
-import '../../../../../core/networking/api_service.dart';
+import '../../domain/entities/auth_session.dart';
+import '../../domain/repos/login_repo.dart';
+import '../datasources/google_auth_datasource.dart';
 import '../models/login_request_body.dart';
 import '../models/login_response_body.dart';
 
-class LoginRepo {
+class LoginRepoImpl implements LoginRepo {
+  static const String _googleCancelledMessage = 'تم إلغاء تسجيل الدخول';
+  static const String _invalidCredentialsMessage =
+      'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+
   final ApiService _apiService;
+  final GoogleAuthDataSource _googleAuth;
+  final TokenStorage _tokenStorage;
 
-  LoginRepo(this._apiService);
+  LoginRepoImpl(this._apiService, this._googleAuth, this._tokenStorage);
 
-  Future<Either<ApiErrorModel, LoginResponseBody>> login(
-    LoginRequestBody loginRequestBody,
-  ) async {
+  @override
+  Future<ApiResult<AuthSession>> login({
+    required String email,
+    required String password,
+  }) async {
     try {
-      final response = await _apiService.login(loginRequestBody);
-      return Right(response);
+      final response = await _apiService.login(
+        LoginRequestBody(email: email, password: password),
+      );
+      return _persistSession(response);
     } catch (error) {
-      return Left(ErrorHandler.handle(error));
+      return ApiResult.failure(_loginFailure(error));
     }
   }
 
-  Future<Either<ApiErrorModel, LoginResponseBody>> googleLogin() async {
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile', 'openid'],
-        serverClientId:
-            "479373165372-d9vr3f1c1b2aodv4kjngi5ra1diug1v6.apps.googleusercontent.com",
-      );
-
-     // await googleSignIn.signOut();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        return Left(ErrorHandler.handle('UnKnown error happened.'));
-      }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      final idToken = googleAuth.idToken ?? "";
-
-      final response = await _apiService.googleLogin({"token": idToken});
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString("token", response.token ?? "");
-
-      return Right(response);
-    } catch (error) {
-      print(error.toString());
-      log(error.toString());
-      return Left(ErrorHandler.handle(error));
+  Failure _loginFailure(Object error) {
+    final failure = ErrorHandler.toFailure(error);
+    if (failure is UnauthorizedFailure &&
+        failure.message == FailureMessages.unauthorized) {
+      return const UnauthorizedFailure(_invalidCredentialsMessage);
     }
+    return failure;
+  }
+
+  @override
+  Future<ApiResult<AuthSession>> loginWithGoogle() async {
+    try {
+      final idToken = await _googleAuth.signInAndGetIdToken();
+      if (idToken == null) {
+        return const ApiResult.failure(
+          UnexpectedFailure(_googleCancelledMessage),
+        );
+      }
+      final response = await _apiService.googleLogin({"token": idToken});
+      return _persistSession(response);
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
+    }
+  }
+
+  Future<ApiResult<AuthSession>> _persistSession(
+    LoginResponseBody response,
+  ) async {
+    final token = response.token;
+    if (token == null || token.isEmpty) {
+      return const ApiResult.failure(UnexpectedFailure());
+    }
+    await _tokenStorage.saveToken(token);
+    return ApiResult.success(
+      AuthSession(token: token, userName: response.userData?.userName),
+    );
   }
 }

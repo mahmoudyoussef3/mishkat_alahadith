@@ -3,29 +3,25 @@ import 'colors.dart';
 import 'styles.dart';
 
 class DailyZekrTextStyles {
-  // Section header title: "اختر ما أنجزته اليوم"
-  static TextStyle sectionHeaderTitle = TextStyles.headlineMedium.copyWith(
+  static TextStyle get sectionHeaderTitle => TextStyles.headlineMedium.copyWith(
     color: ColorsManager.primaryText,
     fontWeight: FontWeight.bold,
   );
 
-  // Info card title and body
-  static TextStyle infoTitle = TextStyles.titleLarge.copyWith(
+  static TextStyle get infoTitle => TextStyles.titleLarge.copyWith(
     color: ColorsManager.primaryText,
     fontWeight: FontWeight.w700,
   );
 
-  static TextStyle infoBody = TextStyles.bodyMedium.copyWith(
+  static TextStyle get infoBody => TextStyles.bodyMedium.copyWith(
     color: ColorsManager.secondaryText,
   );
 
-  // Hint text under zekr list
-  static TextStyle hintText = TextStyles.bodySmall.copyWith(
+  static TextStyle get hintText => TextStyles.bodySmall.copyWith(
     color: ColorsManager.gray,
     fontStyle: FontStyle.normal,
   );
 
-  // Zekr card title/description
   static TextStyle zekrTitle({required bool checked}) =>
       TextStyles.titleLarge.copyWith(
         color:
@@ -33,12 +29,11 @@ class DailyZekrTextStyles {
         fontFamily: 'Cairo',
       );
 
-  static TextStyle zekrDescription = TextStyles.bodyMedium.copyWith(
+  static TextStyle get zekrDescription => TextStyles.bodyMedium.copyWith(
     color: ColorsManager.secondaryText,
     fontFamily: 'Cairo',
   );
 
-  // Footer pill label
   static TextStyle footerLabel({
     required bool enabled,
     required bool checked,
@@ -52,8 +47,7 @@ class DailyZekrTextStyles {
     fontFamily: 'Cairo',
   );
 
-  // Personal tasks title and item text
-  static TextStyle personalTasksTitle = TextStyles.titleLarge.copyWith(
+  static TextStyle get personalTasksTitle => TextStyles.titleLarge.copyWith(
     color: ColorsManager.primaryText,
     fontWeight: FontWeight.bold,
   );
@@ -64,18 +58,17 @@ class DailyZekrTextStyles {
         decoration: isDone ? TextDecoration.lineThrough : null,
       );
 
-  // Buttons
-  static TextStyle primaryButtonLabel = TextStyles.titleMedium.copyWith(
+  static TextStyle get primaryButtonLabel => TextStyles.titleMedium.copyWith(
     color: Colors.white,
     fontWeight: FontWeight.bold,
   );
 
-  static TextStyle sheetTitle = TextStyles.titleLarge.copyWith(
+  static TextStyle get sheetTitle => TextStyles.titleLarge.copyWith(
     color: ColorsManager.primaryText,
     fontWeight: FontWeight.bold,
   );
 
-  static TextStyle inputHint = TextStyles.bodyMedium.copyWith(
+  static TextStyle get inputHint => TextStyles.bodyMedium.copyWith(
     color: ColorsManager.secondaryText,
   );
 }

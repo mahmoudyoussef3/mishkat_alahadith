@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-// ScreenUtil not used directly in this file
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart' show Routes;
 import 'package:mishkat_almasabih/core/theming/colors.dart';

@@ -4,16 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
-import 'package:mishkat_almasabih/features/remaining_questions/logic/cubit/remaining_questions_cubit.dart';
-import 'package:mishkat_almasabih/features/serag/logic/cubit/serag_cubit.dart';
-import 'package:mishkat_almasabih/features/serag/logic/cubit/serag_state.dart';
-import 'package:mishkat_almasabih/features/serag/logic/chat_history/chat_history_cubit.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
+import 'package:mishkat_almasabih/features/remaining_questions/presentation/logic/cubit/remaining_questions_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_state.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/domain/entities/chat_message.dart';
+import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
 
 class ChatInputSection extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback scrollToBottom;
-  final SeragRequestModel model;
+  final SeragHadithContext model;
 
   const ChatInputSection({
     super.key,
@@ -29,12 +30,11 @@ class ChatInputSection extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Input field
           BlocConsumer<SeragCubit, SeragState>(
             listener: (context, state) {
               if (state is SeragSuccess) {
                 context.read<ChatHistoryCubit>().addMessage(
-                  Message(role: "assistant", content: state.messages.response),
+                  ChatMessage(role: "assistant", content: state.response),
                 );
                 scrollToBottom();
               }
@@ -79,7 +79,6 @@ class ChatInputSection extends StatelessWidget {
                       child: Material(
                         color: Colors.transparent,
                         child: GestureDetector(
-                          //   borderRadius: BorderRadius.circular(25.r),
                           onTap:
                               seragState is SeragLoading
                                   ? null
@@ -156,7 +155,6 @@ class ChatInputSection extends StatelessWidget {
             color: SeragDecorations.dividerColor,
           ),
 
-          // Warning
           Container(
             width: double.infinity,
             padding: SeragDecorations.warningDisclaimerPadding,
@@ -177,15 +175,9 @@ class ChatInputSection extends StatelessWidget {
       HapticFeedback.lightImpact();
       context.read<RemainingQuestionsCubit>().emitRemainingQuestions();
       context.read<ChatHistoryCubit>().addMessage(
-        Message(role: "user", content: text),
+        ChatMessage(role: "user", content: text),
       );
-      context.read<SeragCubit>().sendMessage(
-        hadeeth: model.hadith.hadeeth,
-        grade_ar: model.hadith.grade_ar,
-        source: model.hadith.source,
-        takhrij_ar: model.hadith.takhrij_ar,
-        content: text,
-      );
+      context.read<SeragCubit>().sendMessage(hadith: model, content: text);
       controller.clear();
       scrollToBottom();
     }

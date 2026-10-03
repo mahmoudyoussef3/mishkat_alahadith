@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/prayer_times/data/models/location_model.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/entities/prayer_location.dart';
 
 class LocationSelectionDialog extends StatefulWidget {
-  final LocationModel currentLocation;
-  final ValueChanged<LocationModel> onLocationSelected;
+  final PrayerLocation currentLocation;
+  final ValueChanged<PrayerLocation> onLocationSelected;
   final VoidCallback onUseCurrentLocation;
 
   const LocationSelectionDialog({
@@ -54,7 +54,6 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
               Container(
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
@@ -92,7 +91,7 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
                       icon: Icon(Icons.close_rounded, size: 24.sp),
                       color: ColorsManager.secondaryText,
                       style: IconButton.styleFrom(
-                        backgroundColor: ColorsManager.white,
+                        backgroundColor: ColorsManager.cardBackground,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
                         ),
@@ -102,7 +101,6 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
                 ),
               ),
 
-              // Content
               Flexible(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -142,11 +140,11 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
                         child: ListView.separated(
                           shrinkWrap: true,
                           padding: EdgeInsets.only(bottom: 20.h),
-                          itemCount: LocationModel.egyptianCities.length,
+                          itemCount: PrayerLocation.egyptianCities.length,
                           separatorBuilder:
                               (context, index) => SizedBox(height: 10.h),
                           itemBuilder: (context, index) {
-                            final city = LocationModel.egyptianCities[index];
+                            final city = PrayerLocation.egyptianCities[index];
                             final isSelected =
                                 city.cityName ==
                                 widget.currentLocation.cityName;
@@ -238,7 +236,7 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
                 ),
               ),
               Icon(
-                Icons.arrow_forward_ios_rounded, // RTL correct direction
+                Icons.arrow_forward_ios_rounded,
                 size: 16.sp,
                 color: ColorsManager.primaryPurple,
               ),
@@ -249,7 +247,7 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
     );
   }
 
-  Widget _buildCityTile(LocationModel city, bool isSelected) {
+  Widget _buildCityTile(PrayerLocation city, bool isSelected) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -264,7 +262,7 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
             color:
                 isSelected
                     ? ColorsManager.primaryPurple.withOpacity(0.1)
-                    : ColorsManager.white,
+                    : ColorsManager.cardBackground,
             borderRadius: BorderRadius.circular(14.r),
             border: Border.all(
               color:

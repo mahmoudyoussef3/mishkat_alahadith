@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
-import 'package:mishkat_almasabih/features/remaining_questions/logic/cubit/remaining_questions_cubit.dart';
+import 'package:mishkat_almasabih/features/remaining_questions/presentation/logic/cubit/remaining_questions_cubit.dart';
 
 class RemainingQuestionsCard extends StatelessWidget {
   const RemainingQuestionsCard({super.key});
@@ -37,7 +37,7 @@ class RemainingQuestionsCard extends StatelessWidget {
                 SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
-                    'لديك ${state.remainigQuestionsResponse.remaining} محاولات متبقية اليوم',
+                    'لديك ${state.remainingQuestions.remaining} محاولات متبقية اليوم',
                     style: SeragTextStyles.remainingQuestionsText,
                   ),
                 ),

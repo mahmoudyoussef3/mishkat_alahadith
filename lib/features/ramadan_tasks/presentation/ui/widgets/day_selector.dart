@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// Horizontal day chips for picking a specific day in History mode.
 class DaySelector extends StatelessWidget {
   final int selectedDay;
   final int start;
@@ -44,7 +43,7 @@ class DaySelector extends StatelessWidget {
                 color:
                     selected
                         ? ColorsManager.primaryPurple
-                        : ColorsManager.white,
+                        : ColorsManager.cardBackground,
                 borderRadius: BorderRadius.circular(10.r),
                 border: Border.all(
                   color:

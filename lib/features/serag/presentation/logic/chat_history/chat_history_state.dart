@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_response_model.dart';
+import 'package:mishkat_almasabih/features/serag/domain/entities/chat_message.dart';
 
 @immutable
 sealed class ChatHistoryState {}
@@ -10,7 +9,7 @@ final class ChatHistoryInitial extends ChatHistoryState {}
 final class ChatHistoryLoading extends ChatHistoryState {}
 
 final class ChatHistorySuccess extends ChatHistoryState {
-  final List<Message> messages;
+  final List<ChatMessage> messages;
   ChatHistorySuccess(this.messages);
 }
 

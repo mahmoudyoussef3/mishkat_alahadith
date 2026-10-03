@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../../domain/entities/ramadan_task_entity.dart';
+import '../../../../domain/entities/ramadan_task_entity.dart';
 
 
 class MonthlyCalendarView extends StatelessWidget {
@@ -76,7 +76,6 @@ class MonthlyCalendarView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Title ──
           Padding(
             padding: EdgeInsetsDirectional.fromSTEB(16.w, 14.h, 16.w, 10.h),
             child: Row(
@@ -95,7 +94,6 @@ class MonthlyCalendarView extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                // Legend
                 _LegendDot(color: ColorsManager.success, label: 'مكتمل'),
                 SizedBox(width: 8.w),
                 _LegendDot(color: ColorsManager.primaryGold, label: 'جزئي'),
@@ -107,7 +105,6 @@ class MonthlyCalendarView extends StatelessWidget {
 
           Divider(height: 1, color: ColorsManager.mediumGray.withOpacity(0.5)),
 
-          // ── Weeks ──
           for (int week = 0; week < 4; week++) ...[
             _buildWeekSection(week),
             if (week < 3)
@@ -129,7 +126,6 @@ class MonthlyCalendarView extends StatelessWidget {
     final start = weekIndex * 7 + 1;
     final end = weekIndex == 3 ? 30 : (weekIndex + 1) * 7;
 
-    // Compute week progress
     double weekTotal = 0;
     double weekCompleted = 0;
     for (int d = start; d <= end; d++) {
@@ -145,7 +141,6 @@ class MonthlyCalendarView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Week header ──
           Row(
             children: [
               Text(
@@ -299,10 +294,6 @@ class MonthlyCalendarView extends StatelessWidget {
         .join();
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// Legend dot
-// ─────────────────────────────────────────────────────────────
 
 class _LegendDot extends StatelessWidget {
   final Color color;

@@ -1,94 +1,64 @@
 import 'dart:developer';
-import 'package:dartz/dartz.dart';
+
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
-import 'package:mishkat_almasabih/features/ahadith/data/models/ahadiths_model.dart';
-import 'package:mishkat_almasabih/features/ahadith/data/models/local_books_model.dart';
 
-/// Cached response wrapper for paginated ahadith
-class CachedAhadithData {
-  final List<Hadith> ahadith;
-  final int lastPage;
-  final int totalCount;
-  final DateTime cachedAt;
+import '../../domain/entities/chapter_ahadith_page.dart';
+import 'package:mishkat_almasabih/core/domain/entities/chapter_hadith.dart';
+import '../../domain/entities/local_book_hadith.dart';
+import '../../domain/repos/ahadith_repo.dart';
+import '../mappers/ahadith_mapper.dart';
+import '../models/ahadiths_model.dart';
+import '../models/cached_ahadith_data.dart';
 
-  CachedAhadithData({
-    required this.ahadith,
-    required this.lastPage,
-    required this.totalCount,
-    required this.cachedAt,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'ahadith': ahadith.map((h) => h.toJson()).toList(),
-    'lastPage': lastPage,
-    'totalCount': totalCount,
-    'cachedAt': cachedAt.millisecondsSinceEpoch,
-  };
-
-  factory CachedAhadithData.fromJson(Map<String, dynamic> json) {
-    return CachedAhadithData(
-      ahadith:
-          (json['ahadith'] as List)
-              .map((h) => Hadith.fromJson(h as Map<String, dynamic>))
-              .toList(),
-      lastPage: json['lastPage'] as int? ?? 1,
-      totalCount: json['totalCount'] as int? ?? 0,
-      cachedAt: DateTime.fromMillisecondsSinceEpoch(json['cachedAt'] as int),
-    );
-  }
-}
-
-class AhadithsRepo {
-  AhadithsRepo(this._apiService);
+class AhadithRepoImpl implements AhadithRepo {
   final ApiService _apiService;
-  final _cacheService = GenericCacheService.instance;
+  final GenericCacheService _cacheService;
 
-  /// Get cached ahadith for a book/chapter
-  Future<CachedAhadithData?> getCachedAhadith({
+  AhadithRepoImpl(this._apiService, this._cacheService);
+
+  @override
+  Future<CachedChapterAhadith?> getCachedAhadith({
     required String bookSlug,
     required int chapterId,
   }) async {
-    final cacheKey = CacheKeys.paginatedAhadith(bookSlug, chapterId);
-    return await _cacheService.getData<CachedAhadithData>(
-      key: cacheKey,
+    final cached = await _cacheService.getData<CachedAhadithData>(
+      key: CacheKeys.paginatedAhadith(bookSlug, chapterId),
       fromJson: CachedAhadithData.fromJson,
+    );
+    if (cached == null) return null;
+    return CachedChapterAhadith(
+      ahadith: cached.ahadith.map((h) => h.toEntity()).toList(),
+      lastLoadedPage: cached.lastPage,
+      totalCount: cached.totalCount,
     );
   }
 
-  /// Save ahadith to cache
+  @override
   Future<void> cacheAhadith({
     required String bookSlug,
     required int chapterId,
-    required List<Hadith> ahadith,
-    required int lastPage,
+    required List<ChapterHadith> ahadith,
+    required int lastLoadedPage,
     required int totalCount,
   }) async {
-    final cacheKey = CacheKeys.paginatedAhadith(bookSlug, chapterId);
-    final cachedData = CachedAhadithData(
-      ahadith: ahadith,
-      lastPage: lastPage,
-      totalCount: totalCount,
-      cachedAt: DateTime.now(),
-    );
     await _cacheService.saveData<CachedAhadithData>(
-      key: cacheKey,
-      data: cachedData,
+      key: CacheKeys.paginatedAhadith(bookSlug, chapterId),
+      data: CachedAhadithData(
+        ahadith: ahadith.map((h) => h.toModel()).toList(),
+        lastPage: lastLoadedPage,
+        totalCount: totalCount,
+        cachedAt: DateTime.now(),
+      ),
       toJson: (d) => d.toJson(),
       cacheExpirationHours: 24,
     );
   }
 
-  /// Merge new ahadith with existing, removing duplicates by ID
-  List<Hadith> mergeAhadith(List<Hadith> existing, List<Hadith> newItems) {
-    final existingIds = existing.map((h) => h.id).toSet();
-    final uniqueNew = newItems.where((h) => !existingIds.contains(h.id));
-    return [...existing, ...uniqueNew];
-  }
-
-  Future<Either<ApiErrorModel, HadithResponse>> getAhadith({
+  @override
+  Future<ApiResult<ChapterAhadithPage>> getAhadithPage({
     required String bookSlug,
     required int chapterId,
     required int page,
@@ -101,15 +71,24 @@ class AhadithsRepo {
         page,
         paginate,
       );
-
-      return Right(response);
-    } catch (e) {
-      log(e.toString());
-      return Left(ErrorHandler.handle(e));
+      return ApiResult.success(
+        ChapterAhadithPage(
+          ahadith: [
+            for (final hadith in response.hadiths?.data ?? const <Hadith>[])
+              hadith.toEntity(),
+          ],
+          totalPages: response.hadiths?.last_page ?? 1,
+          total: response.hadiths?.total ?? 0,
+        ),
+      );
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
-  Future<Either<ApiErrorModel, LocalHadithResponse>> getLocalAhadith({
+  @override
+  Future<ApiResult<List<LocalBookHadith>>> getLocalAhadith({
     required String bookSlug,
     required int chapterId,
   }) async {
@@ -118,15 +97,15 @@ class AhadithsRepo {
         bookSlug,
         chapterId,
       );
-
-      return Right(response);
-    } catch (e) {
-      log(e.toString());
-      return Left(ErrorHandler.handle(e));
+      return ApiResult.success(response.toEntities());
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
-  Future<Either<ApiErrorModel, LocalHadithResponse>> getThreeAhadith({
+  @override
+  Future<ApiResult<List<LocalBookHadith>>> getArbainAhadith({
     required String bookSlug,
     required int chapterId,
   }) async {
@@ -135,11 +114,10 @@ class AhadithsRepo {
         bookSlug,
         chapterId,
       );
-
-      return Right(response);
-    } catch (e) {
-      log(e.toString());
-      return Left(ErrorHandler.handle(e));
+      return ApiResult.success(response.toEntities());
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 }

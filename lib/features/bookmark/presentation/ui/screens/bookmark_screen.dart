@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/get_cubit/user_bookmarks_cubit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/book_collections_row.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/bookmark_list.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/search_bar_widget.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/book_collections_row.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/bookmark_list.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/search_bar_widget.dart';
 
 class BookmarkScreen extends StatefulWidget {
   const BookmarkScreen({super.key});
@@ -27,22 +27,11 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _query = "";
   bool showHadith = true;
-  bool _isLoggedIn = false;
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _checkAuth();
-  }
-
-  Future<void> _checkAuth() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    setState(() {
-      _isLoggedIn = token != null;
-      _isLoading = false;
-    });
+    context.read<SessionCubit>().checkSession();
   }
 
   @override
@@ -54,16 +43,15 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: 
-      _isLoggedIn
-          ?
-      
-      () => Future.wait([
-        BlocProvider.of<GetBookmarksCubit>(context).getUserBookmarks(),
-        BlocProvider.of<GetCollectionsBookmarkCubit>(context)
-            .getBookMarkCollections(),
-      ]) 
-          : () async {},
+      onRefresh: () async {
+        if (!context.read<SessionCubit>().isSignedIn) return;
+        await Future.wait([
+          BlocProvider.of<GetBookmarksCubit>(context).getUserBookmarks(),
+          BlocProvider.of<GetCollectionsBookmarkCubit>(
+            context,
+          ).getBookMarkCollections(),
+        ]);
+      },
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(
@@ -71,12 +59,16 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           bottom: true,
           child: Scaffold(
             backgroundColor: ColorsManager.secondaryBackground,
-            body:
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _isLoggedIn
-                    ? _buildBookmarkContent()
-                    : _buildLoginPrompt(context),
+            body: BlocBuilder<SessionCubit, SessionState>(
+              builder:
+                  (context, session) => switch (session) {
+                    SessionUnknown() => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    SessionSignedIn() => _buildBookmarkContent(),
+                    SessionSignedOut() => _buildLoginPrompt(context),
+                  },
+            ),
           ),
         ),
       ),

@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 class HadithDetailsDecorations {
-  // Main hadith text card container
   static BoxDecoration contentCard() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -29,7 +28,6 @@ class HadithDetailsDecorations {
     );
   }
 
-  // Chip label at top of hadith card ("نص الحديث")
   static BoxDecoration labelChip() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple.withOpacity(0.1),
@@ -41,7 +39,6 @@ class HadithDetailsDecorations {
     );
   }
 
-  // Small action icon decoration
   static BoxDecoration actionIcon(Color color) {
     return BoxDecoration(
       color: color.withOpacity(0.1),
@@ -50,10 +47,9 @@ class HadithDetailsDecorations {
     );
   }
 
-  // Generic section card container decoration
   static BoxDecoration sectionCard() {
     return BoxDecoration(
-      color: ColorsManager.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(16.r),
       boxShadow: [
         BoxShadow(
@@ -65,7 +61,6 @@ class HadithDetailsDecorations {
     );
   }
 
-  // Purple-tinted container used for actions / navigation rows
   static BoxDecoration actionRow() {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(12.r),
@@ -73,7 +68,6 @@ class HadithDetailsDecorations {
     );
   }
 
-  // Islamic separator gradient decoration
   static BoxDecoration separator() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -87,7 +81,6 @@ class HadithDetailsDecorations {
     );
   }
 
-  // Header info container (green accent)
   static BoxDecoration headerInfo() {
     return BoxDecoration(
       color: ColorsManager.primaryGreen.withOpacity(0.05),
@@ -96,12 +89,10 @@ class HadithDetailsDecorations {
     );
   }
 
-  // Circle avatar background for action icons
   static Color circleActionAvatarBg() {
     return ColorsManager.primaryPurple.withOpacity(0.1);
   }
 
-  // Grade chip background color with opacity
   static Color gradeChipBg(Color base) {
     return base.withOpacity(0.1);
   }

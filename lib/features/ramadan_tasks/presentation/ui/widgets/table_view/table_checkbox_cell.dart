@@ -3,13 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
-/// An animated circular checkbox cell for the Ramadan table grid.
-///
-/// Features:
-/// - Smooth scale animation on toggle
-/// - Subtle color transition when completed
-/// - Soft glow effect for completed state
-/// - Haptic feedback on tap
 class TableCheckboxCell extends StatefulWidget {
   final bool isCompleted;
   final bool enabled;
@@ -134,8 +127,6 @@ class _TableCheckboxCellState extends State<TableCheckboxCell>
   }
 }
 
-/// An empty placeholder cell used when a todayOnly task
-/// doesn't apply to a particular day row.
 class TableEmptyCell extends StatelessWidget {
   const TableEmptyCell({super.key});
 

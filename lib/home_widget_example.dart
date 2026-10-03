@@ -8,17 +8,14 @@ class HomeWidgetExample extends StatefulWidget {
 
 class _HomeWidgetExampleState extends State<HomeWidgetExample> {
   
-  // دالة لتحديث الويدجت
   Future<void> updateWidget() async {
     try {
-      // حفظ البيانات
       await HomeWidget.saveWidgetData<String>('widget_title', 'عنوان جديد');
       await HomeWidget.saveWidgetData<String>('widget_message', 'محتوى محدث');
       
-      // تحديث الويدجت
       await HomeWidget.updateWidget(
-        name: 'HomeWidgetProvider', // اسم الـ Provider في Android
-        iOSName: 'HomeWidgetProvider', // لو بتستخدم iOS
+        name: 'HomeWidgetProvider',
+        iOSName: 'HomeWidgetProvider',
       );
       
       ScaffoldMessenger.of(context).showSnackBar(

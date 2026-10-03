@@ -36,7 +36,7 @@ class _CategoriesSearchBarState extends State<CategoriesSearchBar> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ColorsManager.cardBackground,
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
@@ -86,7 +86,6 @@ class _CategoriesSearchBarState extends State<CategoriesSearchBar> {
                   ),
                 ),
 
-                // Search Input
                 Expanded(
                   child: TextField(
                     controller: _controller,
@@ -100,7 +99,7 @@ class _CategoriesSearchBarState extends State<CategoriesSearchBar> {
                     decoration: InputDecoration(
                       hintText: 'ابحث عن حديث أو كلمة…',
                       hintStyle: TextStyles.font14GrayRegular.copyWith(
-                        color: Colors.grey[400],
+                        color: ColorsManager.disabledText,
                       ),
                       border: InputBorder.none,
                       isDense: true,
@@ -109,7 +108,6 @@ class _CategoriesSearchBarState extends State<CategoriesSearchBar> {
                     style: TextStyles.font14GrayRegular,
                   ),
                 ),
-                // Clear Button
                 if (_controller.text.isNotEmpty)
                   Padding(
                     padding: EdgeInsetsDirectional.only(end: 8.w),
@@ -122,7 +120,7 @@ class _CategoriesSearchBarState extends State<CategoriesSearchBar> {
                         },
                         child: Icon(
                           Icons.close_rounded,
-                          color: Colors.grey[400],
+                          color: ColorsManager.disabledText,
                           size: 20.sp,
                         ),
                       ),

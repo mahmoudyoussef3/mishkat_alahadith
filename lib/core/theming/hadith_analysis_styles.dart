@@ -4,14 +4,12 @@ import 'colors.dart';
 import 'styles.dart';
 
 class HadithAnalysisTextStyles {
-  // Analyze button label
-  static TextStyle analyzeButtonLabel = TextStyles.titleMedium.copyWith(
-    color: ColorsManager.secondaryBackground,
+  static TextStyle get analyzeButtonLabel => TextStyles.titleMedium.copyWith(
+    color: ColorsManager.white,
     fontSize: 16.sp,
     fontWeight: FontWeight.bold,
   );
 
-  // Result title and body
   static TextStyle resultTitle({Color? textColor}) =>
       TextStyles.titleMedium.copyWith(
         fontSize: 18.sp,
@@ -23,11 +21,10 @@ class HadithAnalysisTextStyles {
       TextStyles.bodyMedium.copyWith(
         fontSize: 16.sp,
         height: 1.5,
-        color: textColor ?? Colors.black87,
+        color: textColor ?? ColorsManager.primaryText,
       );
 
-  // Snack bar text
-  static const TextStyle snackText = TextStyle(
-    color: ColorsManager.secondaryBackground,
+  static TextStyle get snackText => TextStyle(
+    color: ColorsManager.white,
   );
 }

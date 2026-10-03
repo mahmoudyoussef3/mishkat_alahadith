@@ -3,10 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../domain/entities/ramadan_task_entity.dart';
-import '../cubit/ramadan_tasks_cubit.dart';
+import '../../../domain/entities/ramadan_task_entity.dart';
+import '../../logic/ramadan_tasks_cubit.dart';
 
-/// Opens a bottom sheet to edit task title & description.
 void showEditTaskSheet(BuildContext parentContext, RamadanTaskEntity task) {
   final cubit = parentContext.read<RamadanTasksCubit>();
   final titleController = TextEditingController(text: task.title);
@@ -102,7 +101,6 @@ void _showDeleteConfirm(
   );
 }
 
-/// Sheet body with title, description fields and save/delete buttons.
 class _EditTaskSheetBody extends StatelessWidget {
   final TextEditingController titleController;
   final TextEditingController descriptionController;
@@ -124,7 +122,6 @@ class _EditTaskSheetBody extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle bar
           Container(
             width: 40.w,
             height: 4.h,
@@ -135,7 +132,6 @@ class _EditTaskSheetBody extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
 
-          // Header row with title and task type badge
           Row(
             children: [
               Expanded(
@@ -168,7 +164,6 @@ class _EditTaskSheetBody extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
 
-          // Title field
           TextField(
             controller: titleController,
             textDirection: TextDirection.rtl,
@@ -186,7 +181,7 @@ class _EditTaskSheetBody extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
-                borderSide: const BorderSide(
+                borderSide: BorderSide(
                   color: ColorsManager.primaryPurple,
                   width: 1.5,
                 ),
@@ -199,7 +194,6 @@ class _EditTaskSheetBody extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
 
-          // Description field
           TextField(
             controller: descriptionController,
             textDirection: TextDirection.rtl,
@@ -219,7 +213,7 @@ class _EditTaskSheetBody extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
-                borderSide: const BorderSide(
+                borderSide: BorderSide(
                   color: ColorsManager.primaryPurple,
                   width: 1.5,
                 ),
@@ -232,10 +226,8 @@ class _EditTaskSheetBody extends StatelessWidget {
           ),
           SizedBox(height: 20.h),
 
-          // Buttons row: delete + save
           Row(
             children: [
-              // Delete button
               SizedBox(
                 height: 48.h,
                 child: OutlinedButton.icon(
@@ -259,7 +251,6 @@ class _EditTaskSheetBody extends StatelessWidget {
               ),
               SizedBox(width: 12.w),
 
-              // Save button
               Expanded(
                 child: SizedBox(
                   height: 48.h,

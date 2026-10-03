@@ -9,12 +9,12 @@ import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/widgets/empty_search_state.dart';
 import 'package:mishkat_almasabih/core/widgets/hadith_card_shimer.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_state.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_details_cubit/cubit/hadith_by_category_details_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/widgets/hadith_category_card.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/widgets/error_widget.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_state.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_details/hadith_by_category_details_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/hadith_category_card.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/error_widget.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
 
 class AhadithListScreen extends StatefulWidget {
   final String categoryId;
@@ -242,7 +242,7 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
       return SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: const Center(
+          child: Center(
             child: CircularProgressIndicator(
               color: ColorsManager.primaryPurple,
             ),
@@ -368,7 +368,7 @@ class _AhadithSearchField extends StatelessWidget {
             hintStyle: TextStyles.bodyMedium.copyWith(
               color: ColorsManager.secondaryText,
             ),
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.search_rounded,
               color: ColorsManager.primaryPurple,
             ),
@@ -395,7 +395,7 @@ class _AhadithSearchField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(
+              borderSide: BorderSide(
                 color: ColorsManager.primaryPurple,
                 width: 1.5,
               ),

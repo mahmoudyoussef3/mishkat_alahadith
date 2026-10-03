@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Global styles not directly used; relying on AuthTextStyles
-import '../../../../../core/theming/auth_styles.dart';
+import 'package:mishkat_almasabih/core/theming/auth_styles.dart';
 
 class TermsAndConditionsText extends StatelessWidget {
   const TermsAndConditionsText({super.key});

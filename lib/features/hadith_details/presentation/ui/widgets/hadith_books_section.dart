@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/section_card.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/section_card.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
 class HadithBookSection extends StatelessWidget {

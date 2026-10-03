@@ -21,7 +21,6 @@ class DeepLinkRouter {
 
     await _waitForNavigator();
 
-    // 🔥 مهم: تأخير التنفيذ بعد أول frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       switch (action) {
         case _OpenHadithById(:final id):
@@ -34,13 +33,11 @@ class DeepLinkRouter {
   }
 
   static _DeepLinkAction? _parse(Uri uri) {
-    // ✅ https link
     if (uri.scheme == 'https' && uri.host == _apiHost) {
       final id = _sanitizeId(extractHadithId(uri));
       if (_isValidId(id)) return _OpenHadithById(id!);
     }
 
-    // ✅ custom scheme
     if (uri.scheme == 'mishkat') {
       if (uri.host == 'hadith' || uri.host == _apiHost) {
         final id = _sanitizeId(extractHadithId(uri));
@@ -52,7 +49,6 @@ class DeepLinkRouter {
   }
 
   static String? _extractHadithIdFromPathOrQuery(Uri uri) {
-    // 1. query param
     final fromQuery = uri.queryParameters['id'];
     if (_isValidId(fromQuery)) return fromQuery;
 
@@ -63,14 +59,12 @@ class DeepLinkRouter {
 
     if (segments.isEmpty) return null;
 
-    // 2. /hadith/:id
     final hadithIndex = segments.indexOf('hadith');
     if (hadithIndex != -1 && hadithIndex + 1 < segments.length) {
       final next = segments[hadithIndex + 1];
       if (_isValidId(next)) return next;
     }
 
-    // 3. fallback (last valid segment)
     for (final seg in segments.reversed) {
       if (_reservedSegments.contains(seg)) continue;
       if (_isValidId(seg)) return seg;
@@ -102,12 +96,9 @@ class DeepLinkRouter {
       await Future.delayed(step);
     }
 
-    // delay صغير بعد توفر navigator
     await Future.delayed(const Duration(milliseconds: 50));
   }
 }
-
-// ==========================
 
 sealed class _DeepLinkAction {
   const _DeepLinkAction();

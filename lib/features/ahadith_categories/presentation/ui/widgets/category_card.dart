@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/category_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/category_entity.dart';
 
 class CategoryCard extends StatelessWidget {
   final CategoryEntity category;
@@ -101,7 +101,7 @@ class CategoryCard extends StatelessWidget {
               _HadithCountChip(count: category.hadeethsCount),
               SizedBox(width: 6.w),
               Icon(
-                Icons.arrow_forward_ios_rounded, // Forward for RTL!
+                Icons.arrow_forward_ios_rounded,
                 color: ColorsManager.primaryPurple,
                 size: 16.sp,
               ),

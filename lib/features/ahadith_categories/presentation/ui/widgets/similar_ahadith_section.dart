@@ -5,9 +5,9 @@ import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/category_entity.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_state.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/category_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_state.dart';
 
 class SimilarAhadithSection extends StatelessWidget {
   final List<String> categoryIds;
@@ -173,7 +173,7 @@ class _CategorySimilarAhadithState extends State<_CategorySimilarAhadith> {
                             return Padding(
                               padding: EdgeInsets.only(bottom: 10.h),
                               child: Material(
-                                color: ColorsManager.white,
+                                color: ColorsManager.cardBackground,
                                 borderRadius: BorderRadius.circular(12.r),
                                 child: InkWell(
                                   onTap: () {

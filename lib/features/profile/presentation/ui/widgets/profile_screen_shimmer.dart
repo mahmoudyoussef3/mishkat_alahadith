@@ -2,22 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 class ProfileShimmerScreen extends StatelessWidget {
   const ProfileShimmerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Match the SliverAppBar structure from ProfileHeader
     return SliverAppBar(
-      foregroundColor: ColorsManager.secondaryBackground,
+      foregroundColor: ColorsManager.white,
       expandedHeight: 200.h,
       pinned: true,
       backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -33,7 +32,6 @@ class ProfileShimmerScreen extends StatelessWidget {
               children: [
                 SizedBox(height: 16.h),
 
-                // ✅ Avatar Shimmer
                 Shimmer.fromColors(
                   baseColor: Colors.white.withOpacity(0.3),
                   highlightColor: Colors.white.withOpacity(0.6),
@@ -45,7 +43,6 @@ class ProfileShimmerScreen extends StatelessWidget {
                 
                 const SizedBox(height: 16),
                 
-                // ✅ Username Shimmer
                 Shimmer.fromColors(
                   baseColor: Colors.white.withOpacity(0.3),
                   highlightColor: Colors.white.withOpacity(0.6),
@@ -61,7 +58,6 @@ class ProfileShimmerScreen extends StatelessWidget {
                 
                 const SizedBox(height: 8),
                 
-                // ✅ Email Shimmer
                 Shimmer.fromColors(
                   baseColor: Colors.white.withOpacity(0.3),
                   highlightColor: Colors.white.withOpacity(0.6),
@@ -80,7 +76,6 @@ class ProfileShimmerScreen extends StatelessWidget {
         ),
       ),
       actions: [
-        // ✅ Edit Button Shimmer
         Padding(
           padding: EdgeInsets.only(right: 8.w),
           child: Shimmer.fromColors(

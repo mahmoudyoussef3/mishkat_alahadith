@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/ramadan_task_entity.dart';
+import '../../../../domain/entities/ramadan_task_entity.dart';
 
-/// Converts an integer to Eastern Arabic numerals.
 String toArabicNumerals(int number) {
   const digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
   return number.toString().split('').map((d) => digits[int.parse(d)]).join();
 }
 
-/// Returns a spiritual icon for a task based on its title keywords.
 IconData taskIconForTitle(RamadanTaskEntity task) {
   final t = task.title;
   if (t.contains('صلاة') || t.contains('صلا')) return Icons.mosque_rounded;

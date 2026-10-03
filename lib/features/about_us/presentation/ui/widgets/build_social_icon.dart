@@ -20,7 +20,7 @@ class BuildSocialIcon extends StatelessWidget {
         radius: 26.r,
         child: Icon(
           icon,
-          color: ColorsManager.secondaryBackground,
+          color: ColorsManager.white,
           size: 22.sp,
         ),
       ),

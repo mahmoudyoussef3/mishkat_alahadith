@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/widgets/empty_search_state.dart';
-import 'package:mishkat_almasabih/features/ahadith/logic/cubit/ahadiths_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/local_hadith_card.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/separator.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/screens/hadith_details_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/logic/cubit/ahadiths_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/local_hadith_card.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/separator.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/screens/hadith_details_screen.dart';
 
 class LocalHadithListBuilder extends StatelessWidget {
   final LocalAhadithsSuccess state;

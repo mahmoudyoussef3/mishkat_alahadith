@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_categories_usecase.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/categories_cubit/categories_state.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_categories_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_state.dart';
 
 class CategoriesCubit extends Cubit<CategoriesState> {
   final GetCategoriesUseCase _getCategoriesUseCase;
@@ -12,9 +12,9 @@ class CategoriesCubit extends Cubit<CategoriesState> {
     emit(const CategoriesLoading());
     final result = await _getCategoriesUseCase();
 
-    result.fold(
-      (error) => emit(CategoriesError(error.message ?? 'حدث خطأ ما')),
-      (categories) => emit(CategoriesLoaded(categories)),
+    result.when(
+      success: (categories) => emit(CategoriesLoaded(categories)),
+      failure: (failure) => emit(CategoriesError(failure.message)),
     );
   }
 

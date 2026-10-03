@@ -1,123 +1,105 @@
 import 'dart:developer';
-import 'package:dartz/dartz.dart';
+
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_response.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/collection_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
-class BookMarkRepo {
+import '../../domain/entities/bookmark_action_result.dart';
+import '../../domain/entities/bookmark_collection.dart';
+import '../../domain/entities/user_bookmark.dart';
+import '../../domain/repos/bookmark_repo.dart';
+import '../mappers/bookmark_mapper.dart';
+import '../models/book_mark_model.dart';
+import '../models/collection_model.dart';
+
+class BookmarkRepoImpl implements BookmarkRepo {
   final ApiService _apiService;
-  final _cacheService = GenericCacheService.instance;
+  final TokenStorage _tokenStorage;
+  final GenericCacheService _cacheService;
 
-  BookMarkRepo(this._apiService);
+  BookmarkRepoImpl(this._apiService, this._tokenStorage, this._cacheService);
 
-  /// Get cached bookmarks
-  Future<BookmarksResponse?> getCachedBookmarks() async {
-    return await _cacheService.getData<BookmarksResponse>(
+  @override
+  Future<List<UserBookmark>?> getCachedBookmarks() async {
+    final cached = await _cacheService.getData<BookmarksResponse>(
       key: CacheKeys.bookmarks,
       fromJson: BookmarksResponse.fromJson,
     );
+    return cached?.bookmarks?.map((b) => b.toEntity()).toList();
   }
 
-  /// Save bookmarks to cache
-  Future<void> cacheBookmarks(BookmarksResponse data) async {
-    await _cacheService.saveData<BookmarksResponse>(
-      key: CacheKeys.bookmarks,
-      data: data,
-      toJson: (d) => d.toJson(),
-      cacheExpirationHours: 1,
-    );
+  @override
+  Future<ApiResult<List<UserBookmark>>> getBookmarks() async {
+    try {
+      final token = await _tokenStorage.requireToken();
+      final response = await _apiService.getUserBookmarks(token);
+      await _cacheService.saveData<BookmarksResponse>(
+        key: CacheKeys.bookmarks,
+        data: response,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 1,
+      );
+      return ApiResult.success([
+        for (final bookmark in response.bookmarks ?? const <Bookmark>[])
+          bookmark.toEntity(),
+      ]);
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
+    }
   }
 
-  /// Get cached collections
-  Future<CollectionsResponse?> getCachedCollections() async {
-    return await _cacheService.getData<CollectionsResponse>(
+  @override
+  Future<List<BookmarkCollection>?> getCachedCollections() async {
+    final cached = await _cacheService.getData<CollectionsResponse>(
       key: CacheKeys.bookmarkCollections,
       fromJson: CollectionsResponse.fromJson,
     );
+    return cached?.toEntities();
   }
 
-  /// Save collections to cache
-  Future<void> cacheCollections(CollectionsResponse data) async {
-    await _cacheService.saveData<CollectionsResponse>(
-      key: CacheKeys.bookmarkCollections,
-      data: data,
-      toJson: (d) => d.toJson(),
-      cacheExpirationHours: 1,
-    );
-  }
-
-  /// Invalidate bookmarks cache (call after add/delete)
-  Future<void> invalidateBookmarksCache() async {
-    await _cacheService.clearCache(CacheKeys.bookmarks);
-  }
-
-  /// Get all user bookmarks (with caching)
-  Future<Either<ApiErrorModel, BookmarksResponse>> getUserBookMarks() async {
+  @override
+  Future<ApiResult<List<BookmarkCollection>>> getCollections() async {
     try {
-      final token = await _getUserToken();
-      final response = await _apiService.getUserBookmarks(token);
-      // Cache the response
-      await cacheBookmarks(response);
-      return Right(response);
-    } catch (e) {
-      return Left(ErrorHandler.handle(e));
-    }
-  }
-
-  Future<Either<ApiErrorModel, CollectionsResponse>>
-  getBookmarkCollectionsRepo() async {
-    try {
-      final token = await _getUserToken();
+      final token = await _tokenStorage.requireToken();
       final response = await _apiService.getBookmarkCollection(token);
-      // Cache the response
-      await cacheCollections(response);
-      return Right(response);
-    } catch (e) {
-      return Left(ErrorHandler.handle(e));
+      await _cacheService.saveData<CollectionsResponse>(
+        key: CacheKeys.bookmarkCollections,
+        data: response,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 1,
+      );
+      return ApiResult.success(response.toEntities());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
-  Future<Either<ApiErrorModel, AddBookmarkResponse>> deleteBookMark(
-    int bookmarkId,
+  @override
+  Future<ApiResult<BookmarkActionResult>> addBookmark(
+    UserBookmark bookmark,
   ) async {
     try {
-      final token = await _getUserToken();
+      final token = await _tokenStorage.requireToken();
+      final response = await _apiService.addBookmark(token, bookmark.toModel());
+      await _cacheService.clearCache(CacheKeys.bookmarks);
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
+    }
+  }
+
+  @override
+  Future<ApiResult<BookmarkActionResult>> deleteBookmark(int bookmarkId) async {
+    try {
+      final token = await _tokenStorage.requireToken();
       final response = await _apiService.deleteUserBookmsrk(bookmarkId, token);
-      // Invalidate cache after mutation
-      await invalidateBookmarksCache();
-      return Right(response);
-    } catch (e) {
-      return Left(ErrorHandler.handle(e));
+      await _cacheService.clearCache(CacheKeys.bookmarks);
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
-  }
-
-  Future<Either<ApiErrorModel, AddBookmarkResponse>> addBookmark(
-    Bookmark body,
-  ) async {
-    try {
-      final token = await _getUserToken();
-      final response = await _apiService.addBookmark(token, body);
-      // Invalidate cache after mutation
-      await invalidateBookmarksCache();
-      return Right(response);
-    } catch (e) {
-      log(e.toString());
-      return Left(ErrorHandler.handle(e));
-    }
-  }
-
-  Future<String> _getUserToken() async {
-    final sharedPref = await SharedPreferences.getInstance();
-    final token = sharedPref.getString('token');
-
-    if (token == null || token.isEmpty) {
-      throw Exception("No token found, user not logged in");
-    }
-    return token;
   }
 }

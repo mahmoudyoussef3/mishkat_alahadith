@@ -29,7 +29,6 @@ class _HadithTextCardState extends State<HadithTextCard> {
             decoration: HadithDetailsDecorations.contentCard(),
             child: Stack(
               children: [
-                /// الخلفية الزخرفية
                 Positioned.fill(
                   child: Opacity(
                     opacity: 0.03,
@@ -43,11 +42,9 @@ class _HadithTextCardState extends State<HadithTextCard> {
                   ),
                 ),
 
-                /// المحتوى
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /// عنوان الكارد
                     Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: 12.w,
@@ -73,7 +70,6 @@ class _HadithTextCardState extends State<HadithTextCard> {
 
                     SizedBox(height: 20.h),
 
-                    /// نص الحديث
                     Text(
                       widget.hadithText,
                       textAlign: TextAlign.right,
@@ -82,7 +78,6 @@ class _HadithTextCardState extends State<HadithTextCard> {
 
                     SizedBox(height: 20.h),
 
-                    /// أيقونات النسخ والمشاركة
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Wrap(

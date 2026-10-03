@@ -1,7 +1,15 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+import '../errors/exceptions.dart';
+
 abstract class NetworkInfo {
   Future<bool> get isConnected;
+}
+
+extension NetworkInfoGuard on NetworkInfo {
+  Future<void> ensureConnected() async {
+    if (!await isConnected) throw const NoConnectionException();
+  }
 }
 
 class NetworkInfoImpl implements NetworkInfo {
@@ -12,8 +20,6 @@ class NetworkInfoImpl implements NetworkInfo {
   @override
   Future<bool> get isConnected async {
     final results = await connectivity.checkConnectivity();
-    // According to connectivity_plus documentation, checkConnectivity() returns a List<ConnectivityResult> in newer versions
-    // We check if it contains something other than .none
     return !results.contains(ConnectivityResult.none) && results.isNotEmpty;
   }
 }

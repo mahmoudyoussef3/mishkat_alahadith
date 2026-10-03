@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../../domain/worship_templates.dart';
+import '../../../logic/worship_templates.dart';
 import 'worship_tile.dart';
 
-/// A collapsible section grouping worship tiles under a labelled header.
 class WorshipSectionWidget extends StatelessWidget {
   final WorshipSection section;
   final void Function(WorshipTemplate template) onItemTap;
@@ -21,7 +20,6 @@ class WorshipSectionWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Section header ──
         Padding(
           padding: EdgeInsetsDirectional.only(
             start: 4.w,
@@ -55,7 +53,6 @@ class WorshipSectionWidget extends StatelessWidget {
             ],
           ),
         ),
-        // ── Items ──
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),

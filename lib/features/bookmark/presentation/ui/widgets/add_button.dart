@@ -4,8 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/entities/user_bookmark.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
 class AddCreationButton extends StatelessWidget {
@@ -73,7 +73,7 @@ class AddCreationButton extends StatelessWidget {
         return ElevatedButton.icon(
           onPressed: () {
             context.read<AddCubitCubit>().addBookmark(
-              Bookmark(
+              UserBookmark(
                 notes: notesController.text,
                 collection: collection.text,
                 bookName: bookName,

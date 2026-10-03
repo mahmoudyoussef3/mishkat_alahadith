@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../domain/entities/ramadan_task_entity.dart';
+import '../../../domain/entities/ramadan_task_entity.dart';
 
-/// A single task card with animated checkbox, type badge, and delete.
-/// Optimized with RepaintBoundary for scrolling performance.
 class RamadanTaskItem extends StatelessWidget {
   final RamadanTaskEntity task;
   final int todayDay;
@@ -61,11 +59,9 @@ class RamadanTaskItem extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // ── Animated checkbox ──
                   _AnimatedCheckbox(isCompleted: isCompleted),
                   SizedBox(width: 14.w),
 
-                  // ── Title + meta ──
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +110,6 @@ class RamadanTaskItem extends StatelessWidget {
                     ),
                   ),
 
-                  // ── Delete button ──
                   if (!readOnly)
                     IconButton(
                       onPressed: onDelete,
@@ -141,7 +136,6 @@ class RamadanTaskItem extends StatelessWidget {
   }
 }
 
-/// Animated circular checkbox with scale + color transition.
 class _AnimatedCheckbox extends StatelessWidget {
   final bool isCompleted;
 
@@ -180,7 +174,6 @@ class _AnimatedCheckbox extends StatelessWidget {
   }
 }
 
-/// Small type badge (daily / today only).
 class _TypeBadge extends StatelessWidget {
   final RamadanTaskEntity task;
 
@@ -212,7 +205,6 @@ class _TypeBadge extends StatelessWidget {
   }
 }
 
-/// Status indicator with dot
 class _StatusIndicator extends StatelessWidget {
   final bool isCompleted;
 

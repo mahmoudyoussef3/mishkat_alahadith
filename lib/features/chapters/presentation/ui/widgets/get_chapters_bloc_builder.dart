@@ -4,11 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
-import 'package:mishkat_almasabih/features/chapters/ui/widgets/build_statistics_container.dart';
-import 'package:mishkat_almasabih/features/chapters/ui/widgets/chapters_grid_view.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/search_bar_widget.dart';
-import '../../../../core/theming/colors.dart';
-import '../../../home/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/widgets/build_statistics_container.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/widgets/chapters_grid_view.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/search_bar_widget.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import '../../../../home/presentation/ui/widgets/build_header_app_bar.dart';
 import '../../logic/cubit/chapters_cubit.dart';
 import 'package:mishkat_almasabih/core/theming/chapters_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/chapters_styles.dart';
@@ -93,7 +93,7 @@ class GetBookChaptersBlocBuilder extends StatelessWidget {
                       hasScrollBody: false,
                       child: Center(
                         child: Card(
-                          color: Colors.white,
+                          color: ColorsManager.cardBackground,
                           elevation: 5,
                           shape: ChaptersDecorations.emptyCardShape(),
                           child: Padding(

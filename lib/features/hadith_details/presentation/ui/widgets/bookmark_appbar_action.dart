@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/add_bookmark_dialogs.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/add_bookmark_dialogs.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
 
 class BookmarkAppBarAction extends StatelessWidget {
-  final String? token;
   final String bookName;
   final String bookSlug;
   final String chapter;
@@ -19,7 +19,6 @@ class BookmarkAppBarAction extends StatelessWidget {
 
   const BookmarkAppBarAction({
     super.key,
-    required this.token,
     required this.bookName,
     required this.bookSlug,
     required this.chapter,
@@ -32,7 +31,7 @@ class BookmarkAppBarAction extends StatelessWidget {
     return AppBarActionButton(
       icon: Icons.bookmark_border_rounded,
       onPressed: () {
-        if (token == null) {
+        if (!context.read<SessionCubit>().isSignedIn) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: ColorsManager.primaryGreen,

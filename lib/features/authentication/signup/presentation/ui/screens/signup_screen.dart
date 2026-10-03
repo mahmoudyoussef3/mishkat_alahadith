@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:mishkat_almasabih/features/authentication/signup/ui/widgets/already_have_account.dart';
-import 'package:mishkat_almasabih/features/authentication/signup/ui/widgets/build_signup_header.dart';
-import 'package:mishkat_almasabih/features/authentication/signup/ui/widgets/build_welcome_message.dart';
-import 'package:mishkat_almasabih/features/authentication/signup/ui/widgets/sign_up_form.dart';
-import 'package:mishkat_almasabih/features/authentication/signup/ui/widgets/signup_bloc_listener.dart';
-import '../../../../../core/theming/colors.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/widgets/already_have_account.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/widgets/build_signup_header.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/widgets/build_welcome_message.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/widgets/sign_up_form.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/widgets/signup_bloc_listener.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 
 class SignupScreen extends StatelessWidget {
@@ -18,7 +18,7 @@ class SignupScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: ColorsManager.white,
+        backgroundColor: ColorsManager.secondaryBackground,
         body: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
           child: Column(
@@ -47,8 +47,6 @@ class SignupScreen extends StatelessWidget {
               SizedBox(height: 24.h),
           
               AlreadyHaveAccount(),
-                 //       SizedBox(height: 8.h),
-         //     LoginWithGoogle(),
           
               SizedBox(height: 40.h),
             ],

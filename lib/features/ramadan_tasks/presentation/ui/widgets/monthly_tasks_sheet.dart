@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../domain/entities/ramadan_task_entity.dart';
+import '../../../domain/entities/ramadan_task_entity.dart';
 
-/// Full-screen modal bottom sheet displaying all 30 Ramadan days
-/// in a vertical scrollable list with tasks listed under each day.
 class MonthlyTasksSheet extends StatelessWidget {
   final List<RamadanTaskEntity> allTasks;
   final int todayDay;
@@ -16,7 +14,6 @@ class MonthlyTasksSheet extends StatelessWidget {
     required this.todayDay,
   });
 
-  /// Convenience method to open the sheet from any screen.
   static void show(
     BuildContext context, {
     required List<RamadanTaskEntity> allTasks,
@@ -30,8 +27,6 @@ class MonthlyTasksSheet extends StatelessWidget {
     );
   }
 
-  // ── Data helpers ─────────────────────────────────────────────
-
   List<RamadanTaskEntity> get _dailyTasks =>
       allTasks.where((t) => t.type == TaskType.daily).toList();
 
@@ -40,7 +35,6 @@ class MonthlyTasksSheet extends StatelessWidget {
           .where((t) => t.type == TaskType.todayOnly && t.createdForDay == day)
           .toList();
 
-  /// All tasks that should appear under a given day.
   List<RamadanTaskEntity> _tasksForDay(int day) => [
     ..._dailyTasks,
     ..._todayOnlyForDay(day),
@@ -81,10 +75,8 @@ class MonthlyTasksSheet extends StatelessWidget {
             ),
             child: Column(
               children: [
-                // ── Drag handle ──
                 _DragHandle(),
 
-                // ── Header ──
                 _SheetHeader(
                   todayDay: todayDay,
                   totalDays: 30,
@@ -93,7 +85,6 @@ class MonthlyTasksSheet extends StatelessWidget {
 
                 SizedBox(height: 8.h),
 
-                // ── Day list ──
                 Expanded(
                   child: ListView.separated(
                     controller: scrollController,
@@ -137,10 +128,6 @@ class MonthlyTasksSheet extends StatelessWidget {
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-// Private helper widgets
-// ══════════════════════════════════════════════════════════════
-
 class _DragHandle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -181,7 +168,7 @@ class _SheetHeader extends StatelessWidget {
                 width: 42.w,
                 height: 42.w,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [
                       ColorsManager.primaryPurple,
                       ColorsManager.darkPurple,
@@ -216,7 +203,6 @@ class _SheetHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              // Stats badge
               Container(
                 padding: EdgeInsetsDirectional.symmetric(
                   horizontal: 12.w,
@@ -240,7 +226,6 @@ class _SheetHeader extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12.h),
-          // Divider
           Container(
             height: 1,
             color: ColorsManager.mediumGray.withOpacity(0.3),
@@ -251,7 +236,6 @@ class _SheetHeader extends StatelessWidget {
   }
 }
 
-/// A card representing a single day (1–30) with its tasks listed vertically.
 class _DayCard extends StatelessWidget {
   final int day;
   final int todayDay;
@@ -302,7 +286,6 @@ class _DayCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Day header bar ──
           _DayHeaderBar(
             day: day,
             isToday: _isToday,
@@ -314,7 +297,6 @@ class _DayCard extends StatelessWidget {
             toArabicNumerals: toArabicNumerals,
           ),
 
-          // ── Tasks list ──
           if (tasks.isEmpty)
             Padding(
               padding: EdgeInsetsDirectional.symmetric(
@@ -367,7 +349,6 @@ class _DayCard extends StatelessWidget {
   }
 }
 
-/// Gradient header bar at the top of each day card.
 class _DayHeaderBar extends StatelessWidget {
   final int day;
   final bool isToday;
@@ -411,7 +392,6 @@ class _DayHeaderBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Day badge
           Container(
             width: 32.w,
             height: 32.w,
@@ -431,7 +411,6 @@ class _DayHeaderBar extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
 
-          // Day label
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -473,7 +452,6 @@ class _DayHeaderBar extends StatelessWidget {
                 ),
                 if (totalCount > 0) ...[
                   SizedBox(height: 3.h),
-                  // Mini progress bar
                   Row(
                     children: [
                       Expanded(
@@ -505,7 +483,6 @@ class _DayHeaderBar extends StatelessWidget {
             ),
           ),
 
-          // Completion icon
           if (isFullyCompleted && totalCount > 0)
             Icon(
               Icons.check_circle_rounded,
@@ -518,7 +495,6 @@ class _DayHeaderBar extends StatelessWidget {
   }
 }
 
-/// A single task row inside a day card.
 class _TaskRow extends StatelessWidget {
   final RamadanTaskEntity task;
   final int day;
@@ -541,7 +517,6 @@ class _TaskRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Checkbox ──
           Padding(
             padding: EdgeInsetsDirectional.only(top: 1.h),
             child: AnimatedContainer(
@@ -571,7 +546,6 @@ class _TaskRow extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
 
-          // ── Task content ──
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -609,7 +583,6 @@ class _TaskRow extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
 
-          // ── Type badge ──
           Container(
             padding: EdgeInsetsDirectional.symmetric(
               horizontal: 5.w,

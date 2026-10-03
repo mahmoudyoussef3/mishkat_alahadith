@@ -43,7 +43,6 @@ class BuildMainCategoryCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Islamic pattern background
             Positioned.fill(
               child: Opacity(
                 opacity: 0.08,
@@ -57,7 +56,6 @@ class BuildMainCategoryCard extends StatelessWidget {
               ),
             ),
 
-            // Decorative corner element
             Positioned(
               top: 0,
               right: 0,
@@ -73,7 +71,6 @@ class BuildMainCategoryCard extends StatelessWidget {
               ),
             ),
 
-            // Main content
             Padding(
               padding: EdgeInsets.symmetric(
                 vertical: Spacing.md2,
@@ -86,7 +83,6 @@ class BuildMainCategoryCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // Title with enhanced styling
                         Text(
                           title,
                           style: HomeTextStyles.mainCategoryTitle,
@@ -95,32 +91,8 @@ class BuildMainCategoryCard extends StatelessWidget {
                         ),
                         SizedBox(height: Spacing.xs),
 
-                        // Subtitle with enhanced styling
-                        /*      Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ColorsManager.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(
-                              color: ColorsManager.white.withOpacity(0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            subtitle,
-                            style: TextStyles.bodyMedium.copyWith(
-                              color: ColorsManager.white.withOpacity(0.95),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        */
                         SizedBox(height: Spacing.xs),
 
-                        // Description with enhanced styling
                         Flexible(
                           child: Text(
                             description,
@@ -133,7 +105,6 @@ class BuildMainCategoryCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Book count with enhanced styling
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: Spacing.md,
@@ -155,7 +126,6 @@ class BuildMainCategoryCard extends StatelessWidget {
               ),
             ),
 
-            // Icon overlay
             Positioned(
               bottom: 16.h,
               left: 16.w,

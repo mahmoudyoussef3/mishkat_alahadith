@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
+import 'package:mishkat_almasabih/core/data/models/new_daily_hadith_model.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/data/datasources/daily_hadith_local_datasource.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const MethodChannel _homeWidgetChannel = MethodChannel('home_widget');
@@ -30,11 +30,11 @@ void main() {
         .setMockMethodCallHandler(_homeWidgetChannel, null);
   });
 
-  group('SaveHadithDailyRepo.saveHadith', () {
+  group('DailyHadithLocalDataSource.saveHadith', () {
     test('pushes the new hadith text to the home screen widget', () async {
       final calls = _mockHomeWidget();
 
-      await SaveHadithDailyRepo().saveHadith(
+      await DailyHadithLocalDataSource().saveHadith(
         const NewDailyHadithModel(id: '1', hadeeth: 'حديث جديد'),
       );
 
@@ -49,7 +49,7 @@ void main() {
     test('leaves the widget untouched when the hadith text is empty', () async {
       final calls = _mockHomeWidget();
 
-      await SaveHadithDailyRepo().saveHadith(
+      await DailyHadithLocalDataSource().saveHadith(
         const NewDailyHadithModel(id: '1', hadeeth: ''),
       );
 
@@ -58,7 +58,7 @@ void main() {
 
     test('still persists the hadith when the widget update fails', () async {
       _mockHomeWidget(fail: true);
-      final repo = SaveHadithDailyRepo();
+      final repo = DailyHadithLocalDataSource();
 
       await repo.saveHadith(
         const NewDailyHadithModel(id: '1', hadeeth: 'حديث جديد'),

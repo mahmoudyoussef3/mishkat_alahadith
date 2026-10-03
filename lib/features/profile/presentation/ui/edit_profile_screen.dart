@@ -7,11 +7,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
 import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
-import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
-import 'package:mishkat_almasabih/features/profile/edit_profile/logic/cubit/edit_profile_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/domain/entities/user_profile.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/logic/edit_profile/edit_profile_cubit.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  final UserResponseModel userData;
+  final UserProfile userData;
 
   const EditProfileScreen({super.key, required this.userData});
 
@@ -115,12 +115,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             style: ProfileTextStyles.editProfileTitle,
                           ),
                         ),
-                        SizedBox(width: 48.w), // space balance
+                        SizedBox(width: 48.w),
                       ],
                     ),
                     SizedBox(height: 30.h),
 
-                    // ===== Avatar Section =====
                     AvatarSection(
                       selectedImageFile: _selectedImageFile,
                       avatarUrl: getAvatarUrl(widget.userData),
@@ -128,11 +127,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     SizedBox(height: 32.h),
 
-                    // ===== Username =====
                     UsernameSection(controller: _usernameController),
                     SizedBox(height: 24.h),
 
-                    // ===== InfoCard =====
                     InfoCard(
                       email: widget.userData.email,
                       createdAt: _formatDate(widget.userData.createdAt),
@@ -140,7 +137,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     SizedBox(height: 40.h),
 
-                    // ===== Save Button =====
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -190,7 +186,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  String getAvatarUrl(UserResponseModel? user) {
+  String getAvatarUrl(UserProfile? user) {
     const String defaultAvatar =
         "https://api.hadith-shareef.com/api/uploads/avatars/default-avatar.jpg";
     if (user == null) {
@@ -251,10 +247,10 @@ class AvatarSection extends StatelessWidget {
           child: CircleAvatar(
             radius: 60.r,
             backgroundImage: imageProvider,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: ColorsManager.lightGray,
             child:
                 imageProvider == null
-                    ? Icon(Icons.person, size: 60.r, color: Colors.grey)
+                    ? Icon(Icons.person, size: 60.r, color: ColorsManager.gray)
                     : null,
           ),
         ),

@@ -8,8 +8,8 @@ final class RemainingQuestionsInitial extends RemainingQuestionsState {}
 final class RemainingQuestionsLoading extends RemainingQuestionsState {}
 
 final class RemainingQuestionsSuccess extends RemainingQuestionsState {
-  final RmainingQuestionsResponse remainigQuestionsResponse;
-  RemainingQuestionsSuccess(this.remainigQuestionsResponse);
+  final RemainingQuestions remainingQuestions;
+  RemainingQuestionsSuccess(this.remainingQuestions);
 }
 
 final class RemainingQuestionsFailure extends RemainingQuestionsState {

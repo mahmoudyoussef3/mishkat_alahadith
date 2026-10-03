@@ -5,12 +5,10 @@ sealed class AddCubitState {}
 
 final class AddCubitInitial extends AddCubitState {}
 
-
-
 final class AddLoading extends AddCubitState {}
 
 final class AddSuccess extends AddCubitState {
-  final AddBookmarkResponse addBookmarkResponse;
+  final BookmarkActionResult addBookmarkResponse;
   AddSuccess(this.addBookmarkResponse);
 }
 

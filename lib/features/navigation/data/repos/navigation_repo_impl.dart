@@ -1,94 +1,83 @@
 import 'dart:developer';
 
-import 'package:dartz/dartz.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
-import 'package:mishkat_almasabih/features/navigation/data/models/local_hadith_navigation_model.dart';
-import 'package:mishkat_almasabih/features/navigation/data/models/navigation_hadith_model.dart';
 
-class NavigationRepo {
+import '../../domain/entities/hadith_navigation.dart';
+import '../../domain/repos/navigation_repo.dart';
+import '../mappers/navigation_mapper.dart';
+import '../models/navigation_hadith_model.dart';
+
+class NavigationRepoImpl implements NavigationRepo {
   final ApiService _apiService;
-  final _cacheService = GenericCacheService.instance;
+  final GenericCacheService _cacheService;
 
-  NavigationRepo(this._apiService);
+  NavigationRepoImpl(this._apiService, this._cacheService);
 
-  /// Get cached navigation data
-  Future<NavigationHadithResponse?> getCachedNavigation(
-    String bookSlug,
-    int chapterNumber,
-    String hadithNumber,
-  ) async {
-    final cacheKey = CacheKeys.navigation(
-      bookSlug,
-      chapterNumber,
-      hadithNumber,
-    );
-    return await _cacheService.getData<NavigationHadithResponse>(
-      key: cacheKey,
-      fromJson: NavigationHadithResponse.fromJson,
-    );
-  }
-
-  /// Save navigation data to cache
-  Future<void> cacheNavigation(
-    String bookSlug,
-    int chapterNumber,
-    String hadithNumber,
-    NavigationHadithResponse data,
-  ) async {
-    final cacheKey = CacheKeys.navigation(
-      bookSlug,
-      chapterNumber,
-      hadithNumber,
-    );
-    await _cacheService.saveData<NavigationHadithResponse>(
-      key: cacheKey,
-      data: data,
-      toJson: (d) => d.toJson(),
-      cacheExpirationHours: 24,
-    );
-  }
-
-  Future<Either<ApiErrorModel, NavigationHadithResponse>> navigationHadith(
-    String hadithNumber,
+  String _cacheKey(
     String bookSlug,
     String chapterNumber,
-  ) async {
+    String hadithNumber,
+  ) => CacheKeys.navigation(
+    bookSlug,
+    int.tryParse(chapterNumber) ?? 0,
+    hadithNumber,
+  );
+
+  @override
+  Future<HadithNavigation?> getCachedNavigation({
+    required String hadithNumber,
+    required String bookSlug,
+    required String chapterNumber,
+  }) async {
+    final cached = await _cacheService.getData<NavigationHadithResponse>(
+      key: _cacheKey(bookSlug, chapterNumber, hadithNumber),
+      fromJson: NavigationHadithResponse.fromJson,
+    );
+    return cached?.toEntity();
+  }
+
+  @override
+  Future<ApiResult<HadithNavigation>> getNavigation({
+    required String hadithNumber,
+    required String bookSlug,
+    required String chapterNumber,
+  }) async {
     try {
       final response = await _apiService.navigationHadith(
         hadithNumber,
         bookSlug,
         chapterNumber,
       );
-      // Cache the response
-      await cacheNavigation(
-        bookSlug,
-        int.tryParse(chapterNumber) ?? 0,
-        hadithNumber,
-        response,
+      await _cacheService.saveData<NavigationHadithResponse>(
+        key: _cacheKey(bookSlug, chapterNumber, hadithNumber),
+        data: response,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 24,
       );
-      return Right(response);
-    } catch (err) {
-      log(err.toString());
-      return Left(ErrorHandler.handle(err));
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
-  Future<Either<ApiErrorModel, LocalNavigationHadithResponse>> localNavigation(
-    String hadithNumber,
-    String bookSlug,
-  ) async {
+  @override
+  Future<ApiResult<HadithNavigation>> getLocalNavigation({
+    required String hadithNumber,
+    required String bookSlug,
+  }) async {
     try {
       final response = await _apiService.localNavigationHadith(
         hadithNumber,
         bookSlug,
       );
-      return Right(response);
-    } catch (err) {
-      log(err.toString());
-      return Left(ErrorHandler.handle(err));
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../domain/entities/ramadan_task_entity.dart';
-import '../../cubit/ramadan_tasks_cubit.dart';
+import '../../../../domain/entities/ramadan_task_entity.dart';
+import '../../../logic/ramadan_tasks_cubit.dart';
 import '../day_selector.dart';
 import '../delete_confirm_dialog.dart';
 import '../empty_state.dart';
@@ -10,7 +10,6 @@ import '../ramadan_task_item.dart';
 import '../section_header.dart';
 import '../week_selector.dart';
 
-/// Card-based list view for tasks - optimized for scrolling performance
 class RamadanCardView extends StatelessWidget {
   final RamadanTasksLoaded state;
 
@@ -29,15 +28,12 @@ class RamadanCardView extends StatelessWidget {
   int _calculateItemCount(RamadanTasksLoaded s) {
     int count = 0;
 
-    // History selectors
     if (s.viewMode == ViewMode.history) {
-      count += 3; // WeekSelector + spacing + DaySelector + spacing
+      count += 3;
     }
 
-    // Section header + spacing
     count += 2;
 
-    // Tasks or empty state
     if (s.filteredTasks.isEmpty) {
       count += 1;
     } else {
@@ -54,7 +50,6 @@ class RamadanCardView extends StatelessWidget {
   ) {
     int currentIndex = index;
 
-    // History selectors
     if (s.viewMode == ViewMode.history) {
       if (currentIndex == 0) {
         return WeekSelector(
@@ -77,7 +72,6 @@ class RamadanCardView extends StatelessWidget {
       currentIndex -= 4;
     }
 
-    // Section header
     if (currentIndex == 0) {
       return SectionHeader(
         title:
@@ -90,7 +84,6 @@ class RamadanCardView extends StatelessWidget {
     if (currentIndex == 1) return SizedBox(height: 8.h);
     currentIndex -= 2;
 
-    // Tasks or empty state
     if (s.filteredTasks.isEmpty) {
       if (currentIndex == 0) {
         return RamadanEmptyState(viewMode: s.viewMode);

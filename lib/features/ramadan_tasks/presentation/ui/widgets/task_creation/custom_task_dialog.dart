@@ -3,11 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../../domain/entities/ramadan_task_entity.dart';
-import '../../cubit/ramadan_tasks_cubit.dart';
+import '../../../../domain/entities/ramadan_task_entity.dart';
+import '../../../logic/ramadan_tasks_cubit.dart';
 
-/// Dialog for adding a custom worship task with title, description,
-/// and daily/today-only selection.
 class CustomTaskDialog extends StatefulWidget {
   const CustomTaskDialog({super.key});
 
@@ -35,8 +33,8 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
       description: _descCtrl.text,
       type: _type,
     );
-    Navigator.pop(context); // close dialog
-    Navigator.pop(context); // close bottom sheet
+    Navigator.pop(context);
+    Navigator.pop(context);
   }
 
   @override
@@ -56,7 +54,6 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ── Header ──
                 Row(
                   children: [
                     Container(
@@ -86,7 +83,6 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
                 ),
                 SizedBox(height: 20.h),
 
-                // ── Title field ──
                 TextFormField(
                   controller: _titleCtrl,
                   textDirection: TextDirection.rtl,
@@ -103,7 +99,6 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
                 ),
                 SizedBox(height: 12.h),
 
-                // ── Description field ──
                 TextFormField(
                   controller: _descCtrl,
                   textDirection: TextDirection.rtl,
@@ -117,7 +112,6 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
                 ),
                 SizedBox(height: 16.h),
 
-                // ── Type selector ──
                 Text(
                   'نوع العبادة',
                   style: TextStyles.titleSmall.copyWith(
@@ -150,7 +144,6 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
                 ),
                 SizedBox(height: 22.h),
 
-                // ── Submit button ──
                 SizedBox(
                   height: 48.h,
                   child: ElevatedButton(
@@ -201,7 +194,7 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.r),
-        borderSide: const BorderSide(
+        borderSide: BorderSide(
           color: ColorsManager.primaryPurple,
           width: 1.5,
         ),
@@ -221,10 +214,6 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// Type selection chip
-// ─────────────────────────────────────────────────────────────
 
 class _TypeChip extends StatelessWidget {
   final String label;

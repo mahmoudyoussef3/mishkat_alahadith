@@ -4,8 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
-import '../../../domain/entities/ramadan_task_entity.dart';
-import '../../cubit/ramadan_tasks_cubit.dart';
+import '../../../../domain/entities/ramadan_task_entity.dart';
+import '../../../logic/ramadan_tasks_cubit.dart';
 import 'fullscreen_table_overlay.dart';
 import 'grid_cells/grid_checkbox_cell.dart';
 import 'grid_cells/grid_corner_cell.dart';
@@ -16,14 +16,17 @@ import 'table_utils.dart';
 
 const int _kDays = 30;
 
-const Color _headerBg = ColorsManager.primaryPurple;
+Color get _headerBg => ColorsManager.primaryPurple;
 const Color _headerBorderBottom = Color(0xFF6435CC);
-const Color _oddRowBg = Color(0xFFF8F5FF);
-const Color _evenRowBg = ColorsManager.white;
-const Color _todayRowBg = Color(0xFFFFF8E1);
+Color get _oddRowBg =>
+    ColorsManager.isDark ? const Color(0xFF211C30) : const Color(0xFFF8F5FF);
+Color get _evenRowBg => ColorsManager.cardBackground;
+Color get _todayRowBg =>
+    ColorsManager.isDark ? const Color(0xFF2E2618) : const Color(0xFFFFF8E1);
 const Color _todayBorder = ColorsManager.primaryGold;
-const Color _gridLine = Color(0xFFEEEEEE);
-const Color _pinnedColLine = Color(0xFFE0E0E0);
+Color get _gridLine =>
+    ColorsManager.isDark ? const Color(0xFF2A2538) : const Color(0xFFEEEEEE);
+Color get _pinnedColLine => ColorsManager.mediumGray;
 
 class RamadanTableView extends StatefulWidget {
   final List<RamadanTaskEntity> allTasks;
@@ -102,12 +105,10 @@ class _RamadanTableViewState extends State<RamadanTableView> {
       textDirection: TextDirection.rtl,
       child: Column(
         children: [
-          // ── Action bar (only in normal mode) ──
           if (!widget.isFullscreen)
             _TableActionBar(
               onExpand: () => FullscreenTableOverlay.show(context),
             ),
-          // ── Table ──
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -139,7 +140,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: ColorsManager.white,
+                      color: ColorsManager.cardBackground,
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
@@ -201,8 +202,6 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     );
   }
 
-  // ── Column spans ────────────────────────────────────────────
-
   TableSpan _colSpan(int c, int taskCount) {
     final double w;
     if (c == 0) {
@@ -217,7 +216,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
       extent: FixedTableSpanExtent(w),
       backgroundDecoration:
           c == 0
-              ? const TableSpanDecoration(
+              ? TableSpanDecoration(
                 border: TableSpanBorder(
                   trailing: BorderSide(color: _pinnedColLine, width: 1),
                 ),
@@ -230,7 +229,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
     if (r == 0) {
       return TableSpan(
         extent: FixedTableSpanExtent(_headerHeight),
-        backgroundDecoration: const TableSpanDecoration(
+        backgroundDecoration: TableSpanDecoration(
           color: _headerBg,
           border: TableSpanBorder(
             trailing: BorderSide(color: _headerBorderBottom, width: 1),
@@ -261,7 +260,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
                   leading: BorderSide(color: _todayBorder, width: 2),
                   trailing: BorderSide(color: _todayBorder, width: 2),
                 )
-                : const TableSpanBorder(
+                : TableSpanBorder(
                   trailing: BorderSide(color: _gridLine, width: 0.5),
                 ),
       ),
@@ -386,10 +385,6 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-// ────────────────────────────────────────────────────────────────
-// Action bar with expand & rotate icons (shown in normal mode)
-// ────────────────────────────────────────────────────────────────
-
 class _TableActionBar extends StatelessWidget {
   final VoidCallback onExpand;
 
@@ -401,7 +396,6 @@ class _TableActionBar extends StatelessWidget {
       padding: EdgeInsetsDirectional.only(start: 12.w, end: 12.w, bottom: 4.h),
       child: Row(
         children: [
-          // Expand fullscreen
           _ActionChip(
             icon: Icons.open_in_full_rounded,
             label: 'عرض كامل',

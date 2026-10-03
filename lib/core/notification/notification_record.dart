@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-/// Model class representing a notification record in history.
 class NotificationRecord {
   final int id;
   final String title;
@@ -20,7 +19,6 @@ class NotificationRecord {
     this.wasRead = false,
   });
 
-  /// Create a copy with modified fields.
   NotificationRecord copyWith({
     int? id,
     String? title,
@@ -41,7 +39,6 @@ class NotificationRecord {
     );
   }
 
-  /// Convert to JSON map.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -54,7 +51,6 @@ class NotificationRecord {
     };
   }
 
-  /// Create from JSON map.
   factory NotificationRecord.fromJson(Map<String, dynamic> json) {
     return NotificationRecord(
       id: json['id'] as int,
@@ -67,10 +63,8 @@ class NotificationRecord {
     );
   }
 
-  /// Convert to JSON string.
   String toJsonString() => jsonEncode(toJson());
 
-  /// Create from JSON string.
   factory NotificationRecord.fromJsonString(String jsonString) {
     return NotificationRecord.fromJson(
       jsonDecode(jsonString) as Map<String, dynamic>,

@@ -3,8 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// A mini circular progress indicator shown at the end of each day row.
-/// Displays the percentage of tasks completed for that day.
 class TableDayProgress extends StatelessWidget {
   final int completed;
   final int total;

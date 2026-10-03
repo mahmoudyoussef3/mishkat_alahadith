@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/features/about_us/ui/widgets/build_info_section.dart';
-import 'package:mishkat_almasabih/features/profile/ui/widgets/section_title.dart';
+import 'package:mishkat_almasabih/features/about_us/presentation/ui/widgets/build_info_section.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/ui/widgets/section_title.dart';
 
 class WhoAreWe extends StatelessWidget {
   const WhoAreWe({super.key});

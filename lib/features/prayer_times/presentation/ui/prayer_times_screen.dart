@@ -4,11 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/prayer_times_styles.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
-import 'package:mishkat_almasabih/features/prayer_times/ui/widgets/location_selection_dialog.dart';
-import 'package:mishkat_almasabih/features/prayer_times/ui/widgets/next_prayer_card.dart';
-import 'package:mishkat_almasabih/features/prayer_times/ui/widgets/prayer_times_grid.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/prayer_times_cubit.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/ui/widgets/location_selection_dialog.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/ui/widgets/next_prayer_card.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/ui/widgets/prayer_times_grid.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key});

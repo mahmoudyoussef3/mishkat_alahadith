@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// Rounded icon button that opens the calendar sheet.
 class CalendarButton extends StatelessWidget {
   final VoidCallback onTap;
   final String hijriDateString;

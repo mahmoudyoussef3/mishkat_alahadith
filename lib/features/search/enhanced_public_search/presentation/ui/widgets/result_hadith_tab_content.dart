@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/core/theming/enhanced_search_styles.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/models/enhanced_search_response_model.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
 
 class ResultHadithTabContent extends StatelessWidget {
   final String selectedTab;
-  final EnhancedHadithModel? data;
+  final ExplainedHadith? data;
 
   const ResultHadithTabContent({
     super.key,
@@ -61,11 +61,11 @@ class ResultHadithTabContent extends StatelessWidget {
         return const Text("لا توجد فوائد");
 
       case "معاني الكلمات":
-        if (data?.words_meanings != null && data!.words_meanings!.isNotEmpty) {
+        if (data?.wordsMeanings != null && data!.wordsMeanings!.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children:
-                data!.words_meanings!
+                data!.wordsMeanings!
                     .map<Widget>(
                       (wm) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),

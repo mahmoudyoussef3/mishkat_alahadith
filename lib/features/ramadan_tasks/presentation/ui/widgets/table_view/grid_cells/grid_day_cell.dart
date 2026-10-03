@@ -4,10 +4,6 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import '../table_utils.dart';
 
-/// Day-number cell for the sticky pinned column (right side in RTL).
-///
-/// Displays the Ramadan day in Eastern Arabic numerals.
-/// Today is highlighted with a prominent gold pill background.
 class GridDayCell extends StatelessWidget {
   final int day;
   final bool isToday;

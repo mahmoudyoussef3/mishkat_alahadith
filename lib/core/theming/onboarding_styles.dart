@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// Onboarding feature text styles
-/// Extracted from onboarding_screen for consistent styling
 class OnboardingTextStyles {
-  // ==================== HEADER ====================
-
-  /// App name text style in header
   static TextStyle appNameStyle(Color color) {
     return TextStyle(
       fontSize: 16.sp,
@@ -15,16 +11,12 @@ class OnboardingTextStyles {
     );
   }
 
-  /// Skip button text style
-  static TextStyle skipButtonStyle = TextStyle(
-    color: Colors.grey.shade600,
+  static TextStyle get skipButtonStyle => TextStyle(
+    color: ColorsManager.secondaryText,
     fontSize: 14.sp,
     fontWeight: FontWeight.w600,
   );
 
-  // ==================== PAGE CONTENT ====================
-
-  /// Page title text style
   static TextStyle pageTitleStyle(bool isSmallScreen) {
     return TextStyle(
       fontSize: isSmallScreen ? 20.sp : 24.sp,
@@ -34,7 +26,6 @@ class OnboardingTextStyles {
     );
   }
 
-  /// Page subtitle text style
   static TextStyle pageSubtitleStyle(bool isSmallScreen) {
     return TextStyle(
       fontSize: isSmallScreen ? 14.sp : 16.sp,
@@ -43,7 +34,6 @@ class OnboardingTextStyles {
     );
   }
 
-  /// Page description text style
   static TextStyle pageDescriptionStyle(bool isSmallScreen) {
     return TextStyle(
       fontSize: isSmallScreen ? 13.sp : 15.sp,
@@ -53,16 +43,12 @@ class OnboardingTextStyles {
     );
   }
 
-  // ==================== NAVIGATION ====================
-
-  /// Back button text style
-  static TextStyle backButtonStyle = TextStyle(
-    color: Colors.grey.shade600,
+  static TextStyle get backButtonStyle => TextStyle(
+    color: ColorsManager.secondaryText,
     fontSize: 16.sp,
     fontWeight: FontWeight.w600,
   );
 
-  /// Next/Start button text style
   static TextStyle nextButtonStyle = TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.bold,

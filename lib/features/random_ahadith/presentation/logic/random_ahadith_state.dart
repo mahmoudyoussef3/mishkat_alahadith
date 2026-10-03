@@ -8,8 +8,8 @@ final class RandomAhadithInitial extends RandomAhadithState {}
 final class RandomAhadithLoading extends RandomAhadithState {}
 
 final class RandomAhadithSuccess extends RandomAhadithState {
-  final RandomAhadithResponse randomAhadithResponse;
-  RandomAhadithSuccess(this.randomAhadithResponse);
+  final List<ExplainedHadith> hadiths;
+  RandomAhadithSuccess(this.hadiths);
 }
 
 final class RandomAhaditFailure extends RandomAhadithState {

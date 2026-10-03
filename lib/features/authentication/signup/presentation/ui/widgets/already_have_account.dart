@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-// ScreenUtil no longer needed directly; sizes resolved via AuthTextStyles
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 
-import '../../../../../core/routing/routes.dart';
-import '../../../../../core/theming/colors.dart';
-import '../../../../../core/theming/auth_styles.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/auth_styles.dart';
 
 class AlreadyHaveAccount extends StatelessWidget {
   const AlreadyHaveAccount({super.key});

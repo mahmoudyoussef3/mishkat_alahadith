@@ -7,21 +7,13 @@ import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/qiblah_finder/logic/cubit/qiblah_cubit.dart';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Constants
-// ─────────────────────────────────────────────────────────────────────────────
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/presentation/logic/qiblah_cubit.dart';
 
 const double _kAlignmentThreshold = 5.0;
 const Duration _kAnimDuration = Duration(milliseconds: 350);
 const Duration _kPulseDuration = Duration(milliseconds: 1200);
 const Curve _kAnimCurve = Curves.easeOutCubic;
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Screen
-// ─────────────────────────────────────────────────────────────────────────────
 
 class QiblahFinderScreen extends StatefulWidget {
   const QiblahFinderScreen({super.key});
@@ -117,10 +109,6 @@ class _QiblahFinderScreenState extends State<QiblahFinderScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Loading View
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _LoadingView extends StatelessWidget {
   const _LoadingView();
 
@@ -135,7 +123,7 @@ class _LoadingView extends StatelessWidget {
             height: 56.r,
             child: CircularProgressIndicator(
               strokeWidth: 3.5,
-              valueColor: const AlwaysStoppedAnimation(
+              valueColor: AlwaysStoppedAnimation(
                 ColorsManager.primaryPurple,
               ),
               backgroundColor: ColorsManager.primaryPurple.withOpacity(0.12),
@@ -153,10 +141,6 @@ class _LoadingView extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// State Message View (errors / permissions / GPS)
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _StateMessageView extends StatelessWidget {
   final IconData icon;
@@ -195,7 +179,6 @@ class _StateMessageView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icon circle
             Container(
               width: 80.r,
               height: 80.r,
@@ -252,10 +235,6 @@ class _StateMessageView extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Compass View  –  StreamBuilder on FlutterQiblah.qiblahStream
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _QiblahCompassView extends StatefulWidget {
   const _QiblahCompassView();
 
@@ -289,13 +268,8 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
     super.dispose();
   }
 
-  // ── Compute real angular difference between phone heading and Kaaba ──
-  // `data.offset` is the FIXED bearing from GPS to Kaaba (doesn't change with
-  // rotation). We need: how many degrees the user must turn from their current
-  // heading (`data.direction`) to face the Kaaba.
   double _qiblahDelta(QiblahDirection data) {
     double diff = data.offset - data.direction;
-    // Normalize to -180 … +180
     while (diff > 180) {
       diff -= 360;
     }
@@ -315,14 +289,12 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
     }
   }
 
-  // Helpers ───────────────────────────────────────────────────────────────
-
   Color _progressColor(double delta) {
     final a = delta.abs();
     if (a <= 5) return ColorsManager.success;
-    if (a <= 15) return const Color(0xFF8BC34A); // light green
+    if (a <= 15) return const Color(0xFF8BC34A);
     if (a <= 30) return ColorsManager.warning;
-    if (a <= 60) return const Color(0xFFFF5722); // deep orange
+    if (a <= 60) return const Color(0xFFFF5722);
     return ColorsManager.error;
   }
 
@@ -378,7 +350,6 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
           children: [
             SizedBox(height: 8.h),
 
-            // ── Status banner ──
             _StatusBanner(
               isAligned: isAligned,
               hint: _directionHint(delta),
@@ -387,7 +358,6 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
 
             SizedBox(height: 20.h),
 
-            // ── Compass ──
             Builder(
               builder: (context) {
                 final screenWidth = MediaQuery.of(context).size.width - 40.w;
@@ -409,7 +379,6 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
 
             SizedBox(height: 20.h),
 
-            // ── Offset pill ──
             _OffsetPill(
               offset: delta,
               progress: progress,
@@ -419,7 +388,6 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
 
             SizedBox(height: 16.h),
 
-            // ── Info chips row ──
             _InfoRow(
               qiblahDeg: data.qiblah,
               directionDeg: data.direction,
@@ -429,7 +397,6 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
 
             SizedBox(height: 12.h),
 
-            // ── Tip ──
             _TipBar(isAligned: isAligned),
 
             SizedBox(height: 8.h),
@@ -439,10 +406,6 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Status Banner
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _StatusBanner extends StatelessWidget {
   final bool isAligned;
@@ -502,10 +465,6 @@ class _StatusBanner extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Compass Widget
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _CompassWidget extends StatelessWidget {
   final double size;
   final double directionDeg;
@@ -535,7 +494,6 @@ class _CompassWidget extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // ── Pulsing glow ring ──
           if (isAligned)
             AnimatedBuilder(
               animation: pulseAnim,
@@ -556,7 +514,6 @@ class _CompassWidget extends StatelessWidget {
               },
             ),
 
-          // ── Progress arc ──
           SizedBox(
             width: size * 0.92,
             height: size * 0.92,
@@ -572,7 +529,6 @@ class _CompassWidget extends StatelessWidget {
             ),
           ),
 
-          // ── Compass dial ──
           SizedBox(
             width: size * 0.82,
             height: size * 0.82,
@@ -583,7 +539,6 @@ class _CompassWidget extends StatelessWidget {
             ),
           ),
 
-          // ── Kaaba icon at top (fixed) ──
           Positioned(
             top: size * 0.015,
             child: AnimatedScale(
@@ -623,10 +578,6 @@ class _CompassWidget extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Compass Dial  (rotates, contains needle)
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _CompassDial extends StatelessWidget {
   final double directionDeg;
   final double qiblahDeg;
@@ -643,7 +594,6 @@ class _CompassDial extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Dial background
         Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -662,7 +612,6 @@ class _CompassDial extends StatelessWidget {
           ),
         ),
 
-        // Rotating compass markings
         AnimatedRotation(
           turns: -directionDeg / 360,
           duration: const Duration(milliseconds: 280),
@@ -673,7 +622,6 @@ class _CompassDial extends StatelessWidget {
           ),
         ),
 
-        // Qiblah needle  (rotates to qiblah relative to device heading)
         AnimatedRotation(
           turns: -(directionDeg - qiblahDeg) / 360,
           duration: const Duration(milliseconds: 280),
@@ -684,13 +632,12 @@ class _CompassDial extends StatelessWidget {
           ),
         ),
 
-        // Center hub
         Container(
           width: 28.r,
           height: 28.r,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
@@ -713,10 +660,6 @@ class _CompassDial extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Offset Pill
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _OffsetPill extends StatelessWidget {
   final double offset;
@@ -745,7 +688,6 @@ class _OffsetPill extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Accuracy badge
           Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
             decoration: BoxDecoration(
@@ -778,10 +720,6 @@ class _OffsetPill extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Info Row (Qiblah angle + Current heading)
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _InfoRow extends StatelessWidget {
   final double qiblahDeg;
@@ -892,10 +830,6 @@ class _InfoTile extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Tip Bar
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _TipBar extends StatelessWidget {
   final bool isAligned;
   const _TipBar({required this.isAligned});
@@ -940,21 +874,12 @@ class _TipBar extends StatelessWidget {
   }
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// Custom Painters
-// ═════════════════════════════════════════════════════════════════════════════
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Dial Painter  — tick marks + cardinal letters
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _DialPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
-    // ── Ticks ──
     final minorPaint =
         Paint()
           ..color = ColorsManager.mediumGray.withOpacity(0.6)
@@ -986,12 +911,11 @@ class _DialPainter extends CustomPainter {
       canvas.drawLine(p1, p2, isMajor ? majorPaint : minorPaint);
     }
 
-    // ── Cardinal labels ──
     const labels = [
-      (0.0, 'ش'), // N
-      (math.pi / 2, 'ق'), // E
-      (math.pi, 'ج'), // S
-      (3 * math.pi / 2, 'غ'), // W
+      (0.0, 'ش'),
+      (math.pi / 2, 'ق'),
+      (math.pi, 'ج'),
+      (3 * math.pi / 2, 'غ'),
     ];
 
     for (final (angle, label) in labels) {
@@ -1025,10 +949,6 @@ class _DialPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Needle Painter  — gold arrow pointing to Qiblah
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _NeedlePainter extends CustomPainter {
   final bool isAligned;
   _NeedlePainter({required this.isAligned});
@@ -1042,7 +962,6 @@ class _NeedlePainter extends CustomPainter {
     final needleTopY = center.dy - r * 0.58;
     final needleBottomY = center.dy + r * 0.20;
 
-    // ── Shadow ──
     final shadowPath =
         Path()
           ..moveTo(center.dx, needleTopY + 2)
@@ -1057,7 +976,6 @@ class _NeedlePainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
     );
 
-    // ── Top half (gold / green when aligned) ──
     final topPath =
         Path()
           ..moveTo(center.dx, needleTopY)
@@ -1084,7 +1002,6 @@ class _NeedlePainter extends CustomPainter {
 
     canvas.drawPath(topPath, topGradient);
 
-    // Outline
     canvas.drawPath(
       topPath,
       Paint()
@@ -1093,7 +1010,6 @@ class _NeedlePainter extends CustomPainter {
         ..strokeWidth = 1.2,
     );
 
-    // ── Bottom half (muted) ──
     final bottomPath =
         Path()
           ..moveTo(center.dx, needleBottomY)

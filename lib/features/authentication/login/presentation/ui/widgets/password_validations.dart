@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theming/colors.dart';
-import '../../../../../core/theming/auth_styles.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/auth_styles.dart';
 
 class PasswordValidations extends StatelessWidget {
   final bool hasLowerCase;
@@ -40,7 +40,7 @@ class PasswordValidations extends StatelessWidget {
   Widget buildValidationRow(String text, bool hasValidated) {
     return Row(
       children: [
-        const CircleAvatar(radius: 2.5, backgroundColor: ColorsManager.gray),
+        CircleAvatar(radius: 2.5, backgroundColor: ColorsManager.gray),
         SizedBox(width: 6),
         Text(
           text,

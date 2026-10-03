@@ -15,7 +15,7 @@ class LoginAsGuestButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        color: ColorsManager.white,
+        color: ColorsManager.cardBackground,
         elevation: 5,
         shape:
             (AuthDecorations.socialCardShape().shape
@@ -27,7 +27,7 @@ class LoginAsGuestButton extends StatelessWidget {
             children: [
               Text('الدخول كزائر', style: AuthTextStyles.cardLabel),
               SizedBox(width: 12.w),
-              const FaIcon(
+              FaIcon(
                 FontAwesomeIcons.userSecret,
                 color: ColorsManager.darkGray,
               ),

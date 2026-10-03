@@ -55,7 +55,7 @@ class NextPrayerCard extends StatelessWidget {
                   SizedBox(height: 8.h),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.schedule_rounded,
                         color: ColorsManager.primaryPurple,
                       ),
@@ -75,7 +75,7 @@ class NextPrayerCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.timer_outlined,
                     color: ColorsManager.primaryPurple,
                   ),

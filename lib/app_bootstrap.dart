@@ -19,8 +19,9 @@ import 'package:mishkat_almasabih/core/services/hive_service.dart';
 import 'package:mishkat_almasabih/core/services/prayer_times_home_widget_sync.dart';
 import 'package:mishkat_almasabih/core/services/prayer_times_widget_background_worker.dart';
 import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
-import 'package:mishkat_almasabih/features/onboarding/sava_date_for_first_time.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_config_repository.dart';
+import 'package:mishkat_almasabih/features/onboarding/domain/usecases/is_first_launch_use_case.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/initialize_ramadan_config_use_case.dart';
+import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
 import 'package:mishkat_almasabih/firebase_options.dart';
 
 import 'mishkat_almasabih.dart';
@@ -41,19 +42,14 @@ Future<void> bootstrapApp() async {
     return true;
   };
 
-  // Only setup that the very first frame depends on (DI-backed cubits/repos,
-  // local storage, date formatting) runs before runApp(). Everything else —
-  // especially anything that can show a permission dialog or a system
-  // Settings screen (notification/exact-alarm/location prompts) — must never
-  // block the first frame, or the app can get stuck on a black screen until
-  // force-killed. See _initializeBackgroundServices below.
   await setUpGetIt();
   await HiveService.init();
   await initializeDateFormatting('ar', null);
 
   WidgetNavigationService.initialize();
 
-  final isFirstTime = await SaveDataForFirstTime.isFirstTime();
+  final isFirstTime = await getIt<IsFirstLaunchUseCase>()();
+  await getIt<ThemeCubit>().load();
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
@@ -68,15 +64,6 @@ Future<void> bootstrapApp() async {
   unawaited(_initializeBackgroundServices());
 }
 
-/// Runs everything that is not required to render the first frame. This
-/// includes notification permission prompts, exact-alarm/system-settings
-/// intents, prayer notification scheduling, background workers and remote
-/// config — all of which involve dialogs, native Settings screens, or
-/// network I/O and must not block [runApp].
-///
-/// Each step is isolated: a failure in one (e.g. the widget background
-/// worker) must never prevent unrelated steps — most importantly prayer
-/// notification scheduling — from running.
 Future<void> _initializeBackgroundServices() async {
   await _runIsolated('NotificationHelper.init', NotificationHelper.init);
   await _runIsolated('LocalNotification.init', LocalNotification.init);
@@ -134,8 +121,7 @@ Future<void> _initializeRamadanRemoteConfig() async {
       'ramadan_total_days': 30,
     });
 
-    final repository = getIt<RamadanConfigRepository>();
-    await repository.initializeRemoteConfig();
+    await getIt<InitializeRamadanConfigUseCase>()();
   } catch (e) {
     debugPrint('Failed to initialize Ramadan Remote Config: $e');
   }

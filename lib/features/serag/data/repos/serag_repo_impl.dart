@@ -1,38 +1,39 @@
 import 'dart:developer';
 
-import 'package:dartz/dartz.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_response_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
-class SeragRepo {
+import '../../domain/entities/serag_hadith_context.dart';
+import '../../domain/repos/serag_repo.dart';
+import '../mappers/serag_mapper.dart';
+import '../models/serag_request_model.dart';
+
+class SeragRepoImpl implements SeragRepo {
   final ApiService _apiService;
-  SeragRepo(this._apiService);
-  Future<Either<ApiErrorModel, SeragResponseModel>> serag(
-    SeragRequestModel seragRequestModel,
-  ) async {
+  final TokenStorage _tokenStorage;
+
+  SeragRepoImpl(this._apiService, this._tokenStorage);
+
+  @override
+  Future<ApiResult<String>> ask({
+    required SeragHadithContext hadith,
+    required String question,
+  }) async {
     try {
-      final String token = await _getUserToken();
-
-      final response = await _apiService.serag(seragRequestModel, token);
-
-      return Right(response);
-    } catch (e) {
-      log(e.toString());
-      return Left(ErrorHandler.handle(e));
+      final token = await _tokenStorage.requireToken();
+      final response = await _apiService.serag(
+        SeragRequestModel(
+          hadith: hadith.toModel(),
+          messages: [Message(role: 'user', content: question)],
+        ),
+        token,
+      );
+      return ApiResult.success(response.response);
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
-  }
-
-  Future<String> _getUserToken() async {
-    final sharedPref = await SharedPreferences.getInstance();
-    final token = sharedPref.getString('token');
-
-    if (token == null || token.isEmpty) {
-      throw Exception("No token found, user not logged in");
-    }
-    return token;
   }
 }

@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/ahadith/logic/cubit/ahadiths_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/ahadith_list_bloc_builder.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/bookmark_listener.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/chapter_ahadith_search_bar.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/chapter_appbar.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/logic/cubit/ahadiths_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/ahadith_list_bloc_builder.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/bookmark_listener.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/chapter_ahadith_search_bar.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/chapter_appbar.dart';
 
 class ChapterAhadithScreen extends StatefulWidget {
   const ChapterAhadithScreen({

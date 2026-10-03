@@ -3,10 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../domain/entities/ramadan_task_entity.dart';
-import '../cubit/ramadan_tasks_cubit.dart';
+import '../../../domain/entities/ramadan_task_entity.dart';
+import '../../logic/ramadan_tasks_cubit.dart';
 
-/// Shows a confirmation dialog before deleting a task.
 void showDeleteConfirmDialog(BuildContext context, RamadanTaskEntity task) {
   showDialog(
     context: context,

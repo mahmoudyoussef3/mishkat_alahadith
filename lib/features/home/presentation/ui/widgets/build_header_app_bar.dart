@@ -35,7 +35,6 @@ class BuildHeaderAppBar extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           children: [
-            // Background pattern
             Positioned.fill(
               child: Opacity(
                 opacity: 0.1,
@@ -51,24 +50,20 @@ class BuildHeaderAppBar extends StatelessWidget {
               ),
             ),
 
-            // Gradient overlay for better contrast
             Positioned.fill(
               child: Container(
                 decoration: HomeDecorations.appBarGradientOverlay(),
               ),
             ),
 
-            // Content
             Padding(
               padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 12.h),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Top row with leading and actions
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Leading button
                       _buildIconButton(
                         icon:
                             home
@@ -83,7 +78,6 @@ class BuildHeaderAppBar extends StatelessWidget {
                         },
                       ),
 
-                      // Actions
                       if (actions != null && actions!.isNotEmpty)
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -100,7 +94,6 @@ class BuildHeaderAppBar extends StatelessWidget {
                     ],
                   ),
 
-                  // Title section (centered)
                   Expanded(
                     child: Center(
                       child: Column(
@@ -124,7 +117,6 @@ class BuildHeaderAppBar extends StatelessWidget {
                           SizedBox(height: 2.h),
                           if (description != null &&
                               description!.isNotEmpty) ...[
-                            //   SizedBox(height: 3.h),
                             Flexible(
                               child: Text(
                                 description!,
@@ -173,7 +165,6 @@ class BuildHeaderAppBar extends StatelessWidget {
   }
 }
 
-// Optional: Wrapper widget for actions to maintain consistency
 class AppBarActionButton extends StatelessWidget {
   const AppBarActionButton({
     super.key,

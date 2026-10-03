@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
 import 'package:mishkat_almasabih/core/theming/daily_hadith_styles.dart';
 
 class HadithTabContent extends StatelessWidget {
   final String selectedTab;
-  final NewDailyHadithModel? data;
+  final ExplainedHadith? data;
 
   const HadithTabContent({
     super.key,
@@ -60,11 +60,11 @@ class HadithTabContent extends StatelessWidget {
         return const Text("لا توجد فوائد");
 
       case "معاني الكلمات":
-        if (data?.words_meanings != null && data!.words_meanings!.isNotEmpty) {
+        if (data?.wordsMeanings != null && data!.wordsMeanings!.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children:
-                data!.words_meanings!
+                data!.wordsMeanings!
                     .map<Widget>(
                       (wm) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -75,7 +75,7 @@ class HadithTabContent extends StatelessWidget {
                                 text: wm.word ?? "",
                                 style: DailyHadithTextStyles.wordStyle,
                               ),
-                              const TextSpan(
+                              TextSpan(
                                 text: ": ",
                                 style: DailyHadithTextStyles.colonStyle,
                               ),

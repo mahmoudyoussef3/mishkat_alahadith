@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/features/serag/logic/chat_history/chat_history_cubit.dart';
-import 'package:mishkat_almasabih/features/serag/logic/chat_history/chat_history_state.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_state.dart';
 import 'chat_message_bubble.dart';
 import 'empty_chat_state.dart';
 

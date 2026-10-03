@@ -19,7 +19,6 @@ class StatisticsShimmer extends StatelessWidget {
           SizedBox(height: 16.h),
           _buildStatsGridShimmer(),
           SizedBox(height: 12.h),
-         // _buildLastActivityShimmer(),
         ],
       ),
     );
@@ -58,8 +57,8 @@ class StatisticsShimmer extends StatelessWidget {
 
   Widget _buildStatCardShimmer() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: ColorsManager.mediumGray,
+      highlightColor: ColorsManager.lightGray,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -78,7 +77,6 @@ class StatisticsShimmer extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Icon shimmer
               Container(
                 width: 42.w,
                 height: 42.w,
@@ -87,7 +85,6 @@ class StatisticsShimmer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12.r),
                 ),
               ),
-              // Value and title shimmer
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -119,8 +116,8 @@ class StatisticsShimmer extends StatelessWidget {
 
   Widget _buildLastActivityShimmer() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: ColorsManager.mediumGray,
+      highlightColor: ColorsManager.lightGray,
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(

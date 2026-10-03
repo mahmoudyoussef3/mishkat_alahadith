@@ -5,18 +5,18 @@ import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
 import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
-import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
-import 'package:mishkat_almasabih/features/profile/edit_profile/logic/cubit/edit_profile_cubit.dart';
-import 'package:mishkat_almasabih/features/profile/edit_profile/ui/edit_profile_screen.dart';
+import 'package:mishkat_almasabih/features/profile/domain/entities/user_profile.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/logic/edit_profile/edit_profile_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/ui/edit_profile_screen.dart';
 
 class ProfileHeader extends StatelessWidget {
-  final UserResponseModel user;
+  final UserProfile user;
   const ProfileHeader({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      foregroundColor: ColorsManager.secondaryBackground,
+      foregroundColor: ColorsManager.white,
       expandedHeight: 200.h,
       pinned: true,
       backgroundColor: Colors.transparent,
@@ -72,7 +72,7 @@ class ProfileHeader extends StatelessWidget {
     );
   }
 
-  String getAvatarUrl(UserResponseModel? user) {
+  String getAvatarUrl(UserProfile? user) {
     const String defaultAvatar =
         "https://api.hadith-shareef.com/api/uploads/avatars/default-avatar.jpg";
     if (user == null) {

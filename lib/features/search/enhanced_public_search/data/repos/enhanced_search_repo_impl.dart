@@ -1,48 +1,50 @@
-import 'package:dartz/dartz.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/models/enhanced_search_response_model.dart';
+import 'package:mishkat_almasabih/core/networking/network_info.dart';
 
-class EnhancedSearchRepo {
+import '../../domain/repos/enhanced_search_repo.dart';
+import '../mappers/enhanced_search_mapper.dart';
+import '../models/enhanced_search_response_model.dart';
+
+class EnhancedSearchRepoImpl implements EnhancedSearchRepo {
   final ApiService _apiService;
-  final _cacheService = GenericCacheService.instance;
+  final GenericCacheService _cacheService;
+  final NetworkInfo _networkInfo;
 
-  EnhancedSearchRepo(this._apiService);
+  EnhancedSearchRepoImpl(
+    this._apiService,
+    this._cacheService,
+    this._networkInfo,
+  );
 
-  /// Get cached enhanced search results
-  Future<EnhancedSearch?> getCachedSearch(String searchTerm) async {
-    final cacheKey = CacheKeys.enhancedSearch(searchTerm);
-    return await _cacheService.getData<EnhancedSearch>(
-      key: cacheKey,
+  @override
+  Future<List<ExplainedHadith>?> getCachedResults(String searchTerm) async {
+    final cached = await _cacheService.getData<EnhancedSearch>(
+      key: CacheKeys.enhancedSearch(searchTerm),
       fromJson: EnhancedSearch.fromJson,
     );
+    return cached?.toEntities();
   }
 
-  /// Save enhanced search results to cache
-  Future<void> cacheSearch(String searchTerm, EnhancedSearch data) async {
-    final cacheKey = CacheKeys.enhancedSearch(searchTerm);
-    await _cacheService.saveData<EnhancedSearch>(
-      key: cacheKey,
-      data: data,
-      toJson: (d) => d.toJson(),
-      cacheExpirationHours: 6,
-    );
-  }
-
-  Future<Either<ApiErrorModel, EnhancedSearch>> fetchEnhancedSearchResults(
-    String searchTerm,
-  ) async {
+  @override
+  Future<ApiResult<List<ExplainedHadith>>> search(String searchTerm) async {
     try {
+      await _networkInfo.ensureConnected();
       final response = await _apiService.getEnhancedSearch({
         "searchTerm": searchTerm,
       });
-      // Cache the response
-      await cacheSearch(searchTerm, response);
-      return Right(response);
-    } catch (e) {
-      return Left(ErrorHandler.handle(e.toString()));
+      await _cacheService.saveData<EnhancedSearch>(
+        key: CacheKeys.enhancedSearch(searchTerm),
+        data: response,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 6,
+      );
+      return ApiResult.success(response.toEntities());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 }

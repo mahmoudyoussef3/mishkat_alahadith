@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:mishkat_almasabih/core/theming/library_decorations.dart';
@@ -11,8 +12,8 @@ class BookCardShimmer extends StatelessWidget {
     return Container(
       decoration: LibraryDecorations.shimmerCard(),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: ColorsManager.mediumGray,
+        highlightColor: ColorsManager.lightGray,
         child: Column(
           children: [
             Expanded(

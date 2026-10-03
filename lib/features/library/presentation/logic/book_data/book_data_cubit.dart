@@ -1,63 +1,58 @@
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
-import 'package:mishkat_almasabih/features/book_data/data/repos/book_data_repo.dart';
+import 'package:mishkat_almasabih/features/library/domain/entities/category_books.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_cached_category_books_use_case.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_category_books_use_case.dart';
 
 part 'book_data_state.dart';
 
 class BookDataCubit extends Cubit<BookDataState> {
-  GetBookDataRepo bookDataRepo;
-  BookDataCubit(this.bookDataRepo) : super(BookDataInitial());
+  final GetCachedCategoryBooksUseCase _getCachedCategoryBooks;
+  final GetCategoryBooksUseCase _getCategoryBooks;
+  BookDataCubit(this._getCachedCategoryBooks, this._getCategoryBooks)
+    : super(BookDataInitial());
 
   Future<void> emitGetBookData(String id) async {
     log('📚 [BookDataCubit] Fetching book data for: $id');
-    
-    // Try cache first
-    final cached = await bookDataRepo.getCachedBookData(id);
+
+    final cached = await _getCachedCategoryBooks(id);
 
     if (cached != null) {
       log('✅ [BookDataCubit] CACHE HIT - category: ${cached.category?.name ?? "N/A"}');
-      // Emit cached data immediately
       emit(BookDataSuccess(cached, isFromCache: true, isRefreshing: true));
 
-      // Background refresh
-      _backgroundRefresh(id, cached);
+      _backgroundRefresh(id);
     } else {
       log('❌ [BookDataCubit] CACHE MISS - Fetching from API');
-      // No cache, fetch from API
       emit(BookDataLoading());
-      final result = await bookDataRepo.getBookData(id);
-      result.fold(
-        (l) {
-          log('🔴 [BookDataCubit] API ERROR: ${l.getAllErrorMessages()}');
-          emit(BookDataFailure(l.getAllErrorMessages()));
+      final result = await _getCategoryBooks(id);
+      result.when(
+        success: (data) {
+          log('🟢 [BookDataCubit] API SUCCESS - category: ${data.category?.name ?? "N/A"}');
+          emit(BookDataSuccess(data));
         },
-        (r) {
-          log('🟢 [BookDataCubit] API SUCCESS - category: ${r.category?.name ?? "N/A"}');
-          emit(BookDataSuccess(r));
+        failure: (failure) {
+          log('🔴 [BookDataCubit] API ERROR: ${failure.message}');
+          emit(BookDataFailure(failure.message));
         },
       );
     }
   }
 
-  Future<void> _backgroundRefresh(String id, CategoryResponse cached) async {
+  Future<void> _backgroundRefresh(String id) async {
     log('🔄 [BookDataCubit] Background refresh started for: $id');
-    final result = await bookDataRepo.getBookData(id);
-    result.fold(
-      (error) {
-        log('⚠️ [BookDataCubit] Background refresh FAILED: ${error.getAllErrorMessages()}');
-        // Background refresh failed, keep cached data
+    final result = await _getCategoryBooks(id);
+    result.when(
+      success: (data) {
+        log('🟢 [BookDataCubit] Background refresh SUCCESS');
+        emit(BookDataSuccess(data, isFromCache: false, isRefreshing: false));
+      },
+      failure: (failure) {
+        log('⚠️ [BookDataCubit] Background refresh FAILED: ${failure.message}');
         if (state is BookDataSuccess) {
           emit((state as BookDataSuccess).copyWith(isRefreshing: false));
         }
-      },
-      (response) {
-        log('🟢 [BookDataCubit] Background refresh SUCCESS');
-        emit(
-          BookDataSuccess(response, isFromCache: false, isRefreshing: false),
-        );
       },
     );
   }

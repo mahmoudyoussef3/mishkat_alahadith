@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/library_decorations.dart';
 import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
-import 'package:mishkat_almasabih/features/book_data/logic/cubit/book_data_cubit.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/library/ui/widgets/book_grid.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/book_data/book_data_cubit.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/library/presentation/ui/widgets/book_grid.dart';
 
 class LibraryScreen extends StatefulWidget {
   final String id;
@@ -45,7 +45,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     if (state is BookDataLoading) {
                       return BookGrid.shimmer(aspectRatio: aspectRatio);
                     } else if (state is BookDataSuccess) {
-                      final books = state.categoryResponse.books ?? [];
+                      final books = state.categoryBooks.books;
                       return BookGrid.success(
                         books: books,
                         aspectRatio: aspectRatio,

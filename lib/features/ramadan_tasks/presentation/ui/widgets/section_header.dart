@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// Section header row with a title and a task count badge.
 class SectionHeader extends StatelessWidget {
   final String title;
   final int count;

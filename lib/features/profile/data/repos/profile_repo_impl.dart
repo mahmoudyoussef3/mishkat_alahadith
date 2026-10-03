@@ -1,85 +1,85 @@
-import 'package:dartz/dartz.dart';
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
-import 'package:mishkat_almasabih/features/profile/data/models/stats_model.dart';
-import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
-class UserResponseRepo {
-  final ApiService apiService;
-  final _cacheService = GenericCacheService.instance;
+import '../../domain/entities/user_profile.dart';
+import '../../domain/entities/user_stats.dart';
+import '../../domain/repos/profile_repo.dart';
+import '../mappers/profile_mapper.dart';
+import '../models/stats_model.dart';
+import '../models/user_response_model.dart';
 
-  UserResponseRepo(this.apiService);
+class ProfileRepoImpl implements ProfileRepo {
+  final ApiService _apiService;
+  final TokenStorage _tokenStorage;
+  final GenericCacheService _cacheService;
 
-  /// Get cached user profile
-  Future<UserResponseModel?> getCachedProfile() async {
-    return await _cacheService.getData<UserResponseModel>(
+  ProfileRepoImpl(this._apiService, this._tokenStorage, this._cacheService);
+
+  @override
+  Future<UserProfile?> getCachedProfile() async {
+    final cached = await _cacheService.getData<UserResponseModel>(
       key: CacheKeys.userProfile,
       fromJson: UserResponseModel.fromJson,
     );
+    return cached?.toEntity();
   }
 
-  /// Save user profile to cache
-  Future<void> cacheProfile(UserResponseModel data) async {
-    await _cacheService.saveData<UserResponseModel>(
-      key: CacheKeys.userProfile,
-      data: data,
-      toJson: (d) => d.toJson(),
-      cacheExpirationHours: 1, // Short cache for user data
-    );
-  }
-
-  /// Get cached user stats
-  Future<StatsModel?> getCachedStats() async {
-    return await _cacheService.getData<StatsModel>(
-      key: CacheKeys.userStats,
-      fromJson: StatsModel.fromJson,
-    );
-  }
-
-  /// Save user stats to cache
-  Future<void> cacheStats(StatsModel data) async {
-    await _cacheService.saveData<StatsModel>(
-      key: CacheKeys.userStats,
-      data: data,
-      toJson: (d) => d.toJson(),
-      cacheExpirationHours: 1,
-    );
-  }
-
-  Future<Either<ApiErrorModel, UserResponseModel>> getUserProfile() async {
+  @override
+  Future<ApiResult<UserProfile>> getProfile() async {
     try {
-      final String token = await _getUserToken();
-      final response = await apiService.getUserProfile(token);
-      // Cache the response
-      await cacheProfile(response);
-      return Right(response);
-    } catch (e) {
-      return Left(ErrorHandler.handle(e));
+      final token = await _tokenStorage.requireToken();
+      final response = await _apiService.getUserProfile(token);
+      await _cacheService.saveData<UserResponseModel>(
+        key: CacheKeys.userProfile,
+        data: response.withoutSecrets(),
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 1,
+      );
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
-  Future<Either<ApiErrorModel, StatsModel>> getUserStats() async {
+  @override
+  Future<ApiResult<UserStats>> getStats() async {
     try {
-      final String token = await _getUserToken();
-      final response = await apiService.getUserStats(token);
-      // Cache the response
-      await cacheStats(response);
-      return Right(response);
-    } catch (e) {
-      return Left(ErrorHandler.handle(e));
+      final token = await _tokenStorage.requireToken();
+      final response = await _apiService.getUserStats(token);
+      await _cacheService.saveData<StatsModel>(
+        key: CacheKeys.userStats,
+        data: response,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 1,
+      );
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
-  Future<String> _getUserToken() async {
-    final sharedPref = await SharedPreferences.getInstance();
-    final token = sharedPref.getString('token');
-
-    if (token == null || token.isEmpty) {
-      throw Exception("No token found, user not logged in");
+  @override
+  Future<ApiResult<UserProfile>> updateProfile({
+    required String username,
+    String? avatarPath,
+  }) async {
+    try {
+      final token = await _tokenStorage.requireToken();
+      final response = await _apiService.updateUserProfile(
+        token,
+        username,
+        avatarPath == null ? null : File(avatarPath),
+      );
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      log(error.toString());
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
-    return token;
   }
 }

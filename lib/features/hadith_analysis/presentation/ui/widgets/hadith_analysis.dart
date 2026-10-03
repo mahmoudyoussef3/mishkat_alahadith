@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/ui/session_builder.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,8 +8,8 @@ import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_analysis_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_analysis_styles.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/logic/cubit/hadith_analysis_cubit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/logic/cubit/hadith_analysis_cubit.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HadithAnalysis extends StatefulWidget {
@@ -31,20 +32,11 @@ class HadithAnalysis extends StatefulWidget {
 
 class _HadithAnalysisState extends State<HadithAnalysis> {
   bool tapped = false;
-  String? token;
-  Future<void> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedToken = prefs.getString('token');
-
-    setState(() {
-      token = storedToken;
-    });
-  }
 
   @override
   void initState() {
-    getToken();
     super.initState();
+    context.read<SessionCubit>().checkSession();
   }
 
   @override
@@ -55,13 +47,13 @@ class _HadithAnalysisState extends State<HadithAnalysis> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _AnalyzeButton(
+            SessionBuilder(
+              builder: (context, isSignedIn) => _AnalyzeButton(
               onTap:
-                  token == null
+                  !isSignedIn
                       ? () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            //  behavior: SnackBarBehavior.floating,
                             content: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -76,7 +68,7 @@ class _HadithAnalysisState extends State<HadithAnalysis> {
                                           context.pushNamed(Routes.loginScreen),
                                   icon: Icon(
                                     Icons.login,
-                                    color: ColorsManager.secondaryBackground,
+                                    color: ColorsManager.white,
                                   ),
                                 ),
                               ],
@@ -94,6 +86,7 @@ class _HadithAnalysisState extends State<HadithAnalysis> {
                           reference: widget.reference,
                         );
                       },
+            ),
             ),
             SizedBox(height: 20.h),
             BlocConsumer<HadithAnalysisCubit, HadithAnalysisState>(
@@ -113,7 +106,7 @@ class _HadithAnalysisState extends State<HadithAnalysis> {
                         icon: FontAwesomeIcons.bookOpen,
                         title: "تحليل الحديث",
                         text:
-                            state.response.analysis ??
+                            state.result.analysis ??
                             "لا يوجد تحليل متاح في الوقت الحالي.",
                       )
                       : _ResultCard(
@@ -188,7 +181,7 @@ class _AnalyzeButtonState extends State<_AnalyzeButton> {
           children: [
             Icon(
               FontAwesomeIcons.wandMagicSparkles,
-              color: ColorsManager.secondaryBackground,
+              color: ColorsManager.white,
               size: 18.sp,
             ),
             SizedBox(width: 12.w),
@@ -257,8 +250,8 @@ class _ShimmerResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: ColorsManager.shimmerBase,
+      highlightColor: ColorsManager.shimmerHighlight,
       child: Container(
         decoration: HadithAnalysisDecorations.shimmerContainer(),
         child: Padding(

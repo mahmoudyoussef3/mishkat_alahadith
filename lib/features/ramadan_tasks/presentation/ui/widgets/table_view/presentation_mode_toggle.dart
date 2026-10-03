@@ -4,16 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// Presentation display mode for the Ramadan tasks screen.
 enum PresentationMode { card, table }
 
-/// A premium Ramadan-themed toggle switch between Card View and Table View.
-///
-/// Features:
-/// - Purple gradient using app colors (primaryPurple to darkPurple) on selected chip
-/// - Smooth animated transitions (300ms)
-/// - Haptic feedback on toggle
-/// - RTL-aware layout
 class PresentationModeToggle extends StatelessWidget {
   final PresentationMode mode;
   final ValueChanged<PresentationMode> onChanged;
@@ -96,7 +88,7 @@ class _ToggleChip extends StatelessWidget {
         decoration: BoxDecoration(
           gradient:
               isSelected
-                  ? const LinearGradient(
+                  ? LinearGradient(
                     colors: [
                       ColorsManager.primaryPurple,
                       ColorsManager.darkPurple,

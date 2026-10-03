@@ -3,10 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// Mini circular progress indicator for a single day's completion.
-///
-/// Uses [TweenAnimationBuilder] for smooth fill animation.
-/// Color transitions: gray → gold → green based on completion %.
 class GridProgressCell extends StatelessWidget {
   final int completed;
   final int total;

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../../core/theming/colors.dart';
-import '../../../../../core/theming/auth_decorations.dart';
-import '../../../../../core/theming/auth_styles.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/auth_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/auth_styles.dart';
 
 class LoginScreenHeader extends StatelessWidget {
   const LoginScreenHeader({super.key});
@@ -13,7 +13,6 @@ class LoginScreenHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // App Logo
         Container(
               width: 100.w,
               height: 100.w,
@@ -36,7 +35,6 @@ class LoginScreenHeader extends StatelessWidget {
 
         SizedBox(height: 20.h),
 
-        // App Name
         Text(
           'مرحباً بك مرة أخرى',
           style: AuthTextStyles.headerTitle,

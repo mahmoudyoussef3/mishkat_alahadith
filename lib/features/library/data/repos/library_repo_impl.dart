@@ -1,48 +1,72 @@
 import 'dart:developer';
 
-import 'package:dartz/dartz.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
-import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
 
-class GetBookDataRepo {
+import '../../domain/entities/category_books.dart';
+import '../../domain/entities/library_statistics.dart';
+import '../../domain/repos/library_repo.dart';
+import '../mappers/library_mapper.dart';
+import '../models/book_data_model.dart';
+import '../models/library_statistics_model.dart';
+
+class LibraryRepoImpl implements LibraryRepo {
   final ApiService _apiService;
-  final _cacheService = GenericCacheService.instance;
+  final GenericCacheService _cacheService;
 
-  GetBookDataRepo(this._apiService);
+  LibraryRepoImpl(this._apiService, this._cacheService);
 
-  /// Get cached book data
-  Future<CategoryResponse?> getCachedBookData(String id) async {
-    final cacheKey = CacheKeys.bookData(id);
-    return await _cacheService.getData<CategoryResponse>(
-      key: cacheKey,
+  @override
+  Future<CategoryBooks?> getCachedCategoryBooks(String categoryId) async {
+    final cached = await _cacheService.getData<CategoryResponse>(
+      key: CacheKeys.bookData(categoryId),
       fromJson: CategoryResponse.fromJson,
     );
+    return cached?.toEntity();
   }
 
-  /// Save book data to cache
-  Future<void> cacheBookData(String id, CategoryResponse data) async {
-    final cacheKey = CacheKeys.bookData(id);
-    await _cacheService.saveData<CategoryResponse>(
-      key: cacheKey,
-      data: data,
-      toJson: (d) => d.toJson(),
-      cacheExpirationHours: 24,
-    );
-  }
-
-  Future<Either<ApiErrorModel, CategoryResponse>> getBookData(String id) async {
+  @override
+  Future<ApiResult<CategoryBooks>> getCategoryBooks(String categoryId) async {
     try {
-      final response = await _apiService.getBookData(id);
-      // Cache the response
-      await cacheBookData(id, response);
-      log('🌍 Loaded BookData from API and cached it for $id');
-      return Right(response);
+      final response = await _apiService.getBookData(categoryId);
+      await _cacheService.saveData<CategoryResponse>(
+        key: CacheKeys.bookData(categoryId),
+        data: response,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 24,
+      );
+      log('🌍 Loaded BookData from API and cached it for $categoryId');
+      return ApiResult.success(response.toEntity());
     } catch (error) {
       log(error.toString());
-      return Left(ErrorHandler.handle(error));
+      return ApiResult.failure(ErrorHandler.toFailure(error));
+    }
+  }
+
+  @override
+  Future<LibraryStatistics?> getCachedStatistics() async {
+    final cached = await _cacheService.getData<StatisticsResponse>(
+      key: CacheKeys.libraryStatistics,
+      fromJson: StatisticsResponse.fromJson,
+    );
+    return cached?.toEntity();
+  }
+
+  @override
+  Future<ApiResult<LibraryStatistics>> getStatistics() async {
+    try {
+      final response = await _apiService.getLibraryStatisctics();
+      await _cacheService.saveData<StatisticsResponse>(
+        key: CacheKeys.libraryStatistics,
+        data: response,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 24,
+      );
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 }

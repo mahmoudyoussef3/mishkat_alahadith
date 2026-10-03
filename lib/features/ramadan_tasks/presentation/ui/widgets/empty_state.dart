@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../cubit/ramadan_tasks_cubit.dart';
+import '../../logic/ramadan_tasks_cubit.dart';
 
-/// Friendly empty state with illustration icon and contextual message.
-/// Optimized with const constructors and smooth animations.
 class RamadanEmptyState extends StatelessWidget {
   final ViewMode viewMode;
 
@@ -38,7 +36,6 @@ class RamadanEmptyState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Animated icon container
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
                 duration: const Duration(milliseconds: 500),
@@ -72,7 +69,6 @@ class RamadanEmptyState extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20.h),
-              // Main message
               Text(
                 message,
                 textAlign: TextAlign.center,
@@ -82,7 +78,6 @@ class RamadanEmptyState extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 6.h),
-              // Subtitle
               Text(
                 subtitle,
                 textAlign: TextAlign.center,

@@ -70,7 +70,6 @@ class Bookmark {
     this.updatedAt,
   });
 
-  /// fromJson => بياخد snake_case (اللي جاي من السيرفر)
   factory Bookmark.fromJson(Map<String, dynamic> json) {
     return Bookmark(
           bookSlug: json['book_slug'] ?? json['bookSlug'],
@@ -78,7 +77,6 @@ class Bookmark {
       id: json['id'] as int?,
       userId: json['user_id'] as int?,
       type: json['type'] as String?,
-   //   bookSlug: json['book_slug'] as String?,
       bookName: json['book_name'] ?? json['bookName'],
       bookNameEn: json['book_name_en'] as String?,
       bookNameUr: json['book_name_ur'] as String?,
@@ -88,7 +86,6 @@ class Bookmark {
       chapterNameUr: json['chapter_name_ur'] as String?,
       hadithId: json['hadith_id'] as String?,
       hadithNumber: json['hadith_number'] as String?,
-    //  hadithText: json['hadith_text'] as String?,
       hadithTextEn: json['hadith_text_en'] as String?,
       hadithTextUr: json['hadith_text_ur'] as String?,
       collection: json['collection'] as String?,
@@ -99,7 +96,6 @@ class Bookmark {
     );
   }
 
-  /// toJson => بيبعت camelCase (زي الريكويست اللي محتاجه الـ API)
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -121,7 +117,7 @@ class Bookmark {
       'collection': collection,
       'notes': notes,
       'isLocal': isLocal,
-      'created_at': createdAt, // ممكن تخليها camel برضو لو السيرفر ما يعتمدهاش
+      'created_at': createdAt,
       'updated_at': updatedAt,
     };
   }

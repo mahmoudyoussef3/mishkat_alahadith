@@ -1,75 +1,58 @@
 import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/chapters/data/models/chapters_model.dart';
-import 'package:mishkat_almasabih/features/chapters/data/repos/chapters_repo.dart';
+import 'package:mishkat_almasabih/core/helpers/functions.dart';
+import 'package:mishkat_almasabih/features/chapters/domain/entities/book_chapter.dart';
+import 'package:mishkat_almasabih/features/chapters/domain/usecases/get_book_chapters_use_case.dart';
+import 'package:mishkat_almasabih/features/chapters/domain/usecases/get_cached_book_chapters_use_case.dart';
 
 part 'chapters_state.dart';
 
 class ChaptersCubit extends Cubit<ChaptersState> {
-  final BookChaptersRepo _bookChaptersRepo;
-  ChaptersCubit(this._bookChaptersRepo) : super(ChaptersInitial());
+  final GetCachedBookChaptersUseCase _getCachedChapters;
+  final GetBookChaptersUseCase _getChapters;
+  ChaptersCubit(this._getCachedChapters, this._getChapters)
+    : super(ChaptersInitial());
 
   Future<void> emitGetBookChapters({required String bookSlug}) async {
     log('📚 [ChaptersCubit] Fetching chapters for: $bookSlug');
-    
-    // Try cache first
-    final cached = await _bookChaptersRepo.getCachedChapters(bookSlug);
 
-    if (cached != null && (cached.chapters?.isNotEmpty ?? false)) {
-      log('✅ [ChaptersCubit] CACHE HIT - ${cached.chapters!.length} chapters');
-      // Emit cached data immediately
+    final cached = await _getCachedChapters(bookSlug);
+
+    if (cached != null && cached.isNotEmpty) {
+      log('✅ [ChaptersCubit] CACHE HIT - ${cached.length} chapters');
       emit(
         ChaptersSuccess(
-          allChapters: cached.chapters!,
-          filteredChapters: cached.chapters!,
+          allChapters: cached,
+          filteredChapters: cached,
           isFromCache: true,
           isRefreshing: true,
         ),
       );
 
-      // Background refresh
-      _backgroundRefresh(bookSlug, cached.chapters!);
+      _backgroundRefresh(bookSlug);
     } else {
       log('❌ [ChaptersCubit] CACHE MISS - Fetching from API');
-      // No cache, fetch from API
       emit(ChaptersLoading());
-      final result = await _bookChaptersRepo.getBookChapters(bookSlug);
-      result.fold(
-        (l) {
-          log('🔴 [ChaptersCubit] API ERROR: ${l.getAllErrorMessages()}');
-          emit(ChaptersFailure(l.getAllErrorMessages()));
+      final result = await _getChapters(bookSlug);
+      result.when(
+        success: (chapters) {
+          log('🟢 [ChaptersCubit] API SUCCESS - ${chapters.length} chapters');
+          emit(ChaptersSuccess(allChapters: chapters, filteredChapters: chapters));
         },
-        (r) {
-          log('🟢 [ChaptersCubit] API SUCCESS - ${r.chapters?.length ?? 0} chapters');
-          emit(
-            ChaptersSuccess(
-              allChapters: r.chapters ?? [],
-              filteredChapters: r.chapters ?? [],
-            ),
-          );
+        failure: (failure) {
+          log('🔴 [ChaptersCubit] API ERROR: ${failure.message}');
+          emit(ChaptersFailure(failure.message));
         },
       );
     }
   }
 
-  Future<void> _backgroundRefresh(
-    String bookSlug,
-    List<Chapter> cachedChapters,
-  ) async {
+  Future<void> _backgroundRefresh(String bookSlug) async {
     log('🔄 [ChaptersCubit] Background refresh started for: $bookSlug');
-    final result = await _bookChaptersRepo.getBookChapters(bookSlug);
-    result.fold(
-      (error) {
-        log('⚠️ [ChaptersCubit] Background refresh FAILED: ${error.getAllErrorMessages()}');
-        // Background refresh failed, keep cached data
-        if (state is ChaptersSuccess) {
-          emit((state as ChaptersSuccess).copyWith(isRefreshing: false));
-        }
-      },
-      (response) {
-        final newChapters = response.chapters ?? [];
+    final result = await _getChapters(bookSlug);
+    result.when(
+      success: (newChapters) {
         log('🟢 [ChaptersCubit] Background refresh SUCCESS - ${newChapters.length} chapters');
         if (newChapters.isEmpty) {
           if (state is ChaptersSuccess) {
@@ -87,6 +70,12 @@ class ChaptersCubit extends Cubit<ChaptersState> {
           ),
         );
       },
+      failure: (failure) {
+        log('⚠️ [ChaptersCubit] Background refresh FAILED: ${failure.message}');
+        if (state is ChaptersSuccess) {
+          emit((state as ChaptersSuccess).copyWith(isRefreshing: false));
+        }
+      },
     );
   }
 
@@ -103,20 +92,11 @@ class ChaptersCubit extends Cubit<ChaptersState> {
               final normalizedChapter = normalizeArabic(
                 chapter.chapterArabic ?? '',
               );
-              return normalizedChapter.contains(normalizedQuery.trim());
+              return normalizedChapter.contains(normalizedQuery);
             }).toList();
 
         emit(currentState.copyWith(filteredChapters: filtered));
       }
     }
-  }
-
-  String normalizeArabic(String text) {
-    final diacritics = RegExp(r'[\u0617-\u061A\u064B-\u0652]');
-    String result = text.replaceAll(diacritics, '');
-    result = result.replaceAll(RegExp('[إأآ]'), 'ا');
-    result = result.replaceAll('ـ', '');
-    result = result.toLowerCase();
-    return result;
   }
 }

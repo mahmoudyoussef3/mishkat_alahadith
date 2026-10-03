@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/public_search_result.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/logic/cubit/enhanced_search_cubit.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/ui/screens/hadith_result_details.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/ui/screens/public_search_result.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/logic/enhanced_search_cubit.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/ui/screens/hadith_result_details.dart';
 
 class DeepLinkHadithScreen extends StatefulWidget {
   final String hadithId;
@@ -27,7 +27,7 @@ class _DeepLinkHadithScreenState extends State<DeepLinkHadithScreen> {
         if (_navigated) return;
         if (state is! EnhancedSearchLoaded) return;
 
-        final results = state.enhancedSearch.results ?? const [];
+        final results = state.results;
         if (results.isEmpty) return;
 
         final exact =
@@ -64,7 +64,7 @@ class _DeepLinkHadithScreenState extends State<DeepLinkHadithScreen> {
       },
       builder: (context, state) {
         if (state is EnhancedSearchLoading) {
-          return const Directionality(
+          return Directionality(
             textDirection: TextDirection.rtl,
             child: Scaffold(
               backgroundColor: ColorsManager.primaryBackground,

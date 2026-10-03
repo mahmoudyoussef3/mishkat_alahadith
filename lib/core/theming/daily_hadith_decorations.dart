@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 class DailyHadithDecorations {
-  // Card containing the hadith content
   static BoxDecoration contentCard() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -29,7 +28,6 @@ class DailyHadithDecorations {
     );
   }
 
-  // The small label chip at top of hadith card (e.g., "نص الحديث")
   static BoxDecoration labelChip() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple.withOpacity(0.1),
@@ -41,7 +39,6 @@ class DailyHadithDecorations {
     );
   }
 
-  // Decorative corner container with quote icon
   static BoxDecoration cornerQuote() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple.withOpacity(0.1),
@@ -52,7 +49,6 @@ class DailyHadithDecorations {
     );
   }
 
-  // Small action icon (copy/share) decoration
   static BoxDecoration actionIcon(Color color) {
     return BoxDecoration(
       color: color.withOpacity(0.1),
@@ -61,10 +57,9 @@ class DailyHadithDecorations {
     );
   }
 
-  // Container holding tabs section
   static BoxDecoration tabsContainer() {
     return BoxDecoration(
-      color: ColorsManager.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(16.r),
       boxShadow: [
         BoxShadow(
@@ -76,10 +71,9 @@ class DailyHadithDecorations {
     );
   }
 
-  // Tab pill decoration depending on selection state
   static BoxDecoration tabPill({required bool isSelected}) {
     return BoxDecoration(
-      color: isSelected ? ColorsManager.primaryPurple : ColorsManager.white,
+      color: isSelected ? ColorsManager.primaryPurple : ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(14.r),
       boxShadow:
           isSelected
@@ -99,7 +93,6 @@ class DailyHadithDecorations {
     );
   }
 
-  // Outer container for selected tab content
   static BoxDecoration tabContentContainer() {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(16.r),
@@ -107,7 +100,6 @@ class DailyHadithDecorations {
     );
   }
 
-  // Actions row container behind copy/share/save
   static BoxDecoration actionRow() {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(12.r),
@@ -115,12 +107,10 @@ class DailyHadithDecorations {
     );
   }
 
-  // Circle avatar background for action icons
   static Color circleActionAvatarBg() {
     return ColorsManager.primaryPurple.withOpacity(0.1);
   }
 
-  // Grade chip background for attribution/grade widget
   static Color gradeChipBg(Color base) {
     return base.withOpacity(0.1);
   }

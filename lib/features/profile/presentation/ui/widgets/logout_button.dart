@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/widgets/app_text_button.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 
 class LogoutButton extends StatelessWidget {
   const LogoutButton({super.key});
@@ -30,8 +31,17 @@ class LogoutButton extends StatelessWidget {
             actions: [
               ElevatedButton(
                 onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.remove("token");
+                  final signedOut =
+                      await context.read<SessionCubit>().signOut();
+                  if (!context.mounted) return;
+                  if (!signedOut) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('تعذر تسجيل الخروج، حاول مرة أخرى'),
+                      ),
+                    );
+                    return;
+                  }
                   context.pushReplacementNamed(Routes.loginScreen);
                 },
                 child: const Text('نعم'),

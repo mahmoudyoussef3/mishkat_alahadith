@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 class PrayerTimesDecorations {
-  // Section divider gradient
   static BoxDecoration sectionDivider() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -17,7 +16,6 @@ class PrayerTimesDecorations {
     );
   }
 
-  // Next prayer card container
   static BoxDecoration nextPrayerContainer() {
     return BoxDecoration(
       color: ColorsManager.cardBackground,
@@ -26,7 +24,6 @@ class PrayerTimesDecorations {
     );
   }
 
-  // Countdown pill decoration
   static BoxDecoration countdownPill() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple.withOpacity(0.08),
@@ -34,7 +31,6 @@ class PrayerTimesDecorations {
     );
   }
 
-  // Prayer grid row container
   static BoxDecoration gridRowContainer() {
     return BoxDecoration(
       color: ColorsManager.cardBackground,
@@ -43,7 +39,6 @@ class PrayerTimesDecorations {
     );
   }
 
-  // Prayer grid icon background
   static BoxDecoration gridRowIconBg() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple.withOpacity(0.12),

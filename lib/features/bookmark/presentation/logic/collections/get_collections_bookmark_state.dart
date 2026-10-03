@@ -8,23 +8,23 @@ final class GetCollectionsBookmarkInitial extends GetCollectionsBookmarkState {}
 final class GetCollectionsBookmarkLoading extends GetCollectionsBookmarkState {}
 
 final class GetCollectionsBookmarkSuccess extends GetCollectionsBookmarkState {
-  final CollectionsResponse collectionsResponse;
+  final List<BookmarkCollection> collections;
   final bool isRefreshing;
   final bool isFromCache;
 
   GetCollectionsBookmarkSuccess(
-    this.collectionsResponse, {
+    this.collections, {
     this.isRefreshing = false,
     this.isFromCache = false,
   });
 
   GetCollectionsBookmarkSuccess copyWith({
-    CollectionsResponse? collectionsResponse,
+    List<BookmarkCollection>? collections,
     bool? isRefreshing,
     bool? isFromCache,
   }) {
     return GetCollectionsBookmarkSuccess(
-      collectionsResponse ?? this.collectionsResponse,
+      collections ?? this.collections,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       isFromCache: isFromCache ?? this.isFromCache,
     );

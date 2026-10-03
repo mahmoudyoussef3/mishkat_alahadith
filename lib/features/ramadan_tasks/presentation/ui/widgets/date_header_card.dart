@@ -3,8 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// Displays both Hijri and Gregorian dates in a decorative card
-/// at the top of the Ramadan tasks screen.
 class DateHeaderCard extends StatelessWidget {
   final String hijriDate;
   final String gregorianDate;
@@ -32,7 +30,6 @@ class DateHeaderCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // ── Crescent icon ──
           Container(
             width: 44.w,
             height: 44.w,
@@ -48,12 +45,10 @@ class DateHeaderCard extends StatelessWidget {
           ),
           SizedBox(width: 14.w),
 
-          // ── Date texts ──
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Hijri date (primary)
                 Text(
                   hijriDate,
                   style: TextStyles.titleMedium.copyWith(
@@ -62,7 +57,6 @@ class DateHeaderCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 4.h),
-                // Gregorian date (secondary)
                 Text(
                   gregorianDate,
                   style: TextStyles.bodySmall.copyWith(
@@ -73,7 +67,6 @@ class DateHeaderCard extends StatelessWidget {
             ),
           ),
 
-          // ── Calendar icon decoration ──
           Icon(
             Icons.calendar_today_rounded,
             color: ColorsManager.primaryPurple.withOpacity(0.3),

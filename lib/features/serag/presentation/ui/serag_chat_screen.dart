@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
-import 'package:mishkat_almasabih/features/serag/ui/widgets/remaining_questions_card.dart';
-import 'package:mishkat_almasabih/features/serag/ui/widgets/chat_messages_list.dart';
-import 'package:mishkat_almasabih/features/serag/ui/widgets/chat_input_section.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/ui/widgets/remaining_questions_card.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/ui/widgets/chat_messages_list.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/ui/widgets/chat_input_section.dart';
 
 class SeragChatScreen extends StatefulWidget {
   const SeragChatScreen({super.key, required this.model});
-  final SeragRequestModel model;
+  final SeragHadithContext model;
 
   @override
   State<SeragChatScreen> createState() => _SeragChatScreenState();

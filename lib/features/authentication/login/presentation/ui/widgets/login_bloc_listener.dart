@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// ScreenUtil not used directly in this file after refactor
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
-import '../../../../../core/helpers/functions.dart';
-import '../../../../../core/routing/routes.dart';
-import '../../../../../core/theming/colors.dart';
-import '../../../../../core/theming/auth_styles.dart';
-import '../../../../../core/widgets/app_text_button.dart';
+import 'package:mishkat_almasabih/core/helpers/functions.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/auth_styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_text_button.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 import '../../logic/cubit/login_cubit.dart';
 import '../../logic/cubit/login_state.dart';
 
@@ -30,6 +30,7 @@ class LoginBlocListener extends StatelessWidget {
             builder: (context) => loadingProgressIndicator(),
           );
         } else if (state is LoginSuccess) {
+          context.read<SessionCubit>().checkSession();
           context.pop();
           context.pushNamedAndRemoveUntil(
             Routes.homeScreen,

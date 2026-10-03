@@ -1,79 +1,74 @@
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/profile/data/models/stats_model.dart';
-import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
-import 'package:mishkat_almasabih/features/profile/data/repos/user_response_repo.dart';
+import 'package:mishkat_almasabih/features/profile/domain/entities/user_profile.dart';
+import 'package:mishkat_almasabih/features/profile/domain/usecases/get_cached_profile_use_case.dart';
+import 'package:mishkat_almasabih/features/profile/domain/usecases/get_profile_use_case.dart';
 
 part 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
-  final UserResponseRepo userResponseRepo;
-  ProfileCubit(this.userResponseRepo) : super(ProfileInitial());
+  final GetCachedProfileUseCase _getCachedProfile;
+  final GetProfileUseCase _getProfile;
+  ProfileCubit(this._getCachedProfile, this._getProfile)
+    : super(ProfileInitial());
 
   Future<void> getUserProfile() async {
     log('👤 [ProfileCubit] Fetching user profile');
-    
-    // Try cache first
-    final cached = await userResponseRepo.getCachedProfile();
+
+    final cached = await _getCachedProfile();
 
     if (cached != null) {
       log('✅ [ProfileCubit] CACHE HIT - user: ${cached.username ?? "N/A"}');
-      // Emit cached data immediately
       emit(ProfileLoaded(cached, isFromCache: true, isRefreshing: true));
 
-      // Background refresh
-      _backgroundRefresh(cached);
+      _backgroundRefresh();
     } else {
       log('❌ [ProfileCubit] CACHE MISS - Fetching from API');
-      // No cache, fetch from API
       emit(ProfileLoading());
-      final result = await userResponseRepo.getUserProfile();
-      result.fold(
-        (error) {
-          log('🔴 [ProfileCubit] API ERROR: ${error.getAllErrorMessages()}');
-          emit(ProfileError(error.getAllErrorMessages()));
-        },
-        (user) {
+      final result = await _getProfile();
+      result.when(
+        success: (user) {
           log('🟢 [ProfileCubit] API SUCCESS - user: ${user.username ?? "N/A"}');
           emit(ProfileLoaded(user));
+        },
+        failure: (failure) {
+          log('🔴 [ProfileCubit] API ERROR: ${failure.message}');
+          emit(ProfileError(failure.message));
         },
       );
     }
   }
 
-  Future<void> _backgroundRefresh(UserResponseModel cached) async {
+  Future<void> _backgroundRefresh() async {
     log('🔄 [ProfileCubit] Background refresh started');
-    final result = await userResponseRepo.getUserProfile();
-    result.fold(
-      (error) {
-        log('⚠️ [ProfileCubit] Background refresh FAILED: ${error.getAllErrorMessages()}');
-        // Background refresh failed, keep cached data
+    final result = await _getProfile();
+    result.when(
+      success: (user) {
+        log('🟢 [ProfileCubit] Background refresh SUCCESS');
+        emit(ProfileLoaded(user, isFromCache: false, isRefreshing: false));
+      },
+      failure: (failure) {
+        log('⚠️ [ProfileCubit] Background refresh FAILED: ${failure.message}');
         if (state is ProfileLoaded) {
           emit((state as ProfileLoaded).copyWith(isRefreshing: false));
         }
       },
-      (user) {
-        log('🟢 [ProfileCubit] Background refresh SUCCESS');
-        emit(ProfileLoaded(user, isFromCache: false, isRefreshing: false));
-      },
     );
   }
 
-  /// Force refresh profile (clears cache)
   Future<void> refreshProfile() async {
     log('🔃 [ProfileCubit] Force refresh profile');
     emit(ProfileLoading());
-    final result = await userResponseRepo.getUserProfile();
-    result.fold(
-      (error) {
-        log('🔴 [ProfileCubit] Refresh ERROR: ${error.getAllErrorMessages()}');
-        emit(ProfileError(error.getAllErrorMessages()));
-      },
-      (user) {
+    final result = await _getProfile();
+    result.when(
+      success: (user) {
         log('🟢 [ProfileCubit] Refresh SUCCESS');
         emit(ProfileLoaded(user));
+      },
+      failure: (failure) {
+        log('🔴 [ProfileCubit] Refresh ERROR: ${failure.message}');
+        emit(ProfileError(failure.message));
       },
     );
   }

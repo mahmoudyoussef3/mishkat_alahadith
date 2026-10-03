@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
-import 'package:mishkat_almasabih/features/home/logic/cubit/get_library_statistics_cubit.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_book_data_state_card.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_main_category_card.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/home_screen_shimmer.dart';
-import 'package:mishkat_almasabih/features/library/ui/screens/library_screen.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/library_statistics/get_library_statistics_cubit.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_book_data_state_card.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_main_category_card.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/home_screen_shimmer.dart';
+import 'package:mishkat_almasabih/features/library/presentation/ui/screens/library_screen.dart';
 
-import '../../../core/theming/library_decorations.dart';
-import '../../../core/theming/library_styles.dart';
-import '../../../core/helpers/spacing.dart';
+import '../../../../../../../core/theming/library_decorations.dart';
+import '../../../../../../../core/theming/library_styles.dart';
+import '../../../../../../../core/helpers/spacing.dart';
 
 class LibraryBooksScreen extends StatefulWidget {
   const LibraryBooksScreen({super.key});
@@ -33,7 +32,6 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SaveHadithDailyRepo().getHadith();
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
@@ -87,7 +85,6 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
       home: false,
       bottomNav: true,
 
-      //     title: 'مشكاة المصابيح',
       title: 'مشكاة الأحاديث',
       description: 'مصادر الأحاديث النبوية الشريفة',
     );
@@ -183,21 +180,21 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
         _buildStatisticsCard(
           icon: Icons.book,
           title: 'إجمالي الكتب',
-          value: state.statisticsResponse.statistics.totalBooks.toString(),
+          value: state.statistics.totalBooks.toString(),
           color: LibraryDecorations.booksColor,
         ),
         SizedBox(width: Spacing.md),
         _buildStatisticsCard(
           icon: Icons.folder,
           title: 'الأبواب',
-          value: state.statisticsResponse.statistics.totalChapters.toString(),
+          value: state.statistics.totalChapters.toString(),
           color: LibraryDecorations.chaptersColor,
         ),
         SizedBox(width: Spacing.md),
         _buildStatisticsCard(
           icon: Icons.auto_stories,
           title: 'الأحاديث',
-          value: state.statisticsResponse.statistics.totalHadiths.toString(),
+          value: state.statistics.totalHadiths.toString(),
           color: LibraryDecorations.hadithsColor,
         ),
       ],
@@ -314,7 +311,7 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
     required String screenId,
   }) {
     final category =
-        state.statisticsResponse.statistics.booksByCategory[categoryKey]!;
+        state.statistics.booksByCategory[categoryKey]!;
 
     return BuildMainCategoryCard(
       title: category.name,

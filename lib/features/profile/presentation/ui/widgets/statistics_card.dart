@@ -4,9 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
-import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
-import 'package:mishkat_almasabih/features/profile/ui/widgets/stats_card.dart';
-import 'package:mishkat_almasabih/features/profile/ui/widgets/statistics_shimmer.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/logic/user_stats/user_stats_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/ui/widgets/stats_card.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/ui/widgets/statistics_shimmer.dart';
 import 'last_activity_card.dart';
 
 class StatisticsSection extends StatelessWidget {

@@ -28,7 +28,6 @@ class RamadanTasksLoaded extends RamadanTasksState {
   final String hijriDateString;
   final String gregorianDateString;
 
-  /// Total days in Ramadan (29 or 30) from Remote Config
   final int totalDays;
 
   RamadanTasksLoaded({

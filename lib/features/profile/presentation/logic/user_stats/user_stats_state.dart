@@ -5,7 +5,7 @@ sealed class UserStatsState {}
 
 final class UserStatsInitial extends UserStatsState {}
 final class UserStatsLoaded extends UserStatsState  {
-  final StatsModel stats;
+  final UserStats stats;
   UserStatsLoaded(this.stats);
 }
 final class UserStatsError extends UserStatsState {

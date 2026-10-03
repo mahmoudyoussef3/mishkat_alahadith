@@ -1,23 +1,32 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/features/home/data/models/search_history_models.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/data/repos/shared_pref_history_item_repo.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/features/authentication/session/domain/usecases/is_signed_in_use_case.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/entities/search_history_entry.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/usecases/add_search_history_entry_use_case.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/usecases/clear_search_history_use_case.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/usecases/delete_search_history_entry_use_case.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/usecases/get_search_history_use_case.dart';
 
 part 'search_history_state.dart';
 
 class SearchHistoryCubit extends Cubit<SearchHistoryState> {
-  final SearchHistoryRepo repo;
-  String? _token;
+  final IsSignedInUseCase _isSignedIn;
+  final GetSearchHistoryUseCase _getHistory;
+  final AddSearchHistoryEntryUseCase _addEntry;
+  final DeleteSearchHistoryEntryUseCase _deleteEntry;
+  final ClearSearchHistoryUseCase _clearHistory;
   bool _initialized = false;
 
-  SearchHistoryCubit(this.repo) : super(SearchHistoryInitial());
+  SearchHistoryCubit(
+    this._isSignedIn,
+    this._getHistory,
+    this._addEntry,
+    this._deleteEntry,
+    this._clearHistory,
+  ) : super(SearchHistoryInitial());
 
   Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    _token = prefs.getString('token');
-
-    if (_token == null) {
+    if (!await _isSignedIn()) {
       emit(SearchHistoryError('Unauthorized: No token found'));
     } else {
       _initialized = true;
@@ -25,11 +34,9 @@ class SearchHistoryCubit extends Cubit<SearchHistoryState> {
     }
   }
 
-  bool get isReady => _initialized && _token != null;
+  bool get isReady => _initialized;
 
-  Future<void> fetchHistory(
- 
-  ) async {
+  Future<void> fetchHistory() async {
     if (!isReady) {
       emit(SearchHistoryError('Unauthorized or Cubit not initialized'));
       return;
@@ -37,18 +44,15 @@ class SearchHistoryCubit extends Cubit<SearchHistoryState> {
 
     emit(SearchHistoryLoading());
 
-    final result = await repo.getSearchHistory(
-      token: _token!,
- 
-    );
+    final result = await _getHistory();
 
-    result.fold(
-      (error) => emit(SearchHistoryError(error.toString())),
-      (history) => emit(SearchHistorySuccess(history)),
+    result.when(
+      success: (history) => emit(SearchHistorySuccess(history)),
+      failure: (failure) => emit(SearchHistoryError(failure.message)),
     );
   }
 
-  Future<void> addSearchItem(AddSearchRequest item) async {
+  Future<void> addSearchItem(NewSearchHistoryEntry item) async {
     if (!isReady) {
       emit(SearchHistoryError('Unauthorized or Cubit not initialized'));
       return;
@@ -56,11 +60,11 @@ class SearchHistoryCubit extends Cubit<SearchHistoryState> {
 
     emit(SearchHistoryLoading());
 
-    final result = await repo.addSearch(token: _token!, body: item);
+    final result = await _addEntry(item);
 
-    await result.fold(
-      (error) async => emit(SearchHistoryError(error.toString())),
-      (_) async => await fetchHistory(),
+    await result.when(
+      success: (_) async => await fetchHistory(),
+      failure: (failure) async => emit(SearchHistoryError(failure.message)),
     );
   }
 
@@ -72,11 +76,11 @@ class SearchHistoryCubit extends Cubit<SearchHistoryState> {
 
     emit(SearchHistoryLoading());
 
-    final result = await repo.deleteSearch(token: _token!, searchId: id);
+    final result = await _deleteEntry(id);
 
-    await result.fold(
-      (error) async => emit(SearchHistoryError(error.toString())),
-      (_) async => await fetchHistory(),
+    await result.when(
+      success: (_) async => await fetchHistory(),
+      failure: (failure) async => emit(SearchHistoryError(failure.message)),
     );
   }
 
@@ -88,16 +92,11 @@ class SearchHistoryCubit extends Cubit<SearchHistoryState> {
 
     emit(SearchHistoryLoading());
 
-    final result = await repo.deleteAllSearch(
-      token: _token!,
-      body: {"confirm": true},
-    );
+    final result = await _clearHistory();
 
-    await result.fold(
-      (error) async => emit(SearchHistoryError(error.toString())),
-      (_) async => emit(SearchHistorySuccess([])),
+    await result.when(
+      success: (_) async => emit(SearchHistorySuccess([])),
+      failure: (failure) async => emit(SearchHistoryError(failure.message)),
     );
   }
-
-
 }

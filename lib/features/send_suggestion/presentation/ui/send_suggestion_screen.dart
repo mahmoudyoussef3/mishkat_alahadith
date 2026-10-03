@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/send_suggestion_styles.dart';
 import 'package:mishkat_almasabih/core/theming/send_suggestion_decorations.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/send_suggestion/send_suggestion_repo.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/send_suggestion/presentation/logic/send_suggestion_cubit.dart';
 
 class SuggestionForm extends StatefulWidget {
   const SuggestionForm({super.key});
@@ -14,9 +15,8 @@ class SuggestionForm extends StatefulWidget {
 
 class _SuggestionFormState extends State<SuggestionForm> {
   final TextEditingController _ctrl = TextEditingController();
-  bool _loading = false;
 
-  Future<void> _onSend() async {
+  void _onSend() {
     final text = _ctrl.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -25,13 +25,11 @@ class _SuggestionFormState extends State<SuggestionForm> {
       return;
     }
 
-    setState(() => _loading = true);
-    final ok = await SuggestionService().sendSuggestion(text);
-    setState(() => _loading = false);
+    context.read<SendSuggestionCubit>().send(text);
+  }
 
-    if (!mounted) return;
-
-    if (ok) {
+  void _onSendStateChanged(BuildContext context, SendSuggestionState state) {
+    if (state is SendSuggestionSent) {
       _ctrl.clear();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -40,7 +38,7 @@ class _SuggestionFormState extends State<SuggestionForm> {
         ),
       );
       Navigator.of(context).pop();
-    } else {
+    } else if (state is SendSuggestionFailed) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: SendSuggestionDecorations.errorSnackbarBackground,
@@ -61,284 +59,293 @@ class _SuggestionFormState extends State<SuggestionForm> {
     final isTablet = MediaQuery.of(context).size.width > 600;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: SafeArea(
-        top: true,
-        bottom: true,
-        child: Scaffold(
-          backgroundColor: SendSuggestionDecorations.scaffoldBackground,
-          body: CustomScrollView(
-            slivers: [
-              const BuildHeaderAppBar(
-                home: false,
-                bottomNav: false,
-                title: 'شاركنا اقتراحاتك',
-                description: 'آراؤكم تهمنا وتساعدنا على التطور',
-              ),
-              SliverFillRemaining(
-                hasScrollBody: true,
-                child: Container(
-                  width: double.infinity,
-                  decoration: SendSuggestionDecorations.backgroundGradient(),
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 40.w : 20.w,
-                      vertical: 20.h,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 40.h),
+    return BlocListener<SendSuggestionCubit, SendSuggestionState>(
+      listener: _onSendStateChanged,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          top: true,
+          bottom: true,
+          child: Scaffold(
+            backgroundColor: SendSuggestionDecorations.scaffoldBackground,
+            body: CustomScrollView(
+              slivers: [
+                const BuildHeaderAppBar(
+                  home: false,
+                  bottomNav: false,
+                  title: 'شاركنا اقتراحاتك',
+                  description: 'آراؤكم تهمنا وتساعدنا على التطور',
+                ),
+                SliverFillRemaining(
+                  hasScrollBody: true,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: SendSuggestionDecorations.backgroundGradient(),
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 40.w : 20.w,
+                        vertical: 20.h,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(height: 40.h),
 
-                        // Main Card
-                        Center(
-                          child: Container(
-                            constraints: BoxConstraints(
-                              maxWidth: isTablet ? 550 : double.infinity,
-                            ),
-                            child: Card(
-                              elevation:
-                                  SendSuggestionDecorations.cardElevation,
-                              shadowColor:
-                                  SendSuggestionDecorations.cardShadowColor,
-                              shape: SendSuggestionDecorations.cardShape,
-                              child: Container(
-                                padding: EdgeInsets.all(isTablet ? 32.w : 24.w),
-                                decoration:
-                                    SendSuggestionDecorations.cardContainer(),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    // Animated Icon
-                                    TweenAnimationBuilder<double>(
-                                      tween: Tween(begin: 0.0, end: 1.0),
-                                      duration:
-                                          SendSuggestionDecorations
-                                              .iconAnimationDuration,
-                                      curve:
-                                          SendSuggestionDecorations
-                                              .iconAnimationCurve,
-                                      builder: (context, value, child) {
-                                        return Transform.scale(
-                                          scale: value,
-                                          child: child,
-                                        );
-                                      },
-                                      child: Container(
-                                        width:
-                                            SendSuggestionDecorations.iconContainerSize(
-                                              isTablet,
-                                            ),
-                                        height:
-                                            SendSuggestionDecorations.iconContainerSize(
-                                              isTablet,
-                                            ),
-                                        decoration:
-                                            SendSuggestionDecorations.iconContainer(),
-                                        child: Icon(
-                                          Icons.lightbulb_outline_rounded,
-                                          color:
-                                              SendSuggestionDecorations
-                                                  .iconColor,
-                                          size:
-                                              SendSuggestionDecorations.iconSize(
+                          Center(
+                            child: Container(
+                              constraints: BoxConstraints(
+                                maxWidth: isTablet ? 550 : double.infinity,
+                              ),
+                              child: Card(
+                                elevation:
+                                    SendSuggestionDecorations.cardElevation,
+                                shadowColor:
+                                    SendSuggestionDecorations.cardShadowColor,
+                                shape: SendSuggestionDecorations.cardShape,
+                                child: Container(
+                                  padding: EdgeInsets.all(
+                                    isTablet ? 32.w : 24.w,
+                                  ),
+                                  decoration:
+                                      SendSuggestionDecorations.cardContainer(),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      TweenAnimationBuilder<double>(
+                                        tween: Tween(begin: 0.0, end: 1.0),
+                                        duration:
+                                            SendSuggestionDecorations
+                                                .iconAnimationDuration,
+                                        curve:
+                                            SendSuggestionDecorations
+                                                .iconAnimationCurve,
+                                        builder: (context, value, child) {
+                                          return Transform.scale(
+                                            scale: value,
+                                            child: child,
+                                          );
+                                        },
+                                        child: Container(
+                                          width:
+                                              SendSuggestionDecorations.iconContainerSize(
                                                 isTablet,
                                               ),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: isTablet ? 20.h : 16.h),
-
-                                    // Title
-                                    Text(
-                                      'شاركنا اقتراحاتك',
-                                      textAlign: TextAlign.center,
-                                      style: SendSuggestionTextStyles.title(
-                                        isTablet,
-                                      ),
-                                    ),
-                                    SizedBox(height: 8.h),
-
-                                    // Subtitle
-                                    Text(
-                                      'لتطوير التطبيق 🌿',
-                                      textAlign: TextAlign.center,
-                                      style: SendSuggestionTextStyles.subtitle(
-                                        isTablet,
-                                      ),
-                                    ),
-                                    SizedBox(height: 12.h),
-
-                                    // Description
-                                    Text(
-                                      'اقتراحك يساعدنا في تحسين التجربة وتقديم أفضل محتوى',
-                                      textAlign: TextAlign.center,
-                                      style:
-                                          SendSuggestionTextStyles.description(
-                                            isTablet,
-                                          ),
-                                    ),
-                                    SizedBox(height: isTablet ? 28.h : 24.h),
-
-                                    // TextField + Privacy Note
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        Container(
+                                          height:
+                                              SendSuggestionDecorations.iconContainerSize(
+                                                isTablet,
+                                              ),
                                           decoration:
-                                              SendSuggestionDecorations.textFieldShadowContainer(),
-                                          child: TextField(
-                                            controller: _ctrl,
-                                            maxLines:
-                                                screenHeight > 700 ? 6 : 4,
-                                            maxLength: 500,
-                                            textAlign: TextAlign.right,
-                                            decoration: InputDecoration(
-                                              hintText: 'اكتب اقتراحك هنا...',
-                                              hintStyle:
-                                                  SendSuggestionTextStyles.textFieldHint(
-                                                    isTablet,
-                                                  ),
-                                              filled: true,
-                                              fillColor:
-                                                  SendSuggestionDecorations
-                                                      .textFieldFillColor,
-                                              enabledBorder:
-                                                  SendSuggestionDecorations.textFieldEnabledBorder(),
-                                              focusedBorder:
-                                                  SendSuggestionDecorations.textFieldFocusedBorder(),
-                                              contentPadding:
-                                                  SendSuggestionDecorations
-                                                      .textFieldPadding,
-                                              counterStyle:
-                                                  SendSuggestionTextStyles
-                                                      .textFieldCounter,
-                                            ),
-                                            style:
-                                                SendSuggestionTextStyles.textFieldInput(
+                                              SendSuggestionDecorations.iconContainer(),
+                                          child: Icon(
+                                            Icons.lightbulb_outline_rounded,
+                                            color:
+                                                SendSuggestionDecorations
+                                                    .iconColor,
+                                            size:
+                                                SendSuggestionDecorations.iconSize(
                                                   isTablet,
                                                 ),
                                           ),
                                         ),
-                                        SizedBox(height: 6.h),
-                                        Text(
-                                          'لن يتم إرسال بريدك الإلكتروني أو اسم المستخدم، مجرد اقتراحك فقط.',
-                                          textAlign: TextAlign.right,
-                                          style:
-                                              SendSuggestionTextStyles.privacyNote(
-                                                isTablet,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: isTablet ? 28.h : 24.h),
-
-                                    // Send Button
-                                    SizedBox(
-                                      height:
-                                          SendSuggestionDecorations.sendButtonHeight(
-                                            isTablet,
-                                          ),
-                                      child: ElevatedButton(
-                                        onPressed: _loading ? null : _onSend,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              SendSuggestionDecorations
-                                                  .sendButtonBackground,
-                                          foregroundColor:
-                                              SendSuggestionDecorations
-                                                  .sendButtonForeground,
-                                          disabledBackgroundColor:
-                                              SendSuggestionDecorations
-                                                  .sendButtonDisabledBackground,
-                                          shape:
-                                              SendSuggestionDecorations
-                                                  .sendButtonShape,
-                                          elevation:
-                                              SendSuggestionDecorations
-                                                  .sendButtonElevation,
-                                          shadowColor:
-                                              SendSuggestionDecorations
-                                                  .sendButtonShadowColor,
-                                        ),
-                                        child:
-                                            _loading
-                                                ? Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    SizedBox(
-                                                      width:
-                                                          SendSuggestionDecorations
-                                                              .loadingIndicatorSize,
-                                                      height:
-                                                          SendSuggestionDecorations
-                                                              .loadingIndicatorSize,
-                                                      child: CircularProgressIndicator(
-                                                        strokeWidth:
-                                                            SendSuggestionDecorations
-                                                                .loadingIndicatorStrokeWidth,
-                                                        valueColor: AlwaysStoppedAnimation<
-                                                          Color
-                                                        >(
-                                                          SendSuggestionDecorations
-                                                              .loadingIndicatorColor,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 12.w),
-                                                    Text(
-                                                      'جارٍ الإرسال...',
-                                                      style:
-                                                          SendSuggestionTextStyles.sendButtonLoadingText(
-                                                            isTablet,
-                                                          ),
-                                                    ),
-                                                  ],
-                                                )
-                                                : Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.send_rounded,
-                                                      size:
-                                                          SendSuggestionDecorations.sendButtonIconSize(
-                                                            isTablet,
-                                                          ),
-                                                    ),
-                                                    SizedBox(width: 10.w),
-                                                    Text(
-                                                      'إرسال الاقتراح',
-                                                      style:
-                                                          SendSuggestionTextStyles.sendButtonText(
-                                                            isTablet,
-                                                          ),
-                                                    ),
-                                                  ],
-                                                ),
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(height: isTablet ? 20.h : 16.h),
+
+                                      Text(
+                                        'شاركنا اقتراحاتك',
+                                        textAlign: TextAlign.center,
+                                        style: SendSuggestionTextStyles.title(
+                                          isTablet,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8.h),
+
+                                      Text(
+                                        'لتطوير التطبيق 🌿',
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            SendSuggestionTextStyles.subtitle(
+                                              isTablet,
+                                            ),
+                                      ),
+                                      SizedBox(height: 12.h),
+
+                                      Text(
+                                        'اقتراحك يساعدنا في تحسين التجربة وتقديم أفضل محتوى',
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            SendSuggestionTextStyles.description(
+                                              isTablet,
+                                            ),
+                                      ),
+                                      SizedBox(height: isTablet ? 28.h : 24.h),
+
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Container(
+                                            decoration:
+                                                SendSuggestionDecorations.textFieldShadowContainer(),
+                                            child: TextField(
+                                              controller: _ctrl,
+                                              maxLines:
+                                                  screenHeight > 700 ? 6 : 4,
+                                              maxLength: 500,
+                                              textAlign: TextAlign.right,
+                                              decoration: InputDecoration(
+                                                hintText: 'اكتب اقتراحك هنا...',
+                                                hintStyle:
+                                                    SendSuggestionTextStyles.textFieldHint(
+                                                      isTablet,
+                                                    ),
+                                                filled: true,
+                                                fillColor:
+                                                    SendSuggestionDecorations
+                                                        .textFieldFillColor,
+                                                enabledBorder:
+                                                    SendSuggestionDecorations.textFieldEnabledBorder(),
+                                                focusedBorder:
+                                                    SendSuggestionDecorations.textFieldFocusedBorder(),
+                                                contentPadding:
+                                                    SendSuggestionDecorations
+                                                        .textFieldPadding,
+                                                counterStyle:
+                                                    SendSuggestionTextStyles
+                                                        .textFieldCounter,
+                                              ),
+                                              style:
+                                                  SendSuggestionTextStyles.textFieldInput(
+                                                    isTablet,
+                                                  ),
+                                            ),
+                                          ),
+                                          SizedBox(height: 6.h),
+                                          Text(
+                                            'لن يتم إرسال بريدك الإلكتروني أو اسم المستخدم، مجرد اقتراحك فقط.',
+                                            textAlign: TextAlign.right,
+                                            style:
+                                                SendSuggestionTextStyles.privacyNote(
+                                                  isTablet,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: isTablet ? 28.h : 24.h),
+
+                                      SizedBox(
+                                        height:
+                                            SendSuggestionDecorations.sendButtonHeight(
+                                              isTablet,
+                                            ),
+                                        child: BlocBuilder<
+                                          SendSuggestionCubit,
+                                          SendSuggestionState
+                                        >(
+                                          builder: (context, state) {
+                                            final loading =
+                                                state is SendSuggestionSending;
+                                            return ElevatedButton(
+                                              onPressed:
+                                                  loading ? null : _onSend,
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    SendSuggestionDecorations
+                                                        .sendButtonBackground,
+                                                foregroundColor:
+                                                    SendSuggestionDecorations
+                                                        .sendButtonForeground,
+                                                disabledBackgroundColor:
+                                                    SendSuggestionDecorations
+                                                        .sendButtonDisabledBackground,
+                                                shape:
+                                                    SendSuggestionDecorations
+                                                        .sendButtonShape,
+                                                elevation:
+                                                    SendSuggestionDecorations
+                                                        .sendButtonElevation,
+                                                shadowColor:
+                                                    SendSuggestionDecorations
+                                                        .sendButtonShadowColor,
+                                              ),
+                                              child:
+                                                  loading
+                                                      ? Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          SizedBox(
+                                                            width:
+                                                                SendSuggestionDecorations
+                                                                    .loadingIndicatorSize,
+                                                            height:
+                                                                SendSuggestionDecorations
+                                                                    .loadingIndicatorSize,
+                                                            child: CircularProgressIndicator(
+                                                              strokeWidth:
+                                                                  SendSuggestionDecorations
+                                                                      .loadingIndicatorStrokeWidth,
+                                                              valueColor: AlwaysStoppedAnimation<
+                                                                Color
+                                                              >(
+                                                                SendSuggestionDecorations
+                                                                    .loadingIndicatorColor,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          SizedBox(width: 12.w),
+                                                          Text(
+                                                            'جارٍ الإرسال...',
+                                                            style:
+                                                                SendSuggestionTextStyles.sendButtonLoadingText(
+                                                                  isTablet,
+                                                                ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                      : Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.send_rounded,
+                                                            size:
+                                                                SendSuggestionDecorations.sendButtonIconSize(
+                                                                  isTablet,
+                                                                ),
+                                                          ),
+                                                          SizedBox(width: 10.w),
+                                                          Text(
+                                                            'إرسال الاقتراح',
+                                                            style:
+                                                                SendSuggestionTextStyles.sendButtonText(
+                                                                  isTablet,
+                                                                ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
 
-                        SizedBox(height: 40.h),
-
-                      
-                      ],
+                          SizedBox(height: 40.h),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

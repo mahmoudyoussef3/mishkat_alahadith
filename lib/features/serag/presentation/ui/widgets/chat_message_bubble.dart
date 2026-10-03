@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/serag_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/serag_styles.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
+import 'package:mishkat_almasabih/features/serag/domain/entities/chat_message.dart';
 
 class ChatMessageBubble extends StatelessWidget {
-  final Message message;
+  final ChatMessage message;
 
   const ChatMessageBubble({super.key, required this.message});
 

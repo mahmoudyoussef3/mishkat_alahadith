@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 
 class ChaptersDecorations {
-  // Outer chapter card container
   static BoxDecoration chapterCard(Color accent) => BoxDecoration(
     borderRadius: BorderRadius.circular(20),
     gradient: LinearGradient(
@@ -20,7 +19,6 @@ class ChaptersDecorations {
     ],
   );
 
-  // Number chip with gradient
   static BoxDecoration numberChip(Color accent) => BoxDecoration(
     gradient: LinearGradient(
       colors: [accent, accent.withOpacity(0.7)],
@@ -37,7 +35,6 @@ class ChaptersDecorations {
     ],
   );
 
-  // Statistics card container
   static BoxDecoration statsCard(Color color) => BoxDecoration(
     gradient: LinearGradient(
       colors: [
@@ -57,23 +54,21 @@ class ChaptersDecorations {
     ],
   );
 
-  // Shimmer placeholder for chapter card
   static BoxDecoration shimmerCard() => BoxDecoration(
     borderRadius: BorderRadius.circular(20),
-    color: Colors.white,
+    color: ColorsManager.cardBackground,
   );
 
   static BoxDecoration shimmerBox() => BoxDecoration(
-    color: Colors.grey.shade400,
+    color: ColorsManager.disabledText,
     borderRadius: BorderRadius.circular(14),
   );
 
   static BoxDecoration shimmerLine() => BoxDecoration(
-    color: Colors.grey.shade400,
+    color: ColorsManager.disabledText,
     borderRadius: BorderRadius.circular(8),
   );
 
-  // Empty state card in chapters list
   static ShapeBorder emptyCardShape() =>
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
 }

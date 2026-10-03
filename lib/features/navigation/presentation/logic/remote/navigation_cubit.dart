@@ -1,45 +1,42 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/navigation/data/models/local_hadith_navigation_model.dart';
-import 'package:mishkat_almasabih/features/navigation/data/models/navigation_hadith_model.dart';
-import 'package:mishkat_almasabih/features/navigation/data/repos/navigation_repo.dart';
+import 'package:mishkat_almasabih/features/navigation/domain/entities/hadith_navigation.dart';
+import 'package:mishkat_almasabih/features/navigation/domain/usecases/get_cached_hadith_navigation_use_case.dart';
+import 'package:mishkat_almasabih/features/navigation/domain/usecases/get_hadith_navigation_use_case.dart';
 
 part 'navigation_state.dart';
 
 class NavigationCubit extends Cubit<NavigationState> {
-  final NavigationRepo _navigationRepo;
-  NavigationCubit(this._navigationRepo) : super(NavigationInitial());
+  final GetCachedHadithNavigationUseCase _getCachedNavigation;
+  final GetHadithNavigationUseCase _getNavigation;
+  NavigationCubit(this._getCachedNavigation, this._getNavigation)
+    : super(NavigationInitial());
 
   Future<void> emitNavigationStates(
     String hadithNumber,
     String bookSlug,
     String chapterNumber,
   ) async {
-    // Try cache first
-    final cached = await _navigationRepo.getCachedNavigation(
-      bookSlug,
-      int.tryParse(chapterNumber) ?? 0,
-      hadithNumber,
+    final cached = await _getCachedNavigation(
+      hadithNumber: hadithNumber,
+      bookSlug: bookSlug,
+      chapterNumber: chapterNumber,
     );
 
     if (cached != null) {
-      // Emit cached data immediately
       emit(NavigationSuccess(cached, isFromCache: true, isRefreshing: true));
 
-      // Background refresh
-      _backgroundRefresh(hadithNumber, bookSlug, chapterNumber, cached);
+      _backgroundRefresh(hadithNumber, bookSlug, chapterNumber);
     } else {
-      // No cache, fetch from API
       emit(NavigationLoading());
-      final result = await _navigationRepo.navigationHadith(
-        hadithNumber,
-        bookSlug,
-        chapterNumber,
+      final result = await _getNavigation(
+        hadithNumber: hadithNumber,
+        bookSlug: bookSlug,
+        chapterNumber: chapterNumber,
       );
-      result.fold(
-        (l) => emit(NavigationFailure(l.getAllErrorMessages())),
-        (r) => emit(NavigationSuccess(r)),
+      result.when(
+        success: (navigation) => emit(NavigationSuccess(navigation)),
+        failure: (failure) => emit(NavigationFailure(failure.message)),
       );
     }
   }
@@ -48,24 +45,26 @@ class NavigationCubit extends Cubit<NavigationState> {
     String hadithNumber,
     String bookSlug,
     String chapterNumber,
-    NavigationHadithResponse cached,
   ) async {
-    final result = await _navigationRepo.navigationHadith(
-      hadithNumber,
-      bookSlug,
-      chapterNumber,
+    final result = await _getNavigation(
+      hadithNumber: hadithNumber,
+      bookSlug: bookSlug,
+      chapterNumber: chapterNumber,
     );
-    result.fold(
-      (error) {
-        // Background refresh failed, keep cached data
+    result.when(
+      success: (navigation) {
+        emit(
+          NavigationSuccess(
+            navigation,
+            isFromCache: false,
+            isRefreshing: false,
+          ),
+        );
+      },
+      failure: (_) {
         if (state is NavigationSuccess) {
           emit((state as NavigationSuccess).copyWith(isRefreshing: false));
         }
-      },
-      (response) {
-        emit(
-          NavigationSuccess(response, isFromCache: false, isRefreshing: false),
-        );
       },
     );
   }

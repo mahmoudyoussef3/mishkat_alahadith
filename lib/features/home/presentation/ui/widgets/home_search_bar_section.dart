@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
-import 'package:mishkat_almasabih/features/home/data/models/search_history_models.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/search_bar_widget.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/logic/cubit/search_history_cubit.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/entities/search_history_entry.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/search_bar_widget.dart';
+import 'package:mishkat_almasabih/features/search/search_history/presentation/logic/search_history_cubit.dart';
 
 class HomeSearchBarSection extends StatefulWidget {
   const HomeSearchBarSection({super.key});
@@ -45,7 +45,7 @@ class _HomeSearchBarSectionState extends State<HomeSearchBarSection> {
             context
                 .read<SearchHistoryCubit>()
                 .addSearchItem(
-                  AddSearchRequest(
+                  NewSearchHistoryEntry(
                     title: trimmedQuery,
                     date:
                         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}",

@@ -1,15 +1,14 @@
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/profile/data/models/user_response_model.dart';
-import 'package:mishkat_almasabih/features/profile/edit_profile/data/repos/edit_profile_repo.dart';
+import 'package:mishkat_almasabih/features/profile/domain/entities/user_profile.dart';
+import 'package:mishkat_almasabih/features/profile/domain/usecases/update_profile_use_case.dart';
 
 part 'edit_profile_state.dart';
 
 class EditProfileCubit extends Cubit<EditProfileState> {
-  final EditProfileRepo editProfileRepo;
-  EditProfileCubit(this.editProfileRepo) : super(EditProfileInitial());
+  final UpdateProfileUseCase _updateProfile;
+  EditProfileCubit(this._updateProfile) : super(EditProfileInitial());
 
   Future<void> updateProfile({
     required String username,
@@ -17,15 +16,14 @@ class EditProfileCubit extends Cubit<EditProfileState> {
   }) async {
     emit(EditProfileLoading());
 
-    final result = await editProfileRepo.updateProfile(
+    final result = await _updateProfile(
       username: username,
-      imageFile: avatarFile, // 👈 File مباشرة
+      avatarPath: avatarFile?.path,
     );
 
-    result.fold(
-      (failure) => emit(EditProfileFailure(
-          failure.getAllErrorMessages())),
-      (updatedUser) => emit(EditProfileSuccess(updatedUser)),
+    result.when(
+      success: (updatedUser) => emit(EditProfileSuccess(updatedUser)),
+      failure: (failure) => emit(EditProfileFailure(failure.message)),
     );
   }
 }

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/ui/session_builder.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/notification/prayer_time_notification_scheduler.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
-import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
-import 'package:mishkat_almasabih/features/profile/ui/widgets/profile_screen_shimmer.dart';
-import 'package:mishkat_almasabih/features/profile/ui/widgets/prayer_notification_section.dart';
-import 'package:mishkat_almasabih/features/profile/ui/widgets/statistics_card.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/routing/routes.dart';
-import '../logic/cubit/profile_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/logic/user_stats/user_stats_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/ui/widgets/profile_screen_shimmer.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/ui/widgets/prayer_notification_settings_section.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/ui/widgets/statistics_card.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
+import '../logic/profile/profile_cubit.dart';
+import 'widgets/appearance_section.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/login_prompt_section.dart';
 
@@ -22,11 +23,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String? _token;
-  bool _prayerNotificationsEnabled = false;
-  bool _isPrayerNotificationBusy = false;
-  bool _batteryOptimizationIgnored = true;
-
   @override
   void initState() {
     super.initState();
@@ -36,39 +32,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _initializeScreen() async {
-    await Future.wait([_checkToken(), _loadPrayerNotificationState()]);
+    await _checkSession();
   }
 
-  Future<void> _loadPrayerNotificationState() async {
-    final results = await Future.wait([
-      PrayerNotificationScheduler.isEnabled(),
-      PrayerNotificationScheduler.hasBatteryOptimizationExemption(),
-    ]);
-    if (!mounted) return;
+  Future<void> _checkSession() async {
+    final signedIn = await context.read<SessionCubit>().checkSession();
 
-    setState(() {
-      _prayerNotificationsEnabled = results[0];
-      _batteryOptimizationIgnored = results[1];
-    });
-  }
-
-  Future<void> _improvePrayerNotificationReliability() async {
-    await PrayerNotificationScheduler.openBatteryOptimizationSettings();
-    // The user returns from the system settings screen; re-read the state so
-    // the reliability tile hides once the app has been exempted.
-    await _loadPrayerNotificationState();
-  }
-
-  Future<void> _checkToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!mounted) return;
-
-    final storedToken = prefs.getString('token');
-    setState(() {
-      _token = storedToken;
-    });
-
-    if (storedToken != null && mounted) {
+    if (signedIn && mounted) {
       final cubit = context.read<ProfileCubit>();
       await Future.wait([
         cubit.getUserProfile(),
@@ -78,61 +48,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _onRefresh() async {
-    if (_token != null && mounted) {
+    if (mounted && context.read<SessionCubit>().isSignedIn) {
       await context.read<ProfileCubit>().getUserProfile();
       await context.read<UserStatsCubit>().getUserStats();
     }
-  }
-
-  Future<void> _togglePrayerNotifications(bool enabled) async {
-    if (_isPrayerNotificationBusy) return;
-
-    setState(() {
-      _isPrayerNotificationBusy = true;
-    });
-
-    final result = await PrayerNotificationScheduler.setEnabled(enabled);
-
-    if (!mounted) return;
-
-    setState(() {
-      _isPrayerNotificationBusy = false;
-      if (result.success) {
-        _prayerNotificationsEnabled = enabled;
-      }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(result.message),
-        backgroundColor:
-            result.success ? ColorsManager.primaryPurple : ColorsManager.error,
-      ),
-    );
-  }
-
-  Future<void> _refreshPrayerNotifications() async {
-    if (_isPrayerNotificationBusy) return;
-
-    setState(() {
-      _isPrayerNotificationBusy = true;
-    });
-
-    final result = await PrayerNotificationScheduler.refreshSchedule();
-
-    if (!mounted) return;
-
-    setState(() {
-      _isPrayerNotificationBusy = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(result.message),
-        backgroundColor:
-            result.success ? ColorsManager.primaryPurple : ColorsManager.error,
-      ),
-    );
   }
 
   @override
@@ -149,33 +68,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
               return CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  // Login Prompt for guests
-                  if (_token == null)
-                    LoginPromptSection(
-                      onLoginPressed: () {
-                        Navigator.pushNamed(context, Routes.loginScreen);
-                      },
-                    ),
-
-                  // Profile Header for logged-in users
-                  if (_token != null) _buildProfileHeader(state),
-
-                  PrayerNotificationSection(
-                    enabled: _prayerNotificationsEnabled,
-                    isBusy: _isPrayerNotificationBusy,
-                    showBatteryReliabilityAction:
-                        _prayerNotificationsEnabled &&
-                        !_batteryOptimizationIgnored,
-                    onChanged: _togglePrayerNotifications,
-                    onRefresh: _refreshPrayerNotifications,
-                    onImproveReliability:
-                        _improvePrayerNotificationReliability,
+                  SessionBuilder(
+                    builder:
+                        (context, isSignedIn) =>
+                            isSignedIn
+                                ? const SliverToBoxAdapter()
+                                : LoginPromptSection(
+                                  onLoginPressed: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      Routes.loginScreen,
+                                    );
+                                  },
+                                ),
                   ),
 
-                  if (_token != null) const StatisticsSection(),
+                  SessionBuilder(
+                    builder:
+                        (context, isSignedIn) =>
+                            isSignedIn
+                                ? _buildProfileHeader(state)
+                                : const SliverToBoxAdapter(),
+                  ),
 
-                  if (_token != null)
-                    SliverPadding(padding: EdgeInsets.only(bottom: 60.h)),
+                  const AppearanceSection(),
+
+                  const PrayerNotificationSettingsSection(),
+
+                  SessionBuilder(
+                    builder:
+                        (context, isSignedIn) =>
+                            isSignedIn
+                                ? const StatisticsSection()
+                                : const SliverToBoxAdapter(),
+                  ),
+
+                  SessionBuilder(
+                    builder:
+                        (context, isSignedIn) =>
+                            isSignedIn
+                                ? SliverPadding(
+                                  padding: EdgeInsets.only(bottom: 60.h),
+                                )
+                                : const SliverToBoxAdapter(),
+                  ),
                 ],
               );
             },

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/widgets/islamic_separator.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/islamic_separator.dart';
 
 class DividerSection extends StatelessWidget {
   final EdgeInsetsGeometry? margin;

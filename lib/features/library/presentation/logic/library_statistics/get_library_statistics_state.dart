@@ -6,23 +6,23 @@ sealed class GetLibraryStatisticsState {}
 final class GetLibraryStatisticsInitial extends GetLibraryStatisticsState {}
 
 final class GetLivraryStatisticsSuccess extends GetLibraryStatisticsState {
-  final StatisticsResponse statisticsResponse;
+  final LibraryStatistics statistics;
   final bool isRefreshing;
   final bool isFromCache;
 
   GetLivraryStatisticsSuccess({
-    required this.statisticsResponse,
+    required this.statistics,
     this.isRefreshing = false,
     this.isFromCache = false,
   });
 
   GetLivraryStatisticsSuccess copyWith({
-    StatisticsResponse? statisticsResponse,
+    LibraryStatistics? statistics,
     bool? isRefreshing,
     bool? isFromCache,
   }) {
     return GetLivraryStatisticsSuccess(
-      statisticsResponse: statisticsResponse ?? this.statisticsResponse,
+      statistics: statistics ?? this.statistics,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       isFromCache: isFromCache ?? this.isFromCache,
     );

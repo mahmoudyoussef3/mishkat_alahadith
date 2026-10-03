@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/hadith_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/hadith_entity.dart';
 
 class HadithCategoryCard extends StatelessWidget {
   final HadithEntity hadith;
@@ -38,7 +38,6 @@ class HadithCategoryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header Section
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               decoration: BoxDecoration(
@@ -90,7 +89,6 @@ class HadithCategoryCard extends StatelessWidget {
               ),
             ),
 
-            // Text Content Section
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               child: Text(

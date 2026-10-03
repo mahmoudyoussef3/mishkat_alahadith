@@ -1,33 +1,27 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/remaining_questions/data/models/remaining_questions_response_model.dart';
-import 'package:mishkat_almasabih/features/remaining_questions/data/repos/remaining_questions_repo.dart';
+import 'package:mishkat_almasabih/features/remaining_questions/domain/entities/remaining_questions.dart';
+import 'package:mishkat_almasabih/features/remaining_questions/domain/usecases/get_remaining_questions_use_case.dart';
 
 part 'remaining_questions_state.dart';
 
 class RemainingQuestionsCubit extends Cubit<RemainingQuestionsState> {
-  final RemainingQuestionsRepo _remainingQuestionsRepo;
-  RemainingQuestionsCubit(this._remainingQuestionsRepo)
+  final GetRemainingQuestionsUseCase _getRemainingQuestions;
+  RemainingQuestionsCubit(this._getRemainingQuestions)
     : super(RemainingQuestionsInitial());
 
   int remaining = 0;
 
   Future<void> emitRemainingQuestions() async {
     emit(RemainingQuestionsLoading());
-    final result = await _remainingQuestionsRepo.getRemainingQuestions();
+    final result = await _getRemainingQuestions();
 
-    result.fold(
-      (l) => emit(
-        RemainingQuestionsFailure(
-          l.getAllErrorMessages() ,
-        ),
-      ),
-      (r) {
-        remaining = r.remaining!;
-        emit(RemainingQuestionsSuccess(r));
-        
+    result.when(
+      success: (data) {
+        remaining = data.remaining;
+        emit(RemainingQuestionsSuccess(data));
       },
+      failure: (failure) => emit(RemainingQuestionsFailure(failure.message)),
     );
   }
 }

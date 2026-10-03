@@ -1,22 +1,21 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_response.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/repos/book_mark_repo.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/entities/bookmark_action_result.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/delete_bookmark_use_case.dart';
 
 part 'delete_cubit_state.dart';
 
 class DeleteCubitCubit extends Cubit<DeleteCubitState> {
-  final BookMarkRepo _bookMarkRepo;
-  DeleteCubitCubit(this._bookMarkRepo) : super(DeleteCubitInitial());
+  final DeleteBookmarkUseCase _deleteBookmark;
+  DeleteCubitCubit(this._deleteBookmark) : super(DeleteCubitInitial());
 
   Future<void> delete(int id) async {
     emit(DeleteLoading());
-    final result = await _bookMarkRepo.deleteBookMark(id);
+    final result = await _deleteBookmark(id);
 
-    result.fold(
-      (l) => emit(DeleteFaliure(l.getAllErrorMessages())),
-      (r) => emit(DeleteSuccess(r)),
+    result.when(
+      success: (response) => emit(DeleteSuccess(response)),
+      failure: (failure) => emit(DeleteFaliure(failure.message)),
     );
   }
 }

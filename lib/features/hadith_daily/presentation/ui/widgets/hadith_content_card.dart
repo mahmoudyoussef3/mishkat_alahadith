@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/ui/widgets/hadith_rich_text.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/presentation/ui/widgets/hadith_rich_text.dart';
 import 'package:mishkat_almasabih/core/theming/daily_hadith_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/daily_hadith_styles.dart';
 
 class HadithContentCard extends StatelessWidget {
-  final NewDailyHadithModel data;
+  final ExplainedHadith data;
   const HadithContentCard({super.key, required this.data});
 
   @override
@@ -18,7 +18,6 @@ class HadithContentCard extends StatelessWidget {
       decoration: DailyHadithDecorations.contentCard(),
       child: Stack(
         children: [
-          // Islamic pattern overlay
           Positioned.fill(
             child: Opacity(
               opacity: 0.0005,
@@ -32,7 +31,6 @@ class HadithContentCard extends StatelessWidget {
             ),
           ),
 
-          // Decorative corner elements
           Positioned(
             top: 0,
             right: 0,
@@ -48,7 +46,6 @@ class HadithContentCard extends StatelessWidget {
             ),
           ),
 
-          // Main content
           Padding(
             padding: EdgeInsets.fromLTRB(22.w, 22.w, 22.w, 20.w),
             child: Column(
@@ -102,7 +99,6 @@ class HadithContentCard extends StatelessWidget {
 
                 SizedBox(height: 18.h),
 
-                // Hadith content
                 HadithRichText(hadith: data.hadeeth ?? ""),
                 SizedBox(height: 14.h),
 
@@ -156,29 +152,6 @@ class HadithContentCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // Bottom decorative element
-          /*  Positioned(
-            bottom: 0,
-            left: 0,
-            child: Container(
-              width: 60.w,
-              height: 60.h,
-              decoration: BoxDecoration(
-                color: ColorsManager.primaryGold.withOpacity(0.08),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20.r),
-                  bottomLeft: Radius.circular(20.r),
-                ),
-              ),
-              child: Icon(
-                Icons.star,
-                color: ColorsManager.primaryGold.withOpacity(0.4),
-                size: 28.sp,
-              ),
-            ),
-          ),
-          */
         ],
       ),
     );

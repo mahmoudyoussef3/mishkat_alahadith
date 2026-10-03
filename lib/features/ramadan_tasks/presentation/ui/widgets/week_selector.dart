@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// Horizontal scrollable week selector (الأسبوع ١ – ٤) for History mode.
 class WeekSelector extends StatelessWidget {
   final int selectedWeek;
   final ValueChanged<int> onSelected;
@@ -37,7 +36,7 @@ class WeekSelector extends StatelessWidget {
                 color:
                     selected
                         ? ColorsManager.primaryPurple
-                        : ColorsManager.white,
+                        : ColorsManager.cardBackground,
                 borderRadius: BorderRadius.circular(10.r),
                 border: Border.all(
                   color:

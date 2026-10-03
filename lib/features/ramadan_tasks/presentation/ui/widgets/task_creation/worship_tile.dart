@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// A single worship item tile with icon, title, and subtle tap animation.
 class WorshipTile extends StatefulWidget {
   final String title;
   final IconData icon;
@@ -79,7 +78,6 @@ class _WorshipTileState extends State<WorshipTile>
           ),
           child: Row(
             children: [
-              // Icon circle
               Container(
                 width: 38.w,
                 height: 38.w,
@@ -94,7 +92,6 @@ class _WorshipTileState extends State<WorshipTile>
                 ),
               ),
               SizedBox(width: 12.w),
-              // Title
               Expanded(
                 child: Text(
                   widget.title,
@@ -105,7 +102,6 @@ class _WorshipTileState extends State<WorshipTile>
                   ),
                 ),
               ),
-              // Trailing add indicator
               Icon(
                 Icons.add_circle_outline_rounded,
                 size: 20.sp,

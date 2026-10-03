@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/helpers/spacing.dart';
+import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 
@@ -27,7 +27,6 @@ class CategoryCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Icon container with gradient background
             Container(
               width: 60,
               height: 60,
@@ -35,7 +34,6 @@ class CategoryCard extends StatelessWidget {
               child: Icon(icon, color: color, size: 28),
             ),
             SizedBox(height: Spacing.md),
-            // Category name
             Text(
               name,
               style: HomeTextStyles.categoryName,
@@ -44,7 +42,6 @@ class CategoryCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             SizedBox(height: Spacing.sm),
-            // Subtle indicator
             Container(
               width: 20,
               height: 3,

@@ -1,23 +1,28 @@
-import 'package:dartz/dartz.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/authentication/signup/data/models/sign_up_response_body.dart';
-import '../../../../../core/networking/api_error_handler.dart';
-import '../../../../../core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
+import 'package:mishkat_almasabih/core/networking/api_service.dart';
+
+import '../../domain/repos/signup_repo.dart';
 import '../models/sign_up_request_body.dart';
 
-class SignupRepo {
+class SignupRepoImpl implements SignupRepo {
   final ApiService _apiService;
 
-  SignupRepo(this._apiService);
+  SignupRepoImpl(this._apiService);
 
-  Future<Either<ApiErrorModel, SignUpResponseBody>> signup(
-    SignupRequestBody signupRequestBody,
-  ) async {
+  @override
+  Future<ApiResult<void>> signup({
+    required String username,
+    required String email,
+    required String password,
+  }) async {
     try {
-      final response = await _apiService.signup(signupRequestBody);
-      return Right(response);
+      await _apiService.signup(
+        SignupRequestBody(username: username, email: email, password: password),
+      );
+      return const ApiResult.success(null);
     } catch (error) {
-      return Left(ErrorHandler.handle(error));
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 }

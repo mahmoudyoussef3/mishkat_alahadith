@@ -1,5 +1,5 @@
 import '../../domain/entities/ramadan_task_entity.dart';
-import '../../domain/repositories/ramadan_tasks_repository.dart';
+import '../../domain/repos/ramadan_tasks_repository.dart';
 import '../datasources/ramadan_tasks_local_datasource.dart';
 import '../models/ramadan_task_model.dart';
 
@@ -79,7 +79,5 @@ class RamadanTasksRepositoryImpl implements RamadanTasksRepository {
   }
 
   @override
-  Future<void> ensureDailyReset(int day) async {
-    // No-op: daily completions are kept across all 30 days for history.
-  }
+  Future<void> ensureDailyReset(int day) async {}
 }

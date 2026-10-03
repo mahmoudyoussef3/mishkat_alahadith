@@ -1,14 +1,19 @@
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/hadith_entity.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/category_entity.dart';
-import 'package:dartz/dartz.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
+
+import '../entities/category_entity.dart';
+import '../entities/hadith_entity.dart';
 
 abstract class CategoriesRepository {
-  Future<Either<ApiErrorModel, List<CategoryEntity>>> getCategories();
-  Future<Either<ApiErrorModel, HadithResponseEntity>> getAhadithByCategory(
+  Future<ApiResult<List<CategoryEntity>>> getCategories();
+
+  Future<ApiResult<HadithResponseEntity>> getAhadithByCategory(
     String categoryId, {
-      
     int? page,
     int? perPage,
   });
+
+  Future<ExplainedHadith?> getCachedHadithDetails(String id);
+
+  Future<ApiResult<ExplainedHadith>> getHadithDetails(String id);
 }

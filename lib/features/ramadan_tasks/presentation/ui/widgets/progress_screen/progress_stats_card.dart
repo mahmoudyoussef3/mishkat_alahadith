@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../../domain/entities/ramadan_task_entity.dart';
+import '../../../../domain/entities/ramadan_task_entity.dart';
 
-/// Detailed progress stats card showing daily, weekly, and monthly
-/// indicators with animated circular rings and stat badges.
 class ProgressStatsCard extends StatelessWidget {
   final int todayDay;
   final double dailyPercent;
@@ -27,8 +25,6 @@ class ProgressStatsCard extends StatelessWidget {
     required this.allTasks,
     required this.hijriDateString,
   });
-
-  // ── Compute streak & perfect days ──
 
   int get _perfectDays {
     final daily = allTasks.where((t) => t.type == TaskType.daily).toList();
@@ -62,7 +58,6 @@ class ProgressStatsCard extends StatelessWidget {
     for (int d = 1; d <= todayDay; d++) {
       total += daily.where((t) => t.completedDays.contains(d)).length;
     }
-    // Add todayOnly completions
     for (final t in allTasks.where((t) => t.type == TaskType.todayOnly)) {
       total += t.completedDays.length;
     }
@@ -73,7 +68,7 @@ class ProgressStatsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
@@ -89,7 +84,6 @@ class ProgressStatsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Header with date ──
           Padding(
             padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 0),
             child: Row(
@@ -131,7 +125,6 @@ class ProgressStatsCard extends StatelessWidget {
 
           SizedBox(height: 16.h),
 
-          // ── Three progress rings ──
           Padding(
             padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w),
             child: Row(
@@ -161,7 +154,6 @@ class ProgressStatsCard extends StatelessWidget {
 
           SizedBox(height: 16.h),
 
-          // ── Stat badges row ──
           Padding(
             padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
             child: Container(
@@ -226,10 +218,6 @@ class ProgressStatsCard extends StatelessWidget {
         .join();
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// Animated progress ring
-// ─────────────────────────────────────────────────────────────
 
 class _ProgressRing extends StatelessWidget {
   final String label;
@@ -304,10 +292,6 @@ class _ProgressRing extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// Stat badge
-// ─────────────────────────────────────────────────────────────
 
 class _StatBadge extends StatelessWidget {
   final IconData icon;

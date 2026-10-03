@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
 import 'package:mishkat_almasabih/core/widgets/hadith_card_shimer.dart';
-import 'package:mishkat_almasabih/features/ahadith/logic/cubit/ahadiths_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/hadith_list_builder.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/local_hadith_list_builder.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/logic/cubit/ahadiths_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/hadith_list_builder.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/local_hadith_list_builder.dart';
 
 class AhadithListBlocBuilder extends StatelessWidget {
   const AhadithListBlocBuilder({
@@ -30,7 +31,6 @@ class AhadithListBlocBuilder extends StatelessWidget {
                 bookSlug: bookSlug,
                 state: state,
               ),
-              // Loading more indicator
               if (state.isLoadingMore)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -38,7 +38,6 @@ class AhadithListBlocBuilder extends StatelessWidget {
                     child: const Center(child: CircularProgressIndicator()),
                   ),
                 ),
-              // No more data indicator
               if (!state.hasMoreData && state.allAhadith.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -46,7 +45,7 @@ class AhadithListBlocBuilder extends StatelessWidget {
                     child: Center(
                       child: Text(
                         'لا يوجد المزيد',
-                        style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                        style: TextStyle(fontSize: 14.sp, color: ColorsManager.gray),
                       ),
                     ),
                   ),

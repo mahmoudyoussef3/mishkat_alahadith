@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/chapters/ui/widgets/build_chapter_card.dart';
-import 'package:mishkat_almasabih/features/chapters/ui/widgets/chapter_card_shimmer.dart';
-import 'package:mishkat_almasabih/features/ahadith/logic/cubit/ahadiths_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/screens/ahadith_screen.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/entities/user_bookmark.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/widgets/build_chapter_card.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/widgets/chapter_card_shimmer.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/logic/cubit/ahadiths_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/screens/ahadith_screen.dart';
 
 class ResponsiveChapterList extends StatelessWidget {
   const ResponsiveChapterList({
@@ -102,7 +102,7 @@ class ResponsiveChapterList extends StatelessWidget {
                         arabicBookName: bookName,
                         arabicWriterName: writerName,
                         arabicChapterName:
-                            items is List<Bookmark>
+                            items is List<UserBookmark>
                                 ? items[index].chapterName
                                 : items[index].chapterArabic,
                       ),
@@ -116,7 +116,7 @@ class ResponsiveChapterList extends StatelessWidget {
             child: ChapterCard(
               chapterNumber: items[index].chapterNumber,
               ar:
-                  items is List<Bookmark>
+                  items is List<UserBookmark>
                       ? items[index].chapterName ?? 'jhjkjnk'
                       : items[index].chapterArabic,
               primaryPurple: primaryPurple,

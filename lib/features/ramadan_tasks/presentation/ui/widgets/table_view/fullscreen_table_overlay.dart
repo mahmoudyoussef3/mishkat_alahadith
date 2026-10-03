@@ -4,14 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../../cubit/ramadan_tasks_cubit.dart';
+import '../../../logic/ramadan_tasks_cubit.dart';
 import 'ramadan_table_view.dart';
 
-/// A fullscreen overlay that displays the Ramadan table in an immersive view.
 class FullscreenTableOverlay extends StatefulWidget {
   const FullscreenTableOverlay({super.key});
 
-  /// Push a fullscreen table overlay route.
   static Future<void> show(BuildContext context) {
     final cubit = context.read<RamadanTasksCubit>();
     return Navigator.of(context).push(
@@ -49,13 +47,11 @@ class _FullscreenTableOverlayState extends State<FullscreenTableOverlay> {
   @override
   void initState() {
     super.initState();
-    // Immersive fullscreen — hide status & nav bars
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   @override
   void dispose() {
-    // Restore system bars
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.edgeToEdge,
       overlays: SystemUiOverlay.values,
@@ -74,9 +70,7 @@ class _FullscreenTableOverlayState extends State<FullscreenTableOverlay> {
         body: SafeArea(
           child: Column(
             children: [
-              // ── Top control bar ──
               _FullscreenControlBar(onClose: _close),
-              // ── Table ──
               Expanded(
                 child: BlocBuilder<RamadanTasksCubit, RamadanTasksState>(
                   builder: (context, state) {
@@ -88,7 +82,7 @@ class _FullscreenTableOverlayState extends State<FullscreenTableOverlay> {
                         isFullscreen: true,
                       );
                     }
-                    return const Center(
+                    return Center(
                       child: CircularProgressIndicator(
                         color: ColorsManager.primaryPurple,
                       ),
@@ -104,10 +98,6 @@ class _FullscreenTableOverlayState extends State<FullscreenTableOverlay> {
   }
 }
 
-// ────────────────────────────────────────────────────────────────
-// Control bar with close button
-// ────────────────────────────────────────────────────────────────
-
 class _FullscreenControlBar extends StatelessWidget {
   final VoidCallback onClose;
 
@@ -118,7 +108,7 @@ class _FullscreenControlBar extends StatelessWidget {
     return Container(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: ColorsManager.white,
+        color: ColorsManager.cardBackground,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -143,7 +133,6 @@ class _FullscreenControlBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // Balance spacer so title stays centered
           const SizedBox(width: 38),
         ],
       ),

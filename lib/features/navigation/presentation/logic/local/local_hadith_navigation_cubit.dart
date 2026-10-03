@@ -1,28 +1,26 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/navigation/data/models/local_hadith_navigation_model.dart';
-import 'package:mishkat_almasabih/features/navigation/data/repos/navigation_repo.dart';
+import 'package:mishkat_almasabih/features/navigation/domain/entities/hadith_navigation.dart';
+import 'package:mishkat_almasabih/features/navigation/domain/usecases/get_local_hadith_navigation_use_case.dart';
 
 part 'local_hadith_navigation_state.dart';
 
 class LocalHadithNavigationCubit extends Cubit<LocalHadithNavigationState> {
-  final NavigationRepo _navigationRepo;
-  LocalHadithNavigationCubit(this._navigationRepo) : super(LocalHadithNavigationInitial());
+  final GetLocalHadithNavigationUseCase _getLocalNavigation;
+  LocalHadithNavigationCubit(this._getLocalNavigation)
+    : super(LocalHadithNavigationInitial());
 
   Future<void> emitLocalNavigation(String hadithNumber, String bookSlug) async {
     emit(LocalHadithNavigationLoading());
 
-    final result = await _navigationRepo.localNavigation(
-      hadithNumber,
-      bookSlug,
+    final result = await _getLocalNavigation(
+      hadithNumber: hadithNumber,
+      bookSlug: bookSlug,
     );
 
-    result.fold(
-      (l) => emit(
-        LocalHadithNavigationFailure(l.getAllErrorMessages()),
-      ),
-      (r) => emit(LocalHadithNavigationSuccess(r)),
+    result.when(
+      success: (navigation) => emit(LocalHadithNavigationSuccess(navigation)),
+      failure: (failure) => emit(LocalHadithNavigationFailure(failure.message)),
     );
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
@@ -27,11 +27,10 @@ class BookmarkCollectionsRow extends StatelessWidget {
         if (state is GetCollectionsBookmarkLoading) {
           return _buildLoadingShimmer();
         } else if (state is GetCollectionsBookmarkSuccess) {
-          final collections = state.collectionsResponse.collections;
+          final collections = state.collections;
 
-          // فلترة العناصر الفارغة أو null
           final filteredCollections =
-              collections!
+              collections
                   .where(
                     (e) =>
                         (e.collection != null &&
@@ -95,7 +94,6 @@ class BookmarkCollectionsRow extends StatelessWidget {
     );
   }
 
-  /// shimmer أثناء التحميل
   Widget _buildLoadingShimmer() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
@@ -115,8 +113,8 @@ class BookmarkCollectionsRow extends StatelessWidget {
             separatorBuilder: (_, __) => SizedBox(width: 8.w),
             itemBuilder:
                 (_, __) => Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
+                  baseColor: ColorsManager.shimmerBase,
+                  highlightColor: ColorsManager.shimmerHighlight,
                   child: Container(
                     width: 90.w,
                     height: 34.h,

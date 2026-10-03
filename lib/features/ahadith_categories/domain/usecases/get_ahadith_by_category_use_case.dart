@@ -1,23 +1,16 @@
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/hadith_entity.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/category_entity.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/repositories/categories_repository.dart';
-import 'package:dartz/dartz.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
+
+import '../entities/hadith_entity.dart';
+import '../repos/categories_repository.dart';
 
 class GetAhadithByCategoryUseCase {
-  final CategoriesRepository _repository;
+  final CategoriesRepository _repo;
 
-  GetAhadithByCategoryUseCase(this._repository);
+  GetAhadithByCategoryUseCase(this._repo);
 
-  Future<Either<ApiErrorModel, HadithResponseEntity>> call(
+  Future<ApiResult<HadithResponseEntity>> call(
     String categoryId, {
     int? page,
     int? perPage,
-  }) async {
-    return await _repository.getAhadithByCategory(
-      categoryId,
-      page: page,
-      perPage: perPage,
-    );
-  }
+  }) => _repo.getAhadithByCategory(categoryId, page: page, perPage: perPage);
 }

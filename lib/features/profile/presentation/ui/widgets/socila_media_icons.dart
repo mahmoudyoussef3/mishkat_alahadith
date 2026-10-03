@@ -49,7 +49,6 @@ class SocilaMediaIcons extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         child: Column(
           children: [
-            /// Header with Logo
             Column(
               children: [
                 CircleAvatar(
@@ -73,7 +72,6 @@ class SocilaMediaIcons extends StatelessWidget {
             ),
             SizedBox(height: 30.h),
 
-            /// رسالتنا
             _buildCard(
               title: "رسالتنا",
               icon: Icons.lightbulb_outline,
@@ -83,7 +81,6 @@ class SocilaMediaIcons extends StatelessWidget {
 
             SizedBox(height: 20.h),
 
-            /// قيمنا
             _buildCard(
               title: "قيمنا",
               icon: Icons.favorite_border,
@@ -93,7 +90,6 @@ class SocilaMediaIcons extends StatelessWidget {
 
             SizedBox(height: 40.h),
 
-            /// Footer
             Column(
               children: [
                 Wrap(

@@ -1,14 +1,12 @@
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/category_entity.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/repositories/categories_repository.dart';
-import 'package:dartz/dartz.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
+
+import '../entities/category_entity.dart';
+import '../repos/categories_repository.dart';
 
 class GetCategoriesUseCase {
-  final CategoriesRepository _repository;
+  final CategoriesRepository _repo;
 
-  GetCategoriesUseCase(this._repository);
+  GetCategoriesUseCase(this._repo);
 
-  Future<Either<ApiErrorModel, List<CategoryEntity>>> call() async {
-    return await _repository.getCategories();
-  }
+  Future<ApiResult<List<CategoryEntity>>> call() => _repo.getCategories();
 }

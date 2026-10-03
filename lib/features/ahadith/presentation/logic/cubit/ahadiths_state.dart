@@ -8,8 +8,8 @@ final class AhadithsInitial extends AhadithsState {}
 final class AhadithsLoading extends AhadithsState {}
 
 final class AhadithsSuccess extends AhadithsState {
-  final List<Hadith> allAhadith;
-  final List<Hadith> filteredAhadith;
+  final List<ChapterHadith> allAhadith;
+  final List<ChapterHadith> filteredAhadith;
   final bool isLoadingMore;
   final bool isRefreshing;
   final bool hasMoreData;
@@ -25,8 +25,8 @@ final class AhadithsSuccess extends AhadithsState {
   });
 
   AhadithsSuccess copyWith({
-    List<Hadith>? allAhadith,
-    List<Hadith>? filteredAhadith,
+    List<ChapterHadith>? allAhadith,
+    List<ChapterHadith>? filteredAhadith,
     bool? isLoadingMore,
     bool? isRefreshing,
     bool? hasMoreData,
@@ -44,17 +44,17 @@ final class AhadithsSuccess extends AhadithsState {
 }
 
 final class LocalAhadithsSuccess extends AhadithsState {
-  final List<LocalHadith> hadiths;
-  final List<LocalHadith> filteredHadiths;
+  final List<LocalBookHadith> hadiths;
+  final List<LocalBookHadith> filteredHadiths;
 
   LocalAhadithsSuccess({
     required this.hadiths,
-    List<LocalHadith>? filteredHadiths,
+    List<LocalBookHadith>? filteredHadiths,
   }) : filteredHadiths = filteredHadiths ?? hadiths;
 
   LocalAhadithsSuccess copyWith({
-    List<LocalHadith>? hadiths,
-    List<LocalHadith>? filteredHadiths,
+    List<LocalBookHadith>? hadiths,
+    List<LocalBookHadith>? filteredHadiths,
   }) {
     return LocalAhadithsSuccess(
       hadiths: hadiths ?? this.hadiths,

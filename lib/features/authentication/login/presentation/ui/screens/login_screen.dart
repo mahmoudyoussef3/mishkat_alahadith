@@ -3,8 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
-import 'package:mishkat_almasabih/features/authentication/login/ui/widgets/login_as_guest_button.dart';
-import '../../../../../core/theming/colors.dart';
+import 'package:mishkat_almasabih/features/authentication/login/presentation/ui/widgets/login_as_guest_button.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import '../widgets/don`t_have_account_text.dart';
 import '../widgets/email_and_password.dart';
 import '../widgets/login_bloc_listener.dart';
@@ -20,37 +20,31 @@ class LoginScreen extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
            
-        backgroundColor: ColorsManager.white,
+        backgroundColor: ColorsManager.secondaryBackground,
         body: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Top spacing
               SizedBox(height: 40.h),
               
-              // App Logo and Title
               LoginScreenHeader(),
               
               SizedBox(height: 40.h),
               
-              // Login Form
               EmailAndPassword(),
               
               SizedBox(height: 22.h),
               
                
               
-              // Login Button
               LoginBlocListener(),
               SizedBox(height: 16.h),
               
-              // Divider
               _buildDivider(),
               
               SizedBox(height: 16.h),
               
-              // Don't have account
               const DontHaveAccountText(),
               
               SizedBox(height: 16.h),

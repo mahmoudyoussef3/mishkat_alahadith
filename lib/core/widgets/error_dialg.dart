@@ -16,7 +16,7 @@ class ErrorState extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            ColorsManager.white,
+            ColorsManager.cardBackground,
             ColorsManager.offWhite.withOpacity(0.8),
           ],
         ),

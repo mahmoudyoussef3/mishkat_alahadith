@@ -1,22 +1,21 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/collection_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/repos/book_mark_repo.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/entities/bookmark_collection.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/get_bookmark_collections_use_case.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/get_cached_bookmark_collections_use_case.dart';
 
 part 'get_collections_bookmark_state.dart';
 
 class GetCollectionsBookmarkCubit extends Cubit<GetCollectionsBookmarkState> {
-  final BookMarkRepo _bookMarkRepo;
-  GetCollectionsBookmarkCubit(this._bookMarkRepo)
+  final GetCachedBookmarkCollectionsUseCase _getCachedCollections;
+  final GetBookmarkCollectionsUseCase _getCollections;
+  GetCollectionsBookmarkCubit(this._getCachedCollections, this._getCollections)
     : super(GetCollectionsBookmarkInitial());
 
   Future<void> getBookMarkCollections() async {
-    // Try cache first
-    final cached = await _bookMarkRepo.getCachedCollections();
+    final cached = await _getCachedCollections();
 
     if (cached != null) {
-      // Emit cached data immediately
       emit(
         GetCollectionsBookmarkSuccess(
           cached,
@@ -25,24 +24,32 @@ class GetCollectionsBookmarkCubit extends Cubit<GetCollectionsBookmarkState> {
         ),
       );
 
-      // Background refresh
-      _backgroundRefresh(cached);
+      _backgroundRefresh();
     } else {
-      // No cache, fetch from API
       emit(GetCollectionsBookmarkLoading());
-      final result = await _bookMarkRepo.getBookmarkCollectionsRepo();
-      result.fold(
-        (l) => emit(GetCollectionsBookmarkError(l.getAllErrorMessages())),
-        (r) => emit(GetCollectionsBookmarkSuccess(r)),
+      final result = await _getCollections();
+      result.when(
+        success:
+            (collections) => emit(GetCollectionsBookmarkSuccess(collections)),
+        failure:
+            (failure) => emit(GetCollectionsBookmarkError(failure.message)),
       );
     }
   }
 
-  Future<void> _backgroundRefresh(CollectionsResponse cached) async {
-    final result = await _bookMarkRepo.getBookmarkCollectionsRepo();
-    result.fold(
-      (error) {
-        // Background refresh failed, keep cached data
+  Future<void> _backgroundRefresh() async {
+    final result = await _getCollections();
+    result.when(
+      success: (collections) {
+        emit(
+          GetCollectionsBookmarkSuccess(
+            collections,
+            isFromCache: false,
+            isRefreshing: false,
+          ),
+        );
+      },
+      failure: (_) {
         if (state is GetCollectionsBookmarkSuccess) {
           emit(
             (state as GetCollectionsBookmarkSuccess).copyWith(
@@ -50,15 +57,6 @@ class GetCollectionsBookmarkCubit extends Cubit<GetCollectionsBookmarkState> {
             ),
           );
         }
-      },
-      (response) {
-        emit(
-          GetCollectionsBookmarkSuccess(
-            response,
-            isFromCache: false,
-            isRefreshing: false,
-          ),
-        );
       },
     );
   }

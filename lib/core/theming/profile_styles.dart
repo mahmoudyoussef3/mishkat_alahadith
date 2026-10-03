@@ -2,215 +2,160 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
-/// Profile feature text styles
-/// Extracted from profile screens and widgets for consistent styling
 class ProfileTextStyles {
-  // ==================== EDIT PROFILE SCREEN ====================
-
-  /// Edit profile screen title
-  static TextStyle editProfileTitle = TextStyle(
+  static TextStyle get editProfileTitle => TextStyle(
     fontSize: 20.sp,
     fontWeight: FontWeight.bold,
     fontFamily: 'YaModernPro',
     color: Colors.white,
   );
 
-  /// Save button text
-  static TextStyle saveButtonText = TextStyle(
+  static TextStyle get saveButtonText => TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.bold,
     color: Colors.white,
     fontFamily: 'YaModernPro',
   );
 
-  /// Avatar picker option text
   static TextStyle avatarPickerOption = TextStyle(
     fontSize: 14.sp,
     fontFamily: 'YaModernPro',
   );
 
-  /// Username field hint text
   static TextStyle usernameFieldHint = TextStyle(fontSize: 15.sp);
 
-  /// Username field text
   static TextStyle usernameFieldText = TextStyle(fontSize: 15.sp);
 
-  /// Info card title and value
   static TextStyle infoCardText = TextStyle(
     fontSize: 14.sp,
     fontFamily: 'YaModernPro',
   );
 
-  // ==================== PROFILE HEADER ====================
-
-  /// Profile username in header
-  static const TextStyle profileHeaderUsername = TextStyle(
+  static TextStyle get profileHeaderUsername => TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.w500,
     color: ColorsManager.white,
   );
 
-  /// Profile email in header
-  static TextStyle profileHeaderEmail = TextStyle(
+  static TextStyle get profileHeaderEmail => TextStyle(
     fontSize: 15,
     color: ColorsManager.white.withOpacity(0.85),
   );
 
-  // ==================== LOGIN PROMPT SECTION ====================
-
-  /// Login prompt title
-  static TextStyle loginPromptTitle = TextStyle(
+  static TextStyle get loginPromptTitle => TextStyle(
     fontSize: 24.sp,
-    color: Colors.black87,
+    color: ColorsManager.primaryText,
     fontWeight: FontWeight.bold,
   );
 
-  /// Login prompt subtitle
-  static TextStyle loginPromptSubtitle = TextStyle(
+  static TextStyle get loginPromptSubtitle => TextStyle(
     fontSize: 16.sp,
     color: ColorsManager.darkGray,
     height: 1.5,
   );
 
-  /// Login button text
-  static TextStyle loginButtonText = TextStyle(
+  static TextStyle get loginButtonText => TextStyle(
     color: Colors.white,
     fontSize: 18.sp,
     fontWeight: FontWeight.bold,
   );
 
-  // ==================== NOTIFICATION TOGGLE CARD ====================
-
-  /// Notification card title
-  static TextStyle notificationCardTitle = TextStyle(
+  static TextStyle get notificationCardTitle => TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.bold,
-    color: Colors.black87,
+    color: ColorsManager.primaryText,
   );
 
-  /// Notification card subtitle
-  static TextStyle notificationCardSubtitle = TextStyle(
+  static TextStyle get notificationCardSubtitle => TextStyle(
     fontSize: 13.sp,
-    color: Colors.grey.shade600,
+    color: ColorsManager.secondaryText,
     height: 1.3,
   );
 
-  // ==================== NOTIFICATION SYSTEM ====================
-
-  /// Section header text
-  static TextStyle sectionHeaderText = TextStyle(
+  static TextStyle get sectionHeaderText => TextStyle(
     fontSize: 20.sp,
     fontWeight: FontWeight.bold,
-    color: Colors.black87,
+    color: ColorsManager.primaryText,
   );
 
-  // ==================== LAST ACTIVITY CARD ====================
-
-  /// Last activity label
-  static TextStyle lastActivityLabel = TextStyle(
+  static TextStyle get lastActivityLabel => TextStyle(
     fontSize: 14.sp,
     color: Colors.white.withOpacity(0.9),
     fontWeight: FontWeight.w600,
   );
 
-  /// Last activity date
-  static TextStyle lastActivityDate = TextStyle(
+  static TextStyle get lastActivityDate => TextStyle(
     fontSize: 18.sp,
     color: Colors.white,
     fontWeight: FontWeight.bold,
   );
 
-  // ==================== DARK MODE TOGGLE ====================
-
-  /// Dark mode title
   static TextStyle darkModeTitle = TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.w600,
   );
 
-  /// Dark mode status
-  static TextStyle darkModeStatus = TextStyle(
+  static TextStyle get darkModeStatus => TextStyle(
     fontSize: 14.sp,
     color: ColorsManager.secondaryText,
   );
 
-  // ==================== STATS CARD ====================
-
-  /// Stat value (large number)
-  static TextStyle statValue = TextStyle(
+  static TextStyle get statValue => TextStyle(
     fontSize: 24.sp,
     fontWeight: FontWeight.bold,
-    color: Colors.black87,
+    color: ColorsManager.primaryText,
   );
 
-  /// Stat title/label
-  static TextStyle statTitle = TextStyle(
+  static TextStyle get statTitle => TextStyle(
     fontSize: 13.sp,
-    color: Colors.grey.shade600,
+    color: ColorsManager.secondaryText,
     fontWeight: FontWeight.w500,
   );
 
-  // ==================== STATISTICS SECTION ====================
-
-  /// Error message text
-  static TextStyle statsErrorMessage = TextStyle(
+  static TextStyle get statsErrorMessage => TextStyle(
     fontSize: 14.sp,
     color: Colors.red,
   );
 
-  // ==================== SECTION TITLE ====================
-
-  /// Section title text
-  static TextStyle sectionTitleText = TextStyle(
+  static TextStyle get sectionTitleText => TextStyle(
     fontSize: 20.sp,
     fontWeight: FontWeight.w600,
     color: ColorsManager.primaryText,
   );
 
-  // ==================== SOCIAL MEDIA ICONS ====================
-
-  /// App name in social media screen
-  static TextStyle socialMediaAppName = TextStyle(
+  static TextStyle get socialMediaAppName => TextStyle(
     fontSize: 20.sp,
     fontWeight: FontWeight.bold,
     color: Colors.purple,
   );
 
-  /// App tagline
-  static TextStyle socialMediaTagline = TextStyle(
+  static TextStyle get socialMediaTagline => TextStyle(
     fontSize: 14.sp,
-    color: Colors.grey.shade700,
+    color: ColorsManager.darkGray,
   );
 
-  /// Card title in social media
   static TextStyle socialMediaCardTitle = TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.bold,
   );
 
-  /// Card description
-  static TextStyle socialMediaCardDescription = TextStyle(
+  static TextStyle get socialMediaCardDescription => TextStyle(
     fontSize: 13.sp,
-    color: Colors.grey.shade700,
+    color: ColorsManager.darkGray,
     height: 1.4,
   );
 
-  /// Terms and privacy links
-  static TextStyle socialMediaLinks = TextStyle(
+  static TextStyle get socialMediaLinks => TextStyle(
     color: Colors.purple,
     fontSize: 13.sp,
   );
 
-  /// Copyright text
-  static TextStyle copyrightText = TextStyle(
+  static TextStyle get copyrightText => TextStyle(
     fontSize: 11.sp,
-    color: Colors.grey.shade600,
+    color: ColorsManager.secondaryText,
   );
 
-  // ==================== SUCCESS SNACKBAR ====================
-
-  /// Success snackbar text
-  static TextStyle successSnackbarText = TextStyle(
-    color: ColorsManager.secondaryBackground,
+  static TextStyle get successSnackbarText => TextStyle(
+    color: ColorsManager.white,
   );
 }

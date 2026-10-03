@@ -10,9 +10,6 @@ class PrayerNotificationSection extends StatelessWidget {
   final bool enabled;
   final bool isBusy;
 
-  /// Whether the optional battery-reliability tile should be shown: true only
-  /// when notifications are on and the app is not yet exempt from battery
-  /// optimization. When false, the tile is hidden entirely.
   final bool showBatteryReliabilityAction;
   final ValueChanged<bool> onChanged;
   final VoidCallback onRefresh;
@@ -144,7 +141,7 @@ class PrayerNotificationSection extends StatelessWidget {
         label: Text(
           'مزامنة الإشعارات الآن',
           style: TextStyle(
-            color: isBusy ? Colors.grey : ColorsManager.primaryPurple,
+            color: isBusy ? ColorsManager.gray : ColorsManager.primaryPurple,
             fontWeight: FontWeight.w700,
           ),
         ),

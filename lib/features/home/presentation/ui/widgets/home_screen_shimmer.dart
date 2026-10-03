@@ -14,9 +14,6 @@ class HomeScreenShimmer extends StatelessWidget {
         _buildHeaderShimmer(),
         SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
-        // BuildDailyHadithCardShimmer(),
-
-        // _buildDividerShimmer(),
         _buildStatisticsSectionShimmer(),
 
         _buildDividerShimmer(),
@@ -26,7 +23,6 @@ class HomeScreenShimmer extends StatelessWidget {
     );
   }
 
-  // Header Shimmer
   Widget _buildHeaderShimmer() {
     return SliverToBoxAdapter(
       child: Container(
@@ -46,7 +42,6 @@ class HomeScreenShimmer extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // App bar shimmer
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -61,14 +56,12 @@ class HomeScreenShimmer extends StatelessWidget {
     );
   }
 
-  // Statistics Section Shimmer
   Widget _buildStatisticsSectionShimmer() {
     return SliverToBoxAdapter(
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 20.w),
         child: Column(
           children: [
-            // Statistics Header Shimmer
             Container(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               decoration: HomeDecorations.shimmerCardContainer(),
@@ -91,7 +84,6 @@ class HomeScreenShimmer extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
 
-            // Statistics Cards Shimmer
             Row(
               children: [
                 Expanded(child: _buildStatisticsCardShimmer()),
@@ -107,7 +99,6 @@ class HomeScreenShimmer extends StatelessWidget {
     );
   }
 
-  // Statistics Card Shimmer
   Widget _buildStatisticsCardShimmer() {
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -124,7 +115,6 @@ class HomeScreenShimmer extends StatelessWidget {
     );
   }
 
-  // Categories Section Shimmer
   Widget _buildCategoriesSectionShimmer() {
     return SliverToBoxAdapter(
       child: Container(
@@ -132,7 +122,6 @@ class HomeScreenShimmer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Categories Header Shimmer
             Container(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               decoration: HomeDecorations.shimmerCardContainer(),
@@ -155,7 +144,6 @@ class HomeScreenShimmer extends StatelessWidget {
             ),
             SizedBox(height: 24.h),
 
-            // Category Cards Shimmer
             Column(
               children: [
                 _buildCategoryCardShimmer(),
@@ -171,7 +159,6 @@ class HomeScreenShimmer extends StatelessWidget {
     );
   }
 
-  // Category Card Shimmer
   Widget _buildCategoryCardShimmer() {
     return Container(
       height: 140.h,
@@ -217,14 +204,13 @@ class HomeScreenShimmer extends StatelessWidget {
     );
   }
 
-  // Divider Shimmer
   Widget _buildDividerShimmer() {
     return SliverToBoxAdapter(
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
         child: Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
+          baseColor: ColorsManager.shimmerBase,
+          highlightColor: ColorsManager.shimmerHighlight,
           child: Container(
             height: 2.h,
             decoration: HomeDecorations.sectionDivider(),
@@ -234,7 +220,6 @@ class HomeScreenShimmer extends StatelessWidget {
     );
   }
 
-  // Helper method to build shimmer containers
   Widget _buildShimmerContainer(
     double width,
     double height, {
@@ -242,8 +227,8 @@ class HomeScreenShimmer extends StatelessWidget {
     double? borderRadius,
   }) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: ColorsManager.shimmerBase,
+      highlightColor: ColorsManager.shimmerHighlight,
       child: Container(
         width: width,
         height: height,

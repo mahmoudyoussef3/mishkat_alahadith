@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/hadith_entity.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_ahadith_by_category_usecase.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_state.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/hadith_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_ahadith_by_category_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_state.dart';
 
 class HadithByCategoryCubit extends Cubit<HadithByCategoryState> {
   final GetAhadithByCategoryUseCase _getAhadithByCategoryUseCase;
@@ -36,14 +36,8 @@ class HadithByCategoryCubit extends Cubit<HadithByCategoryState> {
       perPage: _perPage,
     );
 
-    result.fold(
-      (error) {
-        if (requestVersion != _requestVersion || _categoryId != categoryId) {
-          return;
-        }
-        emit(HadithByCategoryError(error.message ?? 'حدث خطأ ما'));
-      },
-      (response) {
+    result.when(
+      success: (response) {
         if (requestVersion != _requestVersion || _categoryId != categoryId) {
           return;
         }
@@ -56,6 +50,12 @@ class HadithByCategoryCubit extends Cubit<HadithByCategoryState> {
             meta: response.meta,
           ),
         );
+      },
+      failure: (failure) {
+        if (requestVersion != _requestVersion || _categoryId != categoryId) {
+          return;
+        }
+        emit(HadithByCategoryError(failure.message));
       },
     );
   }
@@ -82,8 +82,8 @@ class HadithByCategoryCubit extends Cubit<HadithByCategoryState> {
       perPage: _perPage,
     );
 
-    result.fold(
-      (error) {
+    result.when(
+      failure: (failure) {
         if (requestVersion != _requestVersion ||
             requestCategoryId != _categoryId) {
           _isLoadingMore = false;
@@ -95,14 +95,14 @@ class HadithByCategoryCubit extends Cubit<HadithByCategoryState> {
           emit(
             latestState.copyWith(
               isLoadingMore: false,
-              paginationError: error.message ?? 'حدث خطأ ما',
+              paginationError: failure.message,
             ),
           );
         } else {
-          emit(HadithByCategoryError(error.message ?? 'حدث خطأ ما'));
+          emit(HadithByCategoryError(failure.message));
         }
       },
-      (response) {
+      success: (response) {
         if (requestVersion != _requestVersion ||
             requestCategoryId != _categoryId) {
           _isLoadingMore = false;

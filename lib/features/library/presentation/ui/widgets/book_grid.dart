@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
-import 'package:mishkat_almasabih/features/library/ui/widgets/book_card.dart';
-import 'package:mishkat_almasabih/features/library/ui/widgets/book_card_shimmer.dart';
+import 'package:mishkat_almasabih/features/library/domain/entities/library_book.dart';
+import 'package:mishkat_almasabih/features/library/presentation/ui/widgets/book_card.dart';
+import 'package:mishkat_almasabih/features/library/presentation/ui/widgets/book_card_shimmer.dart';
 
 class BookGrid extends StatelessWidget {
-  final List<Book>? books;
+  final List<LibraryBook>? books;
   final double aspectRatio;
   final bool isShimmer;
 
@@ -20,7 +20,7 @@ class BookGrid extends StatelessWidget {
   }
 
   factory BookGrid.success({
-    required List<Book> books,
+    required List<LibraryBook> books,
     required double aspectRatio,
   }) {
     return BookGrid._(books: books, aspectRatio: aspectRatio, isShimmer: false);
@@ -43,9 +43,6 @@ class BookGrid extends StatelessWidget {
           } else {
             final book = books![index];
             return BookCard(book: book);
-            //   .animate()
-            //  .fadeIn(duration: 1.2.seconds)
-            //   .scale(duration: 1.2.seconds, curve: Curves.easeOutBack);
           }
         }, childCount: isShimmer ? 6 : books!.length),
       ),

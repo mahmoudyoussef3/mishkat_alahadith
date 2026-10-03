@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-// Removed unused flutter_screenutil import after centralizing styles
 
-import '../../../../core/theming/colors.dart';
-import '../../../../core/theming/styles.dart';
-import '../../../../core/helpers/spacing.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/home_styles.dart';
 
@@ -26,7 +25,7 @@ class FeaturedHadithCard extends StatelessWidget {
     return Container(
       width: 280,
       decoration: BoxDecoration(
-        color: ColorsManager.white,
+        color: ColorsManager.cardBackground,
         borderRadius: BorderRadius.circular(Spacing.cardRadius),
         boxShadow: [
           BoxShadow(
@@ -39,7 +38,6 @@ class FeaturedHadithCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with gradient background
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(Spacing.md),
@@ -85,15 +83,12 @@ class FeaturedHadithCard extends StatelessWidget {
                     color: ColorsManager.white,
                     size: 20,
                   ),
-                  onPressed: () {
-                    // TODO: Add to bookmarks
-                  },
+                  onPressed: () {},
                 ),
               ],
             ),
           ),
 
-          // Hadith content
           Expanded(
             child: Padding(
               padding: EdgeInsets.all(Spacing.md),
@@ -108,7 +103,6 @@ class FeaturedHadithCard extends StatelessWidget {
                   ),
                   const Spacer(),
 
-                  // Footer with narrator info
                   Container(
                     padding: EdgeInsets.all(Spacing.sm),
                     decoration: HomeDecorations.featuredFooter(),
@@ -132,9 +126,7 @@ class FeaturedHadithCard extends StatelessWidget {
                             size: 16,
                             color: ColorsManager.primaryPurple,
                           ),
-                          onPressed: () {
-                            // TODO: Share hadith
-                          },
+                          onPressed: () {},
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                         ),

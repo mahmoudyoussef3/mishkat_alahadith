@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../../core/theming/colors.dart';
-import '../../../../../core/widgets/app_text_form_field.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/widgets/app_text_form_field.dart';
 import '../../logic/signup_cubit.dart';
 
 class SignupForm extends StatefulWidget {
@@ -41,7 +41,7 @@ class _SignupFormState extends State<SignupForm> {
                   color: ColorsManager.primaryGreen,
                 ),
                 hintText: 'الاسم الكامل',
-                hintStyle: TextStyle(color: Colors.black),
+                hintStyle: TextStyle(color: ColorsManager.primaryText),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'يرجى إدخال الاسم الكامل';
@@ -59,7 +59,7 @@ class _SignupFormState extends State<SignupForm> {
           SizedBox(height: 16.h),
 
           AppTextFormField(
-                hintStyle: TextStyle(color: Colors.black),
+                hintStyle: TextStyle(color: ColorsManager.primaryText),
 
                 backgroundColor: ColorsManager.lightGray,
                 suffixIcon: Icon(
@@ -87,7 +87,7 @@ class _SignupFormState extends State<SignupForm> {
           SizedBox(height: 16.h),
 
           AppTextFormField(
-                hintStyle: TextStyle(color: Colors.black),
+                hintStyle: TextStyle(color: ColorsManager.primaryText),
 
                 backgroundColor: ColorsManager.lightGray,
                 controller: signupCubit.passwordController,
@@ -123,7 +123,7 @@ class _SignupFormState extends State<SignupForm> {
           SizedBox(height: 16.h),
 
           AppTextFormField(
-                hintStyle: TextStyle(color: Colors.black),
+                hintStyle: TextStyle(color: ColorsManager.primaryText),
 
                 backgroundColor: ColorsManager.lightGray,
                 controller: signupCubit.confirmPasswordController,
@@ -159,11 +159,5 @@ class _SignupFormState extends State<SignupForm> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    passwordController.dispose();
-    super.dispose();
   }
 }

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import '../cubit/ramadan_tasks_cubit.dart';
+import '../../logic/ramadan_tasks_cubit.dart';
 
-/// iOS-style segmented tab bar for switching between Today / History / All views.
 class ViewModeTabs extends StatelessWidget {
   final ViewMode viewMode;
   final ValueChanged<ViewMode> onChange;
@@ -45,7 +44,7 @@ class ViewModeTabs extends StatelessWidget {
           curve: Curves.easeOutCubic,
           padding: EdgeInsetsDirectional.symmetric(vertical: 10.h),
           decoration: BoxDecoration(
-            color: selected ? ColorsManager.white : Colors.transparent,
+            color: selected ? ColorsManager.cardBackground : Colors.transparent,
             borderRadius: BorderRadius.circular(10.r),
             boxShadow:
                 selected

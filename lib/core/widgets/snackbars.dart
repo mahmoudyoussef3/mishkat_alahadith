@@ -8,7 +8,7 @@ void showBookmarkSnackbar(BuildContext context, String message) {
       behavior: SnackBarBehavior.floating,
       content: Text(
         message,
-        style: TextStyle(color: ColorsManager.secondaryBackground),
+        style: TextStyle(color: ColorsManager.white),
       ),
     ),
   );
@@ -21,7 +21,7 @@ void showErrorSnackbar(BuildContext context, String message) {
       behavior: SnackBarBehavior.floating,
       content: Text(
         message,
-        style: TextStyle(color: ColorsManager.secondaryBackground),
+        style: TextStyle(color: ColorsManager.white),
       ),
     ),
   );

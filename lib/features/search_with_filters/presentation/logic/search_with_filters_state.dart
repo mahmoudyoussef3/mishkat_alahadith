@@ -8,8 +8,8 @@ final class SearchWithFiltersInitial extends SearchWithFiltersState {}
 final class SearchWithFiltersLoading extends SearchWithFiltersState {}
 
 final class SearchWithFiltersSuccess extends SearchWithFiltersState {
-  final SearchWithFiltersModel searchWithFiltersModel;
-  SearchWithFiltersSuccess(this.searchWithFiltersModel);
+  final List<ChapterHadith> results;
+  SearchWithFiltersSuccess(this.results);
 }
 
 final class SearchWithFiltersFailure extends SearchWithFiltersState {

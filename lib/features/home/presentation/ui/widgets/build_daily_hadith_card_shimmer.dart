@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
@@ -14,8 +15,8 @@ class BuildDailyHadithCardShimmer extends StatelessWidget {
         height: 180.h,
         width: double.infinity,
         child: Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
+          baseColor: ColorsManager.shimmerBase,
+          highlightColor: ColorsManager.shimmerHighlight,
           child: Container(decoration: HomeDecorations.shimmerCardContainer()),
         ),
       ),

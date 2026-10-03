@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mishkat_almasabih/features/about_us/ui/widgets/build_social_icon.dart';
+import 'package:mishkat_almasabih/features/about_us/presentation/ui/widgets/build_social_icon.dart';
 
 class SocialIconsRow extends StatelessWidget {
   const SocialIconsRow({super.key});

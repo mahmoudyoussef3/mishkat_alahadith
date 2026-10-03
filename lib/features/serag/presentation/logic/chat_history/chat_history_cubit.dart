@@ -1,50 +1,40 @@
-import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
-import 'package:mishkat_almasabih/features/serag/logic/chat_history/chat_history_state.dart';
+import 'package:mishkat_almasabih/features/serag/domain/entities/chat_message.dart';
+import 'package:mishkat_almasabih/features/serag/domain/usecases/clear_chat_history_use_case.dart';
+import 'package:mishkat_almasabih/features/serag/domain/usecases/load_chat_history_use_case.dart';
+import 'package:mishkat_almasabih/features/serag/domain/usecases/save_chat_history_use_case.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_state.dart';
 
 class ChatHistoryCubit extends Cubit<ChatHistoryState> {
-  final List<Message> _messages = [];
+  final LoadChatHistoryUseCase _loadHistory;
+  final SaveChatHistoryUseCase _saveHistory;
+  final ClearChatHistoryUseCase _clearHistory;
+  final List<ChatMessage> _messages = [];
 
-  ChatHistoryCubit() : super(ChatHistoryInitial()) {
-    loadMessages();
-  }
+  ChatHistoryCubit(this._loadHistory, this._saveHistory, this._clearHistory)
+    : super(ChatHistoryInitial());
 
-  List<Message> get messages => List.unmodifiable(_messages);
+  List<ChatMessage> get messages => List.unmodifiable(_messages);
 
-  Future<void> addMessage(Message message) async {
+  Future<void> addMessage(ChatMessage message) async {
     _messages.add(message);
-    await _saveMessages();
+    await _saveHistory(_messages);
     emit(ChatHistorySuccess(List.unmodifiable(_messages)));
   }
 
   Future<void> clearMessages() async {
     _messages.clear();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove("serag_messages");
+    await _clearHistory();
     emit(ChatHistorySuccess([]));
   }
 
   Future<void> loadMessages() async {
     emit(ChatHistoryLoading());
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString("serag_messages");
-
-    if (data != null) {
-      final decoded = jsonDecode(data) as List<dynamic>;
-      _messages
-        ..clear()
-        ..addAll(decoded.map((e) => Message.fromJson(e)));
-    }
+    final saved = await _loadHistory();
+    _messages
+      ..clear()
+      ..addAll(saved);
 
     emit(ChatHistorySuccess(List.unmodifiable(_messages)));
-  }
-
-  Future<void> _saveMessages() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonList = _messages.map((m) => m.toJson()).toList();
-    await prefs.setString("serag_messages", jsonEncode(jsonList));
   }
 }

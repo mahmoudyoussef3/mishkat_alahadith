@@ -6,7 +6,7 @@ sealed class EditProfileState {}
 final class EditProfileInitial extends EditProfileState {}
 final class EditProfileLoading extends EditProfileState {}
 final class EditProfileSuccess extends EditProfileState {
-  final UserResponseModel updatedUser;
+  final UserProfile updatedUser;
   EditProfileSuccess(this.updatedUser);
 }
 final class EditProfileFailure extends EditProfileState {

@@ -3,8 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
-/// A beautiful summary card showing daily/monthly/weekly progress
-/// with an animated circular daily indicator and horizontal bars.
 class RamadanProgress extends StatelessWidget {
   final int todayDay;
   final double dailyPercent;
@@ -40,7 +38,7 @@ class RamadanProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -57,10 +55,8 @@ class RamadanProgress extends StatelessWidget {
       padding: EdgeInsetsDirectional.all(16.w),
       child: Column(
         children: [
-          // ── Top row: circular progress + day label ──
           Row(
             children: [
-              // Circular daily progress
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: dailyPercent.clamp(0.0, 1.0)),
                 duration: const Duration(milliseconds: 600),
@@ -103,7 +99,6 @@ class RamadanProgress extends StatelessWidget {
                 },
               ),
               SizedBox(width: 16.w),
-              // Day info + completed count
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,7 +124,6 @@ class RamadanProgress extends StatelessWidget {
 
           SizedBox(height: 16.h),
 
-          // ── Monthly & weekly bars ──
           _ProgressBar(
             label: 'التقدّم الكلي',
             percent: overallPercent,
@@ -142,7 +136,6 @@ class RamadanProgress extends StatelessWidget {
             barColor: ColorsManager.secondaryPurple,
           ),
 
-          // ── Motivational text ──
           if (motivationalText != null) ...[
             SizedBox(height: 14.h),
             Container(
@@ -184,7 +177,6 @@ class RamadanProgress extends StatelessWidget {
   }
 }
 
-/// A single horizontal progress bar with label and percentage.
 class _ProgressBar extends StatelessWidget {
   final String label;
   final double percent;
@@ -241,7 +233,6 @@ class _ProgressBar extends StatelessWidget {
   }
 }
 
-/// Converts an integer to Arabic-Indic numerals string.
 String _toArabicNumerals(int number) {
   const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
   return number

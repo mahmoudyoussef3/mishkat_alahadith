@@ -5,12 +5,12 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/empty_search_state.dart';
 import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
 import 'package:mishkat_almasabih/core/widgets/hadith_card_shimer.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/chapter_ahadith_card.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/emoty_chapter_ahadith.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/separator.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/screens/hadith_details_screen.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/search_with_filters/logic/cubit/search_with_filters_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/chapter_ahadith_card.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/emoty_chapter_ahadith.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/separator.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/screens/hadith_details_screen.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/search_with_filters/presentation/logic/search_with_filters_cubit.dart';
 
 class FilterSerchResultScreen extends StatelessWidget {
   const FilterSerchResultScreen({super.key, required this.searchQuery});
@@ -40,7 +40,7 @@ class FilterSerchResultScreen extends StatelessWidget {
                   );
                 } else if (state is SearchWithFiltersSuccess) {
                   final hadiths =
-                      state.searchWithFiltersModel.search?.results?.data ?? [];
+                      state.results;
                   if (hadiths.isEmpty) {
                     return EmptySliverState();
                   }

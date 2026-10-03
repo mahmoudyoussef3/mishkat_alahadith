@@ -7,13 +7,13 @@ import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
 import 'package:mishkat_almasabih/core/widgets/hadith_card_shimer.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/chapter_ahadith_card.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/separator.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/get_cubit/user_bookmarks_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/widgets/bookmark_empty_state.dart';
-import 'package:mishkat_almasabih/features/chapters/ui/widgets/chapters_grid_view.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/screens/hadith_details_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/chapter_ahadith_card.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/separator.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/entities/user_bookmark.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/bookmark_empty_state.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/widgets/chapters_grid_view.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/screens/hadith_details_screen.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 
@@ -113,7 +113,7 @@ class _BookmarkListState extends State<BookmarkList> {
     );
   }
 
-  Widget _buildHadithList(List<Bookmark> filteredSearch) {
+  Widget _buildHadithList(List<UserBookmark> filteredSearch) {
     return ListView.separated(
       padding: EdgeInsets.zero,
       shrinkWrap: true,
@@ -168,7 +168,7 @@ class _BookmarkListState extends State<BookmarkList> {
     );
   }
 
-  Widget _buildChapterList(List<Bookmark> chapters) {
+  Widget _buildChapterList(List<UserBookmark> chapters) {
     final firstChapter = chapters.isNotEmpty ? chapters.first : null;
     return SizedBox(
       height: 600.h,

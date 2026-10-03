@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/entities/user_bookmark.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 
@@ -23,12 +23,12 @@ class BookmarkButton extends StatelessWidget {
   });
 
   Future<void> _checkToken(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedToken = prefs.getString('token');
+    final signedIn = await context.read<SessionCubit>().checkSession();
+    if (!context.mounted) return;
 
-    if (storedToken != null) {
+    if (signedIn) {
       context.read<AddCubitCubit>().addBookmark(
-            Bookmark(
+            UserBookmark(
               id: chapterNumber,
               chapterNumber: chapterNumber,
               bookName: arabicBookName,
@@ -49,7 +49,7 @@ class BookmarkButton extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () => context.pushNamed(Routes.loginScreen),
-                icon: const Icon(Icons.login,color: ColorsManager.secondaryBackground,),
+                icon: Icon(Icons.login,color: ColorsManager.white,),
               ),
             ],
           ),

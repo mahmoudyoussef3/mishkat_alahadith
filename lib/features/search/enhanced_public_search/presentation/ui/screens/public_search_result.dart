@@ -5,13 +5,13 @@ import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/empty_search_state.dart';
 import 'package:mishkat_almasabih/core/widgets/hadith_card_shimer.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/chapter_ahadith_card.dart';
-import 'package:mishkat_almasabih/features/ahadith/ui/widgets/separator.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/logic/cubit/enhanced_search_cubit.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/ui/screens/hadith_result_details.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/chapter_ahadith_card.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/separator.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/logic/enhanced_search_cubit.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/ui/screens/hadith_result_details.dart';
 
 class PublicSearchResult extends StatelessWidget {
   const PublicSearchResult({super.key, required this.searchQuery});
@@ -45,7 +45,7 @@ class PublicSearchResult extends StatelessWidget {
                           ),
                         );
                       } else if (state is EnhancedSearchLoaded) {
-                        final hadiths = state.enhancedSearch.results ?? [];
+                        final hadiths = state.results;
                         if (hadiths.isEmpty) {
                           return SliverToBoxAdapter(
                             child: Center(
@@ -93,7 +93,6 @@ class PublicSearchResult extends StatelessWidget {
                               child: ChapterAhadithCard(
                                 number: hadith.id ?? '',
             
-                                //bookName:  '',
                                 text: hadith.hadeeth ?? '',
                                 narrator: hadith.attribution ?? '',
                                 grade:

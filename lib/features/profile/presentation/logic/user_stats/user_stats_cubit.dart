@@ -1,20 +1,19 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/profile/data/models/stats_model.dart';
-import 'package:mishkat_almasabih/features/profile/data/repos/user_response_repo.dart';
+import 'package:mishkat_almasabih/features/profile/domain/entities/user_stats.dart';
+import 'package:mishkat_almasabih/features/profile/domain/usecases/get_user_stats_use_case.dart';
 
 part 'user_stats_state.dart';
 
 class UserStatsCubit extends Cubit<UserStatsState> {
-  final UserResponseRepo userResponseRepo;
-  UserStatsCubit(this.userResponseRepo) : super(UserStatsInitial());
+  final GetUserStatsUseCase _getUserStats;
+  UserStatsCubit(this._getUserStats) : super(UserStatsInitial());
   Future<void> getUserStats() async {
     emit(UserStatsLoading());
-    final result = await userResponseRepo.getUserStats();
-    result.fold(
-      (error) => emit(UserStatsError(error.getAllErrorMessages())),
-      (user) => emit(UserStatsLoaded(user)),
+    final result = await _getUserStats();
+    result.when(
+      success: (stats) => emit(UserStatsLoaded(stats)),
+      failure: (failure) => emit(UserStatsError(failure.message)),
     );
   }
 }

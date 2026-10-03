@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/features/navigation/logic/cubit/navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/navigation/presentation/logic/remote/navigation_cubit.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_details_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
 
@@ -49,7 +49,7 @@ class _HadithNavigationState extends State<HadithNavigation> {
             } else if (state is NavigationFailure) {
               return Center(child: Text(state.errMessage));
             } else if (state is NavigationSuccess) {
-              final data = state.navigationHadithResponse;
+              final data = state.navigation;
 
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -67,10 +67,8 @@ class _HadithNavigationState extends State<HadithNavigation> {
                         onPressed:
                             data.prevHadith != null
                                 ? () {
-                                  // call onPrev لو حابب
                                   if (widget.onPrev != null) widget.onPrev!();
 
-                                  // تجيب الحديث السابق
                                   context
                                       .read<NavigationCubit>()
                                       .emitNavigationStates(

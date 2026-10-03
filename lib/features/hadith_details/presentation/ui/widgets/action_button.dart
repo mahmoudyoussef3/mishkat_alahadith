@@ -19,7 +19,6 @@ class ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      //   borderRadius: BorderRadius.circular(12.r),
       child: Column(
         children: [
           CircleAvatar(

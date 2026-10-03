@@ -4,8 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/loading_progress_indicator.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/delete_cubit/cubit/delete_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/get_cubit/user_bookmarks_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/delete_bookmark/delete_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
 import 'package:mishkat_almasabih/core/theming/hadith_styles.dart';
@@ -146,7 +146,7 @@ class BookmarkHadithCard extends StatelessWidget {
                       ColorsManager.primaryGreen.withOpacity(0.7),
                       ColorsManager.primaryGreen.withOpacity(0.5),
                     ],
-                    textColor: ColorsManager.offWhite,
+                    textColor: ColorsManager.white,
                   ),
                   if (chapterName != null && chapterName!.isNotEmpty)
                     _buildGradientPill(
@@ -155,7 +155,7 @@ class BookmarkHadithCard extends StatelessWidget {
                         ColorsManager.hadithAuthentic.withOpacity(0.7),
                         ColorsManager.hadithAuthentic.withOpacity(0.5),
                       ],
-                      textColor: ColorsManager.offWhite,
+                      textColor: ColorsManager.white,
                     ),
                 ],
               ),

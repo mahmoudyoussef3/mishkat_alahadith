@@ -5,13 +5,13 @@ import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/category_entity.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/categories_cubit/categories_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/categories_cubit/categories_state.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/widgets/category_card.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/widgets/error_widget.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/widgets/loading_shimmer.dart';
-import 'package:mishkat_almasabih/features/home/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/category_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_state.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/category_card.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/error_widget.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/loading_shimmer.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -293,7 +293,7 @@ class _CategoriesSearchField extends StatelessWidget {
             hintStyle: TextStyles.bodyMedium.copyWith(
               color: ColorsManager.secondaryText,
             ),
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.search_rounded,
               color: ColorsManager.primaryPurple,
             ),
@@ -311,7 +311,7 @@ class _CategoriesSearchField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(
+              borderSide: BorderSide(
                 color: ColorsManager.primaryPurple,
                 width: 1.5,
               ),

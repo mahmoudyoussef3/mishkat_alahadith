@@ -4,7 +4,7 @@ import 'package:mishkat_almasabih/features/ahadith_categories/data/models/catego
 import 'package:mishkat_almasabih/features/authentication/login/data/models/login_response_body.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/models/sign_up_request_body.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/models/sign_up_response_body.dart';
-import 'package:mishkat_almasabih/features/book_data/data/models/book_data_model.dart';
+import 'package:mishkat_almasabih/features/library/data/models/book_data_model.dart';
 import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_model.dart';
 import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_response.dart';
 import 'package:mishkat_almasabih/features/bookmark/data/models/collection_model.dart';
@@ -14,8 +14,8 @@ import 'package:mishkat_almasabih/features/ahadith/data/models/local_books_model
 import 'package:mishkat_almasabih/features/hadith_analysis/data/models/hadith_analysis_request.dart';
 import 'package:mishkat_almasabih/features/hadith_analysis/data/models/hadith_analysis_response.dart';
 import 'package:mishkat_almasabih/features/home/data/models/book_model.dart';
-import 'package:mishkat_almasabih/features/home/data/models/library_statistics_model.dart';
-import 'package:mishkat_almasabih/features/home/data/models/search_history_models.dart';
+import 'package:mishkat_almasabih/features/library/data/models/library_statistics_model.dart';
+import 'package:mishkat_almasabih/features/search/search_history/data/models/search_history_models.dart';
 import 'package:mishkat_almasabih/features/navigation/data/models/local_hadith_navigation_model.dart';
 import 'package:mishkat_almasabih/features/navigation/data/models/navigation_hadith_model.dart';
 import 'package:mishkat_almasabih/features/profile/data/models/stats_model.dart';
@@ -168,35 +168,26 @@ abstract class ApiService {
     @Header("x-auth-token") String token,
   );
 
-  // -----------------------------
-  // Search History APIs
-  // -----------------------------
-
-  // 1. إضافة بحث جديد
   @POST(ApiConstants.addSearch)
   Future<AddSearchResponse> addSearch(
     @Header("x-auth-token") String token,
     @Body() AddSearchRequest body,
   );
 
-  // 2. جلب تاريخ البحث
   @GET(ApiConstants.getSearchHistory)
   Future<GetSearchHistoryResponse> getSearchHistory(
     @Header("x-auth-token") String token,
   );
 
-  // 3. جلب إحصائيات المستخدم
   @GET(ApiConstants.getUserStats)
   Future<StatsModel> getUserStats(@Header("x-auth-token") String token);
 
-  // 4. حذف بحث محدد
   @DELETE("${ApiConstants.deleteSearch}/{id}")
   Future<DeleteSearchResponse> deleteSearch(
     @Header("x-auth-token") String token,
     @Path("id") int searchId,
   );
 
-  // 5. حذف كل تاريخ البحث
   @DELETE(ApiConstants.deleteAllSearch)
   Future<DeleteAllSearchResponse> deleteAllSearch(
     @Header("x-auth-token") String token,

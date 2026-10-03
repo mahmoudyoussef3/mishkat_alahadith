@@ -1,19 +1,32 @@
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
+import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/data/datasources/categories_datasource.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/data/models/category_model.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/data/models/hadith_by_category_model.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/hadith_entity.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities_temp/category_entity.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/repositories/categories_repository.dart';
-import 'package:dartz/dartz.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/data/models/hadith_mapper.dart';
+import 'package:mishkat_almasabih/core/data/datasources/hadeethenc_datasource.dart';
+import 'package:mishkat_almasabih/core/networking/network_info.dart';
+import 'package:mishkat_almasabih/core/data/mappers/explained_hadith_mapper.dart';
+import 'package:mishkat_almasabih/core/data/models/new_daily_hadith_model.dart';
+
+import '../../domain/entities/category_entity.dart';
+import '../../domain/entities/hadith_entity.dart';
+import '../../domain/repos/categories_repository.dart';
+import '../datasources/categories_datasource.dart';
+import '../mappers/hadith_mapper.dart';
+import '../models/category_model.dart';
+import '../models/hadith_by_category_model.dart';
 
 class CategoriesRepositoryImpl implements CategoriesRepository {
   final CategoriesDatasource _datasource;
-  final _cacheService = GenericCacheService.instance;
+  final HadeethEncDataSource _hadeethEnc;
+  final GenericCacheService _cacheService;
+  final NetworkInfo _networkInfo;
 
-  CategoriesRepositoryImpl(this._datasource);
+  CategoriesRepositoryImpl(
+    this._datasource,
+    this._hadeethEnc,
+    this._cacheService,
+    this._networkInfo,
+  );
 
   Future<List<CategoryModel>?> _getCachedCategories() async {
     return await _cacheService.getData<List<CategoryModel>>(
@@ -93,25 +106,25 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
   }
 
   @override
-  Future<Either<ApiErrorModel, List<CategoryEntity>>> getCategories() async {
+  Future<ApiResult<List<CategoryEntity>>> getCategories() async {
     try {
       final cachedModels = await _getCachedCategories();
       if (cachedModels != null) {
         final entities = cachedModels.map((model) => model.toEntity()).toList();
-        return Right(entities);
+        return ApiResult.success(entities);
       }
 
       final models = await _datasource.getCategories();
       await _cacheCategories(models);
       final entities = models.map((model) => model.toEntity()).toList();
-      return Right(entities);
-    } catch (e) {
-      return Left(ApiErrorModel(message: e.toString()));
+      return ApiResult.success(entities);
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 
   @override
-  Future<Either<ApiErrorModel, HadithResponseEntity>> getAhadithByCategory(
+  Future<ApiResult<HadithResponseEntity>> getAhadithByCategory(
     String categoryId, {
     int? page,
     int? perPage,
@@ -123,7 +136,7 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
         perPage: perPage,
       );
       if (cached != null) {
-        return Right(cached.toEntity());
+        return ApiResult.success(cached.toEntity());
       }
 
       final response = await _datasource.getAhadithByCategory(
@@ -137,9 +150,35 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
         page: page,
         perPage: perPage,
       );
-      return Right(response.toEntity());
-    } catch (e) {
-      return Left(ApiErrorModel(message: e.toString()));
+      return ApiResult.success(response.toEntity());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
+    }
+  }
+
+  @override
+  Future<ExplainedHadith?> getCachedHadithDetails(String id) async {
+    final cached = await _cacheService.getData<NewDailyHadithModel>(
+      key: CacheKeys.hadithDetails(id),
+      fromJson: NewDailyHadithModel.fromJson,
+    );
+    return cached?.toEntity();
+  }
+
+  @override
+  Future<ApiResult<ExplainedHadith>> getHadithDetails(String id) async {
+    try {
+      await _networkInfo.ensureConnected();
+      final model = await _hadeethEnc.fetchHadith(id);
+      await _cacheService.saveData<NewDailyHadithModel>(
+        key: CacheKeys.hadithDetails(id),
+        data: model,
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 24,
+      );
+      return ApiResult.success(model.toEntity());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 }

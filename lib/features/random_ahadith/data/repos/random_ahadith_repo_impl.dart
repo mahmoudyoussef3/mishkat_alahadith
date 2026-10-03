@@ -1,20 +1,26 @@
-import 'package:dartz/dartz.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/random_ahadith/data/custom_api_service.dart';
-import 'package:mishkat_almasabih/features/random_ahadith/data/models/random_ahadith_model.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
+import 'package:mishkat_almasabih/core/networking/network_info.dart';
 
-class RandomAhadithRepo {
+import '../../domain/repos/random_ahadith_repo.dart';
+import '../datasources/custom_api_service.dart';
+import '../mappers/random_ahadith_mapper.dart';
+
+class RandomAhadithRepoImpl implements RandomAhadithRepo {
   final CustomApiService _customApiService;
+  final NetworkInfo _networkInfo;
 
-  RandomAhadithRepo(this._customApiService);
+  RandomAhadithRepoImpl(this._customApiService, this._networkInfo);
 
-  Future<Either<ApiErrorModel, RandomAhadithResponse>> getRandom() async {
+  @override
+  Future<ApiResult<List<ExplainedHadith>>> getRandomAhadith() async {
     try {
-      final reponse = await _customApiService.getRandomAhadith();
-      return Right(reponse);
-    } catch (e) {
-      return Left(ErrorHandler.handle(e));
+      await _networkInfo.ensureConnected();
+      final response = await _customApiService.getRandomAhadith();
+      return ApiResult.success(response.toEntities());
+    } catch (error) {
+      return ApiResult.failure(ErrorHandler.toFailure(error));
     }
   }
 }

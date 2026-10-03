@@ -1,23 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_model.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/models/book_mark_response.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/repos/book_mark_repo.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/entities/bookmark_action_result.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/entities/user_bookmark.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/add_bookmark_use_case.dart';
 
 part 'add_cubit_state.dart';
 
 class AddCubitCubit extends Cubit<AddCubitState> {
-  final BookMarkRepo _bookMarkRepo;
-  AddCubitCubit(this._bookMarkRepo) : super(AddCubitInitial());
+  final AddBookmarkUseCase _addBookmark;
+  AddCubitCubit(this._addBookmark) : super(AddCubitInitial());
 
-  Future<void> addBookmark(Bookmark body) async {
+  Future<void> addBookmark(UserBookmark body) async {
     emit(AddLoading());
-    final result = await _bookMarkRepo.addBookmark(body);
+    final result = await _addBookmark(body);
 
-    result.fold(
-      (l) => emit(AddFailure(l.getAllErrorMessages())),
-      (r) => emit(AddSuccess(r)),
+    result.when(
+      success: (response) => emit(AddSuccess(response)),
+      failure: (failure) => emit(AddFailure(failure.message)),
     );
   }
 }

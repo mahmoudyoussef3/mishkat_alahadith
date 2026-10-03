@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 class HomeDecorations {
-  // Header app bar gradient overlay
   static BoxDecoration appBarGradientOverlay() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -17,7 +16,6 @@ class HomeDecorations {
     );
   }
 
-  // Header app bar icon button container and border
   static BoxDecoration appBarIconButtonBorder() {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(12.r),
@@ -29,7 +27,6 @@ class HomeDecorations {
     return Colors.white.withOpacity(0.15);
   }
 
-  // Section divider gradient
   static BoxDecoration sectionDivider() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -43,7 +40,6 @@ class HomeDecorations {
     );
   }
 
-  // Daily hadith: read button
   static BoxDecoration readButton() {
     return BoxDecoration(
       color: Colors.white.withOpacity(0.2),
@@ -52,7 +48,6 @@ class HomeDecorations {
     );
   }
 
-  // Daily hadith: green corner quote container
   static BoxDecoration dailyHadithCornerQuote() {
     return BoxDecoration(
       color: ColorsManager.primaryGreen.withOpacity(0.1),
@@ -63,10 +58,9 @@ class HomeDecorations {
     );
   }
 
-  // Category card base container
   static BoxDecoration categoryCard() {
     return BoxDecoration(
-      color: ColorsManager.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(12.r),
       boxShadow: [
         BoxShadow(
@@ -78,7 +72,6 @@ class HomeDecorations {
     );
   }
 
-  // Category icon container with color-based gradient & border
   static BoxDecoration categoryIconContainer(Color color) {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -98,7 +91,6 @@ class HomeDecorations {
     );
   }
 
-  // Main category corner decorative container
   static BoxDecoration mainCategoryCorner() {
     return BoxDecoration(
       color: ColorsManager.white.withOpacity(0.15),
@@ -109,7 +101,6 @@ class HomeDecorations {
     );
   }
 
-  // Main category count pill
   static BoxDecoration mainCategoryCountPill() {
     return BoxDecoration(
       color: ColorsManager.white.withOpacity(0.25),
@@ -128,7 +119,6 @@ class HomeDecorations {
     );
   }
 
-  // Main category icon overlay container
   static BoxDecoration mainCategoryIconOverlay() {
     return BoxDecoration(
       color: ColorsManager.white.withOpacity(0.2),
@@ -137,8 +127,7 @@ class HomeDecorations {
     );
   }
 
-  // Featured hadith header gradient
-  static const BoxDecoration featuredHeaderGradient = BoxDecoration(
+  static BoxDecoration get featuredHeaderGradient => BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
@@ -150,7 +139,6 @@ class HomeDecorations {
     ),
   );
 
-  // Featured footer container
   static BoxDecoration featuredFooter() {
     return BoxDecoration(
       color: ColorsManager.lightGray,
@@ -158,10 +146,9 @@ class HomeDecorations {
     );
   }
 
-  // Quick action card container
   static BoxDecoration quickActionCard() {
     return BoxDecoration(
-      color: ColorsManager.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(16.r),
       boxShadow: [
         BoxShadow(
@@ -173,7 +160,6 @@ class HomeDecorations {
     );
   }
 
-  // Quick action icon background
   static BoxDecoration quickActionIconBg(Color color) {
     return BoxDecoration(
       color: color.withOpacity(0.1),
@@ -181,18 +167,16 @@ class HomeDecorations {
     );
   }
 
-  // Search bar outer container
   static BoxDecoration searchOuter() {
     return BoxDecoration(
-      color: ColorsManager.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(12.r),
     );
   }
 
-  // Section shimmer card base
   static BoxDecoration shimmerCardContainer() {
     return BoxDecoration(
-      color: ColorsManager.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(16.r),
       boxShadow: [
         BoxShadow(
@@ -204,10 +188,9 @@ class HomeDecorations {
     );
   }
 
-  // Generic shimmer small box
   static BoxDecoration shimmerBox({bool circle = false, double? radius}) {
     return BoxDecoration(
-      color: Colors.grey.shade300,
+      color: ColorsManager.mediumGray,
       borderRadius:
           circle
               ? BorderRadius.circular(50)
@@ -215,7 +198,6 @@ class HomeDecorations {
     );
   }
 
-  // Statistics card container with gradient
   static BoxDecoration statsCard(Color baseColor) {
     return BoxDecoration(
       gradient: LinearGradient(

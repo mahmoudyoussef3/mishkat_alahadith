@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:mishkat_almasabih/core/theming/chapters_decorations.dart';
@@ -9,8 +10,8 @@ class ChapterCardShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: ColorsManager.shimmerBase,
+      highlightColor: ColorsManager.shimmerHighlight,
       child: Container(
         decoration: ChaptersDecorations.shimmerCard(),
         padding: const EdgeInsets.all(14),
