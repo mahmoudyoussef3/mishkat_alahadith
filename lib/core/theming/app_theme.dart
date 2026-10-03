@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
 
 import 'app_palette.dart';
-import 'colors.dart';
 
 class AppTheme {
   AppTheme._();
 
   static const String _fontFamily = 'Cairo';
 
-  static ThemeData get lightTheme =>
-      ThemeData(fontFamily: _fontFamily, useMaterial3: true);
+  static ThemeData get lightTheme => _build(AppPalette.light);
 
-  static ThemeData get darkTheme {
-    const palette = AppPalette.dark;
+  static ThemeData get darkTheme => _build(AppPalette.dark);
+
+  static ThemeData _build(AppPalette palette) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: palette.primaryPurple,
-      brightness: Brightness.dark,
+      brightness: palette.brightness,
     ).copyWith(
-      secondary: ColorsManager.primaryGold,
-      onSecondary: const Color(0xFF261A00),
+      secondary: palette.primaryGold,
+      onSecondary: palette.isDark ? const Color(0xFF261A00) : Colors.white,
       surface: palette.cardBackground,
       onSurface: palette.primaryText,
       onSurfaceVariant: palette.secondaryText,
@@ -29,7 +28,7 @@ class AppTheme {
       surfaceContainerHighest: palette.lightGray,
       outline: palette.mediumGray,
       outlineVariant: palette.lightGray,
-      error: ColorsManager.error,
+      error: palette.error,
     );
 
     return ThemeData(

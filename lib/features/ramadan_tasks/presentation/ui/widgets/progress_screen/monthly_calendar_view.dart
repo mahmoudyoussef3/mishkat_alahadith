@@ -268,7 +268,7 @@ class MonthlyCalendarView extends StatelessWidget {
                 margin: EdgeInsetsDirectional.only(top: 2.h),
                 width: 4.w,
                 height: 4.w,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: ColorsManager.primaryGold,
                   shape: BoxShape.circle,
                 ),

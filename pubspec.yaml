@@ -69,6 +69,7 @@ dependencies:
   app_links: ^7.0.0
   sign_in_with_apple: ^8.1.0
   connectivity_plus: ^7.1.1
+  mushaf_text: ^1.4.0
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0

@@ -10,6 +10,7 @@ import 'package:mishkat_almasabih/features/library/presentation/logic/library_st
 import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
 import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/daily_hadith_card.dart';
 import 'package:mishkat_almasabih/features/library/presentation/ui/screens/library_books_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/quran_entry_card.dart';
 
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/ui/widgets/random_ahadith_bloc_builder.dart';
 import 'package:mishkat_almasabih/features/search/search_history/presentation/logic/search_history_cubit.dart';
@@ -113,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
         SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
         const HomeSearchBarSection(),
+        const SliverToBoxAdapter(child: QuranEntryCard()),
         SliverToBoxAdapter(child: const HadithOfTheDayCard()),
         const SectionDivider(),
         const TopBooksSection(),

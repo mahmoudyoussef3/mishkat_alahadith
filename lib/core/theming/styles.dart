@@ -117,7 +117,7 @@ class TextStyles {
   static TextStyle get quranText => TextStyle(
     fontSize: 18.sp,
     fontWeight: FontWeightHelper.medium,
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
     height: 1.7,
   );
 
@@ -153,23 +153,23 @@ class TextStyles {
   );
 
   static TextStyle get font32BlueBold => displayLarge.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get font13BlueSemiBold => labelLarge.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get font13DarkBlueMedium => bodyMedium.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get font13DarkBlueRegular => bodyMedium.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get font24BlueBold => displaySmall.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get font16WhiteSemiBold => bodyLarge.copyWith(
@@ -190,15 +190,15 @@ class TextStyles {
   );
 
   static TextStyle get font12DarkBlueRegular => bodySmall.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get font12BlueRegular => bodySmall.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get font13BlueRegular => bodyMedium.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get font14GrayRegular => bodyMedium.copyWith(
@@ -210,12 +210,12 @@ class TextStyles {
   );
 
   static TextStyle get font14DarkBlueMedium => bodyMedium.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
     fontWeight: FontWeightHelper.medium,
   );
 
   static TextStyle get font14DarkBlueBold => bodyMedium.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
     fontWeight: FontWeightHelper.bold,
   );
 
@@ -225,18 +225,18 @@ class TextStyles {
   );
 
   static TextStyle get font14BlueSemiBold => bodyMedium.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
     fontWeight: FontWeightHelper.semiBold,
   );
 
   static TextStyle get font15DarkBlueMedium => bodyMedium.copyWith(
     fontSize: 15.sp,
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
     fontWeight: FontWeightHelper.medium,
   );
 
   static TextStyle get font18DarkBlueBold => headlineSmall.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get font18DarkBlueSemiBold => headlineSmall.copyWith(

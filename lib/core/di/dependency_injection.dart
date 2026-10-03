@@ -177,6 +177,30 @@ import 'package:mishkat_almasabih/features/search_with_filters/presentation/logi
 import 'package:mishkat_almasabih/features/send_suggestion/data/datasources/suggestion_remote_datasource.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/data/repos/suggestion_repo_impl.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/domain/repos/suggestion_repo.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_reading_local_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_text_local_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/repos/quran_reading_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran/data/repos/quran_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran/domain/repos/quran_reading_repo.dart';
+import 'package:mishkat_almasabih/features/quran/domain/repos/quran_repo.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/filter_surahs_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_ayah_details_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_juz_index_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_last_read_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_mushaf_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_page_info_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_page_tajweed_counts_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_quran_bookmarks_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_surahs_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/remove_quran_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/save_last_read_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/save_mushaf_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/search_quran_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/toggle_quran_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/domain/usecases/send_suggestion_use_case.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/presentation/logic/send_suggestion_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/data/repos/chat_history_repo_impl.dart';
@@ -214,6 +238,7 @@ Future<void> setUpGetIt() async {
   _registerOnboarding();
   _registerSuggestions();
   _registerTheme();
+  _registerQuran();
 }
 
 void _registerCore() {
@@ -692,6 +717,85 @@ void _registerTheme() {
     () => SaveThemeModeUseCase(getIt()),
   );
   getIt.registerLazySingleton<ThemeCubit>(() => ThemeCubit(getIt(), getIt()));
+}
+
+void _registerQuran() {
+  getIt.registerLazySingleton<QuranTextLocalDataSource>(
+    () => QuranTextLocalDataSource(),
+  );
+  getIt.registerLazySingleton<QuranReadingLocalDataSource>(
+    () => QuranReadingLocalDataSource(),
+  );
+  getIt.registerLazySingleton<QuranRepo>(() => QuranRepoImpl(getIt()));
+  getIt.registerLazySingleton<QuranReadingRepo>(
+    () => QuranReadingRepoImpl(getIt()),
+  );
+
+  getIt.registerLazySingleton<GetSurahsUseCase>(() => GetSurahsUseCase(getIt()));
+  getIt.registerLazySingleton<FilterSurahsUseCase>(() => FilterSurahsUseCase());
+  getIt.registerLazySingleton<GetJuzIndexUseCase>(
+    () => GetJuzIndexUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetPageInfoUseCase>(
+    () => GetPageInfoUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetAyahDetailsUseCase>(
+    () => GetAyahDetailsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetPageTajweedCountsUseCase>(
+    () => GetPageTajweedCountsUseCase(getIt()),
+  );
+  // A singleton so its search index is built once per app run.
+  getIt.registerLazySingleton<SearchQuranUseCase>(
+    () => SearchQuranUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetLastReadUseCase>(
+    () => GetLastReadUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveLastReadUseCase>(
+    () => SaveLastReadUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetQuranBookmarksUseCase>(
+    () => GetQuranBookmarksUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ToggleQuranBookmarkUseCase>(
+    () => ToggleQuranBookmarkUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<RemoveQuranBookmarkUseCase>(
+    () => RemoveQuranBookmarkUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetMushafSettingsUseCase>(
+    () => GetMushafSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveMushafSettingsUseCase>(
+    () => SaveMushafSettingsUseCase(getIt()),
+  );
+
+  getIt.registerFactory<QuranIndexCubit>(
+    () => QuranIndexCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerFactory<MushafReaderCubit>(
+    () => MushafReaderCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerFactory<AyahDetailsCubit>(() => AyahDetailsCubit(getIt()));
+  getIt.registerFactory<QuranSearchCubit>(() => QuranSearchCubit(getIt()));
 }
 
 void _registerSuggestions() {

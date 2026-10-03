@@ -74,12 +74,12 @@ class EnhancedSearchTextStyles {
   static TextStyle get wordMeaningWord => TextStyle(
     fontFamily: 'Cairo',
     fontWeight: FontWeight.w700,
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get wordMeaningSeparator => TextStyle(
     fontWeight: FontWeight.bold,
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get wordMeaningText => TextStyle(

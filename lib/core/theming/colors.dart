@@ -14,16 +14,16 @@ class ColorsManager {
   static Color get primaryPurple => _palette.primaryPurple;
 
 
-  static const Color secondaryPurple = Color(0xFF9D7BF0);
+  static const Color secondaryPurple = Color(0xFF8E7AD6);
 
 
-  static const Color primaryGold = Color(0xFFFFB300);
+  static Color get primaryGold => _palette.primaryGold;
 
-  static const Color lightPurple = Color(0xFFB39DDB);
+  static const Color lightPurple = Color(0xFFB7ABE0);
 
-  static const Color darkPurple = Color(0xFF5E35B1);
+  static const Color darkPurple = Color(0xFF4A3A94);
 
-  static const Color accentPurple = Color(0xFF7C4DFF);
+  static const Color accentPurple = Color(0xFF7259D6);
 
   static Color get primaryBackground => _palette.primaryBackground;
 
@@ -64,19 +64,19 @@ class ColorsManager {
   static Color get shimmerBase => _palette.shimmerBase;
   static Color get shimmerHighlight => _palette.shimmerHighlight;
 
-  static const Color success = Color(0xFF4CAF50);
+  static Color get success => _palette.success;
 
-  static const Color warning = Color(0xFFFF9800);
+  static Color get warning => _palette.warning;
 
-  static const Color error = Color(0xFFE53935);
+  static Color get error => _palette.error;
 
-  static const Color info = Color(0xFF2196F3);
+  static Color get info => _palette.info;
 
-  static const Color hadithAuthentic = Color(0xFF4CAF50);
+  static Color get hadithAuthentic => _palette.success;
 
   static Color get hadithGood => _palette.hadithGood;
 
-  static const Color hadithWeak = Color(0xFFFF9800);
+  static Color get hadithWeak => _palette.warning;
 
   static Color get primaryGreen => primaryPurple;
 
@@ -84,7 +84,7 @@ class ColorsManager {
 
   static const Color primaryNavy = darkPurple;
 
-  static const Color accentOrange = primaryGold;
+  static Color get accentOrange => primaryGold;
 
   static Color get mainBlue => primaryPurple;
 

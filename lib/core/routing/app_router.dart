@@ -33,6 +33,14 @@ import 'package:mishkat_almasabih/features/profile/presentation/ui/profile_scree
 import 'package:mishkat_almasabih/features/qiblah_finder/presentation/logic/qiblah_cubit.dart'
     show QiblahCubit;
 import 'package:mishkat_almasabih/features/qiblah_finder/presentation/ui/qiblah_finder_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/models/mushaf_reader_args.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_reader_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_home_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_search_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/tajweed_guide_screen.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/presentation/logic/cubit/remaining_questions_cubit.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/logic/enhanced_search_cubit.dart';
@@ -393,6 +401,45 @@ class AppRouter {
                 child: const QiblahFinderScreen(),
               ),
         );
+      case Routes.quranScreen:
+        _logScreenView('QuranScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<QuranIndexCubit>()..load(),
+                child: const QuranHomeScreen(),
+              ),
+        );
+      case Routes.mushafReader:
+        _logScreenView('MushafReaderScreen');
+        final args = switch (settings.arguments) {
+          final MushafReaderArgs args => args,
+          _ => const MushafReaderArgs(),
+        };
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<MushafReaderCubit>()..init(
+                          initialPage: args.initialPage,
+                          highlightAyahId: args.highlightAyahId,
+                        ),
+                child: MushafReaderScreen(initialPage: args.initialPage),
+              ),
+        );
+      case Routes.quranSearch:
+        _logScreenView('QuranSearchScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<QuranSearchCubit>(),
+                child: const QuranSearchScreen(),
+              ),
+        );
+      case Routes.tajweedGuide:
+        _logScreenView('TajweedGuideScreen');
+        return MaterialPageRoute(builder: (_) => const TajweedGuideScreen());
       case Routes.categoriesScreen:
         _logScreenView('CategoriesScreen');
         return MaterialPageRoute(

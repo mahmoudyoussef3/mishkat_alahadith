@@ -45,10 +45,10 @@ class AddCreationButton extends StatelessWidget {
           );
         } else if (state is AddSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               backgroundColor: ColorsManager.hadithAuthentic,
               behavior: SnackBarBehavior.floating,
-              content: Text(
+              content: const Text(
                 'تم اضافة الحديث إلي المحفوظات',
                 style: TextStyle(color: Colors.white),
               ),
@@ -57,10 +57,10 @@ class AddCreationButton extends StatelessWidget {
           context.pop();
         } else if (state is AddFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               backgroundColor: ColorsManager.error,
 
-              content: Text(
+              content: const Text(
                 "حدث خطأ. حاول مرة أخري",
                 style: TextStyle(color: Colors.white),
               ),

@@ -29,7 +29,7 @@ class ChaptersTextStyles {
   static TextStyle get emptyTitle => TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
-    color: ColorsManager.primaryNavy,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get emptySubtitle => TextStyle(

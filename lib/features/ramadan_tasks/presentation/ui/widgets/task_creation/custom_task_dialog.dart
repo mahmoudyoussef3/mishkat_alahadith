@@ -201,11 +201,11 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.r),
-        borderSide: const BorderSide(color: ColorsManager.error, width: 1),
+        borderSide: BorderSide(color: ColorsManager.error, width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.r),
-        borderSide: const BorderSide(color: ColorsManager.error, width: 1.5),
+        borderSide: BorderSide(color: ColorsManager.error, width: 1.5),
       ),
       contentPadding: EdgeInsetsDirectional.symmetric(
         horizontal: 16.w,

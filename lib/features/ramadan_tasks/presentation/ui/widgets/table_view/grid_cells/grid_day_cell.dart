@@ -18,8 +18,11 @@ class GridDayCell extends StatelessWidget {
           width: 42.w,
           padding: EdgeInsetsDirectional.symmetric(vertical: 4.h),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [ColorsManager.primaryGold, Color(0xFFFFCA28)],
+            gradient: LinearGradient(
+              colors: [
+                ColorsManager.primaryGold,
+                Color.lerp(ColorsManager.primaryGold, Colors.black, 0.2)!,
+              ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),

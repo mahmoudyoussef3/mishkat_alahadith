@@ -71,12 +71,12 @@ class DailyHadithTextStyles {
   static TextStyle get wordStyle => TextStyle(
     fontFamily: 'Cairo',
     fontWeight: FontWeight.w700,
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get colonStyle => TextStyle(
     fontWeight: FontWeight.bold,
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
   static TextStyle get meaningStyle => TextStyle(

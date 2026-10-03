@@ -17,13 +17,13 @@ import 'table_utils.dart';
 const int _kDays = 30;
 
 Color get _headerBg => ColorsManager.primaryPurple;
-const Color _headerBorderBottom = Color(0xFF6435CC);
+const Color _headerBorderBottom = ColorsManager.darkPurple;
 Color get _oddRowBg =>
     ColorsManager.isDark ? const Color(0xFF211C30) : const Color(0xFFF8F5FF);
 Color get _evenRowBg => ColorsManager.cardBackground;
 Color get _todayRowBg =>
     ColorsManager.isDark ? const Color(0xFF2E2618) : const Color(0xFFFFF8E1);
-const Color _todayBorder = ColorsManager.primaryGold;
+Color get _todayBorder => ColorsManager.primaryGold;
 Color get _gridLine =>
     ColorsManager.isDark ? const Color(0xFF2A2538) : const Color(0xFFEEEEEE);
 Color get _pinnedColLine => ColorsManager.mediumGray;
@@ -256,7 +256,7 @@ class _RamadanTableViewState extends State<RamadanTableView> {
         color: bg,
         border:
             isToday
-                ? const TableSpanBorder(
+                ? TableSpanBorder(
                   leading: BorderSide(color: _todayBorder, width: 2),
                   trailing: BorderSide(color: _todayBorder, width: 2),
                 )

@@ -35,7 +35,7 @@ class AuthTextStyles {
   );
 
   static TextStyle get termsLink => TextStyles.bodySmall.copyWith(
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
     fontWeight: FontWeight.w500,
     fontFamily: 'Amiri',
   );
@@ -71,7 +71,7 @@ class AuthTextStyles {
 
   static TextStyle validationText({required bool validated}) => TextStyle(
     fontSize: 13.sp,
-    color: validated ? ColorsManager.gray : ColorsManager.darkPurple,
+    color: validated ? ColorsManager.gray : ColorsManager.darkPurpleText,
     fontFamily: 'Amiri',
   );
 }

@@ -35,7 +35,7 @@ const List<WorshipSection> kWorshipSections = [
   WorshipSection(
     title: 'الصلاة',
     icon: Icons.mosque_rounded,
-    accentColor: Color(0xFF7440E9),
+    accentColor: Color(0xFF5F48B8),
     items: [
       WorshipTemplate(title: 'صلاة الفجر', icon: Icons.wb_twilight_rounded),
       WorshipTemplate(title: 'صلاة الظهر', icon: Icons.wb_sunny_outlined),

@@ -233,7 +233,7 @@ class _EditTaskSheetBody extends StatelessWidget {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: ColorsManager.error,
-                    side: const BorderSide(color: ColorsManager.error),
+                    side: BorderSide(color: ColorsManager.error),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14.r),
                     ),

@@ -93,6 +93,15 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                 ),
                 _buildDrawerItem(
                   context,
+                  icon: Icons.auto_stories_rounded,
+                  title: 'القرآن الكريم',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.pushNamed(Routes.quranScreen);
+                  },
+                ),
+                _buildDrawerItem(
+                  context,
                   icon: Icons.bookmark_rounded,
                   title: 'المحفوظات',
                   onTap: () {

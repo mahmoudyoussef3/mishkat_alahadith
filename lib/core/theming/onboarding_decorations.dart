@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class OnboardingDecorations {
-  static const Color primaryPurple = Color(0xFF7440E9);
+  // Onboarding backgrounds are always light, so it uses the light brand tone.
+  static Color get primaryPurple => AppPalette.light.primaryPurple;
 
-  static const Color lightPurple = Color(0xFF9B6FFF);
+  static const Color lightPurple = ColorsManager.secondaryPurple;
 
   static const Color titleTextColor = Color(0xFF2D3748);
 
   static const Color descriptionTextColor = Color(0xFF718096);
 
   static LinearGradient primaryGradient() {
-    return const LinearGradient(
+    return LinearGradient(
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: [primaryPurple, lightPurple],
