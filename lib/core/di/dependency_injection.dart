@@ -1,231 +1,656 @@
-import 'package:dio/dio.dart';
-import 'package:get_it/get_it.dart';
-import 'package:mishkat_almasabih/core/networking/categories_api_service.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/repositories/hadith_by_category_details_repo.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_ahadith_by_category_usecase.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_details_cubit/cubit/hadith_by_category_details_cubit.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:mishkat_almasabih/core/networking/network_info.dart';
-
-import 'package:mishkat_almasabih/features/authentication/signup/data/repo/signup_repo.dart';
-import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
-import 'package:mishkat_almasabih/features/book_data/data/repos/book_data_repo.dart';
-import 'package:mishkat_almasabih/features/book_data/logic/cubit/book_data_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/data/repos/book_mark_repo.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/delete_cubit/cubit/delete_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/get_cubit/user_bookmarks_cubit.dart';
-import 'package:mishkat_almasabih/features/chapters/data/repos/chapters_repo.dart';
-import 'package:mishkat_almasabih/features/chapters/logic/cubit/chapters_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith/data/repos/ahadiths_repo.dart';
-import 'package:mishkat_almasabih/features/ahadith/logic/cubit/ahadiths_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/data/repos/hadith_analysis_repo.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/logic/cubit/hadith_analysis_cubit.dart';
-
-import 'package:mishkat_almasabih/features/home/data/repos/get_all_books_with_categories_repo.dart';
-import 'package:mishkat_almasabih/features/home/data/repos/get_library_statistics_repo.dart';
-import 'package:mishkat_almasabih/features/home/logic/cubit/get_all_books_with_categories_cubit.dart';
-import 'package:mishkat_almasabih/features/home/logic/cubit/get_library_statistics_cubit.dart';
-import 'package:mishkat_almasabih/features/navigation/data/repos/navigation_repo.dart';
-import 'package:mishkat_almasabih/features/navigation/logic/cubit/navigation_cubit.dart';
-import 'package:mishkat_almasabih/features/navigation/logic/local/cubit/local_hadith_navigation_cubit.dart';
-import 'package:mishkat_almasabih/features/profile/data/repos/user_response_repo.dart';
-import 'package:mishkat_almasabih/features/profile/edit_profile/data/repos/edit_profile_repo.dart';
-import 'package:mishkat_almasabih/features/profile/edit_profile/logic/cubit/edit_profile_cubit.dart';
-import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
-import 'package:mishkat_almasabih/features/profile/logic/cubit/profile_cubit.dart';
-import 'package:mishkat_almasabih/features/qiblah_finder/logic/cubit/qiblah_cubit.dart';
-import 'package:mishkat_almasabih/features/random_ahadith/data/custom_api_service.dart';
-import 'package:mishkat_almasabih/features/random_ahadith/data/repos/random_ahadith_repo.dart';
-import 'package:mishkat_almasabih/features/random_ahadith/logic/cubit/random_ahadith_cubit.dart';
-import 'package:mishkat_almasabih/features/remaining_questions/data/repos/remaining_questions_repo.dart';
-import 'package:mishkat_almasabih/features/remaining_questions/logic/cubit/remaining_questions_cubit.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/repos/enhanced_search_repo.dart';
-import 'package:mishkat_almasabih/features/search/home_screen/data/repos/public_search_repo.dart';
-import 'package:mishkat_almasabih/features/search/home_screen/logic/cubit/public_search_cubit.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/logic/cubit/enhanced_search_cubit.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/data/repos/shared_pref_history_item_repo.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/logic/cubit/search_history_cubit.dart';
-import 'package:mishkat_almasabih/features/search_with_filters/data/repos/search_with_filters_repo.dart';
-import 'package:mishkat_almasabih/features/search_with_filters/logic/cubit/search_with_filters_cubit.dart';
-import 'package:mishkat_almasabih/features/serag/data/repos/serag_repo.dart';
-import 'package:mishkat_almasabih/features/serag/logic/cubit/serag_cubit.dart';
-import '../../features/authentication/login/logic/cubit/login_cubit.dart';
-import '../networking/api_service.dart';
-import '../networking/dio_factory.dart';
-import '../../features/authentication/login/data/repo/login_repo.dart';
-import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_tasks_repository.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/data/datasources/ramadan_tasks_local_datasource.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/data/repositories/ramadan_tasks_repository_impl.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/cubit/ramadan_tasks_cubit.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/data/datasources/ramadan_config_remote_datasource.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/data/repositories/ramadan_config_repository_impl.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repositories/ramadan_config_repository.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:get_it/get_it.dart';
+
+import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
+import 'package:mishkat_almasabih/core/networking/categories_api_service.dart';
+import 'package:mishkat_almasabih/core/networking/dio_factory.dart';
+import 'package:mishkat_almasabih/core/data/datasources/hadeethenc_datasource.dart';
+import 'package:mishkat_almasabih/core/networking/network_info.dart';
+import 'package:mishkat_almasabih/core/storage/token_storage.dart';
+import 'package:mishkat_almasabih/features/ahadith/data/repos/ahadith_repo_impl.dart';
+import 'package:mishkat_almasabih/features/ahadith/domain/repos/ahadith_repo.dart';
+import 'package:mishkat_almasabih/features/ahadith/domain/usecases/cache_chapter_ahadith_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith/domain/usecases/get_arbain_ahadith_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith/domain/usecases/get_cached_chapter_ahadith_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith/domain/usecases/get_chapter_ahadith_page_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith/domain/usecases/get_local_ahadith_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/logic/cubit/ahadiths_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/data/datasources/categories_datasource.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/data/repositories/categories_repository_impl.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/repositories/categories_repository.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_categories_usecase.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/categories_cubit/categories_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/data/repos/categories_repository_impl.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/repos/categories_repository.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_ahadith_by_category_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_cached_hadith_details_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_categories_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/usecases/get_hadith_details_use_case.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_details/hadith_by_category_details_cubit.dart';
+import 'package:mishkat_almasabih/features/authentication/login/data/datasources/google_auth_datasource.dart';
+import 'package:mishkat_almasabih/features/authentication/login/data/repos/login_repo_impl.dart';
+import 'package:mishkat_almasabih/features/authentication/login/domain/repos/login_repo.dart';
+import 'package:mishkat_almasabih/features/authentication/login/domain/usecases/google_login_use_case.dart';
+import 'package:mishkat_almasabih/features/authentication/login/domain/usecases/login_use_case.dart';
+import 'package:mishkat_almasabih/features/authentication/login/presentation/logic/cubit/login_cubit.dart';
+import 'package:mishkat_almasabih/features/authentication/session/data/repos/session_repo_impl.dart';
+import 'package:mishkat_almasabih/features/authentication/session/domain/repos/session_repo.dart';
+import 'package:mishkat_almasabih/features/authentication/session/domain/usecases/is_signed_in_use_case.dart';
+import 'package:mishkat_almasabih/features/authentication/session/domain/usecases/sign_out_use_case.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/data/repos/signup_repo_impl.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/domain/repos/signup_repo.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/domain/usecases/signup_use_case.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/presentation/logic/signup_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/data/repos/bookmark_repo_impl.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/repos/bookmark_repo.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/add_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/delete_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/get_bookmark_collections_use_case.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/get_bookmarks_use_case.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/get_cached_bookmark_collections_use_case.dart';
+import 'package:mishkat_almasabih/features/bookmark/domain/usecases/get_cached_bookmarks_use_case.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/delete_bookmark/delete_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
+import 'package:mishkat_almasabih/features/chapters/data/repos/chapters_repo_impl.dart';
+import 'package:mishkat_almasabih/features/chapters/domain/repos/chapters_repo.dart';
+import 'package:mishkat_almasabih/features/chapters/domain/usecases/get_book_chapters_use_case.dart';
+import 'package:mishkat_almasabih/features/chapters/domain/usecases/get_cached_book_chapters_use_case.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/logic/cubit/chapters_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/data/repos/hadith_analysis_repo_impl.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/domain/repos/hadith_analysis_repo.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/domain/usecases/analyze_hadith_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/logic/cubit/hadith_analysis_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/data/datasources/daily_hadith_local_datasource.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/data/repos/daily_hadith_repo_impl.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/repos/daily_hadith_repo.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/fetch_daily_hadith_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/get_saved_daily_hadith_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_cubit.dart';
+import 'package:mishkat_almasabih/features/library/data/repos/library_repo_impl.dart';
+import 'package:mishkat_almasabih/features/library/domain/repos/library_repo.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_cached_category_books_use_case.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_cached_library_statistics_use_case.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_category_books_use_case.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_library_statistics_use_case.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/book_data/book_data_cubit.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/library_statistics/get_library_statistics_cubit.dart';
+import 'package:mishkat_almasabih/features/navigation/data/repos/navigation_repo_impl.dart';
+import 'package:mishkat_almasabih/features/navigation/domain/repos/navigation_repo.dart';
+import 'package:mishkat_almasabih/features/navigation/domain/usecases/get_cached_hadith_navigation_use_case.dart';
+import 'package:mishkat_almasabih/features/navigation/domain/usecases/get_hadith_navigation_use_case.dart';
+import 'package:mishkat_almasabih/features/navigation/domain/usecases/get_local_hadith_navigation_use_case.dart';
+import 'package:mishkat_almasabih/features/navigation/presentation/logic/local/local_hadith_navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/navigation/presentation/logic/remote/navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/onboarding/data/datasources/onboarding_local_datasource.dart';
+import 'package:mishkat_almasabih/features/onboarding/data/repos/onboarding_repo_impl.dart';
+import 'package:mishkat_almasabih/features/onboarding/domain/repos/onboarding_repo.dart';
+import 'package:mishkat_almasabih/features/onboarding/domain/usecases/complete_onboarding_use_case.dart';
+import 'package:mishkat_almasabih/features/onboarding/domain/usecases/is_first_launch_use_case.dart';
+import 'package:mishkat_almasabih/features/onboarding/presentation/logic/onboarding_cubit.dart';
+import 'package:mishkat_almasabih/features/theme/data/datasources/theme_local_datasource.dart';
+import 'package:mishkat_almasabih/features/theme/data/repos/theme_repo_impl.dart';
+import 'package:mishkat_almasabih/features/theme/domain/repos/theme_repo.dart';
+import 'package:mishkat_almasabih/features/theme/domain/usecases/get_theme_mode_use_case.dart';
+import 'package:mishkat_almasabih/features/theme/domain/usecases/save_theme_mode_use_case.dart';
+import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/datasources/device_location_datasource.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/datasources/prayer_location_local_datasource.dart';
+import 'package:mishkat_almasabih/core/prayer/prayer_times_calculator.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/repos/prayer_times_repo_impl.dart';
+import 'package:mishkat_almasabih/features/prayer_times/data/repos/prayer_notifications_repo_impl.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_notifications_repo.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_prayer_notification_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/open_battery_optimization_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/set_prayer_notifications_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/notifications/prayer_notifications_cubit.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_times_repo.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/calculate_prayer_times_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_device_position_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_next_prayer_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_saved_prayer_location_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/refresh_prayer_home_widget_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/request_location_access_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/reschedule_prayer_notifications_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/save_prayer_location_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/prayer_times_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/data/repos/profile_repo_impl.dart';
+import 'package:mishkat_almasabih/features/profile/domain/repos/profile_repo.dart';
+import 'package:mishkat_almasabih/features/profile/domain/usecases/get_cached_profile_use_case.dart';
+import 'package:mishkat_almasabih/features/profile/domain/usecases/get_profile_use_case.dart';
+import 'package:mishkat_almasabih/features/profile/domain/usecases/get_user_stats_use_case.dart';
+import 'package:mishkat_almasabih/features/profile/domain/usecases/update_profile_use_case.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/logic/edit_profile/edit_profile_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/logic/profile/profile_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/logic/user_stats/user_stats_cubit.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/data/repos/qiblah_repo_impl.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/domain/repos/qiblah_repo.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/domain/usecases/check_qiblah_readiness_use_case.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/domain/usecases/dispose_qiblah_compass_use_case.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/presentation/logic/qiblah_cubit.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/data/datasources/ramadan_config_remote_datasource.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/data/datasources/ramadan_tasks_local_datasource.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/data/repos/ramadan_config_repository_impl.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/data/repos/ramadan_tasks_repository_impl.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repos/ramadan_config_repository.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/repos/ramadan_tasks_repository.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/add_task.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/compute_progress.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/delete_task.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/ensure_daily_reset.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/get_ramadan_calendar_use_case.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/get_tasks.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/initialize_ramadan_config_use_case.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/toggle_daily_completion.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/toggle_today_only_completion.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/update_task.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/logic/ramadan_tasks_cubit.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/data/datasources/custom_api_service.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/data/repos/random_ahadith_repo_impl.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/domain/repos/random_ahadith_repo.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/domain/usecases/get_random_ahadith_use_case.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
+import 'package:mishkat_almasabih/features/remaining_questions/data/repos/remaining_questions_repo_impl.dart';
+import 'package:mishkat_almasabih/features/remaining_questions/domain/repos/remaining_questions_repo.dart';
+import 'package:mishkat_almasabih/features/remaining_questions/domain/usecases/get_remaining_questions_use_case.dart';
+import 'package:mishkat_almasabih/features/remaining_questions/presentation/logic/cubit/remaining_questions_cubit.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/data/repos/enhanced_search_repo_impl.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/domain/repos/enhanced_search_repo.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/domain/usecases/enhanced_search_use_case.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/domain/usecases/get_cached_enhanced_search_use_case.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/logic/enhanced_search_cubit.dart';
+import 'package:mishkat_almasabih/features/search/search_history/data/repos/search_history_repo_impl.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/repos/search_history_repo.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/usecases/add_search_history_entry_use_case.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/usecases/clear_search_history_use_case.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/usecases/delete_search_history_entry_use_case.dart';
+import 'package:mishkat_almasabih/features/search/search_history/domain/usecases/get_search_history_use_case.dart';
+import 'package:mishkat_almasabih/features/search/search_history/presentation/logic/search_history_cubit.dart';
+import 'package:mishkat_almasabih/features/search_with_filters/data/repos/search_with_filters_repo_impl.dart';
+import 'package:mishkat_almasabih/features/search_with_filters/domain/repos/search_with_filters_repo.dart';
+import 'package:mishkat_almasabih/features/search_with_filters/domain/usecases/get_cached_filtered_search_use_case.dart';
+import 'package:mishkat_almasabih/features/search_with_filters/domain/usecases/search_with_filters_use_case.dart';
+import 'package:mishkat_almasabih/features/search_with_filters/presentation/logic/search_with_filters_cubit.dart';
+import 'package:mishkat_almasabih/features/send_suggestion/data/datasources/suggestion_remote_datasource.dart';
+import 'package:mishkat_almasabih/features/send_suggestion/data/repos/suggestion_repo_impl.dart';
+import 'package:mishkat_almasabih/features/send_suggestion/domain/repos/suggestion_repo.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_reading_local_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_text_local_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/repos/quran_reading_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran/data/repos/quran_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran/domain/repos/quran_reading_repo.dart';
+import 'package:mishkat_almasabih/features/quran/domain/repos/quran_repo.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/filter_surahs_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_ayah_details_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_juz_index_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_last_read_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_mushaf_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_page_info_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_page_tajweed_counts_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_quran_bookmarks_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_surahs_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/remove_quran_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/save_last_read_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/save_mushaf_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/search_quran_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/toggle_quran_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/send_suggestion/domain/usecases/send_suggestion_use_case.dart';
+import 'package:mishkat_almasabih/features/send_suggestion/presentation/logic/send_suggestion_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/data/repos/chat_history_repo_impl.dart';
+import 'package:mishkat_almasabih/features/serag/data/repos/serag_repo_impl.dart';
+import 'package:mishkat_almasabih/features/serag/domain/repos/chat_history_repo.dart';
+import 'package:mishkat_almasabih/features/serag/domain/repos/serag_repo.dart';
+import 'package:mishkat_almasabih/features/serag/domain/usecases/ask_serag_use_case.dart';
+import 'package:mishkat_almasabih/features/serag/domain/usecases/clear_chat_history_use_case.dart';
+import 'package:mishkat_almasabih/features/serag/domain/usecases/load_chat_history_use_case.dart';
+import 'package:mishkat_almasabih/features/serag/domain/usecases/save_chat_history_use_case.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_cubit.dart';
 
 final getIt = GetIt.instance;
-final customGetIt = GetIt.instance;
 
 Future<void> setUpGetIt() async {
+  _registerCore();
+  _registerSession();
+  _registerAuthentication();
+  _registerProfile();
+  _registerLibrary();
+  _registerChapters();
+  _registerAhadith();
+  _registerNavigation();
+  _registerBookmarks();
+  _registerDailyHadith();
+  _registerCategories();
+  _registerSearch();
+  _registerRandomAhadith();
+  _registerHadithAnalysis();
+  _registerSerag();
+  _registerPrayerTimes();
+  _registerQiblah();
+  _registerRamadanTasks();
+  _registerOnboarding();
+  _registerSuggestions();
+  _registerTheme();
+  _registerQuran();
+}
+
+void _registerCore() {
   final Dio dio = DioFactory.getDio();
 
   getIt.registerLazySingleton<Connectivity>(() => Connectivity());
   getIt.registerLazySingleton<NetworkInfo>(
     () => NetworkInfoImpl(getIt<Connectivity>()),
   );
-
   getIt.registerLazySingleton<ApiService>(() => ApiService(dio));
   getIt.registerLazySingleton<CategoryApiService>(
     () => CategoryApiService(dio),
   );
+  getIt.registerLazySingleton<CustomApiService>(() => CustomApiService(dio));
+  getIt.registerLazySingleton<HadeethEncDataSource>(
+    () => HadeethEncDataSource(),
+  );
+  getIt.registerLazySingleton<TokenStorage>(() => TokenStorage());
+  getIt.registerLazySingleton<GenericCacheService>(
+    () => GenericCacheService.instance,
+  );
+  getIt.registerLazySingleton<FirebaseRemoteConfig>(
+    () => FirebaseRemoteConfig.instance,
+  );
+}
 
-  getIt.registerLazySingleton<LoginRepo>(() => LoginRepo(getIt()));
-  getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt()));
+void _registerSession() {
+  getIt.registerLazySingleton<SessionRepo>(
+    () => SessionRepoImpl(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<IsSignedInUseCase>(
+    () => IsSignedInUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SignOutUseCase>(() => SignOutUseCase(getIt()));
+  getIt.registerFactory<SessionCubit>(() => SessionCubit(getIt(), getIt()));
+}
 
-  getIt.registerLazySingleton<SignupRepo>(() => SignupRepo(getIt()));
+void _registerAuthentication() {
+  getIt.registerLazySingleton<GoogleAuthDataSource>(
+    () => GoogleAuthDataSourceImpl(),
+  );
+  getIt.registerLazySingleton<LoginRepo>(
+    () => LoginRepoImpl(getIt(), getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<LoginUseCase>(() => LoginUseCase(getIt()));
+  getIt.registerLazySingleton<GoogleLoginUseCase>(
+    () => GoogleLoginUseCase(getIt()),
+  );
+  getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt(), getIt()));
+
+  getIt.registerLazySingleton<SignupRepo>(() => SignupRepoImpl(getIt()));
+  getIt.registerLazySingleton<SignupUseCase>(() => SignupUseCase(getIt()));
   getIt.registerFactory<SignupCubit>(() => SignupCubit(getIt()));
+}
 
-  getIt.registerLazySingleton<GetAllBooksWithCategoriesRepo>(
-    () => GetAllBooksWithCategoriesRepo(getIt()),
+void _registerProfile() {
+  getIt.registerLazySingleton<ProfileRepo>(
+    () => ProfileRepoImpl(getIt(), getIt(), getIt()),
   );
-  getIt.registerFactory<GetAllBooksWithCategoriesCubit>(
-    () => GetAllBooksWithCategoriesCubit(getIt()),
+  getIt.registerLazySingleton<GetCachedProfileUseCase>(
+    () => GetCachedProfileUseCase(getIt()),
   );
+  getIt.registerLazySingleton<GetProfileUseCase>(
+    () => GetProfileUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetUserStatsUseCase>(
+    () => GetUserStatsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<UpdateProfileUseCase>(
+    () => UpdateProfileUseCase(getIt()),
+  );
+  getIt.registerFactory<ProfileCubit>(() => ProfileCubit(getIt(), getIt()));
+  getIt.registerFactory<UserStatsCubit>(() => UserStatsCubit(getIt()));
+  getIt.registerFactory<EditProfileCubit>(() => EditProfileCubit(getIt()));
+}
 
-  getIt.registerLazySingleton<GetLibraryStatisticsRepo>(
-    () => GetLibraryStatisticsRepo(getIt()),
+void _registerLibrary() {
+  getIt.registerLazySingleton<LibraryRepo>(
+    () => LibraryRepoImpl(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetCachedLibraryStatisticsUseCase>(
+    () => GetCachedLibraryStatisticsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetLibraryStatisticsUseCase>(
+    () => GetLibraryStatisticsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetCachedCategoryBooksUseCase>(
+    () => GetCachedCategoryBooksUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetCategoryBooksUseCase>(
+    () => GetCategoryBooksUseCase(getIt()),
   );
   getIt.registerFactory<GetLibraryStatisticsCubit>(
-    () => GetLibraryStatisticsCubit(getIt()),
+    () => GetLibraryStatisticsCubit(getIt(), getIt()),
   );
+  getIt.registerFactory<BookDataCubit>(() => BookDataCubit(getIt(), getIt()));
+}
 
-  getIt.registerLazySingleton<GetBookDataRepo>(() => GetBookDataRepo(getIt()));
-  getIt.registerFactory<BookDataCubit>(() => BookDataCubit(getIt()));
-
-  getIt.registerLazySingleton<BookChaptersRepo>(
-    () => BookChaptersRepo(getIt()),
+void _registerChapters() {
+  getIt.registerLazySingleton<ChaptersRepo>(
+    () => ChaptersRepoImpl(getIt(), getIt()),
   );
-  getIt.registerFactory<ChaptersCubit>(() => ChaptersCubit(getIt()));
-
-  getIt.registerLazySingleton<AhadithsRepo>(() => AhadithsRepo(getIt()));
-  getIt.registerFactory<AhadithsCubit>(() => AhadithsCubit(getIt()));
-
-  getIt.registerLazySingleton<BookMarkRepo>(() => BookMarkRepo(getIt()));
-  getIt.registerFactory<GetBookmarksCubit>(() => GetBookmarksCubit(getIt()));
-
-  getIt.registerFactory<GetCollectionsBookmarkCubit>(
-    () => GetCollectionsBookmarkCubit(getIt()),
+  getIt.registerLazySingleton<GetCachedBookChaptersUseCase>(
+    () => GetCachedBookChaptersUseCase(getIt()),
   );
-
-  getIt.registerFactory<AddCubitCubit>(() => AddCubitCubit(getIt()));
-  getIt.registerFactory<DeleteCubitCubit>(() => DeleteCubitCubit(getIt()));
-
-  getIt.registerLazySingleton<PublicSearchRepo>(
-    () => PublicSearchRepo(getIt()),
+  getIt.registerLazySingleton<GetBookChaptersUseCase>(
+    () => GetBookChaptersUseCase(getIt()),
   );
-  getIt.registerFactory<PublicSearchCubit>(() => PublicSearchCubit(getIt()));
+  getIt.registerFactory<ChaptersCubit>(() => ChaptersCubit(getIt(), getIt()));
+}
 
-  // Hadith of the day feature
-  getIt.registerLazySingleton<SaveHadithDailyRepo>(() => SaveHadithDailyRepo());
-  getIt.registerFactory<DailyHadithCubit>(
-    () => DailyHadithCubit(getIt<SaveHadithDailyRepo>(), getIt<NetworkInfo>()),
+void _registerAhadith() {
+  getIt.registerLazySingleton<AhadithRepo>(
+    () => AhadithRepoImpl(getIt(), getIt()),
   );
+  getIt.registerLazySingleton<GetCachedChapterAhadithUseCase>(
+    () => GetCachedChapterAhadithUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<CacheChapterAhadithUseCase>(
+    () => CacheChapterAhadithUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetChapterAhadithPageUseCase>(
+    () => GetChapterAhadithPageUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetLocalAhadithUseCase>(
+    () => GetLocalAhadithUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetArbainAhadithUseCase>(
+    () => GetArbainAhadithUseCase(getIt()),
+  );
+  getIt.registerFactory<AhadithsCubit>(
+    () => AhadithsCubit(getIt(), getIt(), getIt(), getIt(), getIt()),
+  );
+}
 
-  getIt.registerLazySingleton<NavigationRepo>(() => NavigationRepo(getIt()));
-  getIt.registerFactory<NavigationCubit>(() => NavigationCubit(getIt()));
-
+void _registerNavigation() {
+  getIt.registerLazySingleton<NavigationRepo>(
+    () => NavigationRepoImpl(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetCachedHadithNavigationUseCase>(
+    () => GetCachedHadithNavigationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetHadithNavigationUseCase>(
+    () => GetHadithNavigationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetLocalHadithNavigationUseCase>(
+    () => GetLocalHadithNavigationUseCase(getIt()),
+  );
+  getIt.registerFactory<NavigationCubit>(
+    () => NavigationCubit(getIt(), getIt()),
+  );
   getIt.registerFactory<LocalHadithNavigationCubit>(
     () => LocalHadithNavigationCubit(getIt()),
   );
+}
 
-  getIt.registerLazySingleton<SearchWithFiltersRepo>(
-    () => SearchWithFiltersRepo(getIt()),
+void _registerBookmarks() {
+  getIt.registerLazySingleton<BookmarkRepo>(
+    () => BookmarkRepoImpl(getIt(), getIt(), getIt()),
   );
-  getIt.registerFactory<SearchWithFiltersCubit>(
-    () => SearchWithFiltersCubit(getIt(), getIt<NetworkInfo>()),
+  getIt.registerLazySingleton<GetCachedBookmarksUseCase>(
+    () => GetCachedBookmarksUseCase(getIt()),
   );
+  getIt.registerLazySingleton<GetBookmarksUseCase>(
+    () => GetBookmarksUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetCachedBookmarkCollectionsUseCase>(
+    () => GetCachedBookmarkCollectionsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetBookmarkCollectionsUseCase>(
+    () => GetBookmarkCollectionsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<AddBookmarkUseCase>(
+    () => AddBookmarkUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<DeleteBookmarkUseCase>(
+    () => DeleteBookmarkUseCase(getIt()),
+  );
+  getIt.registerFactory<GetBookmarksCubit>(
+    () => GetBookmarksCubit(getIt(), getIt(), getIt()),
+  );
+  getIt.registerFactory<GetCollectionsBookmarkCubit>(
+    () => GetCollectionsBookmarkCubit(getIt(), getIt()),
+  );
+  getIt.registerFactory<AddCubitCubit>(() => AddCubitCubit(getIt()));
+  getIt.registerFactory<DeleteCubitCubit>(() => DeleteCubitCubit(getIt()));
+}
 
+void _registerDailyHadith() {
+  getIt.registerLazySingleton<DailyHadithLocalDataSource>(
+    () => DailyHadithLocalDataSource(),
+  );
+  getIt.registerLazySingleton<DailyHadithRepo>(
+    () => DailyHadithRepoImpl(getIt(), getIt(), networkInfo: getIt()),
+  );
+  getIt.registerLazySingleton<GetSavedDailyHadithUseCase>(
+    () => GetSavedDailyHadithUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<FetchDailyHadithUseCase>(
+    () => FetchDailyHadithUseCase(getIt()),
+  );
+  getIt.registerFactory<DailyHadithCubit>(
+    () => DailyHadithCubit(getIt(), getIt()),
+  );
+}
+
+void _registerCategories() {
+  getIt.registerLazySingleton<CategoriesDatasource>(
+    () => CategoriesDatasourceImpl(getIt<CategoryApiService>()),
+  );
+  getIt.registerLazySingleton<CategoriesRepository>(
+    () => CategoriesRepositoryImpl(getIt(), getIt(), getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetCategoriesUseCase>(
+    () => GetCategoriesUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetAhadithByCategoryUseCase>(
+    () => GetAhadithByCategoryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetCachedHadithDetailsUseCase>(
+    () => GetCachedHadithDetailsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetHadithDetailsUseCase>(
+    () => GetHadithDetailsUseCase(getIt()),
+  );
+  getIt.registerFactory<CategoriesCubit>(() => CategoriesCubit(getIt()));
+  getIt.registerFactory<HadithByCategoryCubit>(
+    () => HadithByCategoryCubit(getIt()),
+  );
+  getIt.registerFactory<HadithByCategoryDetailsCubit>(
+    () => HadithByCategoryDetailsCubit(getIt(), getIt()),
+  );
+}
+
+void _registerSearch() {
   getIt.registerLazySingleton<EnhancedSearchRepo>(
-    () => EnhancedSearchRepo(getIt()),
+    () => EnhancedSearchRepoImpl(getIt(), getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetCachedEnhancedSearchUseCase>(
+    () => GetCachedEnhancedSearchUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<EnhancedSearchUseCase>(
+    () => EnhancedSearchUseCase(getIt()),
   );
   getIt.registerFactory<EnhancedSearchCubit>(
-    () => EnhancedSearchCubit(getIt(), getIt<NetworkInfo>()),
+    () => EnhancedSearchCubit(getIt(), getIt()),
   );
 
-  getIt.registerLazySingleton<UserResponseRepo>(
-    () => UserResponseRepo(getIt()),
+  getIt.registerLazySingleton<SearchWithFiltersRepo>(
+    () => SearchWithFiltersRepoImpl(getIt(), getIt(), getIt()),
   );
-  getIt.registerFactory<ProfileCubit>(() => ProfileCubit(getIt()));
+  getIt.registerLazySingleton<GetCachedFilteredSearchUseCase>(
+    () => GetCachedFilteredSearchUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SearchWithFiltersUseCase>(
+    () => SearchWithFiltersUseCase(getIt()),
+  );
+  getIt.registerFactory<SearchWithFiltersCubit>(
+    () => SearchWithFiltersCubit(getIt(), getIt()),
+  );
 
-  getIt.registerLazySingleton<EditProfileRepo>(() => EditProfileRepo(getIt()));
-  getIt.registerFactory<EditProfileCubit>(() => EditProfileCubit(getIt()));
+  getIt.registerLazySingleton<SearchHistoryRepo>(
+    () => SearchHistoryRepoImpl(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetSearchHistoryUseCase>(
+    () => GetSearchHistoryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<AddSearchHistoryEntryUseCase>(
+    () => AddSearchHistoryEntryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<DeleteSearchHistoryEntryUseCase>(
+    () => DeleteSearchHistoryEntryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ClearSearchHistoryUseCase>(
+    () => ClearSearchHistoryUseCase(getIt()),
+  );
+  getIt.registerFactory<SearchHistoryCubit>(
+    () => SearchHistoryCubit(getIt(), getIt(), getIt(), getIt(), getIt()),
+  );
+}
 
-  //  getIt.registerLazySingleton<UserStatsRepo>(() => UserStatsRepo(getIt()));
-  getIt.registerFactory<UserStatsCubit>(() => UserStatsCubit(getIt()));
+void _registerRandomAhadith() {
+  getIt.registerLazySingleton<RandomAhadithRepo>(
+    () => RandomAhadithRepoImpl(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetRandomAhadithUseCase>(
+    () => GetRandomAhadithUseCase(getIt()),
+  );
+  getIt.registerFactory<RandomAhadithCubit>(() => RandomAhadithCubit(getIt()));
+}
 
+void _registerHadithAnalysis() {
   getIt.registerLazySingleton<HadithAnalysisRepo>(
-    () => HadithAnalysisRepo(getIt()),
+    () => HadithAnalysisRepoImpl(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<AnalyzeHadithUseCase>(
+    () => AnalyzeHadithUseCase(getIt()),
   );
   getIt.registerFactory<HadithAnalysisCubit>(
     () => HadithAnalysisCubit(getIt()),
   );
+}
+
+void _registerSerag() {
+  getIt.registerLazySingleton<SeragRepo>(() => SeragRepoImpl(getIt(), getIt()));
+  getIt.registerLazySingleton<AskSeragUseCase>(() => AskSeragUseCase(getIt()));
+  getIt.registerFactory<SeragCubit>(() => SeragCubit(getIt()));
+
+  getIt.registerLazySingleton<ChatHistoryRepo>(() => ChatHistoryRepoImpl());
+  getIt.registerLazySingleton<LoadChatHistoryUseCase>(
+    () => LoadChatHistoryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveChatHistoryUseCase>(
+    () => SaveChatHistoryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ClearChatHistoryUseCase>(
+    () => ClearChatHistoryUseCase(getIt()),
+  );
+  getIt.registerFactory<ChatHistoryCubit>(
+    () => ChatHistoryCubit(getIt(), getIt(), getIt()),
+  );
 
   getIt.registerLazySingleton<RemainingQuestionsRepo>(
-    () => RemainingQuestionsRepo(getIt()),
+    () => RemainingQuestionsRepoImpl(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetRemainingQuestionsUseCase>(
+    () => GetRemainingQuestionsUseCase(getIt()),
   );
   getIt.registerFactory<RemainingQuestionsCubit>(
     () => RemainingQuestionsCubit(getIt()),
   );
+}
 
-  getIt.registerLazySingleton<SeragRepo>(() => SeragRepo(getIt()));
-  getIt.registerFactory<SeragCubit>(() => SeragCubit(getIt()));
-
-  ///customApi
-  customGetIt.registerLazySingleton<CustomApiService>(
-    () => CustomApiService(dio),
+void _registerPrayerTimes() {
+  getIt.registerLazySingleton<PrayerTimesRepo>(
+    () => PrayerTimesRepoImpl(
+      PrayerLocationLocalDataSource(),
+      PrayerTimesCalculator(),
+      DeviceLocationDataSource(),
+    ),
   );
-  customGetIt.registerLazySingleton<RandomAhadithRepo>(
-    () => RandomAhadithRepo(customGetIt()),
+  getIt.registerLazySingleton<GetSavedPrayerLocationUseCase>(
+    () => GetSavedPrayerLocationUseCase(getIt()),
   );
-  customGetIt.registerFactory<RandomAhadithCubit>(
-    () => RandomAhadithCubit(customGetIt(), getIt<NetworkInfo>()),
+  getIt.registerLazySingleton<SavePrayerLocationUseCase>(
+    () => SavePrayerLocationUseCase(getIt()),
   );
-
-  customGetIt.registerLazySingleton<SearchHistoryRepo>(
-    () => SearchHistoryRepo(getIt()),
+  getIt.registerLazySingleton<CalculatePrayerTimesUseCase>(
+    () => CalculatePrayerTimesUseCase(getIt()),
   );
-  customGetIt.registerFactory<SearchHistoryCubit>(
-    () => SearchHistoryCubit(getIt()),
+  getIt.registerLazySingleton<GetNextPrayerUseCase>(
+    () => GetNextPrayerUseCase(),
   );
-
-  getIt.registerFactory<PrayerTimesCubit>(() => PrayerTimesCubit());
-
-  getIt.registerFactory<QiblahCubit>(() => QiblahCubit());
-
-  // Firebase Remote Config (shared instance)
-  getIt.registerLazySingleton<FirebaseRemoteConfig>(
-    () => FirebaseRemoteConfig.instance,
+  getIt.registerLazySingleton<RequestLocationAccessUseCase>(
+    () => RequestLocationAccessUseCase(getIt()),
   );
+  getIt.registerLazySingleton<GetDevicePositionUseCase>(
+    () => GetDevicePositionUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<RefreshPrayerHomeWidgetUseCase>(
+    () => RefreshPrayerHomeWidgetUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PrayerNotificationsRepo>(
+    () => PrayerNotificationsRepoImpl(),
+  );
+  getIt.registerLazySingleton<ReschedulePrayerNotificationsUseCase>(
+    () => ReschedulePrayerNotificationsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetPrayerNotificationSettingsUseCase>(
+    () => GetPrayerNotificationSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetPrayerNotificationsEnabledUseCase>(
+    () => SetPrayerNotificationsEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<OpenBatteryOptimizationSettingsUseCase>(
+    () => OpenBatteryOptimizationSettingsUseCase(getIt()),
+  );
+  getIt.registerFactory<PrayerNotificationsCubit>(
+    () => PrayerNotificationsCubit(getIt(), getIt(), getIt(), getIt()),
+  );
+  getIt.registerFactory<PrayerTimesCubit>(
+    () => PrayerTimesCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+}
 
-  // Ramadan Tasks feature with Remote Config
+void _registerQiblah() {
+  getIt.registerLazySingleton<QiblahRepo>(() => QiblahRepoImpl());
+  getIt.registerLazySingleton<CheckQiblahReadinessUseCase>(
+    () => CheckQiblahReadinessUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<DisposeQiblahCompassUseCase>(
+    () => DisposeQiblahCompassUseCase(getIt()),
+  );
+  getIt.registerFactory<QiblahCubit>(() => QiblahCubit(getIt(), getIt()));
+}
+
+void _registerRamadanTasks() {
   getIt.registerLazySingleton<RamadanTasksLocalDataSource>(
     () => RamadanTasksLocalDataSource(),
   );
   getIt.registerLazySingleton<RamadanTasksRepository>(
     () => RamadanTasksRepositoryImpl(getIt<RamadanTasksLocalDataSource>()),
   );
-
-  // Ramadan Configuration from Remote Config
   getIt.registerLazySingleton<RamadanConfigRemoteDataSource>(
     () => RamadanConfigRemoteDataSourceImpl(remoteConfig: getIt()),
   );
@@ -233,37 +658,154 @@ Future<void> setUpGetIt() async {
     () => RamadanConfigRepositoryImpl(remoteDataSource: getIt()),
   );
 
+  getIt.registerLazySingleton<GetTasks>(() => GetTasks(getIt()));
+  getIt.registerLazySingleton<AddTask>(() => AddTask(getIt()));
+  getIt.registerLazySingleton<DeleteTask>(() => DeleteTask(getIt()));
+  getIt.registerLazySingleton<UpdateTask>(() => UpdateTask(getIt()));
+  getIt.registerLazySingleton<ToggleDailyCompletion>(
+    () => ToggleDailyCompletion(getIt()),
+  );
+  getIt.registerLazySingleton<ToggleTodayOnlyCompletion>(
+    () => ToggleTodayOnlyCompletion(getIt()),
+  );
+  getIt.registerLazySingleton<EnsureDailyReset>(
+    () => EnsureDailyReset(getIt()),
+  );
+  getIt.registerLazySingleton<ComputeProgress>(() => ComputeProgress());
+  getIt.registerLazySingleton<GetRamadanCalendarUseCase>(
+    () => GetRamadanCalendarUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<InitializeRamadanConfigUseCase>(
+    () => InitializeRamadanConfigUseCase(getIt()),
+  );
   getIt.registerFactory<RamadanTasksCubit>(
     () => RamadanTasksCubit(
-      getIt<RamadanTasksRepository>(),
-      getIt<RamadanConfigRepository>(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
     ),
   );
+}
 
-  // Categories feature
-  getIt.registerLazySingleton<CategoriesDatasource>(
-    () => CategoriesDatasourceImpl(getIt<CategoryApiService>()),
+void _registerOnboarding() {
+  getIt.registerLazySingleton<OnboardingRepo>(
+    () => OnboardingRepoImpl(OnboardingLocalDataSource()),
   );
-  getIt.registerLazySingleton<CategoriesRepository>(
-    () => CategoriesRepositoryImpl(getIt<CategoriesDatasource>()),
+  getIt.registerLazySingleton<IsFirstLaunchUseCase>(
+    () => IsFirstLaunchUseCase(getIt()),
   );
-  getIt.registerLazySingleton<GetCategoriesUseCase>(
-    () => GetCategoriesUseCase(getIt<CategoriesRepository>()),
+  getIt.registerLazySingleton<CompleteOnboardingUseCase>(
+    () => CompleteOnboardingUseCase(getIt()),
   );
-  getIt.registerLazySingleton<GetAhadithByCategoryUseCase>(
-    () => GetAhadithByCategoryUseCase(getIt<CategoriesRepository>()),
+  getIt.registerFactory<OnboardingCubit>(() => OnboardingCubit(getIt()));
+}
+
+void _registerTheme() {
+  getIt.registerLazySingleton<ThemeRepo>(
+    () => ThemeRepoImpl(ThemeLocalDataSource()),
   );
-  getIt.registerFactory<CategoriesCubit>(
-    () => CategoriesCubit(getIt<GetCategoriesUseCase>()),
+  getIt.registerLazySingleton<GetThemeModeUseCase>(
+    () => GetThemeModeUseCase(getIt()),
   );
-  getIt.registerFactory<HadithByCategoryCubit>(
-    () => HadithByCategoryCubit(getIt<GetAhadithByCategoryUseCase>()),
+  getIt.registerLazySingleton<SaveThemeModeUseCase>(
+    () => SaveThemeModeUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ThemeCubit>(() => ThemeCubit(getIt(), getIt()));
+}
+
+void _registerQuran() {
+  getIt.registerLazySingleton<QuranTextLocalDataSource>(
+    () => QuranTextLocalDataSource(),
+  );
+  getIt.registerLazySingleton<QuranReadingLocalDataSource>(
+    () => QuranReadingLocalDataSource(),
+  );
+  getIt.registerLazySingleton<QuranRepo>(() => QuranRepoImpl(getIt()));
+  getIt.registerLazySingleton<QuranReadingRepo>(
+    () => QuranReadingRepoImpl(getIt()),
   );
 
-  getIt.registerLazySingleton<HadithByCategoryDetailsRepo>(
-    () => HadithByCategoryDetailsRepo(),
+  getIt.registerLazySingleton<GetSurahsUseCase>(() => GetSurahsUseCase(getIt()));
+  getIt.registerLazySingleton<FilterSurahsUseCase>(() => FilterSurahsUseCase());
+  getIt.registerLazySingleton<GetJuzIndexUseCase>(
+    () => GetJuzIndexUseCase(getIt()),
   );
-  getIt.registerFactory<HadithByCategoryDetailsCubit>(
-    () => HadithByCategoryDetailsCubit(getIt(), getIt<NetworkInfo>()),
+  getIt.registerLazySingleton<GetPageInfoUseCase>(
+    () => GetPageInfoUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetAyahDetailsUseCase>(
+    () => GetAyahDetailsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetPageTajweedCountsUseCase>(
+    () => GetPageTajweedCountsUseCase(getIt()),
+  );
+  // A singleton so its search index is built once per app run.
+  getIt.registerLazySingleton<SearchQuranUseCase>(
+    () => SearchQuranUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetLastReadUseCase>(
+    () => GetLastReadUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveLastReadUseCase>(
+    () => SaveLastReadUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetQuranBookmarksUseCase>(
+    () => GetQuranBookmarksUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ToggleQuranBookmarkUseCase>(
+    () => ToggleQuranBookmarkUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<RemoveQuranBookmarkUseCase>(
+    () => RemoveQuranBookmarkUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetMushafSettingsUseCase>(
+    () => GetMushafSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveMushafSettingsUseCase>(
+    () => SaveMushafSettingsUseCase(getIt()),
+  );
+
+  getIt.registerFactory<QuranIndexCubit>(
+    () => QuranIndexCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerFactory<MushafReaderCubit>(
+    () => MushafReaderCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerFactory<AyahDetailsCubit>(() => AyahDetailsCubit(getIt()));
+  getIt.registerFactory<QuranSearchCubit>(() => QuranSearchCubit(getIt()));
+}
+
+void _registerSuggestions() {
+  getIt.registerLazySingleton<SuggestionRepo>(
+    () => SuggestionRepoImpl(SuggestionRemoteDataSource()),
+  );
+  getIt.registerLazySingleton<SendSuggestionUseCase>(
+    () => SendSuggestionUseCase(getIt()),
+  );
+  getIt.registerFactory<SendSuggestionCubit>(
+    () => SendSuggestionCubit(getIt()),
   );
 }

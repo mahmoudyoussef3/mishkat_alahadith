@@ -1,418 +1,408 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/helpers/spacing.dart';
-import 'colors.dart';
-import 'styles.dart';
+import 'package:flutter/services.dart';
 
-/// AppTheme provides comprehensive theming for the Mishkat Al-Masabih app.
-///
-/// This class follows Material Design 3 principles and implements an Islamic-themed
-/// color scheme with consistent component styling across the application.
-///
-/// Features:
-/// - Light and dark theme support
-/// - Islamic color palette (purple and gold)
-/// - Consistent component theming
-/// - Responsive design considerations
+import 'app_palette.dart';
+
 class AppTheme {
-  // Private constructor to prevent instantiation
   AppTheme._();
 
-  /// Light theme configuration with Islamic design elements
-  static ThemeData get lightTheme {
-    return ThemeData(
-      // Core theme properties
-      fontFamily: 'Amiri', // Islamic-friendly Arabic font
-      useMaterial3: true, // Latest Material Design
-      brightness: Brightness.light,
+  static const String _fontFamily = 'Cairo';
 
-      // Color scheme configuration
-      colorScheme: _buildLightColorScheme(),
+  static const double radiusSm = 10;
+  static const double radiusMd = 14;
+  static const double radiusLg = 20;
+  static const double radiusXl = 24;
 
-      // Scaffold and background theming
-      scaffoldBackgroundColor: ColorsManager.primaryBackground,
+  static ThemeData get lightTheme => _build(AppPalette.light);
 
-      // Component themes
-      appBarTheme: _buildAppBarTheme(),
-      cardTheme: _buildCardTheme(),
-      elevatedButtonTheme: _buildElevatedButtonTheme(),
-      outlinedButtonTheme: _buildOutlinedButtonTheme(),
-      textButtonTheme: _buildTextButtonTheme(),
-      inputDecorationTheme: _buildInputDecorationTheme(),
-      bottomNavigationBarTheme: _buildBottomNavigationBarTheme(),
-      floatingActionButtonTheme: _buildFloatingActionButtonTheme(),
-      dividerTheme: _buildDividerTheme(),
-      iconTheme: _buildIconTheme(),
-      primaryIconTheme: _buildPrimaryIconTheme(),
-      chipTheme: _buildChipTheme(),
-      listTileTheme: _buildListTileTheme(),
-      progressIndicatorTheme: _buildProgressIndicatorTheme(),
-      switchTheme: _buildSwitchTheme(),
-      checkboxTheme: _buildCheckboxTheme(),
-      radioTheme: _buildRadioTheme(),
-      sliderTheme: _buildSliderTheme(),
+  static ThemeData get darkTheme => _build(AppPalette.dark);
+
+  /// Transparent system bars whose icons contrast with the page background.
+  static SystemUiOverlayStyle systemBarsStyle(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    final iconBrightness = isDark ? Brightness.light : Brightness.dark;
+    return SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: iconBrightness,
+      statusBarBrightness: brightness,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: iconBrightness,
+      systemNavigationBarContrastEnforced: false,
     );
   }
 
-  /// Dark theme configuration with Islamic design elements
-  static ThemeData get darkTheme {
+  static ThemeData _build(AppPalette palette) {
+    final isDark = palette.isDark;
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: palette.primaryPurple,
+      brightness: palette.brightness,
+    ).copyWith(
+      primary: palette.primaryPurple,
+      onPrimary: Colors.white,
+      primaryContainer: palette.primarySoft,
+      onPrimaryContainer: palette.darkPurpleText,
+      secondary: palette.primaryGold,
+      onSecondary: isDark ? const Color(0xFF261A00) : Colors.white,
+      secondaryContainer: palette.goldSoft,
+      onSecondaryContainer:
+          isDark ? palette.primaryGold : const Color(0xFF5C4210),
+      surface: palette.cardBackground,
+      onSurface: palette.primaryText,
+      onSurfaceVariant: palette.secondaryText,
+      // Ordered lightest → darkest in light mode and darkest → lightest in
+      // dark mode, as Material 3 expects.
+      surfaceContainerLowest:
+          isDark ? palette.primaryBackground : palette.elevatedSurface,
+      surfaceContainerLow:
+          isDark ? palette.secondaryBackground : palette.cardBackground,
+      surfaceContainer: isDark ? palette.cardBackground : palette.offWhite,
+      surfaceContainerHigh:
+          isDark ? palette.elevatedSurface : palette.lightGray,
+      surfaceContainerHighest: isDark ? palette.lightGray : palette.mediumGray,
+      surfaceTint: Colors.transparent,
+      outline: palette.gray,
+      outlineVariant: palette.mediumGray,
+      error: palette.error,
+      onError: Colors.white,
+      inverseSurface: isDark ? palette.darkGray : palette.primaryText,
+      onInverseSurface:
+          isDark ? palette.secondaryBackground : palette.cardBackground,
+      inversePrimary: isDark ? palette.headerEnd : palette.darkPurpleText,
+    );
+
+    final buttonShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(radiusMd),
+    );
+    const buttonText = TextStyle(
+      fontFamily: _fontFamily,
+      fontSize: 15,
+      fontWeight: FontWeight.w700,
+    );
+
     return ThemeData(
-      // Core theme properties
-      fontFamily: 'Amiri',
+      fontFamily: _fontFamily,
       useMaterial3: true,
-      brightness: Brightness.dark,
-
-      // Color scheme configuration
-      colorScheme: _buildDarkColorScheme(),
-
-      // Scaffold and background theming
-      scaffoldBackgroundColor: const Color(0xFF121212),
-      cardColor: const Color(0xFF1E1E1E),
-
-      // Component themes (dark mode specific)
-      appBarTheme: _buildDarkAppBarTheme(),
-      cardTheme: _buildDarkCardTheme(),
-    );
-  }
-
-  // ==================== PRIVATE HELPER METHODS ====================
-
-  /// Builds the light color scheme with Islamic colors
-  static ColorScheme _buildLightColorScheme() {
-    return const ColorScheme.light(
-      primary: ColorsManager.primaryPurple,
-      onPrimary: ColorsManager.white,
-      secondary: ColorsManager.primaryGold,
-      onSecondary: ColorsManager.primaryText,
-      tertiary: ColorsManager.hadithAuthentic,
-      onTertiary: ColorsManager.white,
-      surface: ColorsManager.cardBackground,
-      onSurface: ColorsManager.primaryText,
-      background: ColorsManager.primaryBackground,
-      onBackground: ColorsManager.primaryText,
-      error: ColorsManager.error,
-      onError: ColorsManager.white,
-    );
-  }
-
-  /// Builds the dark color scheme with Islamic colors
-  static ColorScheme _buildDarkColorScheme() {
-    return const ColorScheme.dark(
-      primary: ColorsManager.primaryPurple,
-      onPrimary: ColorsManager.white,
-      secondary: ColorsManager.primaryGold,
-      onSecondary: ColorsManager.white,
-      tertiary: ColorsManager.hadithAuthentic,
-      onTertiary: ColorsManager.white,
-      surface: Color(0xFF1E1E1E),
-      onSurface: ColorsManager.white,
-      background: Color(0xFF121212),
-      onBackground: ColorsManager.white,
-      error: ColorsManager.error,
-      onError: ColorsManager.white,
-    );
-  }
-
-  /// Builds the app bar theme with Islamic styling
-  static AppBarTheme _buildAppBarTheme() {
-    return AppBarTheme(
-      backgroundColor: ColorsManager.white,
-      foregroundColor: ColorsManager.primaryPurple,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: TextStyles.headlineMedium.copyWith(
-        color: ColorsManager.primaryPurple,
-        fontWeight: FontWeight.w600,
-      ),
-      iconTheme: const IconThemeData(
-        color: ColorsManager.primaryPurple,
-        size: 24,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-    );
-  }
-
-  /// Builds the dark app bar theme
-  static AppBarTheme _buildDarkAppBarTheme() {
-    return AppBarTheme(
-      backgroundColor: const Color(0xFF1E1E1E),
-      foregroundColor: ColorsManager.primaryPurple,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: TextStyles.headlineMedium.copyWith(
-        color: ColorsManager.primaryPurple,
-        fontWeight: FontWeight.w600,
-      ),
-      iconTheme: const IconThemeData(
-        color: ColorsManager.primaryPurple,
-        size: 24,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-    );
-  }
-
-  /// Builds the card theme with enhanced shadows
-  static CardThemeData _buildCardTheme() {
-    return CardThemeData(
-      color: ColorsManager.cardBackground,
-      elevation: 4,
-      shadowColor: ColorsManager.primaryPurple.withOpacity(0.15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Spacing.cardRadius),
-      ),
-      margin: EdgeInsets.all(Spacing.cardMargin),
-    );
-  }
-
-  /// Builds the dark card theme
-  static CardThemeData _buildDarkCardTheme() {
-    return CardThemeData(
-      color: const Color(0xFF1E1E1E),
-      elevation: 4,
-      shadowColor: ColorsManager.primaryPurple.withOpacity(0.2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Spacing.cardRadius),
-      ),
-      margin: EdgeInsets.all(Spacing.cardMargin),
-    );
-  }
-
-  /// Builds the elevated button theme
-  static ElevatedButtonThemeData _buildElevatedButtonTheme() {
-    return ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: ColorsManager.primaryPurple,
-        foregroundColor: ColorsManager.white,
+      brightness: palette.brightness,
+      colorScheme: colorScheme,
+      textTheme: _textTheme(palette),
+      scaffoldBackgroundColor: palette.secondaryBackground,
+      canvasColor: palette.secondaryBackground,
+      cardColor: palette.cardBackground,
+      dividerColor: palette.mediumGray,
+      hintColor: palette.gray,
+      disabledColor: palette.disabledText,
+      iconTheme: IconThemeData(color: palette.darkGray),
+      appBarTheme: AppBarTheme(
+        backgroundColor: palette.secondaryBackground,
+        foregroundColor: palette.primaryText,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        padding: EdgeInsets.symmetric(
-          horizontal: Spacing.buttonPadding,
-          vertical: Spacing.md,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        // No titleTextStyle here: AppBar then styles its title with
+        // textTheme.titleLarge in its own foregroundColor.
+      ),
+      cardTheme: CardThemeData(
+        color: palette.cardBackground,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusLg),
+          side: BorderSide(color: palette.mediumGray),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: palette.primaryPurple,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: palette.lightGray,
+          disabledForegroundColor: palette.disabledText,
+          elevation: 0,
+          minimumSize: const Size(64, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+          shape: buttonShape,
+          textStyle: buttonText,
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: palette.primaryPurple,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(64, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+          shape: buttonShape,
+          textStyle: buttonText,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: palette.purpleText,
+          side: BorderSide(color: palette.primaryPurple.withValues(alpha: 0.4)),
+          minimumSize: const Size(64, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+          shape: buttonShape,
+          textStyle: buttonText,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: palette.purpleText,
+          shape: buttonShape,
+          textStyle: buttonText.copyWith(fontSize: 14),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: palette.darkGray),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: palette.primaryPurple,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        highlightElevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusLg),
+        ),
+        extendedTextStyle: buttonText,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: TextStyle(
+          fontFamily: _fontFamily,
+          color: palette.secondaryText,
+          fontSize: 14,
+        ),
+        labelStyle: TextStyle(
+          fontFamily: _fontFamily,
+          color: palette.secondaryText,
+        ),
+        floatingLabelStyle: TextStyle(
+          fontFamily: _fontFamily,
+          color: palette.purpleText,
+        ),
+        prefixIconColor: palette.gray,
+        suffixIconColor: palette.gray,
+        fillColor: palette.lightGray,
+        errorStyle: TextStyle(fontFamily: _fontFamily, color: palette.error),
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: palette.primaryPurple,
+        selectionColor: palette.primaryPurple.withValues(alpha: 0.28),
+        selectionHandleColor: palette.primaryPurple,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: palette.lightGray,
+        selectedColor: palette.primarySoft,
+        disabledColor: palette.lightGray,
+        side: BorderSide.none,
+        shape: const StadiumBorder(),
+        labelStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: palette.primaryText,
+        ),
+        secondaryLabelStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: palette.purpleText,
+        ),
+        checkmarkColor: palette.purpleText,
+        iconTheme: IconThemeData(color: palette.purpleText, size: 18),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: palette.elevatedSurface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusXl),
+        ),
+        titleTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: palette.primaryText,
+        ),
+        contentTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 15,
+          height: 1.6,
+          color: palette.secondaryText,
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: palette.elevatedSurface,
+        modalBackgroundColor: palette.elevatedSurface,
+        surfaceTintColor: Colors.transparent,
+        dragHandleColor: palette.mediumGray,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(radiusXl)),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: isDark ? const Color(0xFF34313D) : palette.primaryText,
+        contentTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: isDark ? palette.primaryText : palette.cardBackground,
+        ),
+        actionTextColor: isDark ? palette.purpleText : palette.primarySoft,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusMd),
+        ),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: palette.elevatedSurface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 3,
+        shadowColor: palette.shadow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusMd),
+          side: BorderSide(color: palette.mediumGray),
+        ),
+        textStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 14,
+          color: palette.primaryText,
+        ),
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: isDark ? palette.elevatedSurface : palette.primaryText,
+          borderRadius: BorderRadius.circular(radiusSm),
+        ),
+        textStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 12,
+          color: isDark ? palette.primaryText : palette.cardBackground,
+        ),
+      ),
+      drawerTheme: DrawerThemeData(
+        backgroundColor: palette.primaryBackground,
+        surfaceTintColor: Colors.transparent,
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: palette.darkGray,
+        textColor: palette.primaryText,
+        titleTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: palette.primaryText,
+        ),
+        subtitleTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 13,
+          color: palette.secondaryText,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Spacing.buttonRadius),
-        ),
-        textStyle: TextStyles.buttonText,
-      ),
-    );
-  }
-
-  /// Builds the outlined button theme
-  static OutlinedButtonThemeData _buildOutlinedButtonTheme() {
-    return OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: ColorsManager.primaryPurple,
-        side: const BorderSide(color: ColorsManager.primaryPurple, width: 1.5),
-        padding: EdgeInsets.symmetric(
-          horizontal: Spacing.buttonPadding,
-          vertical: Spacing.md,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Spacing.buttonRadius),
-        ),
-        textStyle: TextStyles.buttonText.copyWith(
-          color: ColorsManager.primaryPurple,
+          borderRadius: BorderRadius.circular(radiusMd),
         ),
       ),
-    );
-  }
-
-  /// Builds the text button theme
-  static TextButtonThemeData _buildTextButtonTheme() {
-    return TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: ColorsManager.primaryPurple,
-        padding: EdgeInsets.symmetric(
-          horizontal: Spacing.md,
-          vertical: Spacing.sm,
+      dividerTheme: DividerThemeData(
+        color: palette.mediumGray,
+        thickness: 1,
+        space: 1,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: palette.primaryPurple,
+        linearTrackColor: palette.primarySoft,
+        circularTrackColor: Colors.transparent,
+        refreshBackgroundColor: palette.elevatedSurface,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? Colors.white
+                  : palette.gray,
         ),
-        textStyle: TextStyles.linkText,
-      ),
-    );
-  }
-
-  /// Builds the input decoration theme
-  static InputDecorationTheme _buildInputDecorationTheme() {
-    return InputDecorationTheme(
-      filled: true,
-      fillColor: ColorsManager.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(Spacing.inputRadius),
-        borderSide: BorderSide(color: ColorsManager.mediumGray),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(Spacing.inputRadius),
-        borderSide: BorderSide(color: ColorsManager.mediumGray),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(Spacing.inputRadius),
-        borderSide: const BorderSide(
-          color: ColorsManager.primaryPurple,
-          width: 2,
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? palette.primaryPurple
+                  : palette.lightGray,
+        ),
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? Colors.transparent
+                  : palette.mediumGray,
         ),
       ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(Spacing.inputRadius),
-        borderSide: const BorderSide(color: ColorsManager.error, width: 2),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? palette.primaryPurple
+                  : Colors.transparent,
+        ),
+        checkColor: const WidgetStatePropertyAll(Colors.white),
+        side: BorderSide(color: palette.gray, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
-      contentPadding: EdgeInsets.all(Spacing.inputPadding),
-      hintStyle: TextStyles.bodyMedium.copyWith(
-        color: ColorsManager.secondaryText,
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? palette.primaryPurple
+                  : palette.gray,
+        ),
       ),
-      labelStyle: TextStyles.labelLarge,
-      errorStyle: TextStyles.bodySmall.copyWith(color: ColorsManager.error),
-    );
-  }
-
-  /// Builds the bottom navigation bar theme
-  static BottomNavigationBarThemeData _buildBottomNavigationBarTheme() {
-    return const BottomNavigationBarThemeData(
-      backgroundColor: ColorsManager.white,
-      selectedItemColor: ColorsManager.primaryPurple,
-      unselectedItemColor: ColorsManager.gray,
-      type: BottomNavigationBarType.fixed,
-      elevation: 8,
-      selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600),
-      unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w400),
-    );
-  }
-
-  /// Builds the floating action button theme
-  static FloatingActionButtonThemeData _buildFloatingActionButtonTheme() {
-    return const FloatingActionButtonThemeData(
-      backgroundColor: ColorsManager.primaryPurple,
-      foregroundColor: ColorsManager.white,
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+      tabBarTheme: TabBarThemeData(
+        labelColor: palette.purpleText,
+        unselectedLabelColor: palette.secondaryText,
+        indicatorColor: palette.primaryPurple,
+        dividerColor: Colors.transparent,
+        labelStyle: const TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
       ),
-    );
-  }
-
-  /// Builds the divider theme
-  static DividerThemeData _buildDividerTheme() {
-    return const DividerThemeData(
-      color: ColorsManager.lightGray,
-      thickness: 1,
-      space: 1,
-    );
-  }
-
-  /// Builds the icon theme
-  static IconThemeData _buildIconTheme() {
-    return const IconThemeData(color: ColorsManager.primaryPurple, size: 24);
-  }
-
-  /// Builds the primary icon theme
-  static IconThemeData _buildPrimaryIconTheme() {
-    return const IconThemeData(color: ColorsManager.primaryPurple, size: 24);
-  }
-
-  /// Builds the chip theme
-  static ChipThemeData _buildChipTheme() {
-    return ChipThemeData(
-      backgroundColor: ColorsManager.lightGray,
-      selectedColor: ColorsManager.primaryPurple,
-      disabledColor: ColorsManager.mediumGray,
-      labelStyle: TextStyles.labelMedium,
-      padding: EdgeInsets.symmetric(
-        horizontal: Spacing.sm,
-        vertical: Spacing.xs,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    );
-  }
-
-  /// Builds the list tile theme
-  static ListTileThemeData _buildListTileTheme() {
-    return ListTileThemeData(
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: Spacing.listItemPadding,
-        vertical: Spacing.sm,
-      ),
-      titleTextStyle: TextStyles.titleMedium,
-      subtitleTextStyle: TextStyles.bodyMedium,
-      leadingAndTrailingTextStyle: TextStyles.bodySmall,
-      tileColor: ColorsManager.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Spacing.cardRadius),
+      badgeTheme: BadgeThemeData(
+        backgroundColor: palette.error,
+        textColor: Colors.white,
       ),
     );
   }
 
-  /// Builds the progress indicator theme
-  static ProgressIndicatorThemeData _buildProgressIndicatorTheme() {
-    return const ProgressIndicatorThemeData(
-      color: ColorsManager.primaryPurple,
-      linearTrackColor: ColorsManager.lightGray,
-      circularTrackColor: ColorsManager.lightGray,
-    );
-  }
+  /// Cairo for interface text. Line heights come from Material's type scale;
+  /// letter spacing is zeroed because any spacing pulls apart joined Arabic
+  /// letters.
+  static TextTheme _textTheme(AppPalette palette) {
+    TextStyle style(double size, FontWeight weight, [Color? color]) =>
+        TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: size,
+          fontWeight: weight,
+          letterSpacing: 0,
+          color: color ?? palette.primaryText,
+        );
 
-  /// Builds the switch theme
-  static SwitchThemeData _buildSwitchTheme() {
-    return SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
-          return ColorsManager.white;
-        }
-        return ColorsManager.gray;
-      }),
-      trackColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
-          return ColorsManager.primaryPurple;
-        }
-        return ColorsManager.mediumGray;
-      }),
-    );
-  }
-
-  /// Builds the checkbox theme
-  static CheckboxThemeData _buildCheckboxTheme() {
-    return CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
-          return ColorsManager.primaryPurple;
-        }
-        return Colors.transparent;
-      }),
-      checkColor: WidgetStatePropertyAll(ColorsManager.cardBackground),
-      side: const BorderSide(color: ColorsManager.mediumGray, width: 2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-    );
-  }
-
-  /// Builds the radio theme
-  static RadioThemeData _buildRadioTheme() {
-    return RadioThemeData(
-      fillColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
-          return ColorsManager.primaryPurple;
-        }
-        return ColorsManager.mediumGray;
-      }),
-    );
-  }
-
-  /// Builds the slider theme
-  static SliderThemeData _buildSliderTheme() {
-    return SliderThemeData(
-      activeTrackColor: ColorsManager.primaryPurple,
-      inactiveTrackColor: ColorsManager.lightGray,
-      thumbColor: ColorsManager.primaryPurple,
-      overlayColor: ColorsManager.primaryPurple.withOpacity(0.2),
-      valueIndicatorColor: ColorsManager.primaryPurple,
-      valueIndicatorTextStyle: TextStyles.labelMedium.copyWith(
-        color: ColorsManager.white,
-      ),
+    return TextTheme(
+      displayLarge: style(32, FontWeight.w700),
+      displayMedium: style(28, FontWeight.w700),
+      displaySmall: style(24, FontWeight.w700),
+      headlineLarge: style(22, FontWeight.w700),
+      headlineMedium: style(20, FontWeight.w700),
+      headlineSmall: style(18, FontWeight.w700),
+      titleLarge: style(17, FontWeight.w700),
+      titleMedium: style(15, FontWeight.w600),
+      titleSmall: style(14, FontWeight.w600),
+      bodyLarge: style(16, FontWeight.w400),
+      bodyMedium: style(14, FontWeight.w400),
+      bodySmall: style(12, FontWeight.w400, palette.secondaryText),
+      labelLarge: style(14, FontWeight.w600),
+      labelMedium: style(12, FontWeight.w600),
+      labelSmall: style(11, FontWeight.w500, palette.secondaryText),
     );
   }
 }

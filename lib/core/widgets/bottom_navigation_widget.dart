@@ -40,7 +40,7 @@ class BottomNavigationWidget extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: ColorsManager.white,
+        color: ColorsManager.cardBackground,
         boxShadow: [
           BoxShadow(
             color: ColorsManager.black.withOpacity(0.1),

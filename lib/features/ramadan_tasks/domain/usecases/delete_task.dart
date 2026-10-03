@@ -1,4 +1,4 @@
-import '../repositories/ramadan_tasks_repository.dart';
+import '../repos/ramadan_tasks_repository.dart';
 
 class DeleteTask {
   final RamadanTasksRepository repo;

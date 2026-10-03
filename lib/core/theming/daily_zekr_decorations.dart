@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'colors.dart';
 
 class DailyZekrDecorations {
-  // Info card containing how it works
   static BoxDecoration infoCard() => BoxDecoration(
     color: ColorsManager.primaryGold.withOpacity(0.08),
     borderRadius: BorderRadius.circular(12.r),
@@ -13,13 +12,11 @@ class DailyZekrDecorations {
     ),
   );
 
-  // Square icon tile inside the info card
   static BoxDecoration infoIconTile() => BoxDecoration(
     color: ColorsManager.primaryGold.withOpacity(0.2),
     borderRadius: BorderRadius.circular(10.r),
   );
 
-  // Divider gradient between sections
   static BoxDecoration dividerGradient() => BoxDecoration(
     gradient: LinearGradient(
       colors: [
@@ -31,7 +28,6 @@ class DailyZekrDecorations {
     borderRadius: BorderRadius.circular(1.r),
   );
 
-  // Zekr card container decoration based on enabled/checked state
   static BoxDecoration zekrCard({
     required bool enabled,
     required bool checked,
@@ -56,7 +52,6 @@ class DailyZekrDecorations {
     );
   }
 
-  // Leading small icon container inside Zekr card
   static BoxDecoration leadingIconTile() => BoxDecoration(
     color: ColorsManager.primaryPurple.withOpacity(0.10),
     borderRadius: BorderRadius.circular(8.r),
@@ -66,7 +61,6 @@ class DailyZekrDecorations {
     ),
   );
 
-  // Footer pill decoration inside Zekr card
   static BoxDecoration footerPill({
     required bool enabled,
     required bool checked,
@@ -90,17 +84,15 @@ class DailyZekrDecorations {
     );
   }
 
-  // Right side vertical gradient bar in Zekr card
   static BoxDecoration rightGradientBar() => BoxDecoration(
     borderRadius: BorderRadius.circular(2.r),
-    gradient: const LinearGradient(
+    gradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [ColorsManager.primaryPurple, ColorsManager.primaryGold],
     ),
   );
 
-  // Personal tasks section container
   static BoxDecoration personalTasksSection() => BoxDecoration(
     color: ColorsManager.cardBackground,
     borderRadius: BorderRadius.circular(14.r),
@@ -110,7 +102,6 @@ class DailyZekrDecorations {
     ),
   );
 
-  // Single personal task tile
   static BoxDecoration personalTaskTile({required bool isDone}) =>
       BoxDecoration(
         color:
@@ -127,12 +118,10 @@ class DailyZekrDecorations {
         ),
       );
 
-  // Bottom sheet shape
   static ShapeBorder bottomSheetShape() => RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(18.r)),
   );
 
-  // TextField borders inside bottom sheet
   static OutlineInputBorder inputBorder(Color color) => OutlineInputBorder(
     borderRadius: BorderRadius.circular(12.r),
     borderSide: BorderSide(color: color),

@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
+import '../../theming/app_palette.dart';
 import '../../theming/colors.dart';
 import '../../theming/styles.dart';
 
@@ -25,14 +26,14 @@ const _kBgPresets = <Color>[
 ];
 
 const _kTextPresets = <Color>[
-  Color(0xFF212121), // primary text
+  Color(0xFF212121),
   Colors.white,
-  Color(0xFFFFB300), // gold
-  Color(0xFF7440E9), // purple
-  Color(0xFF4CAF50), // green
-  Color(0xFFE53935), // red
-  Color(0xFF2196F3), // blue
-  Color(0xFF795548), // brown
+  Color(0xFFFFB300),
+  Color(0xFF7440E9),
+  Color(0xFF4CAF50),
+  Color(0xFFE53935),
+  Color(0xFF2196F3),
+  Color(0xFF795548),
 ];
 
 class ShareImageEditorBottomSheet extends StatefulWidget {
@@ -72,21 +73,18 @@ class _ShareImageEditorBottomSheetState
     with SingleTickerProviderStateMixin {
   final GlobalKey _exportKey = GlobalKey();
 
-  // Background state
   Color _backgroundColor = Colors.white;
   String? _backgroundAssetPath;
   File? _backgroundFile;
 
-  // Text state
   double _fontSize = 28;
   String _fontFamily = 'Amiri';
   FontWeight _fontWeight = FontWeight.w500;
   double _lineHeight = 1.7;
-  Color _textColor = ColorsManager.primaryText;
+  Color _textColor = _kTextPresets.first;
   TextAlign _textAlign = TextAlign.justify;
 
-  // UI state
-  int _selectedTab = 0; // 0 = background, 1 = text
+  int _selectedTab = 0;
   bool _isExporting = false;
 
   late final AnimationController _tabFadeCtrl;
@@ -123,7 +121,6 @@ class _ShareImageEditorBottomSheetState
     });
   }
 
-  // BUILD
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).viewInsets.bottom;
@@ -342,7 +339,7 @@ class _ShareImageEditorBottomSheetState
                         style: TextStyles.titleSmall.copyWith(
                           color: hasImageBg
                               ? Colors.white.withOpacity(0.9)
-                              : ColorsManager.primaryPurple,
+                              : AppPalette.light.primaryPurple,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -403,7 +400,6 @@ class _ShareImageEditorBottomSheetState
     );
   }
 
-  // BACKGROUND CONTROLS
   Widget _buildBackgroundControls() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,7 +481,6 @@ class _ShareImageEditorBottomSheetState
     );
   }
 
-  // TEXT CONTROLS
   Widget _buildTextControls() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -632,7 +627,7 @@ class _ShareImageEditorBottomSheetState
             child: OutlinedButton.icon(
               onPressed: _reset,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: ColorsManager.mediumGray),
+                side: BorderSide(color: ColorsManager.mediumGray),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14.r),
                 ),
@@ -659,7 +654,7 @@ class _ShareImageEditorBottomSheetState
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14.r),
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [
                       ColorsManager.primaryPurple,
                       ColorsManager.accentPurple,
@@ -709,7 +704,6 @@ class _ShareImageEditorBottomSheetState
     );
   }
 
-  // ACTIONS
   void _openColorPicker({required bool forText}) {
     final initial = forText ? _textColor : _backgroundColor;
     Color tempColor = initial;
@@ -786,7 +780,7 @@ class _ShareImageEditorBottomSheetState
       _fontFamily = widget.initialFontFamily;
       _fontWeight = FontWeight.w500;
       _lineHeight = 1.7;
-      _textColor = ColorsManager.primaryText;
+      _textColor = _kTextPresets.first;
       _textAlign = TextAlign.justify;
     });
   }
@@ -834,8 +828,6 @@ class _ShareImageEditorBottomSheetState
     }
   }
 }
-
-// REUSABLE PRIVATE WIDGETS
 
 class _HeaderAction extends StatelessWidget {
   final IconData icon;
@@ -1274,7 +1266,7 @@ class _AssetThumb extends StatelessWidget {
                       child: Container(
                         width: 18.r,
                         height: 18.r,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: ColorsManager.primaryPurple,
                         ),

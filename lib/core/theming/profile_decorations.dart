@@ -2,16 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
-/// Profile feature decorations
-/// Extracted from profile screens and widgets for consistent styling
 class ProfileDecorations {
-  // ==================== EDIT PROFILE SCREEN ====================
-
-  /// Edit profile screen background gradient
-  static BoxDecoration editProfileBackground = BoxDecoration(
+  static BoxDecoration get editProfileBackground => BoxDecoration(
     gradient: LinearGradient(
       colors: [
-        ColorsManager.primaryPurple.withOpacity(0.85),
+        ColorsManager.headerStart.withValues(alpha: 0.9),
         ColorsManager.primaryBackground,
       ],
       begin: Alignment.topCenter,
@@ -19,7 +14,6 @@ class ProfileDecorations {
     ),
   );
 
-  /// Save button decoration
   static BoxDecoration saveButton() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple,
@@ -27,28 +21,25 @@ class ProfileDecorations {
     );
   }
 
-  /// Avatar section circle shadow
   static List<BoxShadow> avatarShadow() {
     return [
       BoxShadow(color: Colors.black26, blurRadius: 10.r, spreadRadius: 2.r),
     ];
   }
 
-  /// Avatar picker sheet decoration
   static BoxDecoration avatarPickerSheet() {
     return BoxDecoration(
-      color: ColorsManager.white,
+      color: ColorsManager.elevatedSurface,
       borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
     );
   }
 
-  /// Username text field decoration
   static InputDecoration usernameFieldDecoration() {
     return InputDecoration(
       prefixIcon: Icon(Icons.person, color: ColorsManager.primaryPurple),
       hintText: "أدخل اسم المستخدم",
       filled: true,
-      fillColor: Colors.white,
+      fillColor: ColorsManager.cardBackground,
       contentPadding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 12.w),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.r),
@@ -57,25 +48,18 @@ class ProfileDecorations {
     );
   }
 
-  /// Info card decoration
   static BoxDecoration infoCard() {
     return BoxDecoration(borderRadius: BorderRadius.circular(16.r));
   }
 
-  // ==================== PROFILE HEADER ====================
-
-  /// Profile header gradient
-  static BoxDecoration profileHeaderGradient = const BoxDecoration(
+  static BoxDecoration get profileHeaderGradient => BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [ColorsManager.primaryPurple, ColorsManager.secondaryPurple],
+      colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
     ),
   );
 
-  // ==================== LOGIN PROMPT SECTION ====================
-
-  /// Login prompt icon container
   static BoxDecoration loginPromptIconContainer() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple.withOpacity(0.1),
@@ -83,7 +67,6 @@ class ProfileDecorations {
     );
   }
 
-  /// Login button decoration
   static BoxDecoration loginButton() {
     return BoxDecoration(
       color: ColorsManager.primaryGreen,
@@ -91,7 +74,6 @@ class ProfileDecorations {
     );
   }
 
-  /// Login button shadow
   static List<BoxShadow> loginButtonShadow() {
     return [
       BoxShadow(
@@ -102,18 +84,15 @@ class ProfileDecorations {
     ];
   }
 
-  // ==================== NOTIFICATION TOGGLE CARD ====================
-
-  /// Notification card container
   static BoxDecoration notificationCard(bool isEnabled) {
     return BoxDecoration(
-      color: Colors.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(16.r),
       border: Border.all(
         color:
             isEnabled
                 ? ColorsManager.primaryPurple.withOpacity(0.3)
-                : Colors.grey.shade200,
+                : ColorsManager.mediumGray,
         width: 1.5,
       ),
       boxShadow: [
@@ -129,27 +108,22 @@ class ProfileDecorations {
     );
   }
 
-  /// Notification icon container
   static BoxDecoration notificationIconContainer(bool isEnabled) {
     return BoxDecoration(
       color:
           isEnabled
               ? ColorsManager.primaryPurple.withOpacity(0.15)
-              : Colors.grey.shade100,
+              : ColorsManager.lightGray,
       borderRadius: BorderRadius.circular(12.r),
     );
   }
 
-  /// Notification switch colors
-  static Color notificationSwitchActiveColor = ColorsManager.primaryPurple;
-  static Color notificationSwitchActiveTrackColor = ColorsManager.primaryPurple
+  static Color get notificationSwitchActiveColor => ColorsManager.primaryPurple;
+  static Color get notificationSwitchActiveTrackColor => ColorsManager.primaryPurple
       .withOpacity(0.5);
-  static Color notificationSwitchInactiveThumbColor = Colors.grey.shade400;
-  static Color notificationSwitchInactiveTrackColor = Colors.grey.shade300;
+  static Color get notificationSwitchInactiveThumbColor => ColorsManager.disabledText;
+  static Color get notificationSwitchInactiveTrackColor => ColorsManager.mediumGray;
 
-  // ==================== LAST ACTIVITY CARD ====================
-
-  /// Last activity card gradient
   static BoxDecoration lastActivityCard() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -166,7 +140,6 @@ class ProfileDecorations {
     );
   }
 
-  /// Last activity icon container
   static BoxDecoration lastActivityIconContainer() {
     return BoxDecoration(
       color: Colors.white.withOpacity(0.25),
@@ -174,9 +147,6 @@ class ProfileDecorations {
     );
   }
 
-  // ==================== DARK MODE TOGGLE ====================
-
-  /// Dark mode toggle card
   static BoxDecoration darkModeCard() {
     return BoxDecoration(
       color: ColorsManager.cardBackground,
@@ -192,15 +162,11 @@ class ProfileDecorations {
     );
   }
 
-  /// Dark mode switch active color
-  static Color darkModeSwitchActiveColor = ColorsManager.primaryPurple;
+  static Color get darkModeSwitchActiveColor => ColorsManager.primaryPurple;
 
-  // ==================== STATS CARD ====================
-
-  /// Stats card container
   static BoxDecoration statsCard(Color color) {
     return BoxDecoration(
-      color: Colors.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(16.r),
       boxShadow: [
         BoxShadow(
@@ -212,7 +178,6 @@ class ProfileDecorations {
     );
   }
 
-  /// Stats icon container
   static BoxDecoration statsIconContainer(Color color) {
     return BoxDecoration(
       color: color.withOpacity(0.15),
@@ -220,9 +185,6 @@ class ProfileDecorations {
     );
   }
 
-  // ==================== SECTION TITLE ====================
-
-  /// Section title bar decoration
   static BoxDecoration sectionTitleBar() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple,
@@ -230,9 +192,6 @@ class ProfileDecorations {
     );
   }
 
-  // ==================== PROFILE OPTION TILE ====================
-
-  /// Profile option tile container
   static BoxDecoration profileOptionTile() {
     return BoxDecoration(
       color: ColorsManager.cardBackground,
@@ -241,27 +200,18 @@ class ProfileDecorations {
     );
   }
 
-  // ==================== SOCIAL MEDIA ICONS ====================
+  static Color get socialMediaBackground => ColorsManager.offWhite;
 
-  /// Social media screen background color
-  static Color socialMediaBackground = Colors.grey.shade50;
-
-  /// Social media icon circle
   static BoxDecoration socialMediaIconCircle(Color color) {
     return BoxDecoration(color: color.withOpacity(0.15));
   }
 
-  /// Social media card
   static BoxDecoration socialMediaCard() {
     return BoxDecoration(borderRadius: BorderRadius.circular(16.r));
   }
 
-  // ==================== SNACKBAR ====================
-
-  /// Success snackbar decoration
-  static Color successSnackbarBackground = ColorsManager.hadithAuthentic;
+  static Color get successSnackbarBackground => ColorsManager.hadithAuthentic;
   static SnackBarBehavior successSnackbarBehavior = SnackBarBehavior.floating;
 
-  /// Error snackbar background
-  static Color errorSnackbarBackground = Colors.red;
+  static Color get errorSnackbarBackground => ColorsManager.error;
 }

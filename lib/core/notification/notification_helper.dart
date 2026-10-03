@@ -6,24 +6,16 @@ import 'package:mishkat_almasabih/core/notification/notification_storage_helper.
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-/// Default custom notification sound name (without extension).
-//const String kDefaultSoundName = 'yaamsallyallaelnaby.mp3';
-
-/// Helper class for managing local notifications across platforms.
 class NotificationHelper {
   static final FlutterLocalNotificationsPlugin _notification =
       FlutterLocalNotificationsPlugin();
 
-  /// Stream controller for notification tap responses.
-  /// Using broadcast to allow multiple listeners.
   static final StreamController<NotificationResponse>
   notificationResponseController =
       StreamController<NotificationResponse>.broadcast();
 
-  /// Flag to track initialization status.
   static bool _isInitialized = false;
 
-  /// Initialize the notification settings and time zones.
   static Future<void> init() async {
     if (_isInitialized) {
       log('NotificationHelper already initialized');
@@ -31,14 +23,12 @@ class NotificationHelper {
     }
 
     try {
-      // Android initialization settings
       const androidSettings = AndroidInitializationSettings(
         '@mipmap/launcher_icon',
       );
 
-      // iOS initialization settings
       const iosSettings = DarwinInitializationSettings(
-        requestAlertPermission: false, // We'll request manually
+        requestAlertPermission: false,
         requestBadgePermission: false,
         requestSoundPermission: false,
         defaultPresentAlert: true,
@@ -46,7 +36,6 @@ class NotificationHelper {
         defaultPresentSound: true,
       );
 
-      // Combined initialization settings
       const initSettings = InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
@@ -57,11 +46,6 @@ class NotificationHelper {
         onDidReceiveBackgroundNotificationResponse: _onNotificationTap,
         onDidReceiveNotificationResponse: _onNotificationTap,
       );
-
-      // Initialize timezone data
-     // tz.initializeTimeZones();
-
-      //_isInitialized = true;
 
 
 
@@ -77,21 +61,17 @@ class NotificationHelper {
     }
   }
 
-  /// Callback for notification tap events.
-  /// This is a top-level function to support background notifications.
   @pragma('vm:entry-point')
   static void _onNotificationTap(NotificationResponse notificationResponse) {
     notificationResponseController.add(notificationResponse);
   }
 
-  /// Dispose of resources. Call this when the app is closing.
   static Future<void> dispose() async {
     await notificationResponseController.close();
     _isInitialized = false;
     log('NotificationHelper disposed');
   }
 
-  /// Show a basic notification with required title and body.
   static Future<void> showBasicNotification({
     required String title,
     required String body,
@@ -119,7 +99,6 @@ class NotificationHelper {
         ),
       );
 
-      // Save to history
       await NotificationStorageHelper.saveNotification(
         id: id,
         title: title,
@@ -134,7 +113,6 @@ class NotificationHelper {
     }
   }
 
-  /// Show a repeating notification at specified interval.
   static Future<void> showRepeatingNotification({
     required String title,
     required String body,
@@ -165,7 +143,6 @@ class NotificationHelper {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
 
-      // Save to history
       await NotificationStorageHelper.saveNotification(
         id: id,
         title: title,
@@ -180,7 +157,6 @@ class NotificationHelper {
     }
   }
 
-  /// Show a scheduled notification after a delay.
   static Future<void> showScheduleNotification({
     required String title,
     required String body,
@@ -207,7 +183,6 @@ class NotificationHelper {
           importance: importance,
           priority: priority,
           silent: silent,
-      //    soundName: soundName ?? kDefaultSoundName,
         ),
         payload: payload,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -215,7 +190,6 @@ class NotificationHelper {
             UILocalNotificationDateInterpretation.absoluteTime,
       );
 
-      // Save to history
       await NotificationStorageHelper.saveNotification(
         id: id,
         title: title,
@@ -230,7 +204,6 @@ class NotificationHelper {
     }
   }
 
-  /// Schedule a notification at a specific date and time.
   static Future<void> scheduleNotificationAt({
     required String title,
     required String body,
@@ -263,7 +236,6 @@ class NotificationHelper {
           importance: importance,
           priority: priority,
           silent: silent,
-       //   soundName: soundName ?? kDefaultSoundName,
         ),
         payload: payload,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -278,7 +250,6 @@ class NotificationHelper {
     }
   }
 
-  /// Cancel a specific notification by its ID.
   static Future<void> cancelNotification(int id) async {
     try {
       await _notification.cancel(id);
@@ -288,7 +259,6 @@ class NotificationHelper {
     }
   }
 
-  /// Cancel all notifications.
   static Future<void> cancelAllNotifications() async {
     try {
       await _notification.cancelAll();
@@ -298,7 +268,6 @@ class NotificationHelper {
     }
   }
 
-  /// Get list of pending notifications.
   static Future<List<PendingNotificationRequest>>
   getPendingNotifications() async {
     try {
@@ -309,7 +278,6 @@ class NotificationHelper {
     }
   }
 
-  /// Get list of active notifications (shown but not dismissed).
   static Future<List<ActiveNotification>> getActiveNotifications() async {
     try {
       return await _notification.getActiveNotifications();
@@ -319,9 +287,6 @@ class NotificationHelper {
     }
   }
 
-  /// Show a notification with a big picture (image).
-  /// [bigPicturePath] should be a file path on the device.
-  /// For drawable resources, use [showBigPictureFromDrawable].
   static Future<void> showBigPictureNotification({
     required String title,
     required String body,
@@ -370,8 +335,6 @@ class NotificationHelper {
     }
   }
 
-  /// Show a notification with a big picture from drawable resources.
-  /// [drawableName] is the name of the drawable in res/drawable folder.
   static Future<void> showBigPictureFromDrawable({
     required String title,
     required String body,
@@ -419,7 +382,6 @@ class NotificationHelper {
     }
   }
 
-  /// Show a notification with progress bar.
   static Future<void> showProgressNotification({
     required String title,
     required String body,
@@ -462,13 +424,10 @@ class NotificationHelper {
     }
   }
 
-  /// Action IDs for notification buttons
   static const String actionReply = 'reply_action';
   static const String actionMarkRead = 'mark_read_action';
   static const String actionDismiss = 'dismiss_action';
 
-  /// Show a notification with action buttons.
-  /// Actions are only supported on Android.
   static Future<void> showNotificationWithActions({
     required String title,
     required String body,
@@ -535,7 +494,6 @@ class NotificationHelper {
         payload: payload,
       );
 
-      // Save to history
       await NotificationStorageHelper.saveNotification(
         id: id,
         title: title,
@@ -550,8 +508,6 @@ class NotificationHelper {
     }
   }
 
-  /// Show grouped notifications (summary + individual).
-  /// [groupKey] is used to group related notifications.
   static Future<void> showGroupedNotification({
     required String groupKey,
     required String title,
@@ -599,7 +555,6 @@ class NotificationHelper {
         payload: payload,
       );
 
-      // Save to history (only for non-summary notifications)
       if (!isSummary) {
         await NotificationStorageHelper.saveNotification(
           id: id,
@@ -616,8 +571,6 @@ class NotificationHelper {
     }
   }
 
-  /// Show multiple notifications as a group with a summary.
-  /// This is a convenience method that creates both individual and summary notifications.
   static Future<void> showNotificationGroup({
     required String groupKey,
     required List<Map<String, String>> notifications,
@@ -625,7 +578,6 @@ class NotificationHelper {
     int startId = 1000,
   }) async {
     try {
-      // Show individual notifications
       for (int i = 0; i < notifications.length; i++) {
         final notification = notifications[i];
         await showGroupedNotification(
@@ -638,7 +590,6 @@ class NotificationHelper {
         );
       }
 
-      // Show summary notification
       final inboxLines =
           notifications.map((n) => '${n['title']}: ${n['body']}').toList();
 
@@ -659,8 +610,6 @@ class NotificationHelper {
     }
   }
 
-  /// Show a media style notification (for music/audio apps).
-  /// This style is only fully supported on Android.
   static Future<void> showMediaNotification({
     required String title,
     required String body,
@@ -671,7 +620,6 @@ class NotificationHelper {
     bool isPlaying = true,
   }) async {
     try {
-      // Media action buttons
       final List<AndroidNotificationAction> actions = [
         const AndroidNotificationAction(
           'media_previous',
@@ -737,8 +685,6 @@ class NotificationHelper {
     }
   }
 
-  /// Show a simple media notification without custom icons.
-  /// Use this for a quick media notification without needing drawable resources.
   static Future<void> showSimpleMediaNotification({
     required String songTitle,
     required String artist,
@@ -786,7 +732,6 @@ class NotificationHelper {
     }
   }
 
-  /// Helper function to build notification details for both platforms.
   static NotificationDetails _buildNotificationDetails({
     required String channelId,
     required String channelName,
@@ -796,7 +741,6 @@ class NotificationHelper {
     bool silent = false,
     String? soundName,
   }) {
-    // Android notification details
     final androidDetails = AndroidNotificationDetails(
       channelId,
       channelName,
@@ -813,7 +757,6 @@ class NotificationHelper {
       icon: '@mipmap/launcher_icon',
     );
 
-    // iOS notification details
     final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,

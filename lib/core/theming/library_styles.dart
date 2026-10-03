@@ -4,39 +4,29 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart' as BaseStyles;
 
 class LibraryTextStyles {
-  // ==================== BOOK CARD ====================
-
-  // Book title text
-  static TextStyle bookTitle = TextStyle(
+  static TextStyle get bookTitle => TextStyle(
     fontSize: 14.sp,
     fontWeight: FontWeight.bold,
     color: ColorsManager.primaryText,
   );
 
-  // Book writer/author text
-  static TextStyle bookWriter = TextStyle(
+  static TextStyle get bookWriter => TextStyle(
     fontSize: 12.sp,
     color: ColorsManager.secondaryText,
   );
 
-  // Stat text (chapters/hadith counts)
-  static TextStyle statText = TextStyle(
+  static TextStyle get statText => TextStyle(
     fontSize: 14.sp,
     fontWeight: FontWeight.w600,
     color: ColorsManager.secondaryText,
   );
 
-  // ==================== LIBRARY BOOKS SCREEN ====================
-
-  // Screen header in Library sections
-  static TextStyle sectionHeader = BaseStyles.TextStyles.headlineMedium
+  static TextStyle get sectionHeader => BaseStyles.TextStyles.headlineMedium
       .copyWith(color: ColorsManager.primaryText, fontWeight: FontWeight.bold);
 
-  // Section header title style for statistics and categories
-  static TextStyle headerTitleStyle = BaseStyles.TextStyles.headlineMedium
+  static TextStyle get headerTitleStyle => BaseStyles.TextStyles.headlineMedium
       .copyWith(color: ColorsManager.primaryText, fontWeight: FontWeight.bold);
 
-  // Section header description style
-  static TextStyle headerDescriptionStyle = BaseStyles.TextStyles.bodyMedium
+  static TextStyle get headerDescriptionStyle => BaseStyles.TextStyles.bodyMedium
       .copyWith(color: ColorsManager.secondaryText);
 }

@@ -3,25 +3,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 class LibraryDecorations {
-  // ==================== SCAFFOLD ====================
+  static Color get scaffoldBackground => ColorsManager.secondaryBackground;
 
-  // Scaffold background color
-  static const Color scaffoldBackground = ColorsManager.secondaryBackground;
+  static Color get libraryScreenBackground => ColorsManager.primaryBackground;
 
-  // Library screen background
-  static const Color libraryScreenBackground = ColorsManager.primaryBackground;
-
-  // ==================== BOOK CARD ====================
-
-  // Book card outer container
   static BoxDecoration bookCardContainer() {
     return BoxDecoration(
-      color: ColorsManager.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(20.r),
     );
   }
 
-  // Book image box with rounded top corners
   static BoxDecoration bookImageBox(String assetPath) {
     return BoxDecoration(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -29,12 +21,9 @@ class LibraryDecorations {
     );
   }
 
-  // ==================== SHIMMER ====================
-
-  // Shimmer card container used in grid placeholders
   static BoxDecoration shimmerCard() {
     return BoxDecoration(
-      color: Colors.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(20.r),
       boxShadow: [
         BoxShadow(
@@ -46,10 +35,9 @@ class LibraryDecorations {
     );
   }
 
-  // Generic shimmer box for inner lines/rects
   static BoxDecoration shimmerBox({bool circular = false, double? radius}) {
     return BoxDecoration(
-      color: Colors.grey[300],
+      color: ColorsManager.mediumGray,
       borderRadius:
           circular
               ? BorderRadius.circular(50)
@@ -57,12 +45,9 @@ class LibraryDecorations {
     );
   }
 
-  // ==================== LIBRARY BOOKS SCREEN ====================
-
-  // Section header container (for statistics and categories)
   static BoxDecoration sectionHeaderContainer() {
     return BoxDecoration(
-      color: ColorsManager.white,
+      color: ColorsManager.cardBackground,
       borderRadius: BorderRadius.circular(16.r),
       boxShadow: [
         BoxShadow(
@@ -74,7 +59,6 @@ class LibraryDecorations {
     );
   }
 
-  // Icon container for section headers
   static BoxDecoration sectionHeaderIconContainer(Color backgroundColor) {
     return BoxDecoration(
       color: backgroundColor,
@@ -82,43 +66,36 @@ class LibraryDecorations {
     );
   }
 
-  // Statistics card color for books
-  static const Color booksColor = Color.fromARGB(255, 51, 13, 128);
+  static Color get booksColor => ColorsManager.darkPurpleText;
 
-  // Statistics card color for chapters
-  static const Color chaptersColor = ColorsManager.hadithAuthentic;
+  static Color get chaptersColor => ColorsManager.hadithAuthentic;
 
-  // Statistics card color for hadiths
-  static const Color hadithsColor = ColorsManager.primaryGold;
+  static Color get hadithsColor => ColorsManager.primaryGold;
 
-  // Category card gradient for Kutub Tisaa
   static LinearGradient kutubTisaaGradient() {
-    return const LinearGradient(
+    return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryGreen, ColorsManager.darkPurple],
+      colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
     );
   }
 
-  // Category card gradient for Arbaain
   static LinearGradient arbaainGradient() {
-    return const LinearGradient(
+    return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryGreen, ColorsManager.darkPurple],
+      colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
     );
   }
 
-  // Category card gradient for Adab
   static LinearGradient adabGradient() {
-    return const LinearGradient(
+    return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryGreen, ColorsManager.darkPurple],
+      colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
     );
   }
 
-  // Islamic separator decoration
   static BoxDecoration islamicSeparator() {
     return BoxDecoration(
       gradient: LinearGradient(

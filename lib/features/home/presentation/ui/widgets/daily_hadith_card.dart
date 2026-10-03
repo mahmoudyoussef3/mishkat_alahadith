@@ -1,0 +1,199 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mishkat_almasabih/core/helpers/extensions.dart';
+import 'package:mishkat_almasabih/core/notification/hadith_refresh_notifier.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_cubit.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:transparent_image/transparent_image.dart';
+import 'package:mishkat_almasabih/core/theming/home_styles.dart';
+import 'package:mishkat_almasabih/core/theming/home_decorations.dart';
+
+class HadithOfTheDayCard extends StatefulWidget {
+  const HadithOfTheDayCard({super.key});
+
+  @override
+  State<HadithOfTheDayCard> createState() => _HadithOfTheDayCardState();
+}
+
+class _HadithOfTheDayCardState extends State<HadithOfTheDayCard> {
+  final HadithRefreshNotifier _notifier = HadithRefreshNotifier();
+
+  @override
+  void initState() {
+    super.initState();
+    _notifier.addListener(_onHadithRefresh);
+
+    debugPrint('🎧 HadithCard: Listening for notification updates');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DailyHadithCubit>().load();
+    });
+  }
+
+  @override
+  void dispose() {
+    _notifier.removeListener(_onHadithRefresh);
+    debugPrint('👋 HadithCard: Stopped listening');
+    super.dispose();
+  }
+
+  void _onHadithRefresh() {
+    debugPrint('🔄 HadithCard: Refresh triggered from notification');
+    if (!mounted) return;
+    context.read<DailyHadithCubit>().load();
+  }
+
+  void refresh() {
+    debugPrint('🔄 HadithCard: Manual refresh');
+    context.read<DailyHadithCubit>().load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DailyHadithCubit, DailyHadithState>(
+      builder: (context, state) {
+        if (state is DailyHadithLoading || state is DailyHadithInitial) {
+          return Shimmer.fromColors(
+            baseColor: ColorsManager.shimmerBase,
+            highlightColor: ColorsManager.shimmerHighlight,
+            child: Container(
+              margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+              height: 200.h,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: ColorsManager.primaryGreen,
+                borderRadius: BorderRadius.circular(24.r),
+              ),
+            ),
+          );
+        }
+
+        if (state is DailyHadithFailure) {
+          debugPrint(
+            '❌ HadithCard: Error loading hadith - ${state.errMessage}',
+          );
+          return Container(
+            margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
+            height: 180.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: ColorsManager.lightGray,
+              borderRadius: BorderRadius.circular(24.r),
+            ),
+            child: Center(
+              child: Text(
+                "حصل خطأ أثناء تحميل الحديث",
+                style: TextStyle(fontSize: 16.sp, color: ColorsManager.secondaryText),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+
+        final ExplainedHadith hadith =
+            (state as DailyHadithSuccess).dailyHadithModel;
+
+        debugPrint('📖 HadithCard: Displaying hadith - ${hadith.title}');
+        return GestureDetector(
+          onTap:
+              () => context.pushNamed(Routes.hadithOfTheDay, arguments: hadith),
+          child: Container(
+            margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
+            height: 200.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24.r),
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.9,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24.r),
+                      child: FadeInImage(
+                        placeholder: MemoryImage(kTransparentImage),
+                        image: const AssetImage(
+                          "assets/images/moon-light-shine-through-window-into-islamic-mosque-interior.jpg",
+                        ),
+                        fit: BoxFit.cover,
+                        fadeInDuration: const Duration(milliseconds: 700),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 12.h,
+                    horizontal: 20.w,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.auto_stories,
+                            color: ColorsManager.white,
+                            size: 18.sp,
+                          ),
+                          SizedBox(width: 6.w),
+                          Text(
+                            "حديث اليوم",
+                            style: HomeTextStyles.dailyHadithHeaderLabel,
+                          ),
+                        ],
+                      ),
+                      Flexible(
+                        child: Text(
+                          hadith.hadeeth ?? "حديث اليوم",
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.start,
+                          style: HomeTextStyles.dailyHadithText,
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 8.h,
+                          ),
+                          decoration: HomeDecorations.readButton(),
+                          child: Text(
+                            "اقرأ الحديث",
+                            style: HomeTextStyles.readButtonLabel,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  child: Container(
+                    width: 50.w,
+                    height: 50.h,
+                    decoration: HomeDecorations.dailyHadithCornerQuote(),
+                    child: Icon(
+                      Icons.format_quote,
+                      color: ColorsManager.white,
+                      size: 24.sp,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

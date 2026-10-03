@@ -9,7 +9,13 @@ class LoginResponseBody {
   UserData? userData;
   bool? status;
   int? code;
-  LoginResponseBody({this.msg, this.userData, this.status, this.code,this.token});
+  LoginResponseBody({
+    this.msg,
+    this.userData,
+    this.status,
+    this.code,
+    this.token,
+  });
   factory LoginResponseBody.fromJson(Map<String, dynamic> json) =>
       _$LoginResponseBodyFromJson(json);
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/ui/session_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 
 class MishkatDrawer extends StatefulWidget {
   const MishkatDrawer({super.key});
@@ -14,20 +16,10 @@ class MishkatDrawer extends StatefulWidget {
 }
 
 class _MishkatDrawerState extends State<MishkatDrawer> {
-  String? token;
-  Future<void> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedToken = prefs.getString('token');
-
-    setState(() {
-      token = storedToken;
-    });
-  }
-
   @override
   void initState() {
-    getToken();
     super.initState();
+    context.read<SessionCubit>().checkSession();
   }
 
   @override
@@ -36,11 +28,10 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
       backgroundColor: ColorsManager.primaryBackground,
       child: Column(
         children: [
-          // 🌙 Drawer Header
           DrawerHeader(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
+                colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -70,7 +61,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     Text(
                       'مشكاة الأحاديث',
                       style: TextStyle(
-                        color: ColorsManager.secondaryBackground,
+                        color: ColorsManager.white,
                         fontSize: 22.sp,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Amiri',
@@ -90,7 +81,6 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
             ),
           ),
 
-          // 📚 Menu List
           Expanded(
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: 8.w),
@@ -101,17 +91,15 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   title: 'الرئيسية',
                   onTap: () => Navigator.pop(context),
                 ),
-                /*
                 _buildDrawerItem(
                   context,
-                  icon: Icons.search_rounded,
-                  title: 'بحث متقدم',
+                  icon: Icons.auto_stories_rounded,
+                  title: 'القرآن الكريم',
                   onTap: () {
                     Navigator.pop(context);
-                    context.pushNamed(Routes.searchScreen);
+                    context.pushNamed(Routes.quranScreen);
                   },
                 ),
-                */
                 _buildDrawerItem(
                   context,
                   icon: Icons.bookmark_rounded,
@@ -138,18 +126,6 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.libraryScreen);
                   },
                 ),
-                /*
-              
-                      _buildDrawerItem(
-                  context,
-                  icon: Icons.alarm_rounded,
-                  title: 'الذكر اليومي',
-  onTap: () {
-                    Navigator.pop(context);
-                    context.pushNamed(Routes.dailyZekrScreen);
-                  },
-                ),
-                */
                 _buildDrawerItem(
                   context,
                   icon: Icons.access_time_rounded,
@@ -207,18 +183,22 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
             indent: 20.w,
             endIndent: 20.w,
           ),
-          if (token != null)
-            // 🚪 Logout
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.w),
-              child: _buildDrawerItem(
-                context,
-                icon: Icons.logout_rounded,
-                title: 'تسجيل الخروج',
-                color: ColorsManager.error,
-                onTap: () => _showLogoutDialog(context),
-              ),
-            ),
+          SessionBuilder(
+            builder:
+                (context, isSignedIn) =>
+                    isSignedIn
+                        ? Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8.w),
+                          child: _buildDrawerItem(
+                            context,
+                            icon: Icons.logout_rounded,
+                            title: 'تسجيل الخروج',
+                            color: ColorsManager.error,
+                            onTap: () => _showLogoutDialog(context),
+                          ),
+                        )
+                        : const SizedBox.shrink(),
+          ),
           SizedBox(height: 64.h),
         ],
       ),
@@ -277,7 +257,6 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
     );
   }
 
-  // 🔒 Logout confirmation dialog
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -306,9 +285,17 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   ),
                 ),
                 onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.remove("token");
-                  // ignore: use_build_context_synchronously
+                  final signedOut =
+                      await context.read<SessionCubit>().signOut();
+                  if (!context.mounted) return;
+                  if (!signedOut) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('تعذر تسجيل الخروج، حاول مرة أخرى'),
+                      ),
+                    );
+                    return;
+                  }
                   context.pushReplacementNamed(Routes.loginScreen);
                 },
                 child: const Text('نعم', style: TextStyle(color: Colors.white)),
@@ -322,7 +309,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   ),
                 ),
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
+                child: Text(
                   'إلغاء',
                   style: TextStyle(color: ColorsManager.primaryPurple),
                 ),

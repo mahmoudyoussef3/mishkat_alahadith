@@ -31,8 +31,6 @@ class LocalNotification {
   static Future<bool> _ensureExactAlarmPermissionIfNeeded() async {
     if (!Platform.isAndroid) return true;
 
-    // On Android 12+ (API 31+), exact alarms require explicit user permission.
-    // This permission cannot be requested via a normal dialog - it opens Settings.
     try {
       final status = await Permission.scheduleExactAlarm.status;
 
@@ -44,8 +42,6 @@ class LocalNotification {
       log('Exact alarm permission not granted. Status: $status');
       log('Opening system settings for exact alarm permission...');
 
-      // On Android 12+, request() opens the system settings page
-      // where the user must manually enable "Alarms & reminders"
       final requested = await Permission.scheduleExactAlarm.request();
 
       log('Exact alarm permission after request: $requested');
@@ -62,7 +58,6 @@ class LocalNotification {
       return requested.isGranted;
     } catch (e) {
       log('Exact alarm permission check failed: $e');
-      // If permission check fails (older Android), assume it's okay
       return true;
     }
   }
@@ -75,7 +70,6 @@ class LocalNotification {
   static Future<void> init() async {
     await requestNotificationPermission();
     await _configureLocalTimeZone();
-    // 1. Configure iOS initialization settings
     const DarwinInitializationSettings iOSSettings =
         DarwinInitializationSettings(
           requestAlertPermission: true,
@@ -90,13 +84,11 @@ class LocalNotification {
           defaultPresentList: true,
         );
 
-    // 2. Initialize settings for both platforms
     InitializationSettings settings = const InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/launcher_icon'),
       iOS: iOSSettings,
     );
 
-    // 3. Initialize plugin with proper error handling
     try {
       await flutterLocalNotificationsPlugin.initialize(
         settings,
@@ -104,7 +96,6 @@ class LocalNotification {
         onDidReceiveBackgroundNotificationResponse: onTap,
       );
 
-      // Request notification permission on Android 13+ using the plugin API.
       if (Platform.isAndroid) {
         await flutterLocalNotificationsPlugin
             .resolvePlatformSpecificImplementation<
@@ -112,22 +103,19 @@ class LocalNotification {
             >()
             ?.requestNotificationsPermission();
 
-        // Best-effort: request exact alarm permission so scheduled reminders
-        // (like prayer times) can fire reliably on Android 12+.
         await _ensureExactAlarmPermissionIfNeeded();
       }
 
-      // 4. Request permissions explicitly for iOS
       if (Platform.isIOS) {
         final bool? result = await flutterLocalNotificationsPlugin
             .resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin
             >()
             ?.requestPermissions(
-              alert: true, // Request alert permission again
+              alert: true,
               badge: true,
               sound: true,
-              critical: true, // Enable critical alerts
+              critical: true,
             );
         log('iOS permission request result: $result');
       }
@@ -145,7 +133,6 @@ class LocalNotification {
       tz.setLocalLocation(tz.getLocation(timeZoneName));
       _timeZoneConfigured = true;
     } catch (e) {
-      // Fallback: keep default timezone configuration.
       log('Error configuring local timezone: $e');
     }
   }
@@ -169,9 +156,8 @@ class LocalNotification {
   ) async {
     log('Handling foreground notification: ${message.messageId}');
 
-    // 1. Create iOS-specific notification details
     const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
-      presentAlert: true, // Crucial for showing the banner
+      presentAlert: true,
       presentBadge: true,
       presentBanner: true,
       presentSound: true,
@@ -179,7 +165,6 @@ class LocalNotification {
       sound: 'default',
     );
 
-    // 2. Create Android notification details
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
           'id_1',
@@ -191,14 +176,12 @@ class LocalNotification {
           ticker: 'ticker',
         );
 
-    // 3. Combine platform-specific details
     const NotificationDetails platformDetails = NotificationDetails(
       iOS: iOSDetails,
       android: androidDetails,
     );
 
     try {
-      // 4. Show the notification with a unique ID based on timestamp
       final int notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       await flutterLocalNotificationsPlugin.show(
         notificationId,
@@ -215,11 +198,6 @@ class LocalNotification {
     }
   }
 
-  /// Schedule an hourly reminder notification for a specific section.
-  ///
-  /// Uses `periodicallyShow` on Android. On iOS, attempts to use the closest
-  /// available scheduling option; if not supported, will display immediately
-  /// once and rely on push or manual triggers.
   static Future<void> scheduleHourlyReminder({
     required int id,
     required String channelId,
@@ -253,7 +231,6 @@ class LocalNotification {
     );
 
     try {
-      // Ensure we don't keep an old schedule with the same id.
       await cancelReminder(id);
 
       await flutterLocalNotificationsPlugin.periodicallyShow(
@@ -263,14 +240,11 @@ class LocalNotification {
         everyMinute ? RepeatInterval.everyMinute : RepeatInterval.hourly,
         platformDetails,
         payload: payload,
-        // Android 12+ may restrict exact alarms; for periodic reminders,
-        // prefer inexact scheduling to avoid silent failures (esp. Android 15).
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
     } catch (e) {
       log('Error scheduling periodic reminder (id=$id): $e');
 
-      // Last resort: show once (verifies channel + permission are OK).
       await flutterLocalNotificationsPlugin.show(
         id,
         title,
@@ -281,7 +255,6 @@ class LocalNotification {
     }
   }
 
-  /// Schedule a one-time notification at an exact date/time.
   static Future<void> scheduleOneTimeNotification({
     required int id,
     required String channelId,
@@ -330,8 +303,6 @@ class LocalNotification {
         payload: payload,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
-        // If exact alarms aren't allowed, fall back to inexact scheduling
-        // rather than silently failing.
         androidScheduleMode:
             canUseExactAlarms
                 ? AndroidScheduleMode.exactAllowWhileIdle
@@ -348,7 +319,6 @@ class LocalNotification {
     }
   }
 
-  /// Cancel a previously scheduled reminder using its unique ID.
   static Future<void> cancelReminder(int id) async {
     try {
       await flutterLocalNotificationsPlugin.cancel(id);

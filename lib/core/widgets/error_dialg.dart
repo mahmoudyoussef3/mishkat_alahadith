@@ -16,7 +16,7 @@ class ErrorState extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            ColorsManager.white,
+            ColorsManager.cardBackground,
             ColorsManager.offWhite.withOpacity(0.8),
           ],
         ),
@@ -90,14 +90,14 @@ class ErrorState extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.refresh_rounded,
-                      color: ColorsManager.primaryPurple,
+                      color: ColorsManager.purpleText,
                       size: 20.sp,
                     ),
                     SizedBox(width: 8.w),
                     Text(
                       'إعادة المحاولة',
                       style: TextStyle(
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Amiri',

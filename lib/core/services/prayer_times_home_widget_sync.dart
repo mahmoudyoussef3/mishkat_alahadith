@@ -1,52 +1,50 @@
-import 'dart:convert';
-
 import 'package:adhan/adhan.dart';
+import 'package:mishkat_almasabih/core/prayer/prayer_location_store.dart';
+import 'package:mishkat_almasabih/core/prayer/prayer_times_calculator.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mishkat_almasabih/core/prayer/prayer_defaults.dart';
+import 'package:mishkat_almasabih/core/helpers/date_extensions.dart';
 
 class PrayerTimesHomeWidgetSync {
-  static const String _locationKey = 'prayer_notification_location';
-  static const String _legacyLocationKey = 'prayer_location';
+  static const PrayerTimesCalculator _calculator = PrayerTimesCalculator();
 
   static Future<void> refresh() async {
     try {
       final location = await _resolveLocation();
       final now = DateTime.now();
-      final params = CalculationMethod.egyptian.getParameters();
-      params.madhab = Madhab.shafi;
-
-      final prayerTimes = PrayerTimes(
-        Coordinates(location.latitude, location.longitude),
-        DateComponents.from(now),
-        params,
+      final prayerTimes = _calculator.calculate(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        date: now,
       );
 
       final prayers = <_PrayerItem>[
-        _PrayerItem('fajr', 'الفجر', prayerTimes.fajr),
-        _PrayerItem('sunrise', 'الشروق', prayerTimes.sunrise),
-        _PrayerItem('dhuhr', 'الظهر', prayerTimes.dhuhr),
-        _PrayerItem('asr', 'العصر', prayerTimes.asr),
-        _PrayerItem('maghrib', 'المغرب', prayerTimes.maghrib),
-        _PrayerItem('isha', 'العشاء', prayerTimes.isha),
+        _PrayerItem('fajr', PrayerNames.fajr, prayerTimes.fajr),
+        _PrayerItem('sunrise', PrayerNames.sunrise, prayerTimes.sunrise),
+        _PrayerItem('dhuhr', PrayerNames.dhuhr, prayerTimes.dhuhr),
+        _PrayerItem('asr', PrayerNames.asr, prayerTimes.asr),
+        _PrayerItem('maghrib', PrayerNames.maghrib, prayerTimes.maghrib),
+        _PrayerItem('isha', PrayerNames.isha, prayerTimes.isha),
       ];
 
       final next = _resolveNextPrayer(prayers, now);
       final hijriDate = _formatHijriDate(now);
       final gregorianDate = _formatGregorianDate(now);
-      final tomorrow = now.add(const Duration(days: 1));
-      final tomorrowPrayerTimes = PrayerTimes(
-        Coordinates(location.latitude, location.longitude),
-        DateComponents.from(tomorrow),
-        params,
+      final tomorrow = now.nextCalendarDay;
+      final tomorrowPrayerTimes = _calculator.calculate(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        date: tomorrow,
       );
       final tomorrowPrayers = <_PrayerItem>[
-        _PrayerItem('fajr', 'الفجر', tomorrowPrayerTimes.fajr),
-        _PrayerItem('sunrise', 'الشروق', tomorrowPrayerTimes.sunrise),
-        _PrayerItem('dhuhr', 'الظهر', tomorrowPrayerTimes.dhuhr),
-        _PrayerItem('asr', 'العصر', tomorrowPrayerTimes.asr),
-        _PrayerItem('maghrib', 'المغرب', tomorrowPrayerTimes.maghrib),
-        _PrayerItem('isha', 'العشاء', tomorrowPrayerTimes.isha),
+        _PrayerItem('fajr', PrayerNames.fajr, tomorrowPrayerTimes.fajr),
+        _PrayerItem('sunrise', PrayerNames.sunrise, tomorrowPrayerTimes.sunrise),
+        _PrayerItem('dhuhr', PrayerNames.dhuhr, tomorrowPrayerTimes.dhuhr),
+        _PrayerItem('asr', PrayerNames.asr, tomorrowPrayerTimes.asr),
+        _PrayerItem('maghrib', PrayerNames.maghrib, tomorrowPrayerTimes.maghrib),
+        _PrayerItem('isha', PrayerNames.isha, tomorrowPrayerTimes.isha),
       ];
       final tomorrowNext = _resolveNextPrayer(tomorrowPrayers, tomorrow);
 
@@ -93,7 +91,6 @@ class PrayerTimesHomeWidgetSync {
         _formatTime(prayerTimes.isha),
       );
 
-      // Save exact timestamps for dynamic Native calculation
       await HomeWidget.saveWidgetData<int>(
         'prayer_fajr_millis',
         prayerTimes.fajr.millisecondsSinceEpoch,
@@ -136,7 +133,6 @@ class PrayerTimesHomeWidgetSync {
         iOSName: 'PrayerTimesWidget',
       );
     } catch (_) {
-      // Avoid affecting app bootstrap if widget update fails.
     }
   }
 
@@ -153,7 +149,7 @@ class PrayerTimesHomeWidgetSync {
     final fajr = prayers.firstWhere((prayer) => prayer.key == 'fajr');
     return _PrayerItem(
       fajr.key,
-      'الفجر',
+      PrayerNames.fajr,
       fajr.time.add(const Duration(days: 1)),
     );
   }
@@ -264,29 +260,26 @@ class PrayerTimesHomeWidgetSync {
 
   static Future<_WidgetLocation> _resolveLocation() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw =
-        prefs.getString(_locationKey) ?? prefs.getString(_legacyLocationKey);
+    final json = PrayerLocationStore.read(prefs);
 
-    if (raw != null && raw.isNotEmpty) {
+    if (json != null) {
       try {
-        final json = jsonDecode(raw) as Map<String, dynamic>;
         return _WidgetLocation(
-          latitude: (json['latitude'] as num?)?.toDouble() ?? 30.0444,
-          longitude: (json['longitude'] as num?)?.toDouble() ?? 31.2357,
+          latitude: (json['latitude'] as num?)?.toDouble() ?? PrayerDefaults.latitude,
+          longitude: (json['longitude'] as num?)?.toDouble() ?? PrayerDefaults.longitude,
           cityName:
               (json['cityName'] as String?)?.trim().isNotEmpty == true
                   ? json['cityName'] as String
-                  : 'القاهرة، مصر',
+                  : PrayerDefaults.cityName,
         );
       } catch (_) {
-        // Fall back to default location.
       }
     }
 
     return const _WidgetLocation(
-      latitude: 30.0444,
-      longitude: 31.2357,
-      cityName: 'القاهرة، مصر',
+      latitude: PrayerDefaults.latitude,
+      longitude: PrayerDefaults.longitude,
+      cityName: PrayerDefaults.cityName,
     );
   }
 }

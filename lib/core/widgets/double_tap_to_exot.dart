@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 
 // ignore: must_be_immutable
@@ -16,7 +17,7 @@ class DoubleTapToExitApp extends StatelessWidget {
           if (lastBackPressed == null ||
               now.difference(lastBackPressed!) > Duration(seconds: 2)) {
             lastBackPressed = now;
-            showToast('اضغط مرة اخري للخروج من التطبيق', Colors.grey);
+            showToast('اضغط مرة اخري للخروج من التطبيق', ColorsManager.gray);
 
             return false;
           }

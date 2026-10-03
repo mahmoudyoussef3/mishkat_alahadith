@@ -1,64 +1,74 @@
 import 'dart:developer';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/features/about_us/ui/screens/about_us_screen.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/categories_cubit/categories_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_by_category_cubit/ahadith_by_category_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/screens/ahadith_categories_screen.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/screens/categories_screen.dart';
-import 'package:mishkat_almasabih/features/authentication/signup/logic/signup_cubit.dart';
-import 'package:mishkat_almasabih/features/authentication/signup/ui/screens/signup_screen.dart';
-import 'package:mishkat_almasabih/features/book_data/logic/cubit/book_data_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/add_cubit/cubit/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/cubit/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/delete_cubit/cubit/delete_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/logic/get_cubit/user_bookmarks_cubit.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/screens/bookmark_screen.dart';
-import 'package:mishkat_almasabih/features/chapters/logic/cubit/chapters_cubit.dart';
-import 'package:mishkat_almasabih/features/chapters/ui/screens/chapters_screen.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/models/new_daily_hadith_model.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/logic/cubit/daily_hadith_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/ui/screen/daily_hadith_screen.dart';
-import 'package:mishkat_almasabih/features/hadith_details/ui/screens/hadith_details_screen.dart';
-import 'package:mishkat_almasabih/features/home/logic/cubit/get_all_books_with_categories_cubit.dart';
-import 'package:mishkat_almasabih/features/home/logic/cubit/get_library_statistics_cubit.dart';
-import 'package:mishkat_almasabih/features/home/ui/home_screen.dart';
-import 'package:mishkat_almasabih/features/library_books_screen.dart';
-import 'package:mishkat_almasabih/features/prayer_times/logic/cubit/prayer_times_cubit.dart';
-import 'package:mishkat_almasabih/features/prayer_times/ui/prayer_times_screen.dart';
-import 'package:mishkat_almasabih/features/profile/logic/cubit/cubit/user_stats_cubit.dart';
-import 'package:mishkat_almasabih/features/profile/logic/cubit/profile_cubit.dart';
-import 'package:mishkat_almasabih/features/profile/ui/profile_screen.dart';
-import 'package:mishkat_almasabih/features/qiblah_finder/logic/cubit/qiblah_cubit.dart'
+import 'package:mishkat_almasabih/features/about_us/presentation/ui/screens/about_us_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/screens/ahadith_categories_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/screens/categories_screen.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/presentation/logic/signup_cubit.dart';
+import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/screens/signup_screen.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/book_data/book_data_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/delete_bookmark/delete_cubit_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/screens/bookmark_screen.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/logic/cubit/chapters_cubit.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/screens/chapters_screen.dart';
+import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/presentation/ui/screen/daily_hadith_screen.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/screens/hadith_details_screen.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/library_statistics/get_library_statistics_cubit.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/home_screen.dart';
+import 'package:mishkat_almasabih/features/library/presentation/ui/screens/library_books_screen.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/prayer_times_cubit.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/ui/prayer_times_screen.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/logic/user_stats/user_stats_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/logic/profile/profile_cubit.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/ui/profile_screen.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/presentation/logic/qiblah_cubit.dart'
     show QiblahCubit;
-import 'package:mishkat_almasabih/features/qiblah_finder/ui/qiblah_finder_screen.dart';
-import 'package:mishkat_almasabih/features/random_ahadith/logic/cubit/random_ahadith_cubit.dart';
-import 'package:mishkat_almasabih/features/remaining_questions/logic/cubit/remaining_questions_cubit.dart';
-import 'package:mishkat_almasabih/features/search/enhanced_public_search/logic/cubit/enhanced_search_cubit.dart';
-import 'package:mishkat_almasabih/features/search/search_screen/logic/cubit/search_history_cubit.dart';
-import 'package:mishkat_almasabih/features/search_with_filters/logic/cubit/search_with_filters_cubit.dart';
-import 'package:mishkat_almasabih/features/search_with_filters/ui/screens/filter_serch_result_screen.dart';
-import 'package:mishkat_almasabih/features/search_with_filters/ui/screens/search_with_filters_screen.dart';
-import 'package:mishkat_almasabih/features/send_suggestion/send_suggestion_screen.dart';
-import 'package:mishkat_almasabih/features/serag/data/models/serag_request_model.dart';
-import 'package:mishkat_almasabih/features/serag/logic/chat_history/chat_history_cubit.dart';
-import 'package:mishkat_almasabih/features/serag/logic/cubit/serag_cubit.dart';
-import 'package:mishkat_almasabih/features/serag/ui/serag_chat_screen.dart';
-import '../../features/home/ui/widgets/public_search_result.dart';
+import 'package:mishkat_almasabih/features/qiblah_finder/presentation/ui/qiblah_finder_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/models/mushaf_reader_args.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_reader_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_home_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_search_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/tajweed_guide_screen.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
+import 'package:mishkat_almasabih/features/remaining_questions/presentation/logic/cubit/remaining_questions_cubit.dart';
+import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/logic/enhanced_search_cubit.dart';
+import 'package:mishkat_almasabih/features/search/search_history/presentation/logic/search_history_cubit.dart';
+import 'package:mishkat_almasabih/features/search_with_filters/presentation/logic/search_with_filters_cubit.dart';
+import 'package:mishkat_almasabih/features/search_with_filters/presentation/ui/screens/filter_serch_result_screen.dart';
+import 'package:mishkat_almasabih/features/search_with_filters/presentation/ui/screens/search_with_filters_screen.dart';
+import 'package:mishkat_almasabih/features/send_suggestion/presentation/ui/send_suggestion_screen.dart';
+import 'package:mishkat_almasabih/features/send_suggestion/presentation/logic/send_suggestion_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/ui/serag_chat_screen.dart';
+import '../../features/search/enhanced_public_search/presentation/ui/screens/public_search_result.dart';
 import '../di/dependency_injection.dart';
 import 'routes.dart';
-import '../../features/authentication/login/logic/cubit/login_cubit.dart';
-import '../../features/authentication/login/ui/screens/login_screen.dart';
-import '../../features/onboarding/onboarding_screen.dart';
-import '../../features/splash/splash_screen.dart';
+import '../../features/authentication/login/presentation/logic/cubit/login_cubit.dart';
+import '../../features/authentication/login/presentation/ui/screens/login_screen.dart';
+import '../../features/onboarding/presentation/ui/onboarding_screen.dart';
+import 'package:mishkat_almasabih/features/onboarding/presentation/logic/onboarding_cubit.dart';
+import '../../features/splash/presentation/ui/splash_screen.dart';
 
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/screens/ramadan_tasks_screen.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/cubit/ramadan_tasks_cubit.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/screens/ramadan_progress_screen.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/ui/screens/ramadan_tasks_screen.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/logic/ramadan_tasks_cubit.dart';
+import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/ui/screens/ramadan_progress_screen.dart';
 
 import 'package:mishkat_almasabih/core/deep_links/ui/shared_link_hadith_screen.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/cubit/hadith_details_cubit/cubit/hadith_by_category_details_cubit.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_details/hadith_by_category_details_cubit.dart';
 
 class AppRouter {
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -69,7 +79,6 @@ class AppRouter {
   Route? generateRoute(RouteSettings settings) {
     final String routeName = settings.name ?? '';
 
-    // Handle native deep link paths
     if (routeName.startsWith('/api/hadith/')) {
       final id =
           routeName
@@ -94,7 +103,7 @@ class AppRouter {
 
     if (routeName == '/') {
       return MaterialPageRoute(
-        builder: (_) => const Scaffold(backgroundColor: Colors.white),
+        builder: (_) => Scaffold(backgroundColor: ColorsManager.secondaryBackground),
       );
     }
 
@@ -125,7 +134,13 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SplashScreen());
       case Routes.onBoardingScreen:
         _logScreenView('OnboardingScreen');
-        return MaterialPageRoute(builder: (_) => const OnboardingScreen());
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<OnboardingCubit>(),
+                child: const OnboardingScreen(),
+              ),
+        );
       case Routes.signupScreen:
         _logScreenView('SignupScreen');
         return MaterialPageRoute(
@@ -153,12 +168,6 @@ class AppRouter {
                   BlocProvider(
                     create:
                         (context) =>
-                            getIt<GetAllBooksWithCategoriesCubit>()
-                              ..emitGetAllBooksWithCategories(),
-                  ),
-                  BlocProvider(
-                    create:
-                        (context) =>
                             getIt<GetLibraryStatisticsCubit>()
                               ..emitGetStatisticsCubit(),
                   ),
@@ -171,7 +180,7 @@ class AppRouter {
                   BlocProvider(
                     create:
                         (context) =>
-                            customGetIt<RandomAhadithCubit>()
+                            getIt<RandomAhadithCubit>()
                               ..emitRandomStats(),
                   ),
                 ],
@@ -238,10 +247,6 @@ class AppRouter {
               (_) => MultiBlocProvider(
                 providers: [
                   BlocProvider(
-                    create:
-                        (context) => getIt<GetAllBooksWithCategoriesCubit>(),
-                  ),
-                  BlocProvider(
                     create: (context) => getIt<GetLibraryStatisticsCubit>(),
                   ),
                 ],
@@ -306,19 +311,25 @@ class AppRouter {
 
       case Routes.usersSuggestions:
         _logScreenView('UsersSuggestions');
-        return MaterialPageRoute(builder: (_) => SuggestionForm());
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<SendSuggestionCubit>(),
+                child: const SuggestionForm(),
+              ),
+        );
 
       case Routes.hadithOfTheDay:
         _logScreenView('HadithOfTheDay');
         final args = settings.arguments;
-        NewDailyHadithModel query;
+        ExplainedHadith query;
         String title = 'حديث اليوم';
         String description = 'نص حديث نبوي شريف مع شرحه';
 
-        if (args is NewDailyHadithModel) {
+        if (args is ExplainedHadith) {
           query = args;
         } else if (args is Map<String, dynamic>) {
-          query = args['model'] as NewDailyHadithModel;
+          query = args['model'] as ExplainedHadith;
           title = args['title'] as String? ?? title;
           description = args['description'] as String? ?? description;
         } else {
@@ -350,7 +361,7 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const AboutUsScreen());
       case Routes.serag:
         _logScreenView('SeragScreen');
-        final query = settings.arguments as SeragRequestModel;
+        final query = settings.arguments as SeragHadithContext;
 
         return MaterialPageRoute(
           builder:
@@ -365,7 +376,7 @@ class AppRouter {
 
                   BlocProvider(create: (context) => getIt<SeragCubit>()),
                   BlocProvider(
-                    create: (context) => ChatHistoryCubit()..clearMessages(),
+                    create: (context) => getIt<ChatHistoryCubit>()..clearMessages(),
                   ),
                 ],
                 child: SeragChatScreen(model: query),
@@ -390,6 +401,45 @@ class AppRouter {
                 child: const QiblahFinderScreen(),
               ),
         );
+      case Routes.quranScreen:
+        _logScreenView('QuranScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<QuranIndexCubit>()..load(),
+                child: const QuranHomeScreen(),
+              ),
+        );
+      case Routes.mushafReader:
+        _logScreenView('MushafReaderScreen');
+        final args = switch (settings.arguments) {
+          final MushafReaderArgs args => args,
+          _ => const MushafReaderArgs(),
+        };
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<MushafReaderCubit>()..init(
+                          initialPage: args.initialPage,
+                          highlightAyahId: args.highlightAyahId,
+                        ),
+                child: MushafReaderScreen(initialPage: args.initialPage),
+              ),
+        );
+      case Routes.quranSearch:
+        _logScreenView('QuranSearchScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<QuranSearchCubit>(),
+                child: const QuranSearchScreen(),
+              ),
+        );
+      case Routes.tajweedGuide:
+        _logScreenView('TajweedGuideScreen');
+        return MaterialPageRoute(builder: (_) => const TajweedGuideScreen());
       case Routes.categoriesScreen:
         _logScreenView('CategoriesScreen');
         return MaterialPageRoute(

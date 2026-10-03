@@ -2,7 +2,6 @@ import 'package:hive/hive.dart';
 import 'package:mishkat_almasabih/core/services/hive_service.dart';
 import '../models/ramadan_task_model.dart';
 
-/// Local datasource using Hive for persistence.
 class RamadanTasksLocalDataSource {
   Box<RamadanTaskModel>? _box;
 

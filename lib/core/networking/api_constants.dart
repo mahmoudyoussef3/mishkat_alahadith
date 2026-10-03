@@ -1,21 +1,10 @@
-/// API Constants for Mishkat Al-Masabih Islamic Library App
-/// Contains all endpoint URLs and configuration constants
 class ApiConstants {
-  // -----------------------------
-  // Base URLs
-  // -----------------------------
   static const String apiBaseUrl = "https://api.hadith-shareef.com/api/";
   static const String customBaseUrl = "https://api.hadith-shareef.com/api/";
   static const String randomAhadith = "hadith/random";
   static const String hadithCategoriesBaseApi =
       "https://hadeethenc.com/api/v1/";
-  // -----------------------------
-  // Navigator Key
-  // -----------------------------
 
-  // -----------------------------
-  // Authentication
-  // -----------------------------
   static const String login = "auth/login";
   static const String signup = "auth/register";
   static const String googleLogin = "auth/google-login";
@@ -23,9 +12,6 @@ class ApiConstants {
   static const String updateUserProfile = "auth/update-profile";
   static const String getUserStats = "auth/profile/stats";
 
-  // -----------------------------
-  // Islamic Library
-  // -----------------------------
   static const String getAllBooksWithCategories = "islamic-library/books";
   static const String getLibraryStatistics = "islamic-library/statistics";
   static const String getBooksByCategory =
@@ -37,17 +23,11 @@ class ApiConstants {
   static const String getLocalChapterAhadiths =
       "islamic-library/local-books/{bookSlug}/chapters/{chapterId}/hadiths";
 
-  // -----------------------------
-  // Bookmarks
-  // -----------------------------
   static const String getBookmarks = "islamic-bookmarks/user";
   static const String addBookmark = "islamic-bookmarks/add";
   static const String deleteBookmark = "islamic-bookmarks/remove/{bookmarkId}";
   static const String bookmarkCollection = "islamic-bookmarks/collections";
 
-  // -----------------------------
-  // Search
-  // -----------------------------
   static const String publicSearch = "islamic-library/search?q={query}";
   static const String hadithSearch =
       "islamic-library/search?q={query}&book={bookSlug}&chapter={chapter}";
@@ -55,37 +35,22 @@ class ApiConstants {
       "islamic-library/search?q={searchQuery}&book={bookSlug}&narrator={narrator}&status={grade}&category={category}&chapter={chapter}&includeLocal=true&includeAPI=true";
   static const String enhancedSearch = "search";
 
-  // -----------------------------
-  // Navigation
-  // -----------------------------
   static const String navigationHadith =
       "islamic-library/books/{bookSlug}/chapter/{chapterNumber}/hadith/{hadithNumber}/navigation";
   static const String localNavigationHadith =
       "islamic-library/local-books/{bookSlug}/hadiths/{hadithNumber}/navigation";
 
-  // -----------------------------
-  // AI / Hadith Analysis
-  // -----------------------------
   static const String hadithAnalysis = "ai/analyze-hadith";
   static const String serag = "ai/chat";
   static const String remainingQuestions = "ai/remaining-questions";
 
-  // -----------------------------
-  // Daily Hadith
-  // -----------------------------
   static const String dailyHadith = "daily-hadith";
 
-  // -----------------------------
-  // Search History
-  // -----------------------------
   static const String addSearch = "/search-history";
   static const String getSearchHistory = "/search-history/user";
-  static const String deleteSearch = "/search-history"; // /:id
+  static const String deleteSearch = "/search-history";
   static const String deleteAllSearch = "/search-history/user";
 
-  // -----------------------------
-  // Ahadith Categories
-  // -----------------------------
   static const String getCategories = "categories/list/?language=ar";
 
   static const String getAhadithByCategory = "hadeeths/list/";

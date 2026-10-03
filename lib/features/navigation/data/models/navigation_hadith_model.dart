@@ -43,5 +43,3 @@ class Hadith {
   factory Hadith.fromJson(Map<String, dynamic> json) => _$HadithFromJson(json);
   Map<String, dynamic> toJson() => _$HadithToJson(this);
 }
-
-

@@ -1,104 +1,71 @@
+import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 class DailyHadithTextStyles {
-  // Snackbar generic text
-  static const TextStyle snackText = TextStyle(
-    color: ColorsManager.secondaryBackground,
+  static TextStyle get snackText => TextStyle(
+    color: ColorsManager.white,
   );
 
-  // Hadith rich text style (main content)
-  static TextStyle hadithText = TextStyle(
-    fontSize: 20.sp,
-    fontFamily: 'Amiri',
-    height: 1.8,
-    color: Colors.black87,
-    fontWeight: FontWeight.w400,
-  );
+  static TextStyle get hadithText => TextStyles.readingLarge;
 
-  // Label chip text (e.g., "نص الحديث")
-  static TextStyle labelChip = TextStyle(
-    color: ColorsManager.primaryPurple,
+  static TextStyle get labelChip => TextStyle(
+    color: ColorsManager.purpleText,
     fontSize: 12.sp,
     fontWeight: FontWeight.bold,
   );
 
-  // Tabs label text
   static TextStyle tabLabel({required bool isSelected}) {
     return TextStyle(
-      fontSize: isSelected ? 15.sp : 14.sp,
-      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-      color: isSelected ? Colors.white : ColorsManager.primaryPurple,
+      fontSize: 14.sp,
+      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+      color: isSelected ? Colors.white : ColorsManager.secondaryText,
     );
   }
 
-  // Title below icon for hadith title
-  static const TextStyle hadithTitle = TextStyle(
+  static TextStyle get hadithTitle => TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
   );
 
-  // Actions row label text
-  static TextStyle actionLabel = TextStyle(
+  static TextStyle get actionLabel => TextStyle(
     fontSize: 13.sp,
     color: ColorsManager.darkGray,
   );
 
-  // Attribution text style (source)
-  static const TextStyle attribution = TextStyle(
-    fontSize: 16,
-    color: ColorsManager.accentPurple,
-    fontStyle: FontStyle.italic,
-  );
+  static TextStyle get attribution => TextStyles.attribution;
 
-  // Grade chip label style
   static TextStyle gradeLabel(Color color) {
     return TextStyle(color: color, fontWeight: FontWeight.bold);
   }
 
-  // Tab content text styles
-  static const TextStyle explanation = TextStyle(
-    fontFamily: 'Cairo',
-    fontWeight: FontWeight.w500,
-    color: ColorsManager.black,
-    height: 1.6,
-  );
+  static TextStyle get explanation => TextStyles.explanationBody;
 
-  static const TextStyle hintNumber = TextStyle(
+  static TextStyle get hintNumber => TextStyle(
     fontWeight: FontWeight.bold,
-    color: ColorsManager.black,
+    color: ColorsManager.primaryText,
   );
 
-  static const TextStyle hintText = TextStyle(
-    fontFamily: 'Cairo',
-    fontWeight: FontWeight.w500,
-    color: ColorsManager.black,
-  );
+  static TextStyle get hintText => TextStyles.explanationBody;
 
-  static const TextStyle wordStyle = TextStyle(
+  static TextStyle get wordStyle => TextStyle(
     fontFamily: 'Cairo',
     fontWeight: FontWeight.w700,
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
-  static const TextStyle colonStyle = TextStyle(
+  static TextStyle get colonStyle => TextStyle(
     fontWeight: FontWeight.bold,
-    color: ColorsManager.darkPurple,
+    color: ColorsManager.darkPurpleText,
   );
 
-  static const TextStyle meaningStyle = TextStyle(
-    fontSize: 15,
-    fontFamily: 'Cairo',
-    fontWeight: FontWeight.w500,
-    color: Colors.black87,
-  );
+  static TextStyle get meaningStyle => TextStyles.explanationBody;
 
-  // FAB label (Ask Serag) style
-  static TextStyle fabLabel = TextStyle(
+  static TextStyle get fabLabel => TextStyle(
     fontSize: 18.sp,
     fontWeight: FontWeight.bold,
-    color: ColorsManager.secondaryBackground,
+    color: ColorsManager.white,
   );
 }

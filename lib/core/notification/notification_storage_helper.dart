@@ -4,12 +4,10 @@ import 'dart:developer';
 import 'package:mishkat_almasabih/core/notification/notification_record.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Helper class for storing and retrieving notification history.
 class NotificationStorageHelper {
   static const String _storageKey = 'notification_history';
   static const int _maxRecords = 100;
 
-  /// Save a notification record to history.
   static Future<void> saveNotification({
     required int id,
     required String title,
@@ -32,7 +30,6 @@ class NotificationStorageHelper {
 
       records.insert(0, newRecord);
 
-      // Keep only the last _maxRecords
       if (records.length > _maxRecords) {
         records.removeRange(_maxRecords, records.length);
       }
@@ -46,7 +43,6 @@ class NotificationStorageHelper {
     }
   }
 
-  /// Get all notification history records.
   static Future<List<NotificationRecord>> getNotificationHistory() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -66,7 +62,6 @@ class NotificationStorageHelper {
     }
   }
 
-  /// Mark a notification as read.
   static Future<void> markAsRead(int id) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -86,7 +81,6 @@ class NotificationStorageHelper {
     }
   }
 
-  /// Delete a specific notification from history.
   static Future<void> deleteNotification(int id) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -103,7 +97,6 @@ class NotificationStorageHelper {
     }
   }
 
-  /// Clear all notification history.
   static Future<void> clearHistory() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -114,13 +107,11 @@ class NotificationStorageHelper {
     }
   }
 
-  /// Get unread notification count.
   static Future<int> getUnreadCount() async {
     final records = await getNotificationHistory();
     return records.where((r) => !r.wasRead).length;
   }
 
-  /// Get notifications by type.
   static Future<List<NotificationRecord>> getNotificationsByType(
     String type,
   ) async {
@@ -128,7 +119,6 @@ class NotificationStorageHelper {
     return records.where((r) => r.type == type).toList();
   }
 
-  /// Search notifications by title or body.
   static Future<List<NotificationRecord>> searchNotifications(
     String query,
   ) async {

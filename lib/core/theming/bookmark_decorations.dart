@@ -3,11 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/spacing.dart';
 import 'colors.dart';
 
-/// BookmarkDecorations centralizes BoxDecoration patterns for the Bookmark feature.
 class BookmarkDecorations {
   BookmarkDecorations._();
 
-  /// Tab button container (active/inactive).
   static BoxDecoration tabContainer({required bool isActive}) => BoxDecoration(
     color:
         isActive
@@ -16,9 +14,8 @@ class BookmarkDecorations {
     borderRadius: BorderRadius.circular(12.r),
   );
 
-  /// Search card container below app bar.
   static BoxDecoration searchCard() => BoxDecoration(
-    color: ColorsManager.white,
+    color: ColorsManager.cardBackground,
     borderRadius: BorderRadius.circular(Spacing.cardRadius),
     boxShadow: [
       BoxShadow(
@@ -29,13 +26,11 @@ class BookmarkDecorations {
     ],
   );
 
-  /// Container for the collections row background.
   static BoxDecoration collectionsContainer() => BoxDecoration(
     color: ColorsManager.secondaryBackground,
     borderRadius: BorderRadius.circular(16.r),
   );
 
-  /// Individual collection chip container.
   static BoxDecoration collectionChip({required bool isSelected}) =>
       BoxDecoration(
         color: isSelected ? ColorsManager.primaryPurple : Colors.transparent,
@@ -49,19 +44,16 @@ class BookmarkDecorations {
         ),
       );
 
-  /// Shimmer placeholder item for collections loading.
   static BoxDecoration shimmerItem() => BoxDecoration(
     color: ColorsManager.lightGray,
     borderRadius: BorderRadius.circular(16.r),
   );
 
-  /// Notes container.
   static BoxDecoration notesContainer() => BoxDecoration(
     color: ColorsManager.mediumGray.withOpacity(0.4),
     borderRadius: BorderRadius.circular(12.r),
   );
 
-  /// Bookmark Hadith card container.
   static BoxDecoration hadithCard() => BoxDecoration(
     gradient: LinearGradient(
       colors: [ColorsManager.secondaryBackground, ColorsManager.offWhite],
@@ -78,7 +70,6 @@ class BookmarkDecorations {
     ],
   );
 
-  /// Gradient pill for labels.
   static BoxDecoration pill(List<Color> colors) => BoxDecoration(
     gradient: LinearGradient(
       colors: colors,
@@ -88,7 +79,6 @@ class BookmarkDecorations {
     borderRadius: BorderRadius.circular(16.r),
   );
 
-  /// Dialog header icon circle gradient.
   static BoxDecoration iconCircleGradient() => BoxDecoration(
     shape: BoxShape.circle,
     gradient: LinearGradient(
@@ -96,7 +86,6 @@ class BookmarkDecorations {
     ),
   );
 
-  /// Outlined button-like container used for create-new collection.
   static BoxDecoration outlinedButtonContainer() => BoxDecoration(
     border: Border.all(
       color: ColorsManager.primaryPurple.withOpacity(0.3),

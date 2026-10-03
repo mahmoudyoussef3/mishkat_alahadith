@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/notification/firebase_service/notification_handler.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
-import 'package:mishkat_almasabih/features/hadith_daily/data/repos/save_hadith_daily_repo.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/get_saved_daily_hadith_use_case.dart';
 
 class WidgetNavigationService {
   static const platform = MethodChannel('com.mishkat_almasabih.app/widget');
@@ -17,8 +17,6 @@ class WidgetNavigationService {
           final link = call.arguments as String?;
           if (link == null || link.trim().isEmpty) return;
           try {
-            // Let the shared deep-link pipeline handle it.
-            // We only route; the OS-level deep link is handled by app_links.
             final uri = Uri.parse(link);
             navigatorKey.currentState?.pushNamed(
               Routes.shareHadithLink,
@@ -27,9 +25,7 @@ class WidgetNavigationService {
                       ? uri.pathSegments.last
                       : (uri.queryParameters['id'] ?? ''),
             );
-          } catch (_) {
-            // Ignore invalid URIs.
-          }
+          } catch (_) {}
           return;
         case 'openPrayerTimes':
           navigatorKey.currentState?.pushNamed(Routes.prayerTimesScreen);
@@ -45,9 +41,7 @@ class WidgetNavigationService {
 
     if (navigatorKey.currentContext != null) {
       try {
-        final repo = getIt<SaveHadithDailyRepo>();
-
-        final hadith = await repo.getHadith();
+        final hadith = await getIt<GetSavedDailyHadithUseCase>()();
 
         if (hadith != null) {
           navigatorKey.currentState?.pushNamed(

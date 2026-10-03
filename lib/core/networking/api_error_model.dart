@@ -21,13 +21,3 @@ class ApiErrorModel {
 
   Map<String, dynamic> toJson() => _$ApiErrorModelToJson(this);
 }
-
-extension ApiErrorModelX on ApiErrorModel {
-  String getAllErrorMessages() {
-    if (messageAr != null && messageAr!.isNotEmpty) return messageAr!;
-
-   // if (message != null && message!.isNotEmpty) return message!;
-
-    return "Unknown error occurred";
-  }
-}

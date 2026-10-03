@@ -31,4 +31,9 @@ class Routes {
   static const String ahadithListScreen = '/ahadithListScreen';
   static const String shareHadithLink = '/api/hadith';
 
+  static const String quranScreen = '/quran';
+  static const String mushafReader = '/quran/reader';
+  static const String quranSearch = '/quran/search';
+  static const String tajweedGuide = '/quran/tajweedGuide';
+
 }

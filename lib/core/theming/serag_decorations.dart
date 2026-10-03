@@ -2,42 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
-/// Serag Chat feature decorations
-/// Extracted from serag screens and widgets for consistent styling
 class SeragDecorations {
-  // ==================== CHAT SCREEN ====================
+  static Color get scaffoldBackground => ColorsManager.secondaryBackground;
 
-  /// Main scaffold background color
-  static const Color scaffoldBackground = ColorsManager.secondaryBackground;
-
-  // ==================== CHAT MESSAGE BUBBLE ====================
-
-  /// Message bubble padding
   static EdgeInsets messageBubblePadding = EdgeInsets.only(
     bottom: 12.h,
     left: 8.w,
     right: 8.w,
   );
 
-  /// User avatar background color
-  static const Color userAvatarBackground = ColorsManager.primaryPurple;
+  static Color get userAvatarBackground => ColorsManager.primaryPurple;
 
-  /// User avatar icon color
-  static const Color userAvatarIconColor = Colors.white;
+  static Color get userAvatarIconColor => Colors.white;
 
-  /// User avatar icon size
   static double userAvatarIconSize = 18.sp;
 
-  /// User avatar radius
   static double userAvatarRadius = 16.r;
 
-  /// Assistant avatar image path
   static const String assistantAvatarPath = 'assets/images/serag_logo.jpg';
 
-  /// Assistant avatar radius
   static double assistantAvatarRadius = 16.r;
 
-  /// User message bubble decoration (gradient)
   static BoxDecoration userMessageBubble() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -64,7 +49,6 @@ class SeragDecorations {
     );
   }
 
-  /// Assistant message bubble decoration
   static BoxDecoration assistantMessageBubble() {
     return BoxDecoration(
       color: ColorsManager.secondaryBackground,
@@ -84,29 +68,21 @@ class SeragDecorations {
     );
   }
 
-  /// Message bubble padding (internal)
   static EdgeInsets messageBubbleInternalPadding = EdgeInsets.symmetric(
     horizontal: 16.w,
     vertical: 12.h,
   );
 
-  /// Snackbar copy message background
-  static const Color snackbarCopyBackground = ColorsManager.primaryPurple;
+  static Color get snackbarCopyBackground => ColorsManager.primaryPurple;
 
-  /// Snackbar copy message behavior
   static const SnackBarBehavior snackbarBehavior = SnackBarBehavior.floating;
 
-  /// Snackbar copy message shape
   static RoundedRectangleBorder snackbarShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(10),
   );
 
-  /// Snackbar margin
   static EdgeInsets snackbarMargin = EdgeInsets.all(16.w);
 
-  // ==================== CHAT INPUT SECTION ====================
-
-  /// Input section container decoration
   static BoxDecoration inputSectionContainer() {
     return BoxDecoration(
       color: ColorsManager.primaryBackground,
@@ -120,7 +96,6 @@ class SeragDecorations {
     );
   }
 
-  /// Input section padding
   static EdgeInsets inputSectionPadding(BuildContext context) {
     return EdgeInsets.only(
       left: 16.w,
@@ -130,7 +105,6 @@ class SeragDecorations {
     );
   }
 
-  /// Text field container decoration
   static BoxDecoration textFieldContainer() {
     return BoxDecoration(
       color: ColorsManager.secondaryBackground,
@@ -145,13 +119,10 @@ class SeragDecorations {
     );
   }
 
-  /// Text field border
   static const InputBorder textFieldBorder = InputBorder.none;
 
-  /// Text field content padding
   static EdgeInsets textFieldPadding = EdgeInsets.symmetric(horizontal: 20.w);
 
-  /// Send button gradient decoration
   static BoxDecoration sendButtonGradient() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -173,61 +144,41 @@ class SeragDecorations {
     );
   }
 
-  /// Send button size
   static double sendButtonSize = 50.w;
 
-  /// Send button height
   static double sendButtonHeight = 50.h;
 
-  /// Loading indicator size
   static double loadingIndicatorSize = 20.w;
 
-  /// Loading indicator height
   static double loadingIndicatorHeight = 20.h;
 
-  /// Loading indicator color
-  static const Color loadingIndicatorColor = Colors.white;
+  static Color get loadingIndicatorColor => Colors.white;
 
-  /// Loading indicator stroke width
   static const double loadingIndicatorStrokeWidth = 2.5;
 
-  /// Send button icon color
-  static const Color sendButtonIconColor = Colors.white;
+  static Color get sendButtonIconColor => Colors.white;
 
-  /// Error snackbar background color
-  static const Color errorSnackbarBackground = Colors.red;
+  static Color get errorSnackbarBackground => ColorsManager.error;
 
-  /// Limit exceeded snackbar background color
-  static Color limitExceededSnackbarBackground = Colors.red.shade300;
+  static Color get limitExceededSnackbarBackground => ColorsManager.error;
 
-  /// Divider color
-  static const Color dividerColor = ColorsManager.mediumGray;
+  static Color get dividerColor => ColorsManager.mediumGray;
 
-  /// Divider indent
   static double dividerIndent = 50.w;
 
-  /// Divider end indent
   static double dividerEndIndent = 50.w;
 
-  /// Warning disclaimer padding
   static EdgeInsets warningDisclaimerPadding = EdgeInsets.symmetric(
     horizontal: 16.w,
     vertical: 8.h,
   );
 
-  // ==================== EMPTY CHAT STATE ====================
-
-  /// Empty state icon size
   static double emptyStateIconSize = 64.sp;
 
-  /// Empty state icon color
-  static Color emptyStateIconColor = ColorsManager.primaryPurple.withOpacity(
+  static Color get emptyStateIconColor => ColorsManager.primaryPurple.withOpacity(
     0.3,
   );
 
-  // ==================== REMAINING QUESTIONS CARD ====================
-
-  /// Card container decoration
   static BoxDecoration remainingQuestionsCard() {
     return BoxDecoration(
       gradient: LinearGradient(
@@ -246,31 +197,23 @@ class SeragDecorations {
     );
   }
 
-  /// Card margin
   static EdgeInsets remainingQuestionsCardMargin = EdgeInsets.all(16.w);
 
-  /// Card padding
   static EdgeInsets remainingQuestionsCardPadding = EdgeInsets.symmetric(
     vertical: 12.h,
     horizontal: 16.w,
   );
 
-  /// Icon container background color
-  static const Color iconContainerBackground = ColorsManager.primaryPurple;
+  static Color get iconContainerBackground => ColorsManager.primaryPurple;
 
-  /// Icon container padding
   static EdgeInsets iconContainerPadding = EdgeInsets.all(8.w);
 
-  /// Icon container border radius
   static const double iconContainerBorderRadius = 8;
 
-  /// Icon color
-  static const Color iconColor = Colors.white;
+  static Color get iconColor => Colors.white;
 
-  /// Icon size
   static double iconSize = 18.sp;
 
-  /// Shimmer loading card decoration
   static BoxDecoration shimmerLoadingCard() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple.withOpacity(0.05),
@@ -282,39 +225,38 @@ class SeragDecorations {
     );
   }
 
-  /// Shimmer animation duration
   static const Duration shimmerAnimationDuration = Duration(milliseconds: 1500);
 
-  /// Shimmer gradient colors
-  static List<Color> shimmerGradientColors = [
+  static List<Color> get shimmerGradientColors => [
     ColorsManager.primaryPurple.withOpacity(0.1),
     ColorsManager.primaryPurple.withOpacity(0.3),
     ColorsManager.primaryPurple.withOpacity(0.1),
   ];
 
-  // ==================== NO ATTEMPTS LEFT WIDGET ====================
-
-  /// No attempts container decoration
   static BoxDecoration noAttemptsContainer() {
     return BoxDecoration(
-      color: Colors.red.shade50,
+      color:
+          ColorsManager.isDark
+              ? ColorsManager.error.withOpacity(0.12)
+              : ColorsManager.error.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.red.shade200),
+      border: Border.all(
+        color:
+            ColorsManager.isDark
+                ? ColorsManager.error.withOpacity(0.4)
+                : ColorsManager.error.withValues(alpha: 0.35),
+      ),
     );
   }
 
-  /// No attempts container padding
   static const EdgeInsets noAttemptsContainerPadding = EdgeInsets.all(16);
 
-  /// No attempts container margin
   static const EdgeInsets noAttemptsContainerMargin = EdgeInsets.symmetric(
     horizontal: 12,
     vertical: 8,
   );
 
-  /// No attempts warning icon color
-  static const Color noAttemptsWarningIconColor = Colors.red;
+  static Color get noAttemptsWarningIconColor => ColorsManager.error;
 
-  /// No attempts warning icon
   static const IconData noAttemptsWarningIcon = Icons.warning_amber_rounded;
 }

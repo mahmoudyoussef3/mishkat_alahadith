@@ -89,7 +89,6 @@ class EmptySliverState extends StatelessWidget {
   }
 }
 
-/// Non-sliver version (useful in regular Column/List)
 class EmptyState extends StatelessWidget {
   final String title;
   final String subtitle;

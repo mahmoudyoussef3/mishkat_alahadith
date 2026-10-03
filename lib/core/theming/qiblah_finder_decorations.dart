@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
-/// Qiblah Finder feature decorations
-/// Extracted from qiblah_finder_screen for consistent styling
 class QiblahFinderDecorations {
-  // ==================== COMPASS CARD ====================
-
-  /// Main compass card container
   static BoxDecoration compassCard() {
     return BoxDecoration(
       color: ColorsManager.cardBackground,
@@ -23,9 +18,6 @@ class QiblahFinderDecorations {
     );
   }
 
-  // ==================== TIPS SECTION ====================
-
-  /// Tips container background
   static BoxDecoration tipsContainer() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple.withOpacity(0.06),
@@ -37,7 +29,6 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Tips icon container
   static BoxDecoration tipsIconContainer() {
     return BoxDecoration(
       color: ColorsManager.primaryGold.withOpacity(0.14),
@@ -45,17 +36,12 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Tips icon
   static const IconData tipsIcon = Icons.tips_and_updates_rounded;
-  static const Color tipsIconColor = ColorsManager.primaryGold;
+  static Color get tipsIconColor => ColorsManager.primaryGold;
 
-  /// Tips check icon
   static const IconData tipsCheckIcon = Icons.check_circle_rounded;
-  static Color tipsCheckIconColor = ColorsManager.primaryPurple;
+  static Color get tipsCheckIconColor => ColorsManager.primaryPurple;
 
-  // ==================== INFO CHIPS ====================
-
-  /// Info chip container
   static BoxDecoration infoChip() {
     return BoxDecoration(
       color: ColorsManager.secondaryBackground,
@@ -64,12 +50,8 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Info chip icon color
-  static const Color infoChipIconColor = ColorsManager.primaryPurple;
+  static Color get infoChipIconColor => ColorsManager.primaryPurple;
 
-  // ==================== QIBLAH DIAL ====================
-
-  /// Outer ring gradient
   static BoxDecoration dialOuterRing() {
     return BoxDecoration(
       shape: BoxShape.circle,
@@ -84,7 +66,6 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Inner dial surface
   static BoxDecoration dialInnerSurface() {
     return BoxDecoration(
       shape: BoxShape.circle,
@@ -100,7 +81,6 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Center hub
   static BoxDecoration dialCenterHub() {
     return BoxDecoration(
       shape: BoxShape.circle,
@@ -109,7 +89,6 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Qiblah badge container
   static BoxDecoration qiblahBadgeContainer() {
     return BoxDecoration(
       color: ColorsManager.secondaryBackground,
@@ -125,7 +104,6 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Qiblah icon container (mosque icon)
   static BoxDecoration qiblahIconContainer() {
     return BoxDecoration(
       color: ColorsManager.primaryGold.withOpacity(0.14),
@@ -133,11 +111,9 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Qiblah icon
   static const IconData qiblahIcon = Icons.mosque;
-  static const Color qiblahIconColor = ColorsManager.primaryGold;
+  static Color get qiblahIconColor => ColorsManager.primaryGold;
 
-  /// Qiblah degree badge
   static BoxDecoration qiblahDegreeBadge() {
     return BoxDecoration(
       color: ColorsManager.primaryPurple.withOpacity(0.08),
@@ -149,7 +125,6 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Offset label container
   static BoxDecoration offsetLabelContainer() {
     return BoxDecoration(
       color: ColorsManager.secondaryBackground,
@@ -158,9 +133,6 @@ class QiblahFinderDecorations {
     );
   }
 
-  // ==================== COMPASS DIAL PAINTING ====================
-
-  /// Compass ring paint properties
   static Paint dialRingPaint(double radius) {
     return Paint()
       ..style = PaintingStyle.stroke
@@ -168,7 +140,6 @@ class QiblahFinderDecorations {
       ..color = ColorsManager.primaryPurple.withOpacity(0.18);
   }
 
-  /// Minor tick paint
   static Paint dialMinorTickPaint(double radius) {
     return Paint()
       ..style = PaintingStyle.stroke
@@ -177,7 +148,6 @@ class QiblahFinderDecorations {
       ..color = ColorsManager.mediumGray.withOpacity(0.75);
   }
 
-  /// Major tick paint
   static Paint dialMajorTickPaint(double radius) {
     return Paint()
       ..style = PaintingStyle.stroke
@@ -186,29 +156,21 @@ class QiblahFinderDecorations {
       ..color = ColorsManager.primaryPurple.withOpacity(0.55);
   }
 
-  /// Cardinal label colors
-  static const Color dialNorthLabelColor = ColorsManager.primaryPurple;
-  static const Color dialOtherLabelColor = ColorsManager.secondaryText;
+  static Color get dialNorthLabelColor => ColorsManager.primaryPurple;
+  static Color get dialOtherLabelColor => ColorsManager.secondaryText;
 
-  // ==================== NEEDLE PAINTING ====================
-
-  /// Needle paint (Qiblah direction arrow)
   static Paint needlePaint() {
     return Paint()
       ..style = PaintingStyle.fill
       ..color = ColorsManager.primaryGold;
   }
 
-  /// Needle shadow paint
   static Paint needleShadowPaint() {
     return Paint()
       ..style = PaintingStyle.fill
       ..color = ColorsManager.black.withOpacity(0.10);
   }
 
-  // ==================== MESSAGE CARD ====================
-
-  /// Message card (error/permission states)
   static BoxDecoration messageCard() {
     return BoxDecoration(
       color: ColorsManager.cardBackground,
@@ -217,7 +179,6 @@ class QiblahFinderDecorations {
     );
   }
 
-  /// Message card button style
   static ButtonStyle messageCardButton() {
     return ElevatedButton.styleFrom(
       backgroundColor: ColorsManager.primaryPurple,

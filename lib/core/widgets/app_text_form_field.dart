@@ -33,6 +33,7 @@ class AppTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(16.r);
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -43,37 +44,38 @@ class AppTextFormField extends StatelessWidget {
         focusedBorder:
             focusedBorder ??
             OutlineInputBorder(
-              borderSide: const BorderSide(
-                color: ColorsManager.mainBlue,
-                width: 1.3,
+              borderSide: BorderSide(
+                color: ColorsManager.primaryPurple,
+                width: 1.5,
               ),
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: radius,
             ),
         enabledBorder:
             enabledBorder ??
             OutlineInputBorder(
-              borderSide: const BorderSide(
-                color: ColorsManager.lightGray,
-                width: 1.3,
-              ),
-              borderRadius: BorderRadius.circular(16.0),
+              borderSide: BorderSide(color: ColorsManager.mediumGray),
+              borderRadius: radius,
             ),
         errorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red, width: 1.3),
-          borderRadius: BorderRadius.circular(16.0),
+          borderSide: BorderSide(color: ColorsManager.error, width: 1.3),
+          borderRadius: radius,
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red, width: 1.3),
-          borderRadius: BorderRadius.circular(16.0),
+          borderSide: BorderSide(color: ColorsManager.error, width: 1.5),
+          borderRadius: radius,
         ),
-        hintStyle: hintStyle ?? TextStyles.font14LightGrayRegular,
+        hintStyle:
+            hintStyle ??
+            TextStyles.bodyMedium.copyWith(color: ColorsManager.secondaryText),
         hintText: hintText,
         suffixIcon: suffixIcon,
-        fillColor: backgroundColor ?? ColorsManager.mediumGray,
+        fillColor: backgroundColor ?? ColorsManager.lightGray,
         filled: true,
       ),
       obscureText: isObscureText ?? false,
-      style: TextStyles.font14DarkBlueMedium,
+      style:
+          inputTextStyle ??
+          TextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w500),
       validator: (value) {
         return validator(value);
       },

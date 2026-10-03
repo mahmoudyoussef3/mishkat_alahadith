@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/features/bookmark/ui/screens/bookmark_screen.dart';
-import 'package:mishkat_almasabih/features/home/ui/home_screen.dart';
-import 'package:mishkat_almasabih/features/profile/ui/profile_screen.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/ui/screens/bookmark_screen.dart';
+import 'package:mishkat_almasabih/features/home/presentation/ui/home_screen.dart';
+import 'package:mishkat_almasabih/features/profile/presentation/ui/profile_screen.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 
@@ -30,15 +30,12 @@ class OrderStatus implements NotificationHandler {
 class AddCredit implements NotificationHandler {
   @override
   void handleOnTap() {
-    // Use the navigation service to navigate to profile tab
-  //  NavigationService().navigateToProfile();
   }
 }
 
 class CheckCart implements NotificationHandler {
   @override
   void handleOnTap() {
-    // Navigate to the cart screen
     navigatorKey.currentState?.push(
       MaterialPageRoute(builder: (context) => ProfileScreen()),
     );
@@ -48,7 +45,5 @@ class CheckCart implements NotificationHandler {
 class CheckFavorite implements NotificationHandler {
   @override
   void handleOnTap() {
-    // Navigate to the favorite screen
- //   NavigationService().navigateToFavorite();
   }
 }
