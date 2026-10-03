@@ -106,7 +106,7 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(
-          top: true,
+          top: false,
           bottom: true,
           child: Scaffold(
             floatingActionButton: SeragFabButton(

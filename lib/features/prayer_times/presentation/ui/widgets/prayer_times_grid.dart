@@ -111,7 +111,7 @@ class _PrayerRow extends StatelessWidget {
             width: 36.r,
             height: 36.r,
             decoration: PrayerTimesDecorations.gridRowIconBg(),
-            child: Icon(icon, color: ColorsManager.primaryPurple, size: 20.sp),
+            child: Icon(icon, color: ColorsManager.purpleText, size: 20.sp),
           ),
         ],
       ),

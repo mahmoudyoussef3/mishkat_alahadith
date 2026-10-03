@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: RefreshIndicator(
           onRefresh: () => context.read<DailyHadithCubit>().load(),
           child: SafeArea(
-            top: true,
+            top: false,
             bottom: true,
             child: Scaffold(
               drawer: const MishkatDrawer(),

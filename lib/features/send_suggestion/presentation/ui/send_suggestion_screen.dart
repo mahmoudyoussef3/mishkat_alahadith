@@ -64,7 +64,7 @@ class _SuggestionFormState extends State<SuggestionForm> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(
-          top: true,
+          top: false,
           bottom: true,
           child: Scaffold(
             backgroundColor: SendSuggestionDecorations.scaffoldBackground,

@@ -89,10 +89,7 @@ class _ToggleChip extends StatelessWidget {
           gradient:
               isSelected
                   ? LinearGradient(
-                    colors: [
-                      ColorsManager.primaryPurple,
-                      ColorsManager.darkPurple,
-                    ],
+                    colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
                     begin: AlignmentDirectional.topStart,
                     end: AlignmentDirectional.bottomEnd,
                   )

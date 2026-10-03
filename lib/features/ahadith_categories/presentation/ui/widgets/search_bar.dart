@@ -78,7 +78,6 @@ class _CategoriesSearchBarState extends State<CategoriesSearchBar> {
                           'بحث',
                           style: TextStyles.font13BlueSemiBold.copyWith(
                             color: Colors.white,
-                            letterSpacing: 0.2,
                           ),
                         ),
                       ),

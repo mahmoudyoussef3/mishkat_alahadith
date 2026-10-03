@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
 
 class HadithDetailsTextStyles {
   static TextStyle get snackText => TextStyle(
@@ -8,18 +9,12 @@ class HadithDetailsTextStyles {
   );
 
   static TextStyle get labelChip => TextStyle(
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
     fontSize: 12.sp,
     fontWeight: FontWeight.bold,
   );
 
-  static TextStyle get hadithText => TextStyle(
-    fontSize: 20.sp,
-    height: 1.8,
-    color: ColorsManager.primaryText,
-    fontFamily: 'Amiri',
-    fontWeight: FontWeight.w500,
-  );
+  static TextStyle get hadithText => TextStyles.readingLarge;
 
   static TextStyle get bookLabel => TextStyle(
     fontSize: 14.sp,
@@ -44,7 +39,7 @@ class HadithDetailsTextStyles {
   static TextStyle get navigationLabel => TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.bold,
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
   );
 
   static TextStyle get headerMain => TextStyle(

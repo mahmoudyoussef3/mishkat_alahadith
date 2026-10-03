@@ -96,7 +96,6 @@ class _SearchWithFiltersScreenState extends State<SearchWithFiltersScreen> {
                             color: ColorsManager.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 32.sp,
-                            letterSpacing: 1.2,
                           ),
                         ),
                       ),
@@ -137,7 +136,7 @@ class _SearchWithFiltersScreenState extends State<SearchWithFiltersScreen> {
                             child: Text(
                               'مسح الكل',
                               style: TextStyles.bodyMedium.copyWith(
-                                color: ColorsManager.primaryPurple,
+                                color: ColorsManager.purpleText,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

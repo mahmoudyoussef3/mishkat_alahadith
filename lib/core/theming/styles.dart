@@ -8,14 +8,12 @@ class TextStyles {
     fontSize: 32.sp,
     fontWeight: FontWeightHelper.bold,
     color: ColorsManager.primaryText,
-    letterSpacing: -0.5,
   );
 
   static TextStyle get displayMedium => TextStyle(
     fontSize: 28.sp,
     fontWeight: FontWeightHelper.bold,
     color: ColorsManager.primaryText,
-    letterSpacing: -0.25,
   );
 
   static TextStyle get displaySmall => TextStyle(
@@ -102,16 +100,44 @@ class TextStyles {
   static TextStyle get arabicTitle => TextStyle(
     fontSize: 20.sp,
     fontWeight: FontWeightHelper.bold,
-    color: ColorsManager.primaryPurple,
-    letterSpacing: 0.5,
+    color: ColorsManager.purpleText,
   );
 
-  static TextStyle get hadithText => TextStyle(
-    fontSize: 16.sp,
-    fontWeight: FontWeightHelper.regular,
+  /// Long-form reading text (hadith bodies): Amiri with generous line
+  /// spacing so diacritics on neighbouring lines never collide.
+  static TextStyle get readingLarge => TextStyle(
+    fontFamily: 'Amiri',
+    fontSize: 21.sp,
+    height: 2.0,
     color: ColorsManager.primaryText,
-    height: 1.6,
-    fontStyle: FontStyle.italic,
+  );
+
+  /// Reading text for previews and cards.
+  static TextStyle get readingMedium => TextStyle(
+    fontFamily: 'Amiri',
+    fontSize: 18.sp,
+    height: 1.9,
+    color: ColorsManager.primaryText,
+  );
+
+  static TextStyle get hadithText => readingMedium;
+
+  /// Body copy for explanations, lessons and word meanings: regular weight
+  /// and roomy lines, since these passages are read end to end.
+  static TextStyle get explanationBody => TextStyle(
+    fontFamily: 'Cairo',
+    fontSize: 15.sp,
+    fontWeight: FontWeightHelper.regular,
+    height: 1.85,
+    color: ColorsManager.primaryText,
+  );
+
+  /// Source line under a hadith ("رواه البخاري").
+  static TextStyle get attribution => TextStyle(
+    fontFamily: 'Cairo',
+    fontSize: 14.sp,
+    fontWeight: FontWeightHelper.semiBold,
+    color: ColorsManager.purpleText,
   );
 
   static TextStyle get quranText => TextStyle(
@@ -131,20 +157,18 @@ class TextStyles {
     fontSize: 12.sp,
     fontWeight: FontWeightHelper.medium,
     color: ColorsManager.secondaryPurple,
-    letterSpacing: 0.5,
   );
 
   static TextStyle get buttonText => TextStyle(
     fontSize: 14.sp,
     fontWeight: FontWeightHelper.semiBold,
     color: ColorsManager.white,
-    letterSpacing: 0.5,
   );
 
   static TextStyle get linkText => TextStyle(
     fontSize: 14.sp,
     fontWeight: FontWeightHelper.medium,
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
     decoration: TextDecoration.underline,
   );
 

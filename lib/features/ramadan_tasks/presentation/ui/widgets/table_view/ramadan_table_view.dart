@@ -439,7 +439,7 @@ class _ActionChip extends StatelessWidget {
               Text(
                 label,
                 style: TextStyles.labelSmall.copyWith(
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                   fontWeight: FontWeight.w600,
                   fontSize: 11.sp,
                 ),

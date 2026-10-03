@@ -30,7 +30,7 @@ void setupErrorState(BuildContext context, String error) {
               ),
               child: Icon(
                 Icons.info_outline_rounded,
-                color: ColorsManager.primaryPurple,
+                color: ColorsManager.purpleText,
                 size: 32,
               ),
             ),
@@ -58,7 +58,7 @@ void setupErrorState(BuildContext context, String error) {
                 child: Text(
                   'حسناً',
                   style: TextStyles.font14BlueSemiBold.copyWith(
-                    color: ColorsManager.primaryPurple,
+                    color: ColorsManager.purpleText,
                   ),
                 ),
               ),

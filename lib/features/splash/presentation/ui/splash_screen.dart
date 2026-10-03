@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:mishkat_almasabih/core/theming/app_theme.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/splash_styles.dart';
 import 'package:mishkat_almasabih/core/theming/splash_decorations.dart';
@@ -66,31 +68,35 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: SplashDecorations.scaffoldBackground,
-      body: Container(
-        decoration: SplashDecorations.backgroundGradient(),
-        child: Column(
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildLogoSection(),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // Light status bar icons over the violet background.
+      value: AppTheme.systemBarsStyle(Brightness.dark),
+      child: Scaffold(
+        backgroundColor: SplashDecorations.scaffoldBackground,
+        body: Container(
+          decoration: SplashDecorations.backgroundGradient(),
+          child: Column(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildLogoSection(),
 
-                  SizedBox(height: SplashDecorations.spacingAfterLogo),
+                    SizedBox(height: SplashDecorations.spacingAfterLogo),
 
-                  _buildAppNameSection(),
+                    _buildAppNameSection(),
 
-                  SizedBox(height: SplashDecorations.spacingAfterAppName),
+                    SizedBox(height: SplashDecorations.spacingAfterAppName),
 
-                  _buildLoadingIndicator(),
-                ],
+                    _buildLoadingIndicator(),
+                  ],
+                ),
               ),
-            ),
 
-            SizedBox(height: SplashDecorations.bottomSpacing),
-          ],
+              SizedBox(height: SplashDecorations.bottomSpacing),
+            ],
+          ),
         ),
       ),
     );

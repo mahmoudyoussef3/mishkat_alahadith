@@ -24,7 +24,7 @@ class IslamicSeparator extends StatelessWidget {
             decoration: HadithDecorations.quoteChip(),
             child: Icon(
               Icons.format_quote,
-              color: ColorsManager.primaryPurple,
+              color: ColorsManager.purpleText,
               size: 20.r,
             ),
           ),

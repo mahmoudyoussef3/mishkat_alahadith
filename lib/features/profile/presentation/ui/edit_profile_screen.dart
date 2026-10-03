@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mishkat_almasabih/core/theming/app_theme.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
 import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
@@ -62,124 +64,130 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: ProfileDecorations.editProfileBackground,
-          child: BlocConsumer<EditProfileCubit, EditProfileState>(
-            listener: (context, state) {
-              if (state is EditProfileSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    behavior: ProfileDecorations.successSnackbarBehavior,
-                    backgroundColor:
-                        ProfileDecorations.successSnackbarBackground,
-                    content: Text(
-                      "تم تحديث الملف الشخصي بنجاح",
-                      style: ProfileTextStyles.successSnackbarText,
-                    ),
-                  ),
-                );
-                Navigator.pop(context, state.updatedUser);
-              } else if (state is EditProfileFailure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("فشل التحديث: ${state.errorMessage}"),
-                    backgroundColor: ProfileDecorations.errorSnackbarBackground,
-                  ),
-                );
-              }
-            },
-            builder: (context, state) {
-              return SingleChildScrollView(
-                padding: EdgeInsets.all(20.w),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: 24.sp,
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            "تعديل الملف الشخصي",
-                            textAlign: TextAlign.center,
-                            style: ProfileTextStyles.editProfileTitle,
-                          ),
-                        ),
-                        SizedBox(width: 48.w),
-                      ],
-                    ),
-                    SizedBox(height: 30.h),
-
-                    AvatarSection(
-                      selectedImageFile: _selectedImageFile,
-                      avatarUrl: getAvatarUrl(widget.userData),
-                      onPickImage: _pickImage,
-                    ),
-                    SizedBox(height: 32.h),
-
-                    UsernameSection(controller: _usernameController),
-                    SizedBox(height: 24.h),
-
-                    InfoCard(
-                      email: widget.userData.email,
-                      createdAt: _formatDate(widget.userData.createdAt),
-                      achievements: widget.userData.weeklyAchievementCount ?? 0,
-                    ),
-                    SizedBox(height: 40.h),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorsManager.primaryPurple,
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          elevation: 6,
-                        ),
-                        onPressed:
-                            state is EditProfileLoading
-                                ? null
-                                : () {
-                                  context
-                                      .read<EditProfileCubit>()
-                                      .updateProfile(
-                                        username:
-                                            _usernameController.text.trim(),
-                                        avatarFile: _selectedImageFile,
-                                      );
-                                },
-                        child:
-                            state is EditProfileLoading
-                                ? SizedBox(
-                                  width: 20.w,
-                                  height: 20.w,
-                                  child: const CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                                : Text(
-                                  "حفظ",
-                                  style: ProfileTextStyles.saveButtonText,
-                                ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // Light status bar icons over the violet header.
+      value: AppTheme.systemBarsStyle(Brightness.dark),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: ProfileDecorations.editProfileBackground,
+            child: BlocConsumer<EditProfileCubit, EditProfileState>(
+              listener: (context, state) {
+                if (state is EditProfileSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      behavior: ProfileDecorations.successSnackbarBehavior,
+                      backgroundColor:
+                          ProfileDecorations.successSnackbarBackground,
+                      content: Text(
+                        "تم تحديث الملف الشخصي بنجاح",
+                        style: ProfileTextStyles.successSnackbarText,
                       ),
                     ),
-                  ],
-                ),
-              );
-            },
+                  );
+                  Navigator.pop(context, state.updatedUser);
+                } else if (state is EditProfileFailure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("فشل التحديث: ${state.errorMessage}"),
+                      backgroundColor:
+                          ProfileDecorations.errorSnackbarBackground,
+                    ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                return SingleChildScrollView(
+                  padding: EdgeInsets.all(20.w),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                              size: 24.sp,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              "تعديل الملف الشخصي",
+                              textAlign: TextAlign.center,
+                              style: ProfileTextStyles.editProfileTitle,
+                            ),
+                          ),
+                          SizedBox(width: 48.w),
+                        ],
+                      ),
+                      SizedBox(height: 30.h),
+
+                      AvatarSection(
+                        selectedImageFile: _selectedImageFile,
+                        avatarUrl: getAvatarUrl(widget.userData),
+                        onPickImage: _pickImage,
+                      ),
+                      SizedBox(height: 32.h),
+
+                      UsernameSection(controller: _usernameController),
+                      SizedBox(height: 24.h),
+
+                      InfoCard(
+                        email: widget.userData.email,
+                        createdAt: _formatDate(widget.userData.createdAt),
+                        achievements:
+                            widget.userData.weeklyAchievementCount ?? 0,
+                      ),
+                      SizedBox(height: 40.h),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorsManager.primaryPurple,
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            elevation: 6,
+                          ),
+                          onPressed:
+                              state is EditProfileLoading
+                                  ? null
+                                  : () {
+                                    context
+                                        .read<EditProfileCubit>()
+                                        .updateProfile(
+                                          username:
+                                              _usernameController.text.trim(),
+                                          avatarFile: _selectedImageFile,
+                                        );
+                                  },
+                          child:
+                              state is EditProfileLoading
+                                  ? SizedBox(
+                                    width: 20.w,
+                                    height: 20.w,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : Text(
+                                    "حفظ",
+                                    style: ProfileTextStyles.saveButtonText,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -310,7 +318,7 @@ class AvatarPickerSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: ColorsManager.primaryPurple, size: 28.sp),
+          Icon(icon, color: ColorsManager.purpleText, size: 28.sp),
           SizedBox(height: 8.h),
           Text(text, style: ProfileTextStyles.avatarPickerOption),
         ],

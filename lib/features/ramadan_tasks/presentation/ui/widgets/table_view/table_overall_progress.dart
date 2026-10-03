@@ -53,13 +53,13 @@ class TableOverallProgress extends StatelessWidget {
               Icon(
                 Icons.grid_view_rounded,
                 size: 18.sp,
-                color: ColorsManager.primaryPurple,
+                color: ColorsManager.purpleText,
               ),
               SizedBox(width: 8.w),
               Text(
                 'التقدم الكلي',
                 style: TextStyles.titleSmall.copyWith(
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -99,10 +99,7 @@ class TableOverallProgress extends StatelessWidget {
                             child: Container(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [
-                                    ColorsManager.primaryPurple,
-                                    ColorsManager.darkPurple,
-                                  ],
+                                  colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
                                 ),
                                 borderRadius: BorderRadius.circular(4.r),
                               ),
@@ -119,7 +116,7 @@ class TableOverallProgress extends StatelessWidget {
                       Text(
                         '${(value * 100).toInt()}%',
                         style: TextStyles.bodySmall.copyWith(
-                          color: ColorsManager.primaryPurple,
+                          color: ColorsManager.purpleText,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

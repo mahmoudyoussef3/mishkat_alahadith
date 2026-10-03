@@ -3,19 +3,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 class SplashDecorations {
-  static Color get scaffoldBackground => ColorsManager.primaryGreen;
+  static Color get scaffoldBackground => ColorsManager.headerEnd;
 
   static BoxDecoration backgroundGradient() {
     return BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
-          ColorsManager.primaryGreen,
-          ColorsManager.primaryGreen.withOpacity(0.9),
-          ColorsManager.primaryGreen.withOpacity(0.8),
-        ],
-        stops: const [0.0, 0.9, 1.5],
+        colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
       ),
     );
   }

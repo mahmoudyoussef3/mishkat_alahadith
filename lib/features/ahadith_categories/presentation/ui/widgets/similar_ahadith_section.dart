@@ -140,7 +140,7 @@ class _CategorySimilarAhadithState extends State<_CategorySimilarAhadith> {
                     child: Icon(
                       Icons.folder_special_rounded,
                       size: 20.sp,
-                      color: ColorsManager.primaryPurple,
+                      color: ColorsManager.purpleText,
                     ),
                   ),
                   title: Text(
@@ -255,7 +255,7 @@ class _CategorySimilarAhadithState extends State<_CategorySimilarAhadith> {
                                     Text(
                                       'عرض المزيد من الأحاديث',
                                       style: TextStyles.labelLarge.copyWith(
-                                        color: ColorsManager.primaryPurple,
+                                        color: ColorsManager.purpleText,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -263,7 +263,7 @@ class _CategorySimilarAhadithState extends State<_CategorySimilarAhadith> {
                                     Icon(
                                       Icons.arrow_forward_ios_rounded,
                                       size: 14.sp,
-                                      color: ColorsManager.primaryPurple,
+                                      color: ColorsManager.purpleText,
                                     ),
                                   ],
                                 ),

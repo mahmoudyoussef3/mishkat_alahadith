@@ -64,6 +64,16 @@ class ColorsManager {
   static Color get shimmerBase => _palette.shimmerBase;
   static Color get shimmerHighlight => _palette.shimmerHighlight;
 
+  static Color get primarySoft => _palette.primarySoft;
+
+  static Color get goldSoft => _palette.goldSoft;
+
+  static Color get headerStart => _palette.headerStart;
+
+  static Color get headerEnd => _palette.headerEnd;
+
+  static Color get shadow => _palette.shadow;
+
   static Color get success => _palette.success;
 
   static Color get warning => _palette.warning;

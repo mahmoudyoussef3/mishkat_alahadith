@@ -114,8 +114,8 @@ class _HadithAnalysisState extends State<HadithAnalysis> {
                         title: "معلومة",
                         text:
                             "يمكنك الآن الحصول على تحليل سريع للحديث باستخدام الذكاء الاصطناعي.\nاضغط على الزر أعلاه للبدء.",
-                        color: ColorsManager.lightPurple,
-                        textColor: Colors.black87,
+                        color: ColorsManager.primarySoft,
+                        textColor: ColorsManager.primaryText,
                       );
                 } else if (state is HadithAnalysisError) {
                   return tapped
@@ -123,16 +123,16 @@ class _HadithAnalysisState extends State<HadithAnalysis> {
                         icon: FontAwesomeIcons.circleExclamation,
                         title: "خطأ",
                         text: state.message,
-                        color: Colors.red.withOpacity(0.08),
-                        textColor: Colors.red.shade700,
+                        color: ColorsManager.error.withValues(alpha: 0.1),
+                        textColor: ColorsManager.error,
                       )
                       : _ResultCard(
                         icon: FontAwesomeIcons.lightbulb,
                         title: "معلومة",
                         text:
                             "يمكنك الآن الحصول على تحليل سريع للحديث باستخدام الذكاء الاصطناعي.\nاضغط على الزر أعلاه للبدء.",
-                        color: ColorsManager.lightPurple,
-                        textColor: Colors.black87,
+                        color: ColorsManager.primarySoft,
+                        textColor: ColorsManager.primaryText,
                       );
                 } else {
                   return _ResultCard(
@@ -140,8 +140,8 @@ class _HadithAnalysisState extends State<HadithAnalysis> {
                     title: "معلومة",
                     text:
                         "يمكنك الآن الحصول على تحليل سريع للحديث باستخدام الذكاء الاصطناعي.\nاضغط على الزر أعلاه للبدء.",
-                    color: ColorsManager.lightPurple,
-                    textColor: Colors.black87,
+                    color: ColorsManager.primarySoft,
+                    textColor: ColorsManager.primaryText,
                   );
                 }
               },

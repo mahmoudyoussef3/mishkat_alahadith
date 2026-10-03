@@ -38,10 +38,9 @@ class _SignupFormState extends State<SignupForm> {
                 backgroundColor: ColorsManager.lightGray,
                 suffixIcon: Icon(
                   Icons.person,
-                  color: ColorsManager.primaryGreen,
+                  color: ColorsManager.purpleText,
                 ),
                 hintText: 'الاسم الكامل',
-                hintStyle: TextStyle(color: ColorsManager.primaryText),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'يرجى إدخال الاسم الكامل';
@@ -59,12 +58,11 @@ class _SignupFormState extends State<SignupForm> {
           SizedBox(height: 16.h),
 
           AppTextFormField(
-                hintStyle: TextStyle(color: ColorsManager.primaryText),
 
                 backgroundColor: ColorsManager.lightGray,
                 suffixIcon: Icon(
                   Icons.email,
-                  color: ColorsManager.primaryGreen,
+                  color: ColorsManager.purpleText,
                 ),
                 controller: signupCubit.emailController,
                 hintText: 'البريد الإلكتروني',
@@ -87,7 +85,6 @@ class _SignupFormState extends State<SignupForm> {
           SizedBox(height: 16.h),
 
           AppTextFormField(
-                hintStyle: TextStyle(color: ColorsManager.primaryText),
 
                 backgroundColor: ColorsManager.lightGray,
                 controller: signupCubit.passwordController,
@@ -98,7 +95,7 @@ class _SignupFormState extends State<SignupForm> {
                     isPasswordObscureText
                         ? Icons.visibility
                         : Icons.visibility_off,
-                    color: ColorsManager.primaryGreen,
+                    color: ColorsManager.purpleText,
                   ),
                   onPressed: () {
                     setState(() {
@@ -123,7 +120,6 @@ class _SignupFormState extends State<SignupForm> {
           SizedBox(height: 16.h),
 
           AppTextFormField(
-                hintStyle: TextStyle(color: ColorsManager.primaryText),
 
                 backgroundColor: ColorsManager.lightGray,
                 controller: signupCubit.confirmPasswordController,
@@ -134,7 +130,7 @@ class _SignupFormState extends State<SignupForm> {
                     isPasswordConfirmationObscureText
                         ? Icons.visibility
                         : Icons.visibility_off,
-                    color: ColorsManager.primaryGreen,
+                    color: ColorsManager.purpleText,
                   ),
                   onPressed: () {
                     setState(() {

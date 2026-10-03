@@ -56,7 +56,7 @@ class HistoryListItem extends StatelessWidget {
               ),
               child: Icon(
                 Icons.search,
-                color: ColorsManager.primaryGreen,
+                color: ColorsManager.purpleText,
                 size: 18.r,
               ),
             ),

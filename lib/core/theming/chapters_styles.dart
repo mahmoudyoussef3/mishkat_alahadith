@@ -5,15 +5,15 @@ import 'styles.dart';
 
 class ChaptersTextStyles {
   static TextStyle get numberLabel => TextStyle(
-    color: ColorsManager.white,
+    color: ColorsManager.purpleText,
     fontWeight: FontWeight.w800,
   );
 
   static TextStyle get chapterTitle => TextStyle(
     color: ColorsManager.primaryText,
-    fontSize: 16.sp,
+    fontSize: 14.sp,
     fontWeight: FontWeight.w600,
-    height: 1.1,
+    height: 1.35,
   );
 
   static TextStyle get statsTitle => TextStyles.titleMedium.copyWith(

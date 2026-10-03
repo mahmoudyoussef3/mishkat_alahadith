@@ -59,7 +59,7 @@ class BookmarkTextStyles {
   );
 
   static TextStyle get createNewLabel => TextStyle(
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
     fontSize: 14,
     fontWeight: FontWeight.w600,
   );

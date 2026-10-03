@@ -107,7 +107,7 @@ class _SheetHeader extends StatelessWidget {
                 child: Icon(
                   Icons.add_task_rounded,
                   size: 20.sp,
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                 ),
               ),
               SizedBox(width: 10.w),
@@ -524,7 +524,7 @@ class _CustomTaskButton extends StatelessWidget {
                 child: Icon(
                   Icons.edit_note_rounded,
                   size: 20.sp,
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                 ),
               ),
               SizedBox(width: 12.w),
@@ -537,7 +537,7 @@ class _CustomTaskButton extends StatelessWidget {
                       style: TextStyles.titleSmall.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: 14.sp,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                       ),
                     ),
                     SizedBox(height: 1.h),

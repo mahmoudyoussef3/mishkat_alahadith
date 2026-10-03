@@ -55,7 +55,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(
-          top: true,
+          top: false,
           bottom: true,
           child: Scaffold(
             backgroundColor: ColorsManager.secondaryBackground,
@@ -170,7 +170,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
             Icon(
               Icons.lock_outline,
               size: 90.r,
-              color: ColorsManager.primaryGreen,
+              color: ColorsManager.purpleText,
             ),
             SizedBox(height: 20.h),
             Text(

@@ -27,7 +27,7 @@ class SectionHeader extends StatelessWidget {
           child: Text(
             '$count',
             style: TextStyles.titleSmall.copyWith(
-              color: ColorsManager.primaryPurple,
+              color: ColorsManager.purpleText,
             ),
           ),
         ),

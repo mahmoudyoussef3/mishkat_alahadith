@@ -29,19 +29,6 @@ class _HadithTextCardState extends State<HadithTextCard> {
             decoration: HadithDetailsDecorations.contentCard(),
             child: Stack(
               children: [
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.03,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.r),
-                      child: Image.asset(
-                        'assets/images/islamic_pattern.jpg',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -56,7 +43,7 @@ class _HadithTextCardState extends State<HadithTextCard> {
                         children: [
                           Icon(
                             Icons.auto_stories,
-                            color: ColorsManager.primaryPurple,
+                            color: ColorsManager.purpleText,
                             size: 16.sp,
                           ),
                           SizedBox(width: 6.w),
@@ -86,7 +73,7 @@ class _HadithTextCardState extends State<HadithTextCard> {
                           _buildActionIcon(
                             context,
                             icon: Icons.copy_rounded,
-                            color: ColorsManager.primaryPurple,
+                            color: ColorsManager.purpleText,
                             tooltip: "نسخ الحديث",
                             onTap: () {
                               Clipboard.setData(
@@ -104,7 +91,7 @@ class _HadithTextCardState extends State<HadithTextCard> {
                           _buildActionIcon(
                             context,
                             icon: Icons.share_rounded,
-                            color: ColorsManager.primaryGreen,
+                            color: ColorsManager.purpleText,
                             tooltip: "مشاركة الحديث",
                             onTap: () {
                               String? link;
@@ -123,7 +110,7 @@ class _HadithTextCardState extends State<HadithTextCard> {
                           _buildActionIcon(
                             context,
                             icon: Icons.ios_share_rounded,
-                            color: ColorsManager.primaryGreen,
+                            color: ColorsManager.purpleText,
                             tooltip: "مشاركة كرابط",
                             onTap: () => shareHadithLink(
                               context,

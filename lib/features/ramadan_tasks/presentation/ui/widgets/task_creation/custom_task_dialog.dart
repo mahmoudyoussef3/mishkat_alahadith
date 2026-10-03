@@ -68,7 +68,7 @@ class _CustomTaskDialogState extends State<CustomTaskDialog> {
                       child: Icon(
                         Icons.edit_note_rounded,
                         size: 20.sp,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                       ),
                     ),
                     SizedBox(width: 10.w),

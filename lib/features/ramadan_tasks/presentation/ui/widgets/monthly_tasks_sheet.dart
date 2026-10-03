@@ -169,10 +169,7 @@ class _SheetHeader extends StatelessWidget {
                 height: 42.w,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      ColorsManager.primaryPurple,
-                      ColorsManager.darkPurple,
-                    ],
+                    colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
                   ),
                   borderRadius: BorderRadius.circular(12.r),
                 ),

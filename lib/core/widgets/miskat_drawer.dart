@@ -31,7 +31,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
           DrawerHeader(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
+                colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

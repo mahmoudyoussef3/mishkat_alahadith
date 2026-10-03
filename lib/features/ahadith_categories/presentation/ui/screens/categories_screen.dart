@@ -295,7 +295,7 @@ class _CategoriesSearchField extends StatelessWidget {
             ),
             prefixIcon: Icon(
               Icons.search_rounded,
-              color: ColorsManager.primaryPurple,
+              color: ColorsManager.purpleText,
             ),
             filled: true,
             fillColor: ColorsManager.secondaryBackground,

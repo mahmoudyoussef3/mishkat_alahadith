@@ -39,7 +39,7 @@ class SearchBarWidget extends StatelessWidget {
             hintStyle: HomeTextStyles.searchHint,
             prefixIcon: Icon(
               Icons.search,
-              color: ColorsManager.primaryPurple,
+              color: ColorsManager.purpleText,
               size: 24,
             ),
             suffixIcon:

@@ -18,12 +18,12 @@ class PrayerTimesTextStyles {
 
   static TextStyle get nextPrayerTimeValue => BaseStyles.TextStyles.titleLarge
       .copyWith(
-        color: ColorsManager.primaryPurple,
+        color: ColorsManager.purpleText,
         fontWeight: FontWeight.w700,
       );
 
   static TextStyle get countdownValue => BaseStyles.TextStyles.titleMedium.copyWith(
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
     fontWeight: FontWeight.w700,
   );
 

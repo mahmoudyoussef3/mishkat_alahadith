@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/deep_links/deep_link_router.dart';
@@ -83,7 +84,22 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
                 theme: AppTheme.lightTheme,
                 darkTheme: AppTheme.darkTheme,
                 themeMode: themeMode.isDark ? ThemeMode.dark : ThemeMode.light,
-                builder: (context, child) => AppPaletteScope(child: child!),
+                // Paints the theme background behind every route, so system
+                // bar areas outside a screen's SafeArea are never black, and
+                // gives the system bars icons that contrast with it. App bars
+                // drawn under the status bar override this with their own.
+                builder:
+                    (context, child) => AppPaletteScope(
+                      child: AnnotatedRegion<SystemUiOverlayStyle>(
+                        value: AppTheme.systemBarsStyle(
+                          Theme.of(context).brightness,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          child: child!,
+                        ),
+                      ),
+                    ),
 
                 initialRoute: _startScreen,
 

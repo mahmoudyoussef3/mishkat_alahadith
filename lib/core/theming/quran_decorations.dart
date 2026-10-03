@@ -63,7 +63,7 @@ class QuranDecorations {
   static BoxDecoration continueReadingCard() {
     return BoxDecoration(
       gradient: LinearGradient(
-        colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
+        colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
         begin: AlignmentDirectional.topStart,
         end: AlignmentDirectional.bottomEnd,
       ),
@@ -88,8 +88,13 @@ class QuranDecorations {
 
   static ButtonStyle continueReadingButton() {
     return FilledButton.styleFrom(
-      backgroundColor: ColorsManager.white,
-      foregroundColor: ColorsManager.darkPurple,
+      // A pure white button glares on the deep night header.
+      backgroundColor:
+          ColorsManager.isDark ? ColorsManager.primarySoft : ColorsManager.white,
+      foregroundColor:
+          ColorsManager.isDark
+              ? ColorsManager.darkPurpleText
+              : ColorsManager.darkPurple,
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
     );

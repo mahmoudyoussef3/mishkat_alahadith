@@ -29,7 +29,7 @@ class EmptyState extends StatelessWidget {
                 child: Icon(
                   Icons.search_off,
                   size: 40.r,
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                 ),
               ),
               SizedBox(height: 24.h),

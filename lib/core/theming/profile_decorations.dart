@@ -6,7 +6,7 @@ class ProfileDecorations {
   static BoxDecoration get editProfileBackground => BoxDecoration(
     gradient: LinearGradient(
       colors: [
-        ColorsManager.primaryPurple.withOpacity(0.85),
+        ColorsManager.headerStart.withValues(alpha: 0.9),
         ColorsManager.primaryBackground,
       ],
       begin: Alignment.topCenter,
@@ -56,7 +56,7 @@ class ProfileDecorations {
     gradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [ColorsManager.primaryPurple, ColorsManager.secondaryPurple],
+      colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
     ),
   );
 
@@ -213,5 +213,5 @@ class ProfileDecorations {
   static Color get successSnackbarBackground => ColorsManager.hadithAuthentic;
   static SnackBarBehavior successSnackbarBehavior = SnackBarBehavior.floating;
 
-  static Color get errorSnackbarBackground => Colors.red;
+  static Color get errorSnackbarBackground => ColorsManager.error;
 }

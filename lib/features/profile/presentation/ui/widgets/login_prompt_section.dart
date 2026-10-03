@@ -41,7 +41,7 @@ class LoginPromptSection extends StatelessWidget {
       child: Icon(
         FontAwesomeIcons.userLock,
         size: 80.sp,
-        color: ColorsManager.primaryPurple,
+        color: ColorsManager.purpleText,
       ),
     );
   }

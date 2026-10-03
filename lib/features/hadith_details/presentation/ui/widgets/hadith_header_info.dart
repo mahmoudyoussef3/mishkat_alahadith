@@ -23,7 +23,7 @@ class HadithHeaderInfo extends StatelessWidget {
         children: [
           Icon(
             Icons.format_quote,
-            color: ColorsManager.primaryGreen,
+            color: ColorsManager.purpleText,
             size: 28.sp,
           ),
           SizedBox(width: 12.w),

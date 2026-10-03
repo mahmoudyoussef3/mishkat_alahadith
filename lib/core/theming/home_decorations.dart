@@ -6,11 +6,11 @@ class HomeDecorations {
   static BoxDecoration appBarGradientOverlay() {
     return BoxDecoration(
       gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
+        begin: AlignmentDirectional.topStart,
+        end: AlignmentDirectional.bottomEnd,
         colors: [
-          ColorsManager.primaryPurple.withOpacity(0.3),
-          ColorsManager.primaryPurple,
+          ColorsManager.headerStart.withValues(alpha: 0.9),
+          ColorsManager.headerEnd.withValues(alpha: 0.97),
         ],
       ),
     );
@@ -131,7 +131,7 @@ class HomeDecorations {
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryPurple, ColorsManager.secondaryPurple],
+      colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
     ),
     borderRadius: BorderRadius.only(
       topLeft: Radius.circular(12),

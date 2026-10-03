@@ -79,7 +79,7 @@ class LibraryDecorations {
     return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryGreen, ColorsManager.darkPurple],
+      colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
     );
   }
 
@@ -87,7 +87,7 @@ class LibraryDecorations {
     return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryGreen, ColorsManager.darkPurple],
+      colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
     );
   }
 
@@ -95,7 +95,7 @@ class LibraryDecorations {
     return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [ColorsManager.primaryGreen, ColorsManager.darkPurple],
+      colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
     );
   }
 

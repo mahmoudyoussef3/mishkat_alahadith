@@ -97,7 +97,7 @@ class GridHeaderCell extends StatelessWidget {
                     ListTile(
                       leading: Icon(
                         Icons.edit_rounded,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         size: 22.sp,
                       ),
                       title: Text('تعديل المهمة', style: TextStyles.titleSmall),

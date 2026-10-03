@@ -96,7 +96,7 @@ class _RamadanCalendarSheetState extends State<RamadanCalendarSheet> {
                       children: [
                         Icon(
                           Icons.calendar_month_rounded,
-                          color: ColorsManager.primaryPurple,
+                          color: ColorsManager.purpleText,
                           size: 24.sp,
                         ),
                         SizedBox(width: 8.w),

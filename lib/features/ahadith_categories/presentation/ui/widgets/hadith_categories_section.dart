@@ -42,7 +42,7 @@ class HadithCategoriesSection extends StatelessWidget {
             children: [
               Icon(
                 Icons.sell_rounded,
-                color: ColorsManager.primaryPurple,
+                color: ColorsManager.purpleText,
                 size: 16.sp,
               ),
               SizedBox(width: 8.w),
@@ -123,7 +123,7 @@ class _CategoryChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                 ),
               ),
             ],

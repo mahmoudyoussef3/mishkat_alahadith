@@ -7,7 +7,7 @@ class SendSuggestionTextStyles {
     return TextStyle(
       fontSize: isTablet ? 26.sp : 22.sp,
       fontWeight: FontWeight.bold,
-      color: ColorsManager.primaryPurple,
+      color: ColorsManager.purpleText,
       height: 1.3,
     );
   }

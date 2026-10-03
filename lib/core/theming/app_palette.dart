@@ -33,6 +33,19 @@ class AppPalette {
   final Color shimmerBase;
   final Color shimmerHighlight;
 
+  /// Brand-tinted fill for chips, selected states and icon wells.
+  final Color primarySoft;
+
+  /// Gold-tinted fill for highlights such as "today" or featured items.
+  final Color goldSoft;
+
+  /// Gradient for the large page headers.
+  final Color headerStart;
+  final Color headerEnd;
+
+  /// Shadow tint; near-invisible in dark mode, where borders carry elevation.
+  final Color shadow;
+
   const AppPalette._({
     required this.brightness,
     required this.primaryPurple,
@@ -58,6 +71,11 @@ class AppPalette {
     required this.disabledText,
     required this.shimmerBase,
     required this.shimmerHighlight,
+    required this.primarySoft,
+    required this.goldSoft,
+    required this.headerStart,
+    required this.headerEnd,
+    required this.shadow,
   });
 
   bool get isDark => brightness == Brightness.dark;
@@ -89,6 +107,11 @@ class AppPalette {
     disabledText: Color(0xFFB3AEB8),
     shimmerBase: Color(0xFFECE9E3),
     shimmerHighlight: Color(0xFFF7F5F1),
+    primarySoft: Color(0xFFECE7F5),
+    goldSoft: Color(0xFFF6EEDC),
+    headerStart: Color(0xFF5F48B8),
+    headerEnd: Color(0xFF46358F),
+    shadow: Color(0x142B2733),
   );
 
   /// Soft night palette: deep charcoal instead of pure black (avoids halation
@@ -118,5 +141,10 @@ class AppPalette {
     disabledText: Color(0xFF5D5966),
     shimmerBase: Color(0xFF201E26),
     shimmerHighlight: Color(0xFF2C2A33),
+    primarySoft: Color(0xFF2C2840),
+    goldSoft: Color(0xFF2D2819),
+    headerStart: Color(0xFF342B57),
+    headerEnd: Color(0xFF231F38),
+    shadow: Color(0x33000000),
   );
 }

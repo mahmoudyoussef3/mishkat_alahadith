@@ -30,7 +30,7 @@ class StatisticsShimmer extends StatelessWidget {
         Icon(
           FontAwesomeIcons.chartLine,
           size: 20.sp,
-          color: ColorsManager.primaryPurple,
+          color: ColorsManager.purpleText,
         ),
         SizedBox(width: 8.w),
         Text("الإحصائيات", style: ProfileTextStyles.sectionHeaderText),

@@ -198,7 +198,7 @@ class QuranTextStyles {
   );
 
   static TextStyle get searchHitReference => TextStyles.bodySmall.copyWith(
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
     fontWeight: FontWeight.w800,
   );
 

@@ -39,7 +39,7 @@ class DateHeaderCard extends StatelessWidget {
             ),
             child: Icon(
               Icons.nights_stay_rounded,
-              color: ColorsManager.primaryPurple,
+              color: ColorsManager.purpleText,
               size: 24.sp,
             ),
           ),
@@ -52,7 +52,7 @@ class DateHeaderCard extends StatelessWidget {
                 Text(
                   hijriDate,
                   style: TextStyles.titleMedium.copyWith(
-                    color: ColorsManager.primaryPurple,
+                    color: ColorsManager.purpleText,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

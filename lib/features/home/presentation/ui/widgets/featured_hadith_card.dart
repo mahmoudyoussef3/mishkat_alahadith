@@ -111,7 +111,7 @@ class FeaturedHadithCard extends StatelessWidget {
                         Icon(
                           Icons.person_outline,
                           size: 16,
-                          color: ColorsManager.primaryPurple,
+                          color: ColorsManager.purpleText,
                         ),
                         SizedBox(width: Spacing.xs),
                         Expanded(
@@ -124,7 +124,7 @@ class FeaturedHadithCard extends StatelessWidget {
                           icon: Icon(
                             Icons.share_outlined,
                             size: 16,
-                            color: ColorsManager.primaryPurple,
+                            color: ColorsManager.purpleText,
                           ),
                           onPressed: () {},
                           padding: EdgeInsets.zero,

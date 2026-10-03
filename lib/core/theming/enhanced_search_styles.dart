@@ -1,3 +1,4 @@
+import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
@@ -18,46 +19,28 @@ class EnhancedSearchTextStyles {
   static TextStyle get hadithTitle => TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
   );
 
-  static TextStyle get specialWord => TextStyle(
-    fontSize: 20,
-    fontFamily: "Amiri",
-    height: 1.8,
-    color: ColorsManager.primaryPurple,
+  static TextStyle get specialWord => TextStyles.readingLarge.copyWith(
+    color: ColorsManager.purpleText,
     fontWeight: FontWeight.bold,
   );
 
-  static TextStyle get regularWord => TextStyle(
-    fontSize: 20,
-    fontFamily: "Amiri",
-    height: 1.8,
-    color: ColorsManager.primaryText,
-    fontWeight: FontWeight.w400,
-  );
+  static TextStyle get regularWord => TextStyles.readingLarge;
 
   static TextStyle get wordDialogTitle => TextStyle(
     fontWeight: FontWeight.bold,
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
   );
 
-  static TextStyle get attribution => TextStyle(
-    fontSize: 16,
-    color: ColorsManager.accentPurple,
-    fontStyle: FontStyle.italic,
-  );
+  static TextStyle get attribution => TextStyles.attribution;
 
   static TextStyle gradeChipText(Color color) {
     return TextStyle(color: color, fontWeight: FontWeight.bold);
   }
 
-  static TextStyle get explanationText => TextStyle(
-    fontFamily: 'Cairo',
-    fontWeight: FontWeight.w500,
-    color: ColorsManager.primaryText,
-    height: 1.6,
-  );
+  static TextStyle get explanationText => TextStyles.explanationBody;
 
   static TextStyle get hintsCounter => TextStyle(
     fontFamily: 'Cairo',
@@ -65,11 +48,8 @@ class EnhancedSearchTextStyles {
     color: ColorsManager.primaryText,
   );
 
-  static TextStyle get hintsContent => TextStyle(
-    fontFamily: 'Cairo',
-    fontWeight: FontWeight.w500,
-    color: ColorsManager.primaryText,
-  );
+  static TextStyle get hintsContent =>
+      TextStyles.explanationBody.copyWith(color: ColorsManager.darkGray);
 
   static TextStyle get wordMeaningWord => TextStyle(
     fontFamily: 'Cairo',
@@ -94,7 +74,7 @@ class EnhancedSearchTextStyles {
   static TextStyle get selectedTabText => TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.bold,
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
   );
 
   static TextStyle get unselectedTabText => TextStyle(
@@ -104,13 +84,13 @@ class EnhancedSearchTextStyles {
   );
 
   static TextStyle get hadithContentLabel => TextStyle(
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
     fontSize: 12.sp,
     fontWeight: FontWeight.bold,
   );
 
   static TextStyle get hadithLabelText => TextStyle(
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
     fontSize: 12.sp,
     fontWeight: FontWeight.bold,
   );

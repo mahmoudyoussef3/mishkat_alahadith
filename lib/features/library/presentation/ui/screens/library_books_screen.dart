@@ -35,6 +35,7 @@ class _HomeScreenState extends State<LibraryBooksScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
+        top: false,
         child: Scaffold(
           backgroundColor: LibraryDecorations.scaffoldBackground,
           body: _buildBody(),

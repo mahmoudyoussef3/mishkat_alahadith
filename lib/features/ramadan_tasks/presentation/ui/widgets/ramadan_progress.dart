@@ -39,7 +39,7 @@ class RamadanProgress extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
+          colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

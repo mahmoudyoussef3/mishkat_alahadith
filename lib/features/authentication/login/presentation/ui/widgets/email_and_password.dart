@@ -35,7 +35,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
                 backgroundColor: ColorsManager.lightGray,
                 suffixIcon: Icon(
                   Icons.email,
-                  color: ColorsManager.primaryGreen,
+                  color: ColorsManager.purpleText,
                 ),
                 controller: context.read<LoginCubit>().emailController,
                 hintText: 'البريد الإلكتروني',
@@ -68,7 +68,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
                 suffixIcon: IconButton(
                   icon: Icon(
                     isObscureText ? Icons.visibility : Icons.visibility_off,
-                    color: ColorsManager.primaryGreen,
+                    color: ColorsManager.purpleText,
                   ),
                   onPressed: () {
                     setState(() {

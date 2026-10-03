@@ -14,13 +14,13 @@ class HadithAnalysisTextStyles {
       TextStyles.titleMedium.copyWith(
         fontSize: 18.sp,
         fontWeight: FontWeight.w600,
-        color: textColor ?? ColorsManager.primaryGreen,
+        color: textColor ?? ColorsManager.purpleText,
       );
 
   static TextStyle resultBody({Color? textColor}) =>
       TextStyles.bodyMedium.copyWith(
-        fontSize: 16.sp,
-        height: 1.5,
+        fontSize: 15.sp,
+        height: 1.85,
         color: textColor ?? ColorsManager.primaryText,
       );
 

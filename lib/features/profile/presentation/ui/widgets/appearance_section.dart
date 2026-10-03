@@ -22,7 +22,7 @@ class AppearanceSection extends StatelessWidget {
                 Icon(
                   FontAwesomeIcons.palette,
                   size: 20.sp,
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                 ),
                 SizedBox(width: 8.w),
                 Text('المظهر', style: ProfileTextStyles.sectionHeaderText),

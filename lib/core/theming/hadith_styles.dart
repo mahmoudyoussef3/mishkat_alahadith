@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'colors.dart';
+import 'styles.dart';
 
 class HadithTextStyles {
   HadithTextStyles._();
@@ -19,13 +20,7 @@ class HadithTextStyles {
     fontFamily: 'Amiri',
   );
 
-  static TextStyle get hadithArabic => TextStyle(
-    fontFamily: 'Amiri',
-    color: ColorsManager.primaryText,
-    fontSize: 17.sp,
-    height: 1.8,
-    fontWeight: FontWeight.w500,
-  );
+  static TextStyle get hadithArabic => TextStyles.readingMedium;
 
   static TextStyle pillLabel(Color textColor, {double? fontSize}) => TextStyle(
     color: textColor,

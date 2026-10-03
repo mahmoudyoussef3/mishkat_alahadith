@@ -90,7 +90,7 @@ class DayRecordsView extends StatelessWidget {
             height: 38.w,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [ColorsManager.primaryPurple, ColorsManager.darkPurple],
+                colors: [ColorsManager.headerStart, ColorsManager.headerEnd],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -274,7 +274,7 @@ class DayRecordsView extends StatelessWidget {
                       '#',
                       style: TextStyles.bodySmall.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         fontSize: 11.sp,
                       ),
                       textAlign: TextAlign.center,
@@ -286,7 +286,7 @@ class DayRecordsView extends StatelessWidget {
                       'المهمة',
                       style: TextStyles.bodySmall.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         fontSize: 11.sp,
                       ),
                     ),
@@ -297,7 +297,7 @@ class DayRecordsView extends StatelessWidget {
                       'النوع',
                       style: TextStyles.bodySmall.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         fontSize: 11.sp,
                       ),
                       textAlign: TextAlign.center,
@@ -309,7 +309,7 @@ class DayRecordsView extends StatelessWidget {
                       'الحالة',
                       style: TextStyles.bodySmall.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         fontSize: 11.sp,
                       ),
                       textAlign: TextAlign.center,

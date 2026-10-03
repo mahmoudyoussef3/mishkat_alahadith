@@ -67,7 +67,7 @@ class HadithContentCard extends StatelessWidget {
                       ),
                       child: Icon(
                         Icons.auto_stories_rounded,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         size: 20.sp,
                       ),
                     ),
@@ -110,7 +110,7 @@ class HadithContentCard extends StatelessWidget {
                       _buildActionIcon(
                         context,
                         icon: Icons.copy_rounded,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         tooltip: "نسخ الحديث",
                         onTap: () {
                           Clipboard.setData(
@@ -127,7 +127,7 @@ class HadithContentCard extends StatelessWidget {
                       _buildActionIcon(
                         context,
                         icon: Icons.share_rounded,
-                        color: ColorsManager.primaryGreen,
+                        color: ColorsManager.purpleText,
                         tooltip: "مشاركة الحديث",
 
                         onTap:
@@ -139,7 +139,7 @@ class HadithContentCard extends StatelessWidget {
                       _buildActionIcon(
                         context,
                         icon: Icons.link_rounded,
-                        color: ColorsManager.primaryGreen,
+                        color: ColorsManager.purpleText,
                         tooltip: "مشاركة كرابط",
                         onTap: () => shareHadithLink(
                           context,

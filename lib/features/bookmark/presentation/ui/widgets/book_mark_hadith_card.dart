@@ -49,7 +49,7 @@ class BookmarkHadithCard extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.bookmark,
-                        color: ColorsManager.primaryGreen,
+                        color: ColorsManager.purpleText,
                         size: 18.r,
                       ),
                       SizedBox(width: 6.w),

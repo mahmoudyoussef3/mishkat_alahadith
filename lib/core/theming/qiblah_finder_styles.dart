@@ -39,7 +39,7 @@ class QiblahFinderTextStyles {
   );
 
   static TextStyle get qiblahDegreeBadge => TextStyles.bodySmall.copyWith(
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
     fontWeight: FontWeight.w900,
   );
 

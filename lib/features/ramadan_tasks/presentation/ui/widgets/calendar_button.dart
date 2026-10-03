@@ -34,19 +34,19 @@ class CalendarButton extends StatelessWidget {
                 ? Text(
               'اليوم المتمم لشهر شعبان',
               style: TextStyles.titleLarge.copyWith(
-                color: ColorsManager.primaryGreen,
+                color: ColorsManager.purpleText,
               ),
             )
                 :
             Text(
               'اليوم $hijriDateString',
               style: TextStyles.titleLarge.copyWith(
-                color: ColorsManager.primaryGreen,
+                color: ColorsManager.purpleText,
               ),
             ),
             Icon(
               Icons.calendar_month_rounded,
-              color: ColorsManager.primaryPurple,
+              color: ColorsManager.purpleText,
               size: 22.sp,
             ),
           ],

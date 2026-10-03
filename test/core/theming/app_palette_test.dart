@@ -53,6 +53,19 @@ void main() {
           expect(_contrast(accent, palette.cardBackground), greaterThan(3));
         }
       });
+
+      test('brand text stays readable on brand-tinted fills', () {
+        expect(
+          _contrast(palette.purpleText, palette.primarySoft),
+          greaterThan(4.5),
+        );
+      });
+
+      test('white header text meets WCAG AA across the header gradient', () {
+        for (final stop in [palette.headerStart, palette.headerEnd]) {
+          expect(_contrast(Colors.white, stop), greaterThan(4.5));
+        }
+      });
     });
   }
 }

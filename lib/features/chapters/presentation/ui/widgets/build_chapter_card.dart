@@ -18,7 +18,7 @@ class ChapterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: ChaptersDecorations.chapterCard(primaryPurple),
+      decoration: ChaptersDecorations.chapterCard(),
       padding: const EdgeInsets.all(8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +44,7 @@ class ChapterCard extends StatelessWidget {
                 Flexible(
                   child: Text(
                     ar!,
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     textDirection: TextDirection.rtl,
                     style: ChaptersTextStyles.chapterTitle,

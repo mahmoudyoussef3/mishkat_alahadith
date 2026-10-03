@@ -58,13 +58,12 @@ class AuthTextStyles {
     fontSize: 14.sp,
     fontWeight: FontWeight.w400,
     color: ColorsManager.secondaryText,
-    fontFamily: 'Amiri',
+    fontFamily: 'Cairo',
   );
 
   static TextStyle get primaryButtonText => TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.w600,
-    letterSpacing: 0.5,
     color: ColorsManager.white,
     fontFamily: 'Amiri',
   );

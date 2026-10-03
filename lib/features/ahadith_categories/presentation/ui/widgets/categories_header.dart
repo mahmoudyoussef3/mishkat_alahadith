@@ -21,7 +21,7 @@ class CategoriesHeader extends StatelessWidget {
             ),
             child: Icon(
               Icons.category_rounded,
-              color: ColorsManager.primaryPurple,
+              color: ColorsManager.purpleText,
               size: 22.sp,
             ),
           ),
@@ -34,7 +34,7 @@ class CategoriesHeader extends StatelessWidget {
                 Text(
                   'التصنيفات الرئيسية',
                   style: TextStyles.font24BlueBold.copyWith(
-                    color: ColorsManager.primaryPurple,
+                    color: ColorsManager.purpleText,
                     fontSize: 20.sp,
                     height: 1.2,
                   ),

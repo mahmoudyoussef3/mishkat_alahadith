@@ -24,14 +24,25 @@ class BuildHeaderAppBar extends StatelessWidget {
   final List<Widget>? actions;
   @override
   Widget build(BuildContext context) {
+    // When the header is drawn under the status bar, it collapses to a strip
+    // behind the status bar instead of scrolling away, so page content never
+    // scrolls underneath the status bar icons.
+    final underStatusBar = MediaQuery.paddingOf(context).top > 0;
     return SliverAppBar(
       leading: const SizedBox.shrink(),
       automaticallyImplyLeading: false,
       expandedHeight: 110.h,
       floating: true,
-      pinned: pinned,
-      backgroundColor: ColorsManager.primaryPurple,
+      pinned: pinned || underStatusBar,
+      toolbarHeight: pinned ? kToolbarHeight : 0,
+      backgroundColor: ColorsManager.headerEnd,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
+      scrolledUnderElevation: 0,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24.r)),
+      ),
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           children: [
@@ -57,7 +68,13 @@ class BuildHeaderAppBar extends StatelessWidget {
             ),
 
             Padding(
-              padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 12.h),
+              // The header may extend under the status bar; keep its
+              // content below it.
+              padding: EdgeInsets.only(
+                left: 16.w,
+                right: 16.w,
+                top: 12.h + MediaQuery.paddingOf(context).top,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -107,7 +124,6 @@ class BuildHeaderAppBar extends StatelessWidget {
                                 color: ColorsManager.white,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 22.sp,
-                                letterSpacing: 0.5,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 1,

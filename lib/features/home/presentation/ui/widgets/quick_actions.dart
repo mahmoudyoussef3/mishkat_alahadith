@@ -46,7 +46,7 @@ class QuickActions extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.flash_on, color: ColorsManager.primaryPurple, size: 24),
+            Icon(Icons.flash_on, color: ColorsManager.purpleText, size: 24),
             SizedBox(width: Spacing.sm),
             Text(
               'إجراءات سريعة',

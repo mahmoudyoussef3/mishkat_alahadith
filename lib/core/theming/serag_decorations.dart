@@ -158,9 +158,9 @@ class SeragDecorations {
 
   static Color get sendButtonIconColor => Colors.white;
 
-  static Color get errorSnackbarBackground => Colors.red;
+  static Color get errorSnackbarBackground => ColorsManager.error;
 
-  static Color get limitExceededSnackbarBackground => Colors.red.shade300;
+  static Color get limitExceededSnackbarBackground => ColorsManager.error;
 
   static Color get dividerColor => ColorsManager.mediumGray;
 
@@ -238,13 +238,13 @@ class SeragDecorations {
       color:
           ColorsManager.isDark
               ? ColorsManager.error.withOpacity(0.12)
-              : Colors.red.shade50,
+              : ColorsManager.error.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
       border: Border.all(
         color:
             ColorsManager.isDark
                 ? ColorsManager.error.withOpacity(0.4)
-                : Colors.red.shade200,
+                : ColorsManager.error.withValues(alpha: 0.35),
       ),
     );
   }
@@ -256,7 +256,7 @@ class SeragDecorations {
     vertical: 8,
   );
 
-  static Color get noAttemptsWarningIconColor => Colors.red;
+  static Color get noAttemptsWarningIconColor => ColorsManager.error;
 
   static const IconData noAttemptsWarningIcon = Icons.warning_amber_rounded;
 }

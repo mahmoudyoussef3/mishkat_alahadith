@@ -114,7 +114,7 @@ class ProfileTextStyles {
 
   static TextStyle get statsErrorMessage => TextStyle(
     fontSize: 14.sp,
-    color: Colors.red,
+    color: ColorsManager.error,
   );
 
   static TextStyle get sectionTitleText => TextStyle(
@@ -126,7 +126,7 @@ class ProfileTextStyles {
   static TextStyle get socialMediaAppName => TextStyle(
     fontSize: 20.sp,
     fontWeight: FontWeight.bold,
-    color: Colors.purple,
+    color: ColorsManager.purpleText,
   );
 
   static TextStyle get socialMediaTagline => TextStyle(
@@ -146,7 +146,7 @@ class ProfileTextStyles {
   );
 
   static TextStyle get socialMediaLinks => TextStyle(
-    color: Colors.purple,
+    color: ColorsManager.purpleText,
     fontSize: 13.sp,
   );
 

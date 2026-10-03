@@ -13,7 +13,7 @@ class HadithTitle extends StatelessWidget {
       children: [
         Icon(
           Icons.auto_stories,
-          color: ColorsManager.primaryPurple,
+          color: ColorsManager.purpleText,
           size: 24.sp,
         ),
         Text(

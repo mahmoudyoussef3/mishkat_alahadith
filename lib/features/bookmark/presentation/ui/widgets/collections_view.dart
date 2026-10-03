@@ -89,7 +89,7 @@ class CollectionsView extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.add_circle_outline,
-                            color: ColorsManager.primaryPurple,
+                            color: ColorsManager.purpleText,
                             size: 20,
                           ),
                           const SizedBox(width: 8),

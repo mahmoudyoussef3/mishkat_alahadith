@@ -72,7 +72,7 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
                       ),
                       child: Icon(
                         Icons.location_on_rounded,
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         size: 24.sp,
                       ),
                     ),
@@ -228,7 +228,7 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
                     Text(
                       'المواقيت الأدق لموقعك',
                       style: TextStyles.bodySmall.copyWith(
-                        color: ColorsManager.primaryPurple,
+                        color: ColorsManager.purpleText,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -238,7 +238,7 @@ class _LocationSelectionDialogState extends State<LocationSelectionDialog> {
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16.sp,
-                color: ColorsManager.primaryPurple,
+                color: ColorsManager.purpleText,
               ),
             ],
           ),

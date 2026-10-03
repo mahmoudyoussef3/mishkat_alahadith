@@ -102,7 +102,7 @@ class CategoryCard extends StatelessWidget {
               SizedBox(width: 6.w),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: ColorsManager.primaryPurple,
+                color: ColorsManager.purpleText,
                 size: 16.sp,
               ),
             ],

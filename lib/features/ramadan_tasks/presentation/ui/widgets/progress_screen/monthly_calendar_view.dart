@@ -82,7 +82,7 @@ class MonthlyCalendarView extends StatelessWidget {
               children: [
                 Icon(
                   Icons.calendar_month_rounded,
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                   size: 22.sp,
                 ),
                 SizedBox(width: 8.w),
@@ -147,7 +147,7 @@ class MonthlyCalendarView extends StatelessWidget {
                 _weekLabels[weekIndex],
                 style: TextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                   fontSize: 12.sp,
                 ),
               ),

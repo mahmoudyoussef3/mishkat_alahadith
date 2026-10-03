@@ -9,18 +9,11 @@ class HadithAnalysisDecorations {
             ? ColorsManager.primaryGreen.withOpacity(0.85)
             : ColorsManager.primaryGreen,
     borderRadius: BorderRadius.circular(16.r),
-    boxShadow: [
-      BoxShadow(
-        color: ColorsManager.primaryGreen.withOpacity(0.4),
-        blurRadius: pressed ? 2 : 10,
-        offset: const Offset(0, 4),
-      ),
-    ],
   );
 
   static BoxDecoration resultCard({Color? background}) => BoxDecoration(
-    borderRadius: BorderRadius.circular(12.r),
-    color: background ?? ColorsManager.primaryGreen.withOpacity(0.05),
+    borderRadius: BorderRadius.circular(16.r),
+    color: background ?? ColorsManager.primarySoft,
   );
 
   static BoxDecoration shimmerContainer() => BoxDecoration(

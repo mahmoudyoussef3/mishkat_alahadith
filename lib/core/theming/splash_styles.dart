@@ -8,7 +8,6 @@ class SplashTextStyles {
     fontSize: 32.sp,
     fontWeight: FontWeight.bold,
     color: ColorsManager.white,
-    letterSpacing: 1.0,
     shadows: [
       Shadow(
         color: ColorsManager.black.withOpacity(0.3),

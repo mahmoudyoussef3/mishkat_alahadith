@@ -60,13 +60,13 @@ class SeragTextStyles {
   );
 
   static TextStyle get remainingQuestionsText => TextStyle(
-    color: ColorsManager.primaryPurple,
+    color: ColorsManager.purpleText,
     fontWeight: FontWeight.w600,
     fontSize: 14.sp,
   );
 
   static TextStyle get noAttemptsWarningText => TextStyle(
-    color: Colors.red,
+    color: ColorsManager.error,
     fontSize: 14,
     height: 1.4,
   );

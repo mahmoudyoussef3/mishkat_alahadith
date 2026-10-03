@@ -286,7 +286,7 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
                   child: Text(
                     'إعادة المحاولة',
                     style: TextStyles.labelMedium.copyWith(
-                      color: ColorsManager.primaryPurple,
+                      color: ColorsManager.purpleText,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -312,7 +312,7 @@ class _AhadithListScreenState extends State<AhadithListScreen> {
               child: Text(
                 'تم عرض جميع الأحاديث',
                 style: TextStyles.labelMedium.copyWith(
-                  color: ColorsManager.primaryPurple,
+                  color: ColorsManager.purpleText,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -370,7 +370,7 @@ class _AhadithSearchField extends StatelessWidget {
             ),
             prefixIcon: Icon(
               Icons.search_rounded,
-              color: ColorsManager.primaryPurple,
+              color: ColorsManager.purpleText,
             ),
             suffixIcon:
                 controller.text.isEmpty
