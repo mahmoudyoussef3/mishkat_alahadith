@@ -18,14 +18,11 @@ const int _kDays = 30;
 
 Color get _headerBg => ColorsManager.primaryPurple;
 const Color _headerBorderBottom = ColorsManager.darkPurple;
-Color get _oddRowBg =>
-    ColorsManager.isDark ? const Color(0xFF211C30) : const Color(0xFFF8F5FF);
+Color get _oddRowBg => ColorsManager.offWhite;
 Color get _evenRowBg => ColorsManager.cardBackground;
-Color get _todayRowBg =>
-    ColorsManager.isDark ? const Color(0xFF2E2618) : const Color(0xFFFFF8E1);
+Color get _todayRowBg => ColorsManager.goldSoft;
 Color get _todayBorder => ColorsManager.primaryGold;
-Color get _gridLine =>
-    ColorsManager.isDark ? const Color(0xFF2A2538) : const Color(0xFFEEEEEE);
+Color get _gridLine => ColorsManager.lightGray;
 Color get _pinnedColLine => ColorsManager.mediumGray;
 
 class RamadanTableView extends StatefulWidget {

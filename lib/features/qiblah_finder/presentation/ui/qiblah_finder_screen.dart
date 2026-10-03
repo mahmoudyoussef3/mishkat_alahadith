@@ -292,9 +292,13 @@ class _QiblahCompassViewState extends State<_QiblahCompassView>
   Color _progressColor(double delta) {
     final a = delta.abs();
     if (a <= 5) return ColorsManager.success;
-    if (a <= 15) return const Color(0xFF8BC34A);
+    if (a <= 15) {
+      return Color.lerp(ColorsManager.success, ColorsManager.warning, 0.4)!;
+    }
     if (a <= 30) return ColorsManager.warning;
-    if (a <= 60) return const Color(0xFFFF5722);
+    if (a <= 60) {
+      return Color.lerp(ColorsManager.warning, ColorsManager.error, 0.5)!;
+    }
     return ColorsManager.error;
   }
 

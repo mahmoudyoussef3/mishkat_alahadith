@@ -110,7 +110,7 @@ class StatisticsSection extends StatelessWidget {
           title: "عمليات البحث",
           value: "${state.stats.searchesCount}",
           icon: FontAwesomeIcons.magnifyingGlass,
-          color: const Color(0xFF00BCD4),
+          color: ColorsManager.info,
         ),
       ],
     );

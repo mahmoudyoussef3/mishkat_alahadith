@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class OnboardingTextStyles {
@@ -12,7 +12,7 @@ class OnboardingTextStyles {
   }
 
   static TextStyle get skipButtonStyle => TextStyle(
-    color: ColorsManager.secondaryText,
+    color: AppPalette.light.secondaryText,
     fontSize: 14.sp,
     fontWeight: FontWeight.w600,
   );
@@ -21,7 +21,7 @@ class OnboardingTextStyles {
     return TextStyle(
       fontSize: isSmallScreen ? 20.sp : 24.sp,
       fontWeight: FontWeight.bold,
-      color: const Color(0xFF2D3748),
+      color: AppPalette.light.primaryText,
       height: 1.3,
     );
   }
@@ -37,14 +37,14 @@ class OnboardingTextStyles {
   static TextStyle pageDescriptionStyle(bool isSmallScreen) {
     return TextStyle(
       fontSize: isSmallScreen ? 13.sp : 15.sp,
-      color: const Color(0xFF718096),
+      color: AppPalette.light.secondaryText,
       height: 1.5,
       fontWeight: FontWeight.w400,
     );
   }
 
   static TextStyle get backButtonStyle => TextStyle(
-    color: ColorsManager.secondaryText,
+    color: AppPalette.light.secondaryText,
     fontSize: 16.sp,
     fontWeight: FontWeight.w600,
   );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
@@ -394,7 +394,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   icon: Icon(
                     OnboardingDecorations.backButtonIcon,
                     size: OnboardingDecorations.backButtonIconSize,
-                    color: ColorsManager.secondaryText,
+                    color: AppPalette.light.secondaryText,
                   ),
                   label: Text(
                     'السابق',

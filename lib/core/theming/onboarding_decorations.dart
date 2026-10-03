@@ -9,9 +9,9 @@ class OnboardingDecorations {
 
   static const Color lightPurple = ColorsManager.secondaryPurple;
 
-  static const Color titleTextColor = Color(0xFF2D3748);
+  static Color get titleTextColor => AppPalette.light.primaryText;
 
-  static const Color descriptionTextColor = Color(0xFF718096);
+  static Color get descriptionTextColor => AppPalette.light.secondaryText;
 
   static LinearGradient primaryGradient() {
     return LinearGradient(
@@ -34,7 +34,7 @@ class OnboardingDecorations {
         end: Alignment.bottomLeft,
         colors: [
           pageGradient.colors.first.withOpacity(0.08),
-          Colors.white,
+          AppPalette.light.secondaryBackground,
           pageGradient.colors.last.withOpacity(0.03),
         ],
       ),
@@ -70,7 +70,7 @@ class OnboardingDecorations {
   static ButtonStyle skipButtonStyle() {
     return TextButton.styleFrom(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      backgroundColor: ColorsManager.lightGray,
+      backgroundColor: AppPalette.light.lightGray,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
     );
   }
@@ -254,7 +254,7 @@ class OnboardingDecorations {
     );
   }
 
-  static Color get inactiveIndicatorColor => ColorsManager.mediumGray;
+  static Color get inactiveIndicatorColor => AppPalette.light.mediumGray;
 
   static const Duration pageChangeDuration = Duration(milliseconds: 100);
 

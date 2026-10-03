@@ -66,10 +66,7 @@ class LibraryDecorations {
     );
   }
 
-  static Color get booksColor =>
-      ColorsManager.isDark
-          ? ColorsManager.darkPurpleText
-          : const Color.fromARGB(255, 51, 13, 128);
+  static Color get booksColor => ColorsManager.darkPurpleText;
 
   static Color get chaptersColor => ColorsManager.hadithAuthentic;
 

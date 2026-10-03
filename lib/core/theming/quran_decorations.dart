@@ -88,13 +88,14 @@ class QuranDecorations {
 
   static ButtonStyle continueReadingButton() {
     return FilledButton.styleFrom(
-      // A pure white button glares on the deep night header.
+      // A pure white button glares on the deep night header, so dark mode
+      // uses the regular brand button instead.
       backgroundColor:
-          ColorsManager.isDark ? ColorsManager.primarySoft : ColorsManager.white,
-      foregroundColor:
           ColorsManager.isDark
-              ? ColorsManager.darkPurpleText
-              : ColorsManager.darkPurple,
+              ? ColorsManager.primaryPurple
+              : ColorsManager.white,
+      foregroundColor:
+          ColorsManager.isDark ? ColorsManager.white : ColorsManager.darkPurple,
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
     );
