@@ -45,3 +45,6 @@ app.*.map.json
 /android/app/release
 
 sentry.properties
+
+# Sentry CLI binary (downloaded by sentry-wizard setup; >100 MB)
+/sentry-wizard
