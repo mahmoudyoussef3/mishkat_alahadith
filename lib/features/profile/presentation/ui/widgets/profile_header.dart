@@ -5,6 +5,7 @@ import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
 import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
+import 'package:mishkat_almasabih/core/widgets/screen_title_header.dart';
 import 'package:mishkat_almasabih/features/profile/domain/entities/user_profile.dart';
 import 'package:mishkat_almasabih/features/profile/presentation/logic/edit_profile/edit_profile_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/presentation/ui/edit_profile_screen.dart';
@@ -16,6 +17,8 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
+      // No back button when shown as the profile tab.
+      automaticallyImplyLeading: !EmbeddedScreenScope.isEmbedded(context),
       foregroundColor: ColorsManager.white,
       expandedHeight: 200.h,
       pinned: true,

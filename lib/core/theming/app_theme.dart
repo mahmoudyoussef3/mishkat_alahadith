@@ -108,7 +108,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusLg),
-          side: BorderSide(color: palette.mediumGray),
+          side: BorderSide(color: palette.border),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -282,6 +282,34 @@ class AppTheme {
       drawerTheme: DrawerThemeData(
         backgroundColor: palette.primaryBackground,
         surfaceTintColor: Colors.transparent,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: palette.cardBackground,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        height: 68,
+        indicatorColor: palette.primarySoft,
+        indicatorShape: const StadiumBorder(),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            size: 23,
+            color:
+                states.contains(WidgetState.selected)
+                    ? palette.purpleText
+                    : palette.secondaryText,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontFamily: _fontFamily,
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? palette.purpleText : palette.secondaryText,
+          );
+        }),
       ),
       listTileTheme: ListTileThemeData(
         iconColor: palette.darkGray,

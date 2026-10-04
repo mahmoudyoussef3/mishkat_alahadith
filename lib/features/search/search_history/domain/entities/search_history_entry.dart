@@ -28,4 +28,15 @@ class NewSearchHistoryEntry {
     this.searchType,
     this.resultsCount,
   });
+
+  /// An entry for [query] searched at [at], with the API's "yyyy-MM-dd"
+  /// date and "HH:mm:ss" time.
+  factory NewSearchHistoryEntry.forQuery(String query, DateTime at) {
+    String two(int value) => value.toString().padLeft(2, '0');
+    return NewSearchHistoryEntry(
+      title: query.trim(),
+      date: '${at.year}-${two(at.month)}-${two(at.day)}',
+      time: '${two(at.hour)}:${two(at.minute)}:${two(at.second)}',
+    );
+  }
 }

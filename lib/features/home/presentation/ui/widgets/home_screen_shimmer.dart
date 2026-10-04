@@ -27,16 +27,8 @@ class HomeScreenShimmer extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Container(
         height: 100.h,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              ColorsManager.primaryGreen,
-              ColorsManager.primaryGreen.withOpacity(0.8),
-            ],
-          ),
-        ),
+        // Same gradient as the loaded header, so nothing flashes on load.
+        decoration: HomeDecorations.appBarGradientOverlay(),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
           child: Column(

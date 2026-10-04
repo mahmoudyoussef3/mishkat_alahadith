@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/widgets/screen_title_header.dart';
+import 'package:mishkat_almasabih/core/widgets/segmented_tabs.dart';
+import 'package:mishkat_almasabih/core/widgets/state_message.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
-import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
-import 'package:mishkat_almasabih/core/helpers/spacing.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/core/theming/bookmark_styles.dart';
-import 'package:mishkat_almasabih/core/theming/bookmark_decorations.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/book_collections_row.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/bookmark_list.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
 import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/search_bar_widget.dart';
 
+/// Saved hadiths and chapters, with collection folders and a text filter.
 class BookmarkScreen extends StatefulWidget {
   const BookmarkScreen({super.key});
 
@@ -23,10 +23,12 @@ class BookmarkScreen extends StatefulWidget {
 }
 
 class _BookmarkScreenState extends State<BookmarkScreen> {
-  String selectedCollection = "الكل";
   final TextEditingController _searchController = TextEditingController();
-  String _query = "";
-  bool showHadith = true;
+
+  /// Selected collection; null shows every collection.
+  String? _collection;
+  String _query = '';
+  bool _showHadiths = true;
 
   @override
   void initState() {
@@ -40,166 +42,170 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
     super.dispose();
   }
 
+  Future<void> _refresh() async {
+    if (!context.read<SessionCubit>().isSignedIn) return;
+    await Future.wait([
+      context.read<GetBookmarksCubit>().getUserBookmarks(),
+      context.read<GetCollectionsBookmarkCubit>().getBookMarkCollections(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        if (!context.read<SessionCubit>().isSignedIn) return;
-        await Future.wait([
-          BlocProvider.of<GetBookmarksCubit>(context).getUserBookmarks(),
-          BlocProvider.of<GetCollectionsBookmarkCubit>(
-            context,
-          ).getBookMarkCollections(),
-        ]);
-      },
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: SafeArea(
-          top: false,
-          bottom: true,
-          child: Scaffold(
-            backgroundColor: ColorsManager.secondaryBackground,
-            body: BlocBuilder<SessionCubit, SessionState>(
-              builder:
-                  (context, session) => switch (session) {
-                    SessionUnknown() => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    SessionSignedIn() => _buildBookmarkContent(),
-                    SessionSignedOut() => _buildLoginPrompt(context),
-                  },
-            ),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: ColorsManager.secondaryBackground,
+        body: SafeArea(
+          bottom: false,
+          child: BlocBuilder<SessionCubit, SessionState>(
+            builder:
+                (context, session) => switch (session) {
+                  SessionUnknown() => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  SessionSignedIn() => _buildContent(),
+                  SessionSignedOut() => const _SignedOutView(),
+                },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBookmarkContent() {
-    return CustomScrollView(
-      slivers: [
-        BuildHeaderAppBar(bottomNav: true, title: "العلامات المرجعية"),
+  /// Clears the collection filter once that collection no longer exists,
+  /// since its tile, the only way to clear it, is gone too.
+  void _dropMissingCollection(GetCollectionsBookmarkState state) {
+    final selected = _collection;
+    if (selected == null || state is! GetCollectionsBookmarkSuccess) return;
+    if (state.collections.any((c) => c.collection == selected)) return;
+    setState(() => _collection = null);
+  }
 
-        SliverToBoxAdapter(child: SizedBox(height: 16.h)),
+  Widget _buildContent() {
+    return BlocListener<
+      GetCollectionsBookmarkCubit,
+      GetCollectionsBookmarkState
+    >(
+      listener: (context, state) => _dropMissingCollection(state),
+      child: _buildScrollView(),
+    );
+  }
 
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            child: Row(
-              children: [
-                _buildTabButton(
-                  "الأحاديث",
-                  isActive: showHadith,
-                  isHadith: true,
-                ),
-                SizedBox(width: 12.w),
-                _buildTabButton(
-                  "الأبواب",
-                  isActive: !showHadith,
-                  isHadith: false,
-                ),
-              ],
-            ),
+  Widget _buildScrollView() {
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: CustomScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        slivers: [
+          const SliverToBoxAdapter(
+            child: ScreenTitleHeader(title: 'المحفوظات'),
           ),
-        ),
-
-        if (showHadith)
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              child: _buildSearchField(),
-            ),
-          ),
-
-        if (showHadith)
-          SliverToBoxAdapter(
-            child: BookmarkCollectionsRow(
-              selectedCollection: selectedCollection,
-              onCollectionSelected: (collection) {
-                setState(() => selectedCollection = collection);
-              },
-            ),
-          ),
-
-        BookmarkList(
-          selectedCollection: selectedCollection,
-          query: _query,
-          showHadiht: showHadith,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabButton(
-    String title, {
-    required bool isActive,
-    required bool isHadith,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => showHadith = isHadith),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          padding: EdgeInsets.symmetric(vertical: 12.h),
-          decoration: BookmarkDecorations.tabContainer(isActive: isActive),
-          alignment: Alignment.center,
-          child: Text(
-            title,
-            style: BookmarkTextStyles.tabLabel(isActive: isActive),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchField() {
-    return SearchBarWidget(
-      hintText: 'ابحث بنص الحديث أو الملاحظات...',
-      controller: _searchController,
-      onChanged: (value) => setState(() => _query = value),
-    );
-  }
-
-  Widget _buildLoginPrompt(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.lock_outline,
-              size: 90.r,
-              color: ColorsManager.purpleText,
-            ),
-            SizedBox(height: 20.h),
-            Text(
-              "يجب تسجيل الدخول للوصول إلى العلامات المرجعية",
-              textAlign: TextAlign.center,
-              style: TextStyles.bodyLarge.copyWith(
-                color: ColorsManager.darkGray,
-                fontWeight: FontWeight.bold,
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
+              child: BlocSelector<
+                GetBookmarksCubit,
+                GetBookmarksState,
+                (int, int)?
+              >(
+                selector:
+                    (state) => switch (state) {
+                      UserBookmarksSuccess(:final bookmarks) => (
+                        bookmarks.where((b) => b.type == 'hadith').length,
+                        bookmarks.where((b) => b.type == 'chapter').length,
+                      ),
+                      _ => null,
+                    },
+                builder:
+                    (context, counts) => SegmentedTabs(
+                      labels: [
+                        _withCount('الأحاديث', counts?.$1),
+                        _withCount('الأبواب', counts?.$2),
+                      ],
+                      selectedIndex: _showHadiths ? 0 : 1,
+                      onChanged:
+                          (index) => setState(() => _showHadiths = index == 0),
+                    ),
               ),
             ),
-            SizedBox(height: 30.h),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorsManager.primaryGreen,
-                padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 14.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
+          ),
+          if (_showHadiths) ...[
+            SliverToBoxAdapter(
+              child: BookmarkCollectionsRow(
+                selectedCollection: _collection,
+                onCollectionSelected:
+                    (collection) => setState(() => _collection = collection),
               ),
-              onPressed: () => Navigator.pushNamed(context, Routes.loginScreen),
-              icon: const Icon(Icons.login, color: Colors.white),
-              label: Text(
-                "تسجيل الدخول",
-                style: TextStyles.bodyLarge.copyWith(color: Colors.white),
+            ),
+            SliverToBoxAdapter(
+              // Nothing to filter until a hadith has been saved.
+              child: BlocSelector<GetBookmarksCubit, GetBookmarksState, bool>(
+                selector:
+                    (state) =>
+                        state is UserBookmarksSuccess &&
+                        state.bookmarks.any((b) => b.type == 'hadith'),
+                builder:
+                    (context, hasHadiths) =>
+                        hasHadiths
+                            ? Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                20.w,
+                                14.h,
+                                20.w,
+                                10.h,
+                              ),
+                              child: SearchBarWidget(
+                                hintText: 'ابحث في نص الحديث أو ملاحظاتك…',
+                                controller: _searchController,
+                                onChanged:
+                                    (value) =>
+                                        setState(() => _query = value.trim()),
+                              ),
+                            )
+                            : SizedBox(height: 8.h),
               ),
             ),
           ],
-        ),
+          BookmarkList(
+            selectedCollection: _collection,
+            query: _query,
+            showHadiths: _showHadiths,
+          ),
+        ],
       ),
+    );
+  }
+
+  static String _withCount(String label, int? count) =>
+      count == null || count == 0
+          ? label
+          : '$label · ${toArabicDigits('$count')}';
+}
+
+class _SignedOutView extends StatelessWidget {
+  const _SignedOutView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const ScreenTitleHeader(title: 'المحفوظات'),
+        Expanded(
+          child: Center(
+            child: StateMessage(
+              icon: Icons.bookmark_border_rounded,
+              title: 'احفظ الأحاديث التي تحبها',
+              subtitle:
+                  'سجّل الدخول لحفظ الأحاديث وتنظيمها في مجموعات '
+                  'والرجوع إليها من أي جهاز',
+              actionLabel: 'تسجيل الدخول',
+              actionIcon: Icons.login_rounded,
+              onAction: () => Navigator.pushNamed(context, Routes.loginScreen),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

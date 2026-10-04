@@ -7,6 +7,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
 
 class MishkatDrawer extends StatefulWidget {
   const MishkatDrawer({super.key});
@@ -89,7 +90,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   context,
                   icon: Icons.home_rounded,
                   title: 'الرئيسية',
-                  onTap: () => Navigator.pop(context),
+                  onTap: () => _openTab(context, MainTab.home),
                 ),
                 _buildDrawerItem(
                   context,
@@ -104,10 +105,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   context,
                   icon: Icons.bookmark_rounded,
                   title: 'المحفوظات',
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.pushNamed(Routes.bookmarkScreen);
-                  },
+                  onTap: () => _openTab(context, MainTab.saved),
                 ),
                 _buildDrawerItem(
                   context,
@@ -121,10 +119,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   context,
                   icon: Icons.menu_book_rounded,
                   title: 'مكتبة مشكاة',
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.pushNamed(Routes.libraryScreen);
-                  },
+                  onTap: () => _openTab(context, MainTab.library),
                 ),
                 _buildDrawerItem(
                   context,
@@ -150,10 +145,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   context,
                   icon: Icons.person_rounded,
                   title: 'الملف الشخصي',
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.pushNamed(Routes.profileScreen);
-                  },
+                  onTap: () => _openTab(context, MainTab.profile),
                 ),
                 _buildDrawerItem(
                   context,
@@ -203,6 +195,13 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
         ],
       ),
     );
+  }
+
+  /// Closes the drawer and switches the app shell to [tab].
+  void _openTab(BuildContext context, MainTab tab) {
+    final navigation = context.read<MainNavigationCubit>();
+    Navigator.pop(context);
+    navigation.select(tab);
   }
 
   Widget _buildDrawerItem(

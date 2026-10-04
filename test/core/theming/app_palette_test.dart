@@ -61,6 +61,36 @@ void main() {
         );
       });
 
+      test('grade labels meet WCAG AA on their tinted badges', () {
+        for (final (text, fill) in [
+          (palette.success, palette.successSoft),
+          (palette.hadithGood, palette.goldSoft),
+          (palette.error, palette.errorSoft),
+        ]) {
+          expect(_contrast(text, fill), greaterThan(4.5));
+        }
+      });
+
+      test('text on gold surfaces meets WCAG AA', () {
+        expect(_contrast(palette.goldInk, palette.goldSoft), greaterThan(4.5));
+        expect(
+          _contrast(palette.onGoldBright, palette.goldBright),
+          greaterThan(4.5),
+        );
+      });
+
+      test('white text meets WCAG AAA on the hero surface', () {
+        expect(_contrast(Colors.white, palette.heroBackground), greaterThan(7));
+      });
+
+      test('the selected filter pill keeps its label readable', () {
+        // Selected pills invert: page background text on a primary text fill.
+        expect(
+          _contrast(palette.secondaryBackground, palette.primaryText),
+          greaterThan(7),
+        );
+      });
+
       test('white header text meets WCAG AA across the header gradient', () {
         for (final stop in [palette.headerStart, palette.headerEnd]) {
           expect(_contrast(Colors.white, stop), greaterThan(4.5));

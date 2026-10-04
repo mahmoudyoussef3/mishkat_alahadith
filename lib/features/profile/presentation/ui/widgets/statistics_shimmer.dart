@@ -57,8 +57,8 @@ class StatisticsShimmer extends StatelessWidget {
 
   Widget _buildStatCardShimmer() {
     return Shimmer.fromColors(
-      baseColor: ColorsManager.mediumGray,
-      highlightColor: ColorsManager.lightGray,
+      baseColor: ColorsManager.shimmerBase,
+      highlightColor: ColorsManager.shimmerHighlight,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -116,8 +116,8 @@ class StatisticsShimmer extends StatelessWidget {
 
   Widget _buildLastActivityShimmer() {
     return Shimmer.fromColors(
-      baseColor: ColorsManager.mediumGray,
-      highlightColor: ColorsManager.lightGray,
+      baseColor: ColorsManager.shimmerBase,
+      highlightColor: ColorsManager.shimmerHighlight,
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(

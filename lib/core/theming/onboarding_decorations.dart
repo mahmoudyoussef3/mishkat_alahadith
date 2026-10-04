@@ -142,11 +142,11 @@ class OnboardingDecorations {
 
   static BoxDecoration iconOverlayContainerDecoration() {
     return BoxDecoration(
-      color: Colors.white,
+      color: ColorsManager.elevatedSurface,
       borderRadius: BorderRadius.circular(16.r),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.1),
+          color: ColorsManager.shadow,
           blurRadius: 8,
           offset: const Offset(0, 4),
         ),

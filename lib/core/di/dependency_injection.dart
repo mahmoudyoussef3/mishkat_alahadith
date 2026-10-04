@@ -213,6 +213,9 @@ import 'package:mishkat_almasabih/features/serag/domain/usecases/load_chat_histo
 import 'package:mishkat_almasabih/features/serag/domain/usecases/save_chat_history_use_case.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_cubit.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_library_books_use_case.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/library_books/library_books_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -239,6 +242,7 @@ Future<void> setUpGetIt() async {
   _registerSuggestions();
   _registerTheme();
   _registerQuran();
+  _registerMainNavigation();
 }
 
 void _registerCore() {
@@ -335,6 +339,10 @@ void _registerLibrary() {
     () => GetLibraryStatisticsCubit(getIt(), getIt()),
   );
   getIt.registerFactory<BookDataCubit>(() => BookDataCubit(getIt(), getIt()));
+  getIt.registerLazySingleton<GetLibraryBooksUseCase>(
+    () => GetLibraryBooksUseCase(getIt()),
+  );
+  getIt.registerFactory<LibraryBooksCubit>(() => LibraryBooksCubit(getIt()));
 }
 
 void _registerChapters() {
@@ -808,4 +816,8 @@ void _registerSuggestions() {
   getIt.registerFactory<SendSuggestionCubit>(
     () => SendSuggestionCubit(getIt()),
   );
+}
+
+void _registerMainNavigation() {
+  getIt.registerFactory<MainNavigationCubit>(MainNavigationCubit.new);
 }

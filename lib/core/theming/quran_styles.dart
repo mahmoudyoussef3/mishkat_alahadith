@@ -38,10 +38,10 @@ class QuranTextStyles {
     color: ColorsManager.white.withValues(alpha: 0.85),
   );
 
-  static TextStyle get continueReadingButton => TextStyles.labelLarge.copyWith(
-    fontWeight: FontWeight.w800,
-    color: ColorsManager.darkPurple,
-  );
+  /// No color: the label takes the foreground from
+  /// [QuranDecorations.continueReadingButton], which differs per theme.
+  static TextStyle get continueReadingButton =>
+      TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800);
 
   static TextStyle get entryCardTitle => TextStyle(
     fontFamily: _decorativeFont,

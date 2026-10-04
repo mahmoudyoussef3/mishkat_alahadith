@@ -10,7 +10,6 @@ import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/sc
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/screens/categories_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/presentation/logic/signup_cubit.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/screens/signup_screen.dart';
-import 'package:mishkat_almasabih/features/library/presentation/logic/book_data/book_data_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/delete_bookmark/delete_cubit_cubit.dart';
@@ -23,7 +22,9 @@ import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily
 import 'package:mishkat_almasabih/features/hadith_daily/presentation/ui/screen/daily_hadith_screen.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/screens/hadith_details_screen.dart';
 import 'package:mishkat_almasabih/features/library/presentation/logic/library_statistics/get_library_statistics_cubit.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/home_screen.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/ui/main_navigation_screen.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/library_books/library_books_cubit.dart';
 import 'package:mishkat_almasabih/features/library/presentation/ui/screens/library_books_screen.dart';
 import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/prayer_times_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/presentation/ui/prayer_times_screen.dart';
@@ -41,7 +42,6 @@ import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_home_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_search_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/tajweed_guide_screen.dart';
-import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/presentation/logic/cubit/remaining_questions_cubit.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/logic/enhanced_search_cubit.dart';
 import 'package:mishkat_almasabih/features/search/search_history/presentation/logic/search_history_cubit.dart';
@@ -160,31 +160,29 @@ class AppRouter {
               ),
         );
       case Routes.homeScreen:
-        _logScreenView('HomeScreen');
+      case Routes.mainNavigationScreen:
+        _logScreenView(MainTab.home.analyticsName);
         return MaterialPageRoute(
+          settings: settings,
           builder:
               (_) => MultiBlocProvider(
                 providers: [
+                  BlocProvider(create: (_) => getIt<MainNavigationCubit>()),
                   BlocProvider(
                     create:
-                        (context) =>
+                        (_) =>
                             getIt<GetLibraryStatisticsCubit>()
                               ..emitGetStatisticsCubit(),
                   ),
-
-                  BlocProvider(create: (context) => getIt<BookDataCubit>()),
-                  BlocProvider(create: (context) => getIt<DailyHadithCubit>()),
+                  // Eager, so history is ready before the first search.
                   BlocProvider(
-                    create: (context) => getIt<SearchHistoryCubit>()..init(),
-                  ),
-                  BlocProvider(
-                    create:
-                        (context) =>
-                            getIt<RandomAhadithCubit>()
-                              ..emitRandomStats(),
+                    lazy: false,
+                    create: (_) => getIt<SearchHistoryCubit>()..init(),
                   ),
                 ],
-                child: const HomeScreen(),
+                child: MainNavigationScreen(
+                  onTabChanged: (tab) => _logScreenView(tab.analyticsName),
+                ),
               ),
         );
       case Routes.searchScreen:
@@ -249,6 +247,7 @@ class AppRouter {
                   BlocProvider(
                     create: (context) => getIt<GetLibraryStatisticsCubit>(),
                   ),
+                  BlocProvider(create: (context) => getIt<LibraryBooksCubit>()),
                 ],
                 child: const LibraryBooksScreen(),
               ),

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/profile_decorations.dart';
 
 class ProfileShimmerScreen extends StatelessWidget {
   const ProfileShimmerScreen({super.key});
@@ -16,16 +17,8 @@ class ProfileShimmerScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                ColorsManager.primaryPurple,
-                ColorsManager.secondaryPurple,
-              ],
-            ),
-          ),
+          // Same gradient as the loaded header, so nothing flashes on load.
+          decoration: ProfileDecorations.profileHeaderGradient,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

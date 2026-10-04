@@ -74,6 +74,22 @@ class ColorsManager {
 
   static Color get shadow => _palette.shadow;
 
+  static Color get border => _palette.border;
+
+  static Color get heroBackground => _palette.heroBackground;
+
+  static Color get goldBright => _palette.goldBright;
+
+  static Color get onGoldBright => _palette.onGoldBright;
+
+  static Color get goldInk => _palette.goldInk;
+
+  static Color get successSoft => _palette.successSoft;
+
+  static Color get errorSoft => _palette.errorSoft;
+
+  static Color get coverShadow => _palette.coverShadow;
+
   static Color get success => _palette.success;
 
   static Color get warning => _palette.warning;
@@ -86,7 +102,7 @@ class ColorsManager {
 
   static Color get hadithGood => _palette.hadithGood;
 
-  static Color get hadithWeak => _palette.warning;
+  static Color get hadithWeak => _palette.error;
 
   static Color get primaryGreen => primaryPurple;
 

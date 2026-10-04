@@ -12,8 +12,8 @@ class BookCardShimmer extends StatelessWidget {
     return Container(
       decoration: LibraryDecorations.shimmerCard(),
       child: Shimmer.fromColors(
-        baseColor: ColorsManager.mediumGray,
-        highlightColor: ColorsManager.lightGray,
+        baseColor: ColorsManager.shimmerBase,
+        highlightColor: ColorsManager.shimmerHighlight,
         child: Column(
           children: [
             Expanded(

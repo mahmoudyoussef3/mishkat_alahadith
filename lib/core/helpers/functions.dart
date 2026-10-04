@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mishkat_almasabih/core/deep_links/hadith_link.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
@@ -98,24 +99,7 @@ void setupErrorState(BuildContext context, String error) {
       textColor: Colors.white,
       fontSize: 16.0);
 }
-String convertToArabicNumber(int number) {
-  const englishToArabic = {
-    '0': '٠',
-    '1': '١',
-    '2': '٢',
-    '3': '٣',
-    '4': '٤',
-    '5': '٥',
-    '6': '٦',
-    '7': '٧',
-    '8': '٨',
-    '9': '٩',
-  };
-
-  String english = number.toString();
-  String arabic = english.split('').map((digit) => englishToArabic[digit] ?? digit).join();
-  return arabic;
-}
+String convertToArabicNumber(int number) => toArabicDigits('$number');
 
 
   String normalizeArabic(String text) {

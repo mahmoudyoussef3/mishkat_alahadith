@@ -79,7 +79,7 @@ class GetBookChaptersBlocBuilder extends StatelessWidget {
                 _buildStatsCards(),
                 SliverToBoxAdapter(
                   child: Divider(
-                    color: ColorsManager.primaryNavy,
+                    color: ColorsManager.darkPurpleText,
                     endIndent: 30.h,
                     indent: 30.h,
                   ),
@@ -104,7 +104,7 @@ class GetBookChaptersBlocBuilder extends StatelessWidget {
                                 Icon(
                                   Icons.search_off,
                                   size: 60,
-                                  color: ColorsManager.primaryNavy,
+                                  color: ColorsManager.darkPurpleText,
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
