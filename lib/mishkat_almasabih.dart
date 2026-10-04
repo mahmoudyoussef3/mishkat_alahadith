@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -48,12 +47,10 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
     log("Start screen: $_startScreen");
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(
-        _deepLinkHandler.init((uri) async {
-          if (kDebugMode) debugPrint('Received deep link: $uri');
-          await DeepLinkRouter.handle(uri);
-        }),
-      );
+      _deepLinkHandler.init((uri) async {
+        if (kDebugMode) debugPrint('Received deep link: $uri');
+        await DeepLinkRouter.handle(uri);
+      });
     });
   }
 

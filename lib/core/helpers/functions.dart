@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mishkat_almasabih/core/deep_links/hadith_link.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/ui/widgets/share_image_editor.dart';
@@ -151,12 +153,31 @@ Future<void> shareHadithLink(
   BuildContext context, {
   required String? hadithId,
 }) async {
-  if (hadithId == null || hadithId.toString().isEmpty) {
-    return;
+  final link = hadithId == null ? null : HadithLink.build(hadithId);
+  if (link == null) return;
+  final shareText = "اقرأ هذا الحديث عبر الرابط:\n$link";
+
+  try {
+    await SharePlus.instance.share(
+      ShareParams(text: shareText, sharePositionOrigin: _shareOrigin(context)),
+    );
+  } on PlatformException {
+    showToast('تعذر مشاركة الرابط', ColorsManager.error);
   }
-  final String link = "https://api.hadith-shareef.com/api/hadith/$hadithId";
-  final String shareText = "اقرأ هذا الحديث عبر الرابط:\n$link";
-  Share.share(shareText);
+}
+
+/// iPad shows the share sheet as a popover anchored to this rect, and
+/// share_plus rejects a rect that is not inside the screen.
+Rect _shareOrigin(BuildContext context) {
+  final screen = Offset.zero & MediaQuery.sizeOf(context);
+  final box = context.findRenderObject();
+  if (box is RenderBox && box.hasSize) {
+    final visible = (box.localToGlobal(Offset.zero) & box.size).intersect(
+      screen,
+    );
+    if (!visible.isEmpty) return visible;
+  }
+  return Rect.fromCenter(center: screen.center, width: 1, height: 1);
 }
 
   bool checkBookSlug(String bookSlug) {

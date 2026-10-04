@@ -31,9 +31,6 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <meta-data
-            android:name="flutter_deeplinking_enabled"
-            android:value="true" />
 
         <!-- App Widget -->
         <receiver
@@ -91,6 +88,13 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
+
+            <!-- Links are handled by app_links (DeepLinkRouter). Flutter's
+                 built-in handler must stay off or it pushes the link path as a
+                 route too. -->
+            <meta-data
+                android:name="flutter_deeplinking_enabled"
+                android:value="false" />
 
             <!-- Launcher -->
             <intent-filter>

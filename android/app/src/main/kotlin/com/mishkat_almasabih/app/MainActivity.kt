@@ -140,11 +140,8 @@ class MainActivity : FlutterActivity() {
                 methodChannel?.invokeMethod("openPrayerTimes", null)
             }
 
-            // Handle deep links like mishkat://hadith?... via intent.data
-            val dataUri = it.data
-            if (dataUri != null && dataUri.scheme == "mishkat" && dataUri.host == "hadith") {
-                methodChannel?.invokeMethod("openHadithLink", dataUri.toString())
-            }
+            // Link intents (mishkat:// and https) are delivered by the
+            // app_links plugin; forwarding them here too would open them twice.
         }
     }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/deep_links/hadith_link.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:flutter/services.dart';
@@ -94,16 +95,14 @@ class _HadithTextCardState extends State<HadithTextCard> {
                             color: ColorsManager.purpleText,
                             tooltip: "مشاركة الحديث",
                             onTap: () {
-                              String? link;
-                              if (widget.hadithId != null &&
-                                  widget.hadithId!.isNotEmpty) {
-                                link =
-                                    "https://api.hadith-shareef.com/api/hadith/${widget.hadithId}";
-                              }
+                              final id = widget.hadithId;
                               shareHadithAsImage(
                                 context,
                                 text: widget.hadithText,
-                                deepLink: link,
+                                deepLink:
+                                    id == null
+                                        ? null
+                                        : HadithLink.build(id)?.toString(),
                               );
                             },
                           ),
