@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/arabic_plurals.dart';
+import 'package:mishkat_almasabih/core/helpers/extensions.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/core/widgets/filter_pill.dart';
 import 'package:mishkat_almasabih/core/widgets/screen_title_header.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
@@ -11,6 +14,7 @@ import 'package:mishkat_almasabih/features/library/domain/entities/library_stati
 import 'package:mishkat_almasabih/features/library/presentation/logic/library_books/library_books_cubit.dart';
 import 'package:mishkat_almasabih/features/library/presentation/logic/library_statistics/get_library_statistics_cubit.dart';
 import 'package:mishkat_almasabih/features/library/presentation/ui/widgets/book_cover_tile.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// The library: every book as a cover grid, filterable by category.
@@ -25,6 +29,16 @@ class LibraryBooksScreen extends StatefulWidget {
 }
 
 class _LibraryBooksScreenState extends State<LibraryBooksScreen> {
+  /// Search is a tab in the app shell; outside it, open the search screen.
+  void _openSearch(BuildContext context) {
+    final navigation = context.read<MainNavigationCubit?>();
+    if (navigation != null) {
+      navigation.select(MainTab.search);
+    } else {
+      context.pushNamed(Routes.searchScreen);
+    }
+  }
+
   /// Selected category id; null shows every category.
   String? _category;
 
@@ -98,6 +112,11 @@ class _LibraryBooksScreenState extends State<LibraryBooksScreen> {
                               subtitle:
                                   '${arabicCount(statistics.totalBooks, ArabicNoun.book)}'
                                   ' · ${approximateHadithCount(statistics.totalHadiths)}',
+                              trailing: AppIconButton(
+                                tooltip: 'البحث في الأحاديث',
+                                icon: Icons.search_rounded,
+                                onPressed: () => _openSearch(context),
+                              ),
                             ),
                           ),
                           SliverToBoxAdapter(

@@ -219,7 +219,7 @@ class _ReadButton extends StatelessWidget {
               ),
               SizedBox(width: 4.w),
               Icon(
-                Icons.chevron_left_rounded,
+                Icons.chevron_right_rounded,
                 size: 20.r,
                 color: ColorsManager.heroBackground,
               ),

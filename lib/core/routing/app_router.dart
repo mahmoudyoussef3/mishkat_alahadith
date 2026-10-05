@@ -7,6 +7,7 @@ import 'package:mishkat_almasabih/features/about_us/presentation/ui/screens/abou
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/screens/ahadith_categories_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/category_style.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/screens/categories_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/presentation/logic/signup_cubit.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/screens/signup_screen.dart';
@@ -477,20 +478,23 @@ class AppRouter {
         );
       case Routes.ahadithListScreen:
         _logScreenView('AhadithListScreen');
-        final args = settings.arguments as Map<String, dynamic>;
-        final categoryId = args['categoryId'] as String;
-        final categoryTitle = args['categoryTitle'] as String?;
+        final category = switch (settings.arguments) {
+          final CategoryHadithsArgs args => args,
+          final Map<String, dynamic> map => CategoryHadithsArgs(
+            categoryId: map['categoryId'] as String,
+            title: (map['categoryTitle'] as String?) ?? 'أحاديث التصنيف',
+          ),
+          _ => null,
+        };
+        if (category == null) return null;
         return MaterialPageRoute(
           builder:
               (_) => BlocProvider(
                 create:
                     (context) =>
                         getIt<HadithByCategoryCubit>()
-                          ..getAhadithByCategory(categoryId),
-                child: AhadithListScreen(
-                  categoryId: categoryId,
-                  categoryTitle: categoryTitle,
-                ),
+                          ..getAhadithByCategory(category.categoryId),
+                child: AhadithListScreen(args: category),
               ),
         );
       case Routes.shareHadithLink:

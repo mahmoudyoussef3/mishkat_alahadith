@@ -48,6 +48,19 @@ const _gregorianMonths = [
   'ديسمبر',
 ];
 
+const _weekdays = [
+  'الاثنين',
+  'الثلاثاء',
+  'الأربعاء',
+  'الخميس',
+  'الجمعة',
+  'السبت',
+  'الأحد',
+];
+
+/// Day of the week in Arabic: "الاثنين".
+String arabicWeekday(DateTime date) => _weekdays[date.weekday - 1];
+
 /// Gregorian date in Arabic: "٥ أكتوبر ٢٠٢٦".
 String formatArabicGregorianDate(DateTime date) =>
     toArabicDigits('${date.day} ${_gregorianMonths[date.month - 1]} ${date.year}');
@@ -55,16 +68,40 @@ String formatArabicGregorianDate(DateTime date) =>
 /// A recent moment relative to [now]: "اليوم ١٠:٣٢ ص", "أمس ١٠:٣٢ ص", or
 /// "٥ أكتوبر ١٠:٣٢ ص" for older days.
 String formatArabicDayAndTime(DateTime time, {required DateTime now}) {
-  final day = DateTime(time.year, time.month, time.day);
-  final today = DateTime(now.year, now.month, now.day);
-  final daysAgo = today.difference(day).inDays;
-  final dayLabel = switch (daysAgo) {
+  final dayLabel = switch (_calendarDaysBetween(time, now)) {
     0 => 'اليوم',
     1 => 'أمس',
     _ => toArabicDigits('${time.day} ${_gregorianMonths[time.month - 1]}'),
   };
   return '$dayLabel ${formatArabicClock(time)}';
 }
+
+/// Whole calendar days from [from] to [to], counted on UTC dates so a
+/// daylight-saving change (a 23- or 25-hour day) does not skew it.
+int _calendarDaysBetween(DateTime from, DateTime to) => DateTime.utc(
+  to.year,
+  to.month,
+  to.day,
+).difference(DateTime.utc(from.year, from.month, from.day)).inDays;
+
+/// How long ago [time] was, by calendar day: "اليوم", "أمس", "منذ ٣ أيام"
+/// within a week, otherwise the date ("٢٨ سبتمبر").
+String formatArabicRelativeDay(DateTime time, {required DateTime now}) {
+  final daysAgo = _calendarDaysBetween(time, now);
+  return switch (daysAgo) {
+    <= 0 => 'اليوم',
+    1 => 'أمس',
+    <= 7 => 'منذ ${arabicCount(daysAgo, _day)}',
+    _ => toArabicDigits('${time.day} ${_gregorianMonths[time.month - 1]}'),
+  };
+}
+
+const _day = ArabicNoun(
+  singular: 'يوم',
+  dual: 'يومين',
+  plural: 'أيام',
+  accusative: 'يوماً',
+);
 
 /// Umm al-Qura date in Arabic: "١٢ ربيع الآخر ١٤٤٨".
 String formatArabicHijriDate(DateTime date) {

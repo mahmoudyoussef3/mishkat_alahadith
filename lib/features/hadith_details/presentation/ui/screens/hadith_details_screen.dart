@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/deep_links/hadith_link.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
@@ -176,11 +175,12 @@ class _HadithDetailView extends StatelessWidget {
                               icon: Icons.share_rounded,
                               label: 'مشاركة',
                               onTap:
+                                  // No app link: links resolve explained-hadith
+                                  // ids, and a book's numbering is different.
                                   () => shareHadithText(
                                     context,
                                     text: HadithTextParts.typeset(text),
                                     source: _sourceLine(hadithId),
-                                    hadithId: hadithId.isEmpty ? null : hadithId,
                                   ),
                             ),
                             HadithCardAction(
@@ -191,12 +191,6 @@ class _HadithDetailView extends StatelessWidget {
                                     context,
                                     text: text,
                                     source: _sourceLine(hadithId),
-                                    deepLink:
-                                        hadithId.isEmpty
-                                            ? null
-                                            : HadithLink.build(
-                                              hadithId,
-                                            )?.toString(),
                                   ),
                             ),
                           ],

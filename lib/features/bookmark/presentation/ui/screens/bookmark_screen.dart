@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_plurals.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/screen_title_header.dart';
@@ -98,8 +99,13 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
       child: CustomScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         slivers: [
-          const SliverToBoxAdapter(
-            child: ScreenTitleHeader(title: 'المحفوظات'),
+          SliverToBoxAdapter(
+            child: BlocSelector<GetBookmarksCubit, GetBookmarksState, String?>(
+              selector: (state) => _summary(state),
+              builder:
+                  (context, summary) =>
+                      ScreenTitleHeader(title: 'المحفوظات', subtitle: summary),
+            ),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -111,9 +117,9 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
               >(
                 selector:
                     (state) => switch (state) {
-                      UserBookmarksSuccess(:final bookmarks) => (
-                        bookmarks.where((b) => b.type == 'hadith').length,
-                        bookmarks.where((b) => b.type == 'chapter').length,
+                      UserBookmarksSuccess() => (
+                        state.hadithCount,
+                        state.chapterCount,
                       ),
                       _ => null,
                     },
@@ -176,6 +182,26 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
       ),
     );
   }
+
+  /// "١٠ أحاديث · ٣ أبواب · مجموعتان", leaving out what is empty.
+  static String? _summary(GetBookmarksState state) {
+    if (state is! UserBookmarksSuccess) return null;
+    final parts = [
+      if (state.hadithCount > 0) arabicCount(state.hadithCount, ArabicNoun.hadith),
+      if (state.chapterCount > 0)
+        arabicCount(state.chapterCount, ArabicNoun.chapter),
+      if (state.collectionCount > 0)
+        arabicCount(state.collectionCount, _collectionNoun),
+    ];
+    return parts.isEmpty ? null : parts.join(' · ');
+  }
+
+  static const _collectionNoun = ArabicNoun(
+    singular: 'مجموعة',
+    dual: 'مجموعتان',
+    plural: 'مجموعات',
+    accusative: 'مجموعة',
+  );
 
   static String _withCount(String label, int? count) =>
       count == null || count == 0

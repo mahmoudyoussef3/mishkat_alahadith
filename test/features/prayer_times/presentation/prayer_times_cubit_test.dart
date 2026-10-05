@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/entities/daily_prayer_times.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/entities/device_location.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/entities/prayer_location.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_notifications_repo.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_times_repo.dart';
@@ -56,6 +57,13 @@ class _WorkingRepo extends _FailingCalculationRepo {
       ),
     );
   }
+}
+
+/// A working repo on a device whose location permission is refused.
+class _DeniedLocationRepo extends _WorkingRepo {
+  @override
+  Future<ApiResult<LocationAccess>> requestLocationAccess() async =>
+      const ApiResult.success(LocationAccess.denied);
 }
 
 class _UnusedNotificationsRepo extends Fake
@@ -133,5 +141,20 @@ void main() {
 
       expect(loaded().isShowingToday, isTrue);
     });
+  });
+
+  test('a refused location reports it and keeps the times shown', () async {
+    final cubit = _cubit(_DeniedLocationRepo());
+    await cubit.init();
+    final emitted = <PrayerTimesState>[];
+    final subscription = cubit.stream.listen(emitted.add);
+
+    await cubit.useCurrentLocation();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(emitted.first, isA<PrayerTimesError>());
+    expect(cubit.state, isA<PrayerTimesLoaded>());
+    await subscription.cancel();
+    await cubit.close();
   });
 }

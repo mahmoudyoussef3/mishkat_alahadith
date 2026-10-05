@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_details/hadith_by_category_details_cubit.dart';
 
 /// Loads a hadith by id, then resets the stack to Home → hadith.
@@ -48,44 +49,47 @@ class _SharedLinkHadithScreenState extends State<SharedLinkHadithScreen> {
         }
       },
       builder: (context, state) {
-        if (state is HadithByCategoryDetailsError) {
-          return Directionality(
-            textDirection: TextDirection.rtl,
-            child: Scaffold(
-              backgroundColor: ColorsManager.primaryBackground,
-              body: Center(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ErrorState(
-                        error: 'تعذر فتح الرابط: ${state.message}',
-                        onRetry:
-                            () => context
-                                .read<HadithByCategoryDetailsCubit>()
-                                .fetchById(widget.hadithId),
-                      ),
-                      TextButton(
-                        onPressed:
-                            () => Navigator.of(context).pushNamedAndRemoveUntil(
-                              Routes.homeScreen,
-                              (route) => false,
-                            ),
-                        child: const Text('العودة إلى الرئيسية'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
+        final failed = state is HadithByCategoryDetailsError;
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
-            backgroundColor: ColorsManager.primaryBackground,
-            body: Center(child: CircularProgressIndicator()),
+            backgroundColor: ColorsManager.secondaryBackground,
+            body: SafeArea(
+              child: Center(
+                child:
+                    failed
+                        ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            StateMessage.error(
+                              message: 'تعذر فتح الرابط: ${state.message}',
+                              onRetry:
+                                  () => context
+                                      .read<HadithByCategoryDetailsCubit>()
+                                      .fetchById(widget.hadithId),
+                            ),
+                            TextButton(
+                              onPressed:
+                                  () => Navigator.of(
+                                    context,
+                                  ).pushNamedAndRemoveUntil(
+                                    Routes.homeScreen,
+                                    (route) => false,
+                                  ),
+                              child: const Text('العودة إلى الرئيسية'),
+                            ),
+                          ],
+                        )
+                        : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text('جاري فتح الحديث…', style: TextStyles.caption),
+                          ],
+                        ),
+              ),
+            ),
           ),
         );
       },

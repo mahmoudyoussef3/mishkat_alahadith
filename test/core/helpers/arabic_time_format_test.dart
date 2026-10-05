@@ -75,4 +75,37 @@ void main() {
       );
     });
   });
+
+  group('arabicWeekday', () {
+    test('names Monday and Sunday', () {
+      expect(arabicWeekday(DateTime(2026, 10, 5)), 'الاثنين');
+      expect(arabicWeekday(DateTime(2026, 10, 11)), 'الأحد');
+    });
+  });
+
+  group('formatArabicRelativeDay', () {
+    final now = DateTime(2026, 10, 5, 9);
+
+    test('says today and yesterday by calendar day', () {
+      expect(formatArabicRelativeDay(DateTime(2026, 10, 5, 1), now: now), 'اليوم');
+      expect(formatArabicRelativeDay(DateTime(2026, 10, 4, 23), now: now), 'أمس');
+    });
+
+    test('counts days within a week', () {
+      expect(formatArabicRelativeDay(DateTime(2026, 10, 3), now: now), 'منذ يومين');
+      expect(formatArabicRelativeDay(DateTime(2026, 10, 2), now: now), 'منذ ٣ أيام');
+    });
+
+    test('writes the date for older days', () {
+      expect(formatArabicRelativeDay(DateTime(2026, 9, 20), now: now), '٢٠ سبتمبر');
+    });
+  });
+
+  test('counts calendar days across a 23-hour daylight-saving day', () {
+    // Local midnights 23 hours apart still count as one calendar day.
+    final beforeSwitch = DateTime(2026, 4, 23, 23, 30);
+    final afterSwitch = DateTime(2026, 4, 24, 23, 0);
+
+    expect(formatArabicRelativeDay(beforeSwitch, now: afterSwitch), 'أمس');
+  });
 }

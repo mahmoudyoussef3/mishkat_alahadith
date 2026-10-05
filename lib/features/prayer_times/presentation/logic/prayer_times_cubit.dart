@@ -104,13 +104,21 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     unawaited(_rescheduleNotifications());
   }
 
+  /// Switches to the device's location. When it cannot be used, the
+  /// error is reported and the times already shown stay on screen.
   Future<void> useCurrentLocation() async {
+    final shown = state;
+    void fail(String message) {
+      emit(PrayerTimesError(message));
+      if (shown is PrayerTimesLoaded) emit(shown);
+    }
+
     final accessResult = await _requestLocationAccess();
     if (isClosed) return;
     final LocationAccess access;
     switch (accessResult) {
       case ApiFailure():
-        emit(PrayerTimesError(_locationFailedMessage));
+        fail(_locationFailedMessage);
         return;
       case ApiSuccess(:final data):
         access = data;
@@ -118,17 +126,13 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
 
     switch (access) {
       case LocationAccess.serviceDisabled:
-        emit(PrayerTimesError('الرجاء تفعيل خدمات الموقع على جهازك'));
+        fail('الرجاء تفعيل خدمات الموقع على جهازك');
         return;
       case LocationAccess.denied:
-        emit(PrayerTimesError('يجب السماح بالوصول إلى الموقع'));
+        fail('يجب السماح بالوصول إلى الموقع');
         return;
       case LocationAccess.deniedForever:
-        emit(
-          PrayerTimesError(
-            'تم رفض الوصول إلى الموقع بشكل دائم. الرجاء تفعيله من الإعدادات',
-          ),
-        );
+        fail('تم رفض الوصول إلى الموقع بشكل دائم. الرجاء تفعيله من الإعدادات');
         return;
       case LocationAccess.granted:
         break;
@@ -139,7 +143,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     if (isClosed) return;
     switch (position) {
       case ApiFailure():
-        emit(PrayerTimesError(_locationFailedMessage));
+        fail(_locationFailedMessage);
       case ApiSuccess(data: final position):
         await updateLocation(
           PrayerLocation.currentDevice(

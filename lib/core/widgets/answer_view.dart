@@ -49,7 +49,7 @@ class AnswerView extends StatelessWidget {
               text,
               style: TextStyles.explanationBody.copyWith(fontWeight: FontWeight.w500),
             ),
-            AnswerList(:final items, :final ordered) => _ListCard(
+            AnswerList(:final items, :final ordered) => NumberedListCard(
               items: items,
               ordered: ordered,
             ),
@@ -88,8 +88,10 @@ class _Heading extends StatelessWidget {
   }
 }
 
-class _ListCard extends StatelessWidget {
-  const _ListCard({required this.items, required this.ordered});
+/// Points in a bordered card, numbered or bulleted.
+class NumberedListCard extends StatelessWidget {
+  const NumberedListCard({
+    super.key,required this.items, required this.ordered});
 
   final List<String> items;
   final bool ordered;

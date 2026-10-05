@@ -93,7 +93,7 @@ class ChapterAhadithCard extends StatelessWidget {
               SizedBox(width: 10.w),
               Text('اقرأ', style: TextStyles.actionLabel),
               Icon(
-                Icons.chevron_left_rounded,
+                Icons.chevron_right_rounded,
                 size: 18.r,
                 color: ColorsManager.purpleText,
               ),

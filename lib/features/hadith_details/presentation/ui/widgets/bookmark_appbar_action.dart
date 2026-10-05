@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
@@ -16,6 +18,10 @@ class BookmarkAppBarAction extends StatelessWidget {
   final String hadithNumber;
   final String hadithText;
 
+  /// Id to save under when [hadithNumber] is empty, e.g. for an explained
+  /// hadith; a random one is used when this is null too.
+  final String? bookmarkId;
+
   const BookmarkAppBarAction({
     super.key,
     required this.bookName,
@@ -23,6 +29,7 @@ class BookmarkAppBarAction extends StatelessWidget {
     required this.chapter,
     required this.hadithNumber,
     required this.hadithText,
+    this.bookmarkId,
   });
 
   Future<void> _save(BuildContext context) async {
@@ -50,7 +57,10 @@ class BookmarkAppBarAction extends StatelessWidget {
               chapter: chapter,
               hadithNumber: hadithNumber,
               hadithText: hadithText,
-              id: hadithNumber.isEmpty ? ' ' : hadithNumber,
+              id:
+                  hadithNumber.isNotEmpty
+                      ? hadithNumber
+                      : bookmarkId ?? '${Random().nextInt(10000000) + 1}',
             ),
           ),
     );
