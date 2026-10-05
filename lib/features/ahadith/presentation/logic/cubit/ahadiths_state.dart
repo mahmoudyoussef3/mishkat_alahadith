@@ -15,6 +15,12 @@ final class AhadithsSuccess extends AhadithsState {
   final bool hasMoreData;
   final bool isFromCache;
 
+  /// How many hadiths the chapter has in all, when the API reports it.
+  final int? totalCount;
+
+  /// Grade the list is narrowed to, or null for every grade.
+  final HadithGrade? gradeFilter;
+
   AhadithsSuccess({
     required this.allAhadith,
     required this.filteredAhadith,
@@ -22,6 +28,8 @@ final class AhadithsSuccess extends AhadithsState {
     this.isRefreshing = false,
     this.hasMoreData = true,
     this.isFromCache = false,
+    this.totalCount,
+    this.gradeFilter,
   });
 
   AhadithsSuccess copyWith({
@@ -31,6 +39,7 @@ final class AhadithsSuccess extends AhadithsState {
     bool? isRefreshing,
     bool? hasMoreData,
     bool? isFromCache,
+    int? totalCount,
   }) {
     return AhadithsSuccess(
       allAhadith: allAhadith ?? this.allAhadith,
@@ -39,6 +48,8 @@ final class AhadithsSuccess extends AhadithsState {
       isRefreshing: isRefreshing ?? this.isRefreshing,
       hasMoreData: hasMoreData ?? this.hasMoreData,
       isFromCache: isFromCache ?? this.isFromCache,
+      totalCount: totalCount ?? this.totalCount,
+      gradeFilter: gradeFilter,
     );
   }
 }

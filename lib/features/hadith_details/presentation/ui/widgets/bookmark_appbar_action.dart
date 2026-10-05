@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/core/helpers/extensions.dart';
-import 'package:mishkat_almasabih/core/routing/routes.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/ui/sign_in_prompt.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/add_bookmark_dialogs.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
 
+/// Saves the hadith into one of the user's collections; guests are asked
+/// to sign in first.
 class BookmarkAppBarAction extends StatelessWidget {
   final String bookName;
   final String bookSlug;
@@ -26,57 +25,44 @@ class BookmarkAppBarAction extends StatelessWidget {
     required this.hadithText,
   });
 
+  Future<void> _save(BuildContext context) async {
+    final signedIn = await context.read<SessionCubit>().checkSession();
+    if (!context.mounted) return;
+    if (!signedIn) {
+      showSignInRequired(context);
+      return;
+    }
+    showDialog<void>(
+      context: context,
+      builder:
+          (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider.value(value: context.read<AddCubitCubit>()),
+              BlocProvider.value(
+                value:
+                    context.read<GetCollectionsBookmarkCubit>()
+                      ..getBookMarkCollections(),
+              ),
+            ],
+            child: AddToFavoritesDialog(
+              bookName: bookName,
+              bookSlug: bookSlug,
+              chapter: chapter,
+              hadithNumber: hadithNumber,
+              hadithText: hadithText,
+              id: hadithNumber.isEmpty ? ' ' : hadithNumber,
+            ),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AppBarActionButton(
-      icon: Icons.bookmark_border_rounded,
-      onPressed: () {
-        if (!context.read<SessionCubit>().isSignedIn) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: ColorsManager.primaryGreen,
-              content: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'يجب تسجيل الدخول أولاً لاستخدام هذه الميزة',
-                    textDirection: TextDirection.rtl,
-                    style: HadithDetailsTextStyles.snackText,
-                  ),
-                  IconButton(
-                    onPressed: () => context.pushNamed(Routes.loginScreen),
-                    icon: const Icon(Icons.login, color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          );
-        } else {
-          showDialog(
-            context: context,
-            builder: (dialogContext) {
-              return MultiBlocProvider(
-                providers: [
-                  BlocProvider.value(value: context.read<AddCubitCubit>()),
-                  BlocProvider.value(
-                    value:
-                        context.read<GetCollectionsBookmarkCubit>()
-                          ..getBookMarkCollections(),
-                  ),
-                ],
-                child: AddToFavoritesDialog(
-                  bookName: bookName,
-                  bookSlug: bookSlug,
-                  chapter: chapter,
-                  hadithNumber: hadithNumber,
-                  hadithText: hadithText,
-                  id: hadithNumber.isEmpty ? ' ' : hadithNumber,
-                ),
-              );
-            },
-          );
-        }
-      },
+    return AppIconButton(
+      tooltip: 'حفظ الحديث',
+      icon: Icons.bookmark_rounded,
+      variant: AppIconButtonVariant.tonal,
+      onPressed: () => _save(context),
     );
   }
 }

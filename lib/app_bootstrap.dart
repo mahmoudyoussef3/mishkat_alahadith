@@ -22,6 +22,7 @@ import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
 import 'package:mishkat_almasabih/features/onboarding/domain/usecases/is_first_launch_use_case.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/initialize_ramadan_config_use_case.dart';
 import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/logic/hadith_font_scale_cubit.dart';
 import 'package:mishkat_almasabih/firebase_options.dart';
 
 import 'mishkat_almasabih.dart';
@@ -49,7 +50,10 @@ Future<void> bootstrapApp() async {
   WidgetNavigationService.initialize();
 
   final isFirstTime = await getIt<IsFirstLaunchUseCase>()();
-  await getIt<ThemeCubit>().load();
+  await Future.wait([
+    getIt<ThemeCubit>().load(),
+    getIt<HadithFontScaleCubit>().load(),
+  ]);
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 

@@ -63,9 +63,14 @@ class AppIconButton extends StatelessWidget {
       ),
     };
     final dimension = size ?? 42.r;
+    final enabled = onPressed != null;
 
     final button = Material(
-      color: background,
+      // A disabled solid button falls back to a neutral fill.
+      color:
+          enabled || variant != AppIconButtonVariant.filled
+              ? background
+              : ColorsManager.lightGray,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14.r),
@@ -76,7 +81,15 @@ class AppIconButton extends StatelessWidget {
         child: SizedBox.square(
           dimension: dimension,
           child: IconTheme.merge(
-            data: IconThemeData(color: foreground, size: dimension * 0.5),
+            data: IconThemeData(
+              color:
+                  enabled
+                      ? foreground
+                      : variant == AppIconButtonVariant.filled
+                      ? ColorsManager.disabledText
+                      : foreground.withValues(alpha: 0.35),
+              size: dimension * 0.5,
+            ),
             child: Center(child: child ?? Icon(icon)),
           ),
         ),

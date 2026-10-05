@@ -114,22 +114,25 @@ String convertToArabicNumber(int number) => toArabicDigits('$number');
 
     return result.trim();
   }
+/// Opens the share-as-image editor for [text]. [source] is printed at the
+/// foot of the card and [deepLink] added to the caption.
 Future<void> shareHadithAsImage(
   BuildContext context, {
   required String text,
   String? deepLink,
+  String? source,
 }) async {
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
-    builder: (_) {
-      return ShareImageEditorBottomSheet(
-        text: text,
-        deepLink: deepLink,
-      );
-    },
+    builder:
+        (_) => ShareImageEditorBottomSheet(
+          text: text,
+          deepLink: deepLink,
+          source: source,
+        ),
   );
 }
 
@@ -148,6 +151,39 @@ Future<void> shareHadithLink(
   } on PlatformException {
     showToast('تعذر مشاركة الرابط', ColorsManager.error);
   }
+}
+
+/// Shares the hadith as text: its words, its source and, when it has an
+/// id, a link that opens it in the app.
+Future<void> shareHadithText(
+  BuildContext context, {
+  required String text,
+  String? source,
+  String? hadithId,
+}) async {
+  final link = hadithId == null ? null : HadithLink.build(hadithId);
+  final shareText = [
+    text.trim(),
+    if (source != null && source.trim().isNotEmpty) '— ${source.trim()}',
+    if (link != null) '\n$link',
+  ].join('\n');
+
+  try {
+    await SharePlus.instance.share(
+      ShareParams(text: shareText, sharePositionOrigin: _shareOrigin(context)),
+    );
+  } on PlatformException {
+    showToast('تعذر مشاركة الحديث', ColorsManager.error);
+  }
+}
+
+/// Copies [text] and confirms it.
+Future<void> copyHadithText(BuildContext context, String text) async {
+  await Clipboard.setData(ClipboardData(text: text.trim()));
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(const SnackBar(content: Text('تم نسخ الحديث')));
 }
 
 /// iPad shows the share sheet as a popover anchored to this rect, and

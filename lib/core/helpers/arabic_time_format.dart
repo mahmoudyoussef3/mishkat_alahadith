@@ -33,6 +33,39 @@ String formatArabicCountdown(Duration remaining) {
   };
 }
 
+const _gregorianMonths = [
+  'يناير',
+  'فبراير',
+  'مارس',
+  'أبريل',
+  'مايو',
+  'يونيو',
+  'يوليو',
+  'أغسطس',
+  'سبتمبر',
+  'أكتوبر',
+  'نوفمبر',
+  'ديسمبر',
+];
+
+/// Gregorian date in Arabic: "٥ أكتوبر ٢٠٢٦".
+String formatArabicGregorianDate(DateTime date) =>
+    toArabicDigits('${date.day} ${_gregorianMonths[date.month - 1]} ${date.year}');
+
+/// A recent moment relative to [now]: "اليوم ١٠:٣٢ ص", "أمس ١٠:٣٢ ص", or
+/// "٥ أكتوبر ١٠:٣٢ ص" for older days.
+String formatArabicDayAndTime(DateTime time, {required DateTime now}) {
+  final day = DateTime(time.year, time.month, time.day);
+  final today = DateTime(now.year, now.month, now.day);
+  final daysAgo = today.difference(day).inDays;
+  final dayLabel = switch (daysAgo) {
+    0 => 'اليوم',
+    1 => 'أمس',
+    _ => toArabicDigits('${time.day} ${_gregorianMonths[time.month - 1]}'),
+  };
+  return '$dayLabel ${formatArabicClock(time)}';
+}
+
 /// Umm al-Qura date in Arabic: "١٢ ربيع الآخر ١٤٤٨".
 String formatArabicHijriDate(DateTime date) {
   HijriCalendar.setLocal('ar');

@@ -9,7 +9,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/widgets/screen_title_header.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/search_bar_widget.dart';
+import 'package:mishkat_almasabih/core/widgets/search_bar_widget.dart';
 import 'package:mishkat_almasabih/features/search/search_history/domain/entities/search_history_entry.dart';
 import 'package:mishkat_almasabih/features/search/search_history/presentation/logic/search_history_cubit.dart';
 import 'package:shimmer/shimmer.dart';

@@ -10,6 +10,7 @@ import 'package:mishkat_almasabih/features/prayer_times/domain/entities/prayer_l
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/calculate_prayer_times_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_device_position_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_next_prayer_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_previous_prayer_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_saved_prayer_location_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/refresh_prayer_home_widget_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/request_location_access_use_case.dart';
@@ -31,6 +32,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
   final GetDevicePositionUseCase _getDevicePosition;
   final RefreshPrayerHomeWidgetUseCase _refreshHomeWidget;
   final ReschedulePrayerNotificationsUseCase _rescheduleNotifications;
+  final GetPreviousPrayerUseCase _getPreviousPrayer;
 
   PrayerTimesCubit(
     this._getSavedLocation,
@@ -41,6 +43,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     this._getDevicePosition,
     this._refreshHomeWidget,
     this._rescheduleNotifications,
+    this._getPreviousPrayer,
   ) : super(PrayerTimesInitial());
 
   Timer? _ticker;
@@ -169,12 +172,15 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
 
       final nextPrayer = _nextPrayerAt(now);
       if (nextPrayer == null) return;
+      final previousPrayer = _previousPrayerAt(now);
 
       emit(
         current.copyWith(
           remaining: nextPrayer.time.difference(now),
           nextPrayerLabel: _arabicLabel(nextPrayer.key),
           nextPrayerTime: nextPrayer.time,
+          previousPrayerLabel: _arabicLabel(previousPrayer?.key),
+          previousPrayerTime: previousPrayer?.time,
         ),
       );
     });
@@ -188,9 +194,16 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     return _getNextPrayer(today: today, tomorrow: tomorrow, now: now);
   }
 
+  NextPrayer? _previousPrayerAt(DateTime now) {
+    final today = _prayerTimes;
+    if (today == null) return null;
+    return _getPreviousPrayer(today: today, now: now);
+  }
+
   PrayerTimesLoaded _buildLoaded(DateTime date, DailyPrayerTimes times) {
     final now = DateTime.now();
     final nextPrayer = _nextPrayerAt(now);
+    final previousPrayer = _previousPrayerAt(now);
 
     return PrayerTimesLoaded(
       date: DateTime(date.year, date.month, date.day),
@@ -198,7 +211,30 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
       nextPrayerLabel: _arabicLabel(nextPrayer?.key),
       nextPrayerTime: nextPrayer?.time,
       remaining: nextPrayer?.time.difference(now),
+      previousPrayerLabel: _arabicLabel(previousPrayer?.key),
+      previousPrayerTime: previousPrayer?.time,
     );
+  }
+
+  /// Lists the times [days] away from the day shown (negative for earlier
+  /// days). The countdown keeps following today.
+  void showAdjacentDay(int days) {
+    final current = state;
+    if (current is! PrayerTimesLoaded) return;
+    final shown = current.selectedDate;
+    _showDay(current, DateTime(shown.year, shown.month, shown.day + days));
+  }
+
+  void showToday() {
+    final current = state;
+    if (current is PrayerTimesLoaded) _showDay(current, current.date);
+  }
+
+  void _showDay(PrayerTimesLoaded current, DateTime day) {
+    final result = _calculatePrayerTimes(_currentLocation, day);
+    if (result case ApiSuccess(:final data)) {
+      emit(current.copyWith(selectedDate: day, selectedTimes: data));
+    }
   }
 
   String? _arabicLabel(String? name) => PrayerNames.arabic(name);

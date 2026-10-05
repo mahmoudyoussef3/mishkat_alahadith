@@ -6,6 +6,7 @@ import 'package:mishkat_almasabih/core/networking/api_constants.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/models/book_chapters_args.dart';
 import 'package:mishkat_almasabih/features/library/domain/entities/library_book.dart';
 
 /// A book as its cover with the title, author and size beneath. Opens the
@@ -36,15 +37,14 @@ class BookCoverTile extends StatelessWidget {
   void _open(BuildContext context) {
     context.pushNamed(
       Routes.bookChaptersScreen,
-      arguments: [
-        book.bookSlug ?? '',
-        {
-          'bookName': bookNamesArabic[book.bookName],
-          'writerName': bookWriters[book.bookName],
-          'noOfChapters': book.chaptersCount.toString(),
-          'noOfHadith': book.hadithsCount.toString(),
-        },
-      ],
+      arguments: BookChaptersArgs(
+        bookSlug: book.bookSlug ?? '',
+        bookName: _title,
+        writerName: _author,
+        chaptersCount: book.chaptersCount,
+        hadithsCount: book.hadithsCount,
+        coverImage: bookImages[book.bookName],
+      ),
     );
   }
 

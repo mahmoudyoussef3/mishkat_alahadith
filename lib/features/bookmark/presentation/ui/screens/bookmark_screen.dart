@@ -12,7 +12,7 @@ import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collectio
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/book_collections_row.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/ui/widgets/bookmark_list.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/search_bar_widget.dart';
+import 'package:mishkat_almasabih/core/widgets/search_bar_widget.dart';
 
 /// Saved hadiths and chapters, with collection folders and a text filter.
 class BookmarkScreen extends StatefulWidget {

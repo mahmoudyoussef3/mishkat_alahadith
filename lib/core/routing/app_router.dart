@@ -16,6 +16,7 @@ import 'package:mishkat_almasabih/features/bookmark/presentation/logic/delete_bo
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/ui/screens/bookmark_screen.dart';
 import 'package:mishkat_almasabih/features/chapters/presentation/logic/cubit/chapters_cubit.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/models/book_chapters_args.dart';
 import 'package:mishkat_almasabih/features/chapters/presentation/ui/screens/chapters_screen.dart';
 import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_cubit.dart';
@@ -53,7 +54,11 @@ import 'package:mishkat_almasabih/features/send_suggestion/presentation/logic/se
 import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/ui/open_siraj.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/ui/serag_chat_screen.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/logic/cubit/hadith_analysis_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/ui/siraj_analysis_args.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/ui/siraj_analysis_screen.dart';
 import '../../features/search/enhanced_public_search/presentation/ui/screens/public_search_result.dart';
 import '../di/dependency_injection.dart';
 import 'routes.dart';
@@ -255,16 +260,15 @@ class AppRouter {
 
       case Routes.bookChaptersScreen:
         _logScreenView('BookChaptersScreen');
-        final args = settings.arguments as List<dynamic>;
-        final bookSlug = args[0];
+        final book = settings.arguments as BookChaptersArgs;
         return MaterialPageRoute(
           builder:
               (_) => BlocProvider(
                 create:
                     (context) =>
                         getIt<ChaptersCubit>()
-                          ..emitGetBookChapters(bookSlug: bookSlug),
-                child: BookChaptersScreen(args: args),
+                          ..emitGetBookChapters(bookSlug: book.bookSlug),
+                child: BookChaptersScreen(book: book),
               ),
         );
       case Routes.publicSearchSCreen:
@@ -360,7 +364,12 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const AboutUsScreen());
       case Routes.serag:
         _logScreenView('SeragScreen');
-        final query = settings.arguments as SeragHadithContext;
+        final chat = switch (settings.arguments) {
+          final SeragChatArgs args => args,
+          final SeragHadithContext hadith => SeragChatArgs(hadith: hadith),
+          _ => null,
+        };
+        if (chat == null) return null;
 
         return MaterialPageRoute(
           builder:
@@ -378,7 +387,25 @@ class AppRouter {
                     create: (context) => getIt<ChatHistoryCubit>()..clearMessages(),
                   ),
                 ],
-                child: SeragChatScreen(model: query),
+                child: SeragChatScreen(args: chat),
+              ),
+        );
+
+      case Routes.sirajAnalysis:
+        _logScreenView('SirajAnalysisScreen');
+        final analysis = settings.arguments as SirajAnalysisArgs;
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (_) =>
+                        getIt<HadithAnalysisCubit>()..analyzeHadith(
+                          hadith: analysis.hadith,
+                          attribution: analysis.attribution,
+                          grade: analysis.grade,
+                          reference: analysis.reference,
+                        ),
+                child: SirajAnalysisScreen(args: analysis),
               ),
         );
 

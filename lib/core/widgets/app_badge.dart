@@ -72,9 +72,12 @@ class AppBadge extends StatelessWidget {
 
 /// Hadith grade in its semantic colour: green authentic, gold good, red weak.
 class GradeBadge extends StatelessWidget {
-  const GradeBadge({super.key, required this.grade});
+  const GradeBadge({super.key, required this.grade, this.withIcon = false});
 
   final HadithGrade grade;
+
+  /// Adds a seal before the label, for the hadith being read.
+  final bool withIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +88,7 @@ class GradeBadge extends StatelessWidget {
     };
     return AppBadge(
       label: grade.arabicLabel,
+      icon: withIcon ? Icons.verified_rounded : null,
       background: background,
       foreground: foreground,
     );

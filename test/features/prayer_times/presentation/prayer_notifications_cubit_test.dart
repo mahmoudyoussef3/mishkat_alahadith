@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/entities/prayer_location.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/entities/prayer_notification_settings.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_notifications_repo.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_times_repo.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_prayer_notification_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_saved_prayer_location_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/open_battery_optimization_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/reschedule_prayer_notifications_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/set_prayer_notifications_enabled_use_case.dart';
@@ -32,11 +35,25 @@ class _FakeRepo implements PrayerNotificationsRepo {
   }
 
   @override
-  Future<ApiResult<String>> reschedule() async =>
-      const ApiResult.success('تمت المزامنة');
+  Future<ApiResult<String>> reschedule() async {
+    settings = PrayerNotificationSettings(
+      enabled: settings.enabled,
+      batteryOptimizationIgnored: settings.batteryOptimizationIgnored,
+      lastSyncedAt: _syncTime,
+    );
+    return const ApiResult.success('تمت المزامنة');
+  }
 
   @override
   Future<void> openBatteryOptimizationSettings() async {}
+}
+
+final _syncTime = DateTime(2026, 10, 5, 10, 32);
+
+class _LocationRepo extends Fake implements PrayerTimesRepo {
+  @override
+  Future<PrayerLocation> getSavedLocation() async =>
+      PrayerLocation.egyptianCities[1];
 }
 
 PrayerNotificationsCubit _cubit(_FakeRepo repo) => PrayerNotificationsCubit(
@@ -44,6 +61,7 @@ PrayerNotificationsCubit _cubit(_FakeRepo repo) => PrayerNotificationsCubit(
   SetPrayerNotificationsEnabledUseCase(repo),
   ReschedulePrayerNotificationsUseCase(repo),
   OpenBatteryOptimizationSettingsUseCase(repo),
+  GetSavedPrayerLocationUseCase(_LocationRepo()),
 );
 
 void main() {
@@ -62,6 +80,30 @@ void main() {
 
     expect(cubit.state.enabled, isTrue);
     expect(cubit.state.showBatteryReliabilityAction, isTrue);
+  });
+
+  test('load shows the city the times are calculated for', () async {
+    await cubit.load();
+
+    expect(cubit.state.locationName, 'الإسكندرية');
+  });
+
+  test('load shows when notifications were last synced', () async {
+    repo.settings = PrayerNotificationSettings(
+      enabled: true,
+      batteryOptimizationIgnored: true,
+      lastSyncedAt: _syncTime,
+    );
+
+    await cubit.load();
+
+    expect(cubit.state.lastSyncedAt, _syncTime);
+  });
+
+  test('a successful refresh shows the new sync time', () async {
+    await cubit.refresh();
+
+    expect(cubit.state.lastSyncedAt, _syncTime);
   });
 
   test('a successful toggle updates the switch and reports the message', () async {

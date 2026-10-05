@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/presentation/logic/cubit/hadith_analysis_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/presentation/ui/widgets/hadith_analysis.dart';
-import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_books_section.dart';
-import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_grade_title.dart';
+import 'package:mishkat_almasabih/core/deep_links/hadith_link.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
+import 'package:mishkat_almasabih/core/helpers/functions.dart';
+import 'package:mishkat_almasabih/core/helpers/hadith_grade.dart';
+import 'package:mishkat_almasabih/core/helpers/hadith_text.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
+import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_text_card.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/navigation/presentation/logic/remote/navigation_cubit.dart';
-import 'package:mishkat_almasabih/features/navigation/presentation/logic/local/local_hadith_navigation_cubit.dart';
-import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_header_info.dart';
-import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/divider_section.dart';
-import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/navigation_container.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/ui/siraj_analysis_args.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/logic/hadith_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/bookmark_appbar_action.dart';
-import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/serag_fab_button.dart';
-import 'package:mishkat_almasabih/core/theming/hadith_details_styles.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_reader_bar.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_reading_card.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_source_card.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/siraj_prompt_card.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/ui/hadith_font_size_sheet.dart';
+import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/ui/open_siraj.dart';
 
-// ignore: must_be_immutable
-class HadithDetailScreen extends StatefulWidget {
+/// A hadith from a book at full length, with its source, Siraj, and steps
+/// to the neighbouring hadiths of the chapter.
+class HadithDetailScreen extends StatelessWidget {
   final String? hadithText;
   final String? narrator;
   final String? grade;
@@ -36,9 +38,9 @@ class HadithDetailScreen extends StatefulWidget {
   final bool isBookMark;
   final String chapterNumber;
   final bool isLocal;
-  bool showNavigation;
+  final bool showNavigation;
 
-  HadithDetailScreen({
+  const HadithDetailScreen({
     super.key,
     required this.hadithText,
     required this.chapterNumber,
@@ -56,342 +58,217 @@ class HadithDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<HadithDetailScreen> createState() => _HadithDetailScreenState();
-}
-
-class _HadithDetailScreenState extends State<HadithDetailScreen> {
-  bool prev = false;
-  bool isNavigated = false;
-  String newTextOfHadith = '';
-
-  String newHadithId = '';
-  late String _currentHadithId;
-  bool _hasPrev = true;
-  bool _hasNext = true;
-
-  bool _isValid(String? text) => text != null && text.trim().isNotEmpty;
-
-  @override
-  void initState() {
-    _currentHadithId = widget.hadithNumber ?? '';
-    super.initState();
-    context.read<SessionCubit>().checkSession();
-  }
-
-
-  @override
   Widget build(BuildContext context) {
+    final withNavigation = showNavigation && !isBookMark;
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => getIt<AddCubitCubit>()),
-        BlocProvider(create: (context) => getIt<NavigationCubit>()),
-        BlocProvider(create: (context) => getIt<LocalHadithNavigationCubit>()),
-        BlocProvider(create: (context) => getIt<GetCollectionsBookmarkCubit>()),
-
+        BlocProvider(create: (_) => getIt<AddCubitCubit>()),
+        BlocProvider(create: (_) => getIt<GetCollectionsBookmarkCubit>()),
         BlocProvider(
           create:
-              (context) =>
-                  getIt<HadithAnalysisCubit>()..analyzeHadith(
-                    hadith:
-                        newTextOfHadith.isEmpty
-                            ? widget.hadithText ?? ''
-                            : newTextOfHadith,
-                    attribution: widget.author ?? '',
-                    grade: widget.grade ?? '',
-
-                    reference: widget.bookName ?? '',
+              (_) =>
+                  getIt<HadithReaderCubit>()..start(
+                    hadithId: hadithNumber ?? '',
+                    text: hadithText ?? '',
+                    bookSlug: bookSlug ?? '',
+                    chapterNumber: chapterNumber,
+                    isLocal: isLocal,
+                    withNavigation: withNavigation,
                   ),
         ),
       ],
       child: Directionality(
         textDirection: TextDirection.rtl,
-        child: SafeArea(
-          top: false,
-          bottom: true,
-          child: Scaffold(
-            floatingActionButton: SeragFabButton(
-              hadithText:
-                  (isNavigated && newTextOfHadith.isNotEmpty)
-                      ? newTextOfHadith
-                      : (widget.hadithText ?? ''),
-              grade: widget.grade ?? '',
-              bookName: widget.bookName ?? '',
-              narrator: widget.narrator ?? '',
-            ),
-            backgroundColor: ColorsManager.secondaryBackground,
-            body: CustomScrollView(
-              slivers: [
-                BuildHeaderAppBar(
+        child: _HadithDetailView(screen: this, withNavigation: withNavigation),
+      ),
+    );
+  }
+}
+
+class _HadithDetailView extends StatelessWidget {
+  const _HadithDetailView({required this.screen, required this.withNavigation});
+
+  final HadithDetailScreen screen;
+  final bool withNavigation;
+
+  String? get _bookName => _nonEmpty(screen.bookName);
+
+  String _sourceLine(String hadithId) => [
+    _bookName,
+    // "حديث ٩" rather than a bare "٩": next to "·" a lone Arabic digit
+    // reads like it has a trailing zero.
+    if (hadithId.isNotEmpty) toArabicDigits('حديث $hadithId'),
+  ].nonNulls.join(' · ');
+
+  SeragHadithContext _sirajContext(String text) => SeragHadithContext(
+    hadeeth: text,
+    gradeAr: screen.grade ?? '',
+    source: screen.bookName ?? '',
+    takhrijAr: screen.narrator ?? '',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final grade = HadithGrade.tryParse(screen.grade);
+    final author = _nonEmpty(screen.author);
+    final narrator = _nonEmpty(screen.narrator);
+
+    return Scaffold(
+      backgroundColor: ColorsManager.secondaryBackground,
+      bottomNavigationBar: withNavigation ? const HadithReaderBar() : null,
+      body: SafeArea(
+        bottom: !withNavigation,
+        child: BlocBuilder<HadithReaderCubit, HadithReaderState>(
+          buildWhen:
+              (previous, current) =>
+                  previous.hadithId != current.hadithId ||
+                  previous.text != current.text,
+          builder: (context, reader) {
+            final text = reader.text;
+            final hadithId = reader.hadithId;
+
+            return Column(
+              children: [
+                DetailHeader(
                   title: 'تفاصيل الحديث',
-                  actions:
-                      widget.isBookMark
-                          ? []
-                          : [
-                            BookmarkAppBarAction(
-                              bookName: widget.bookName ?? '',
-                              bookSlug: widget.bookSlug ?? '',
-                              chapter: widget.chapter ?? '',
-                              hadithNumber: widget.hadithNumber ?? '',
-                              hadithText:
-                                  (isNavigated && newTextOfHadith.isNotEmpty)
-                                      ? newTextOfHadith
-                                      : (widget.hadithText ?? ''),
+                  subtitle: [
+                    _bookName,
+                    _nonEmpty(screen.chapter),
+                  ].nonNulls.join(' · '),
+                  actions: [
+                    AppIconButton(
+                      tooltip: 'حجم الخط',
+                      icon: Icons.text_increase_rounded,
+                      onPressed: () => showHadithFontSizeSheet(context),
+                    ),
+                    if (!screen.isBookMark)
+                      BookmarkAppBarAction(
+                        bookName: screen.bookName ?? '',
+                        bookSlug: screen.bookSlug ?? '',
+                        chapter: screen.chapter ?? '',
+                        hadithNumber: hadithId,
+                        hadithText: text,
+                      ),
+                  ],
+                ),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    child: ListView(
+                      key: ValueKey(hadithId),
+                      padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
+                      children: [
+                        HadithReadingCard(
+                          text: text.isEmpty ? 'نص الحديث غير متوفر' : text,
+                          number: hadithId,
+                          grade: grade,
+                          actions: [
+                            HadithCardAction(
+                              icon: Icons.content_copy_rounded,
+                              label: 'نسخ',
+                              onTap:
+                                  () => copyHadithText(
+                                    context,
+                                    HadithTextParts.typeset(text),
+                                  ),
+                            ),
+                            HadithCardAction(
+                              icon: Icons.share_rounded,
+                              label: 'مشاركة',
+                              onTap:
+                                  () => shareHadithText(
+                                    context,
+                                    text: HadithTextParts.typeset(text),
+                                    source: _sourceLine(hadithId),
+                                    hadithId: hadithId.isEmpty ? null : hadithId,
+                                  ),
+                            ),
+                            HadithCardAction(
+                              icon: Icons.image_outlined,
+                              label: 'بطاقة',
+                              onTap:
+                                  () => shareHadithAsImage(
+                                    context,
+                                    text: text,
+                                    source: _sourceLine(hadithId),
+                                    deepLink:
+                                        hadithId.isEmpty
+                                            ? null
+                                            : HadithLink.build(
+                                              hadithId,
+                                            )?.toString(),
+                                  ),
                             ),
                           ],
-                ),
-
-                if (_isValid(widget.hadithNumber) || _isValid(widget.bookName))
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 22.w,
-                        vertical: 16.h,
-                      ),
-                      child: HadithHeaderInfo(
-                        hadithId:
-                            newHadithId.isNotEmpty
-                                ? newHadithId
-                                : _currentHadithId,
-                        bookName: widget.bookName,
-                      ),
-                    ),
-                  ),
-
-                if (_isValid(widget.hadithText))
-                  SliverToBoxAdapter(
-                    child: HadithTextCard(
-                      hadithText:
-                          isNavigated
-                              ? newTextOfHadith
-                              : widget.hadithText ?? "الحديث غير متوفر",
-                      hadithId: newHadithId.isNotEmpty ? newHadithId : _currentHadithId,
-                    ),
-                  ),
-
-                SliverToBoxAdapter(child: SizedBox(height: 20.h)),
-                if (widget.showNavigation && !widget.isBookMark)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 16.h,
-                      ),
-                      child:
-                          widget.isLocal
-                              ? _buildLocalNavigation()
-                              : _buildRemoteNavigation(),
-                    ),
-                  ),
-
-                HadithAnalysis(
-                  attribution: widget.narrator ?? '',
-                  hadith:
-                      newTextOfHadith.isEmpty
-                          ? widget.hadithText ?? ''
-                          : newTextOfHadith,
-                  grade: widget.grade ?? '',
-                  reference: widget.bookName ?? '',
-                ),
-
-                if (_isValid(widget.grade)) const DividerSection(),
-
-                if (_isValid(widget.grade))
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
-                      child: HadithGradeTile(
-                        grade: widget.grade ?? '',
-                        onTap: () {
-                          Clipboard.setData(
-                            ClipboardData(text: widget.hadithText ?? ''),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: ColorsManager.success,
-                              content: Row(
-                                children: [
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Colors.white,
-                                    size: 20.sp,
-                                  ),
-                                  SizedBox(width: 12.w),
-                                  Text(
-                                    "تم نسخ الحديث بنجاح",
-                                    style: HadithDetailsTextStyles.snackText
-                                        .copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                ],
+                        ),
+                        SizedBox(height: 16.h),
+                        SirajPromptCard(
+                          onAnalyze:
+                              () => openSirajAnalysis(
+                                context,
+                                SirajAnalysisArgs(
+                                  hadith: text,
+                                  attribution: screen.author ?? '',
+                                  grade: screen.grade ?? '',
+                                  reference: screen.bookName ?? '',
+                                  title: _sourceLine(hadithId),
+                                ),
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
+                          onAsk:
+                              () => openSiraj(
+                                context,
+                                hadith: _sirajContext(text),
+                                title: _sourceLine(hadithId),
                               ),
+                        ),
+                        SizedBox(height: 16.h),
+                        HadithSourceCard(
+                          rows: [
+                            HadithSourceRow(
+                              Icons.menu_book_rounded,
+                              'الكتاب',
+                              _bookName ?? '',
                             ),
-                          );
-                        },
-                      ),
+                            HadithSourceRow(
+                              Icons.person_rounded,
+                              'المؤلف',
+                              author ?? '',
+                            ),
+                            HadithSourceRow(
+                              Icons.event_rounded,
+                              'وفاة المؤلف',
+                              _nonEmpty(screen.authorDeath) ?? '',
+                            ),
+                            HadithSourceRow(
+                              Icons.folder_rounded,
+                              'الباب',
+                              _nonEmpty(screen.chapter) ?? '',
+                            ),
+                            // Some lists pass the author as the narrator;
+                            // only show a real narrator.
+                            HadithSourceRow(
+                              Icons.record_voice_over_rounded,
+                              'الراوي',
+                              narrator == null || narrator == author
+                                  ? ''
+                                  : narrator,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-
-                if (_isValid(widget.bookName) ||
-                    _isValid(widget.author) ||
-                    _isValid(widget.chapter))
-                  const DividerSection(),
-
-                if (_isValid(widget.bookName) ||
-                    _isValid(widget.author) ||
-                    _isValid(widget.chapter))
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
-                      child: HadithBookSection(
-                        bookName: widget.bookName ?? '',
-                        author: widget.author,
-                        authorDeath: widget.authorDeath,
-                        chapter: widget.chapter ?? '',
-                      ),
-                    ),
-                  ),
-
-                const DividerSection(),
-
-                SliverToBoxAdapter(child: SizedBox(height: 120.h)),
+                ),
               ],
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildLocalNavigation() {
-    return BlocConsumer<LocalHadithNavigationCubit, LocalHadithNavigationState>(
-      listener: (context, state) {
-        if (state is LocalHadithNavigationFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: ColorsManager.error,
-              behavior: SnackBarBehavior.floating,
-              content: Text(
-                state.errMessage,
-                style: HadithDetailsTextStyles.snackText,
-              ),
-            ),
-          );
-        }
-        if (state is LocalHadithNavigationSuccess) {
-          setState(() {
-            isNavigated = true;
-            final hadith =
-                prev
-                    ? state.navigation.prevHadith
-                    : state.navigation.nextHadith;
-
-            if (hadith != null) {
-              newTextOfHadith = hadith.title ?? "الحديث غير متوفر";
-              newHadithId = hadith.id.toString();
-              _currentHadithId = newHadithId;
-              _hasPrev = state.navigation.prevHadith != null;
-              _hasNext = state.navigation.nextHadith != null;
-            }
-          });
-        }
-      },
-      builder: (context, state) {
-        return NavigationContainer(
-          isLoading: state is NavigationLoading,
-          hadithId: newHadithId.isNotEmpty ? newHadithId : _currentHadithId,
-          onPrev:
-              _hasPrev
-                  ? () {
-                    prev = true;
-                    context
-                        .read<LocalHadithNavigationCubit>()
-                        .emitLocalNavigation(
-                          _currentHadithId,
-                          widget.bookSlug ?? "",
-                        );
-                  }
-                  : null,
-          onNext:
-              _hasNext
-                  ? () {
-                    prev = false;
-                    context
-                        .read<LocalHadithNavigationCubit>()
-                        .emitLocalNavigation(
-                          _currentHadithId,
-                          widget.bookSlug ?? "",
-                        );
-                  }
-                  : null,
-        );
-      },
-    );
-  }
-
-  Widget _buildRemoteNavigation() {
-    return BlocConsumer<NavigationCubit, NavigationState>(
-      listener: (context, state) {
-        if (state is NavigationFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: ColorsManager.error,
-              behavior: SnackBarBehavior.floating,
-              content: Text(
-                state.errMessage,
-                style: HadithDetailsTextStyles.snackText,
-              ),
-            ),
-          );
-        }
-        if (state is NavigationSuccess) {
-          setState(() {
-            isNavigated = true;
-            final hadith =
-                prev
-                    ? state.navigation.prevHadith
-                    : state.navigation.nextHadith;
-
-            if (hadith != null) {
-              newTextOfHadith = hadith.title ?? "الحديث غير متوفر";
-              newHadithId = hadith.id!;
-              _currentHadithId = newHadithId;
-              _hasPrev = state.navigation.prevHadith != null;
-              _hasNext = state.navigation.nextHadith != null;
-            }
-          });
-        }
-      },
-      builder: (context, state) {
-        return NavigationContainer(
-          isLoading: state is NavigationLoading,
-          hadithId: newHadithId.isNotEmpty ? newHadithId : _currentHadithId,
-          onPrev:
-              _hasPrev
-                  ? () {
-                    prev = true;
-                    context.read<NavigationCubit>().emitNavigationStates(
-                      _currentHadithId,
-                      widget.bookSlug ?? "",
-                      widget.chapterNumber,
-                    );
-                  }
-                  : null,
-          onNext:
-              _hasNext
-                  ? () {
-                    prev = false;
-                    context.read<NavigationCubit>().emitNavigationStates(
-                      _currentHadithId,
-                      widget.bookSlug ?? "",
-                      widget.chapterNumber,
-                    );
-                  }
-                  : null,
-        );
-      },
-    );
+  static String? _nonEmpty(String? value) {
+    final trimmed = value?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
   }
 }

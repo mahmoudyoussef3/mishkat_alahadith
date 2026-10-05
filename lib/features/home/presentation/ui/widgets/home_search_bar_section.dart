@@ -7,7 +7,7 @@ import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
 import 'package:mishkat_almasabih/features/search/search_history/domain/entities/search_history_entry.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/search_bar_widget.dart';
+import 'package:mishkat_almasabih/core/widgets/search_bar_widget.dart';
 import 'package:mishkat_almasabih/features/search/search_history/presentation/logic/search_history_cubit.dart';
 
 /// Search field with a shortcut to the full search tab.

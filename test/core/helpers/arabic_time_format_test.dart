@@ -44,4 +44,35 @@ void main() {
       expect(formatArabicCountdown(Duration.zero), 'أقل من دقيقة');
     });
   });
+
+  group('formatArabicGregorianDate', () {
+    test('writes the day, Arabic month name and year', () {
+      expect(formatArabicGregorianDate(DateTime(2026, 10, 5)), '٥ أكتوبر ٢٠٢٦');
+    });
+  });
+
+  group('formatArabicDayAndTime', () {
+    final now = DateTime(2026, 10, 5, 18, 0);
+
+    test('says today for a time earlier the same day', () {
+      expect(
+        formatArabicDayAndTime(DateTime(2026, 10, 5, 10, 32), now: now),
+        'اليوم ١٠:٣٢ ص',
+      );
+    });
+
+    test('says yesterday for the previous calendar day', () {
+      expect(
+        formatArabicDayAndTime(DateTime(2026, 10, 4, 23, 59), now: now),
+        'أمس ١١:٥٩ م',
+      );
+    });
+
+    test('writes the date for older days', () {
+      expect(
+        formatArabicDayAndTime(DateTime(2026, 9, 28, 9, 5), now: now),
+        '٢٨ سبتمبر ٩:٠٥ ص',
+      );
+    });
+  });
 }

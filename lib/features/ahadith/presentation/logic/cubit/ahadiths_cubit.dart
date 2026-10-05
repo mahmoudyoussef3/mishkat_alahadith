@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
+import 'package:mishkat_almasabih/core/helpers/hadith_grade.dart';
 import 'package:mishkat_almasabih/core/domain/entities/chapter_hadith.dart';
 import 'package:mishkat_almasabih/features/ahadith/domain/entities/local_book_hadith.dart';
 import 'package:mishkat_almasabih/features/ahadith/domain/usecases/cache_chapter_ahadith_use_case.dart';
@@ -29,6 +30,8 @@ class AhadithsCubit extends Cubit<AhadithsState> {
   bool _hasMore = true;
   String? _lastSourceKey;
   int _currentPage = 1;
+  String _query = '';
+  HadithGrade? _grade;
 
   Future<void> emitAhadiths({
     required String bookSlug,
@@ -44,6 +47,8 @@ class AhadithsCubit extends Cubit<AhadithsState> {
       _hasMore = true;
       _isLoadingMore = false;
       _currentPage = 1;
+      _query = '';
+      _grade = null;
       emit(AhadithsInitial());
       _lastSourceKey = currentSourceKey;
     }
@@ -100,12 +105,11 @@ class AhadithsCubit extends Cubit<AhadithsState> {
       _hasMore = cached.ahadith.length < cached.totalCount;
 
       emit(
-        AhadithsSuccess(
-          allAhadith: cached.ahadith,
-          filteredAhadith: cached.ahadith,
+        _success(
+          cached.ahadith,
           isFromCache: true,
-          hasMoreData: _hasMore,
           isRefreshing: true,
+          totalCount: cached.totalCount,
         ),
       );
 
@@ -167,15 +171,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
           totalCount: page.total,
         );
 
-        emit(
-          AhadithsSuccess(
-            allAhadith: merged,
-            filteredAhadith: merged,
-            isFromCache: false,
-            isRefreshing: false,
-            hasMoreData: _hasMore,
-          ),
-        );
+        emit(_success(merged, totalCount: page.total));
       },
       failure: (failure) {
         log('⚠️ [AhadithsCubit] Background refresh FAILED: ${failure.message}');
@@ -261,14 +257,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
           totalCount: response.total,
         );
 
-        emit(
-          AhadithsSuccess(
-            allAhadith: merged,
-            filteredAhadith: merged,
-            isLoadingMore: false,
-            hasMoreData: _hasMore,
-          ),
-        );
+        emit(_success(merged, totalCount: response.total));
       },
       failure: (failure) {
         log('🔴 [AhadithsCubit] API ERROR: ${failure.message}');
@@ -276,14 +265,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
         if (existingAhadith.isEmpty) {
           emit(AhadithsFailure(failure.message));
         } else {
-          emit(
-            AhadithsSuccess(
-              allAhadith: existingAhadith,
-              filteredAhadith: existingAhadith,
-              isLoadingMore: false,
-              hasMoreData: _hasMore,
-            ),
-          );
+          emit(_success(existingAhadith, totalCount: _totalCount));
         }
       },
     );
@@ -300,7 +282,13 @@ class AhadithsCubit extends Cubit<AhadithsState> {
             : await _getLocalAhadith(bookSlug: bookSlug, chapterId: chapterId);
 
     result.when(
-      success: (hadiths) => emit(LocalAhadithsSuccess(hadiths: hadiths)),
+      success:
+          (hadiths) => emit(
+            LocalAhadithsSuccess(
+              hadiths: hadiths,
+              filteredHadiths: _matchingLocal(hadiths),
+            ),
+          ),
       failure: (failure) => emit(AhadithsFailure(failure.message)),
     );
   }
@@ -308,40 +296,73 @@ class AhadithsCubit extends Cubit<AhadithsState> {
   bool get hasMore => _hasMore;
   int get currentPage => _currentPage;
 
+  /// Narrows the list to hadiths containing [query], ignoring diacritics.
   void filterAhadith(String query) {
-    final currentState = state;
-    final normalizedQuery = normalizeArabic(query);
+    _query = normalizeArabic(query);
+    _reapplyFilters();
+  }
 
-    if (currentState is AhadithsSuccess) {
-      if (normalizedQuery.isEmpty) {
-        emit(currentState.copyWith(filteredAhadith: currentState.allAhadith));
-      } else {
-        final filtered =
-            currentState.allAhadith
-                .where(
-                  (h) =>
-                      h.hadithArabic != null &&
-                      normalizeArabic(
-                        h.hadithArabic!,
-                      ).contains(normalizedQuery),
-                )
-                .toList();
-        emit(currentState.copyWith(filteredAhadith: filtered));
-      }
-    } else if (currentState is LocalAhadithsSuccess) {
-      if (normalizedQuery.isEmpty) {
-        emit(currentState.copyWith(filteredHadiths: currentState.hadiths));
-      } else {
-        final filtered =
-            currentState.hadiths
-                .where(
-                  (h) =>
-                      h.arabic != null &&
-                      normalizeArabic(h.arabic!).contains(normalizedQuery),
-                )
-                .toList();
-        emit(currentState.copyWith(filteredHadiths: filtered));
-      }
+  /// Narrows the list to [grade], or shows every grade when null.
+  void filterByGrade(HadithGrade? grade) {
+    _grade = grade;
+    _reapplyFilters();
+  }
+
+  void _reapplyFilters() {
+    switch (state) {
+      case final AhadithsSuccess current:
+        emit(
+          _success(
+            current.allAhadith,
+            isFromCache: current.isFromCache,
+            isRefreshing: current.isRefreshing,
+            isLoadingMore: current.isLoadingMore,
+            totalCount: current.totalCount,
+          ),
+        );
+      case final LocalAhadithsSuccess current:
+        emit(current.copyWith(filteredHadiths: _matchingLocal(current.hadiths)));
+      default:
+        break;
     }
   }
+
+  int? get _totalCount => switch (state) {
+    AhadithsSuccess(:final totalCount) => totalCount,
+    _ => null,
+  };
+
+  /// A success state for [ahadith] with the current filters applied.
+  AhadithsSuccess _success(
+    List<ChapterHadith> ahadith, {
+    bool isFromCache = false,
+    bool isRefreshing = false,
+    bool isLoadingMore = false,
+    int? totalCount,
+  }) => AhadithsSuccess(
+    allAhadith: ahadith,
+    filteredAhadith: ahadith.where(_matches).toList(),
+    isFromCache: isFromCache,
+    isRefreshing: isRefreshing,
+    isLoadingMore: isLoadingMore,
+    hasMoreData: _hasMore,
+    totalCount: totalCount,
+    gradeFilter: _grade,
+  );
+
+  bool _matches(ChapterHadith hadith) {
+    final grade = _grade;
+    if (grade != null && HadithGrade.tryParse(hadith.status) != grade) {
+      return false;
+    }
+    return _query.isEmpty ||
+        normalizeArabic(hadith.hadithArabic ?? '').contains(_query);
+  }
+
+  List<LocalBookHadith> _matchingLocal(List<LocalBookHadith> hadiths) =>
+      _query.isEmpty
+          ? hadiths
+          : hadiths
+              .where((h) => normalizeArabic(h.arabic ?? '').contains(_query))
+              .toList();
 }
