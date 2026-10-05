@@ -24,12 +24,20 @@ import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collectio
 import 'package:mishkat_almasabih/features/hadith_daily/presentation/ui/widgets/hadith_tabs.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/bookmark_appbar_action.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_reading_card.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/entities/hadith_speech_request.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/entities/speech_track.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_button.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_host.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_player.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_text.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/share_hadith_audio.dart';
 import 'package:mishkat_almasabih/features/reading_preferences/presentation/ui/hadith_font_size_sheet.dart';
 import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/ui/open_siraj.dart';
 
 /// A hadith with its explanation, lessons and word meanings: the hadith of
-/// the day, a topic's hadith, or one opened from a link.
+/// the day, a topic's hadith, or one opened from a link. All of it can be
+/// read aloud.
 class HadithDailyScreen extends StatelessWidget {
   const HadithDailyScreen({
     super.key,
@@ -53,10 +61,12 @@ class HadithDailyScreen extends StatelessWidget {
       ],
       child: Directionality(
         textDirection: TextDirection.rtl,
-        child: _ExplainedHadithView(
-          hadith: dailyHadithModel,
-          title: title,
-          description: description,
+        child: ReadAloudHost(
+          child: _ExplainedHadithView(
+            hadith: dailyHadithModel,
+            title: title,
+            description: description,
+          ),
         ),
       ),
     );
@@ -84,6 +94,14 @@ class _ExplainedHadithView extends StatelessWidget {
   String? get _id {
     final value = hadith.id?.trim();
     return value == null || value.isEmpty ? null : value;
+  }
+
+  ExplainedHadithSpeech get _speech {
+    final heading = hadith.title?.trim();
+    return ExplainedHadithSpeech(
+      title: heading == null || heading.isEmpty ? title : heading,
+      hadith: hadith,
+    );
   }
 
   void _askSiraj(BuildContext context) => openSiraj(
@@ -126,8 +144,12 @@ class _ExplainedHadithView extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: ColorsManager.secondaryBackground,
-        bottomNavigationBar:
-            _text.isEmpty ? null : _SirajBar(onTap: () => _askSiraj(context)),
+        bottomNavigationBar: ReadAloudBottomBar(
+          below:
+              _text.isEmpty
+                  ? null
+                  : _SirajBar(onTap: () => _askSiraj(context)),
+        ),
         body: SafeArea(
           bottom: false,
           child: Column(
@@ -159,6 +181,10 @@ class _ExplainedHadithView extends StatelessWidget {
                       text: _text.isEmpty ? 'نص الحديث غير متوفر' : _text,
                       grade: HadithGrade.tryParse(grade),
                       gradeLabel: grade == null || grade.isEmpty ? null : grade,
+                      headerAction:
+                          _text.isEmpty
+                              ? null
+                              : ReadAloudButton(request: _speech),
                       footer:
                           _attribution == null
                               ? null
@@ -172,8 +198,10 @@ class _ExplainedHadithView extends StatelessWidget {
                                   ),
                                   SizedBox(width: 6.w),
                                   Expanded(
-                                    child: Text(
+                                    child: ReadAloudText(
                                       _attribution!,
+                                      part: SpeechPart.source,
+                                      scaled: false,
                                       style: TextStyles.caption.copyWith(
                                         fontWeight: FontWeight.w600,
                                         height: 1.6,
@@ -215,6 +243,12 @@ class _ExplainedHadithView extends StatelessWidget {
                                                 ? null
                                                 : HadithLink.build(id)?.toString(),
                                       ),
+                                ),
+                                HadithCardAction(
+                                  icon: Icons.graphic_eq_rounded,
+                                  label: 'صوت',
+                                  onTap:
+                                      () => shareHadithAudio(context, _speech),
                                 ),
                               ],
                     ),

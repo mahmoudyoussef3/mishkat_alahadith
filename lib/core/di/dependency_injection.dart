@@ -107,6 +107,24 @@ import 'package:mishkat_almasabih/features/reading_preferences/domain/repos/read
 import 'package:mishkat_almasabih/features/reading_preferences/domain/usecases/get_hadith_font_scale_use_case.dart';
 import 'package:mishkat_almasabih/features/reading_preferences/domain/usecases/save_hadith_font_scale_use_case.dart';
 import 'package:mishkat_almasabih/features/reading_preferences/presentation/logic/hadith_font_scale_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/data/datasources/read_aloud_settings_local_datasource.dart';
+import 'package:mishkat_almasabih/features/read_aloud/data/datasources/text_to_speech_datasource.dart';
+import 'package:mishkat_almasabih/features/read_aloud/data/repos/read_aloud_repo_impl.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/repos/read_aloud_repo.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/build_hadith_speech_track_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/export_hadith_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/get_read_aloud_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/inspect_speech_engine_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/pause_speech_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/prepare_speech_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/resume_speech_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/save_read_aloud_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/speak_text_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/stop_speech_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/watch_read_aloud_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/watch_speech_events_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_settings_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/data/datasources/device_location_datasource.dart';
 import 'package:mishkat_almasabih/features/prayer_times/data/datasources/prayer_location_local_datasource.dart';
 import 'package:mishkat_almasabih/core/prayer/prayer_times_calculator.dart';
@@ -253,6 +271,7 @@ Future<void> setUpGetIt() async {
   _registerSuggestions();
   _registerTheme();
   _registerReadingPreferences();
+  _registerReadAloud();
   _registerQuran();
   _registerMainNavigation();
 }
@@ -766,6 +785,70 @@ void _registerReadingPreferences() {
   );
   getIt.registerLazySingleton<HadithFontScaleCubit>(
     () => HadithFontScaleCubit(getIt(), getIt()),
+  );
+}
+
+void _registerReadAloud() {
+  // flutter_tts delivers callbacks to one instance only, so the engine,
+  // and the cubit that follows it, are app-wide singletons.
+  getIt.registerLazySingleton<TextToSpeechDataSource>(
+    () => TextToSpeechDataSource(),
+  );
+  getIt.registerLazySingleton<ReadAloudRepo>(
+    () => ReadAloudRepoImpl(getIt(), ReadAloudSettingsLocalDataSource()),
+  );
+  getIt.registerLazySingleton<BuildHadithSpeechTrackUseCase>(
+    () => const BuildHadithSpeechTrackUseCase(),
+  );
+  getIt.registerLazySingleton<GetReadAloudSettingsUseCase>(
+    () => GetReadAloudSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveReadAloudSettingsUseCase>(
+    () => SaveReadAloudSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchReadAloudSettingsUseCase>(
+    () => WatchReadAloudSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchSpeechEventsUseCase>(
+    () => WatchSpeechEventsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<InspectSpeechEngineUseCase>(
+    () => InspectSpeechEngineUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PrepareSpeechUseCase>(
+    () => PrepareSpeechUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<SpeakTextUseCase>(
+    () => SpeakTextUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PauseSpeechUseCase>(
+    () => PauseSpeechUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ResumeSpeechUseCase>(
+    () => ResumeSpeechUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<StopSpeechUseCase>(
+    () => StopSpeechUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ExportHadithAudioUseCase>(
+    () => ExportHadithAudioUseCase(getIt(), getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<ReadAloudCubit>(
+    () => ReadAloudCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerLazySingleton<ReadAloudSettingsCubit>(
+    () => ReadAloudSettingsCubit(getIt(), getIt(), getIt()),
   );
 }
 

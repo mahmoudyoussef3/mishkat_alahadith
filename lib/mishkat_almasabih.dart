@@ -13,6 +13,8 @@ import 'package:mishkat_almasabih/core/theming/app_theme.dart';
 import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 import 'package:mishkat_almasabih/features/theme/domain/entities/app_theme_mode.dart';
 import 'package:mishkat_almasabih/features/reading_preferences/presentation/logic/hadith_font_scale_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_settings_cubit.dart';
 import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
 import 'core/routing/app_router.dart';
 import 'core/routing/routes.dart';
@@ -68,6 +70,10 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
         BlocProvider(create: (_) => getIt<SessionCubit>()..checkSession()),
         BlocProvider.value(value: getIt<ThemeCubit>()),
         BlocProvider.value(value: getIt<HadithFontScaleCubit>()),
+        // App-wide: the device has one speech engine, and the settings
+        // sheet opens above any screen.
+        BlocProvider.value(value: getIt<ReadAloudCubit>()),
+        BlocProvider.value(value: getIt<ReadAloudSettingsCubit>()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),

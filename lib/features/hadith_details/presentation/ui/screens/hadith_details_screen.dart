@@ -18,12 +18,19 @@ import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widget
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_reading_card.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_source_card.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/siraj_prompt_card.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/entities/hadith_speech_request.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_settings_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_button.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_host.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_player.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/share_hadith_audio.dart';
 import 'package:mishkat_almasabih/features/reading_preferences/presentation/ui/hadith_font_size_sheet.dart';
 import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/ui/open_siraj.dart';
 
-/// A hadith from a book at full length, with its source, Siraj, and steps
-/// to the neighbouring hadiths of the chapter.
+/// A hadith from a book at full length, with its source, Siraj, steps to
+/// the neighbouring hadiths of the chapter, and reading aloud.
 class HadithDetailScreen extends StatelessWidget {
   final String? hadithText;
   final String? narrator;
@@ -59,6 +66,10 @@ class HadithDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final withNavigation = showNavigation && !isBookMark;
+    final view = _HadithDetailView(
+      screen: this,
+      withNavigation: withNavigation,
+    );
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<AddCubitCubit>()),
@@ -78,7 +89,12 @@ class HadithDetailScreen extends StatelessWidget {
       ],
       child: Directionality(
         textDirection: TextDirection.rtl,
-        child: _HadithDetailView(screen: this, withNavigation: withNavigation),
+        child: ReadAloudHost(
+          child: _ChapterReading(
+            speechFor: (reader) => view.speech(reader.text, reader.hadithId),
+            child: view,
+          ),
+        ),
       ),
     );
   }
@@ -99,6 +115,14 @@ class _HadithDetailView extends StatelessWidget {
     if (hadithId.isNotEmpty) toArabicDigits('حديث $hadithId'),
   ].nonNulls.join(' · ');
 
+  BookHadithSpeech speech(String text, String hadithId) => BookHadithSpeech(
+    title: _sourceLine(hadithId),
+    text: text,
+    bookName: _bookName ?? '',
+    bookSlug: screen.bookSlug ?? '',
+    number: hadithId,
+  );
+
   SeragHadithContext _sirajContext(String text) => SeragHadithContext(
     hadeeth: text,
     gradeAr: screen.grade ?? '',
@@ -114,7 +138,9 @@ class _HadithDetailView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: ColorsManager.secondaryBackground,
-      bottomNavigationBar: withNavigation ? const HadithReaderBar() : null,
+      bottomNavigationBar: ReadAloudBottomBar(
+        below: withNavigation ? const HadithReaderBar() : null,
+      ),
       body: SafeArea(
         bottom: !withNavigation,
         child: BlocBuilder<HadithReaderCubit, HadithReaderState>(
@@ -161,6 +187,12 @@ class _HadithDetailView extends StatelessWidget {
                           text: text.isEmpty ? 'نص الحديث غير متوفر' : text,
                           number: hadithId,
                           grade: grade,
+                          headerAction:
+                              text.trim().isEmpty
+                                  ? null
+                                  : ReadAloudButton(
+                                    request: speech(text, hadithId),
+                                  ),
                           actions: [
                             HadithCardAction(
                               icon: Icons.content_copy_rounded,
@@ -193,6 +225,16 @@ class _HadithDetailView extends StatelessWidget {
                                     source: _sourceLine(hadithId),
                                   ),
                             ),
+                            if (text.trim().isNotEmpty)
+                              HadithCardAction(
+                                icon: Icons.graphic_eq_rounded,
+                                label: 'صوت',
+                                onTap:
+                                    () => shareHadithAudio(
+                                      context,
+                                      speech(text, hadithId),
+                                    ),
+                              ),
                           ],
                         ),
                         SizedBox(height: 16.h),
@@ -264,5 +306,64 @@ class _HadithDetailView extends StatelessWidget {
   static String? _nonEmpty(String? value) {
     final trimmed = value?.trim();
     return trimmed == null || trimmed.isEmpty ? null : trimmed;
+  }
+}
+
+/// Keeps a reading going through the chapter. When a hadith has been read
+/// and "next hadith" is on, steps to the next one; when the reader steps to
+/// another hadith while listening, reads that one instead.
+class _ChapterReading extends StatelessWidget {
+  const _ChapterReading({required this.speechFor, required this.child});
+
+  final HadithSpeechRequest Function(HadithReaderState reader) speechFor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final owner = ReadAloudHost.ownerOf(context);
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ReadAloudCubit, ReadAloudState>(
+          listenWhen:
+              (previous, current) =>
+                  current.ownedBy(owner) &&
+                  previous.status != current.status &&
+                  current.status == ReadAloudStatus.completed,
+          listener: (context, _) {
+            final settings = context.read<ReadAloudSettingsCubit>().state;
+            final reader = context.read<HadithReaderCubit>();
+            if (settings.settings.autoContinue &&
+                reader.state.hasNext &&
+                !reader.state.isLoading) {
+              reader.next();
+            }
+          },
+        ),
+        BlocListener<HadithReaderCubit, HadithReaderState>(
+          listenWhen:
+              (previous, current) => previous.hadithId != current.hadithId,
+          listener: (context, reader) {
+            final readAloud = context.read<ReadAloudCubit>();
+            final state = readAloud.state;
+            if (!state.ownedBy(owner)) return;
+            final autoContinue =
+                context
+                    .read<ReadAloudSettingsCubit>()
+                    .state
+                    .settings
+                    .autoContinue;
+            final keepReading =
+                state.isPlaying ||
+                (state.status == ReadAloudStatus.completed && autoContinue);
+            if (keepReading && reader.text.trim().isNotEmpty) {
+              readAloud.play(owner, speechFor(reader));
+            } else {
+              readAloud.stop();
+            }
+          },
+        ),
+      ],
+      child: child,
+    );
   }
 }

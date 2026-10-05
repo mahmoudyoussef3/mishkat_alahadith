@@ -91,10 +91,17 @@ class _Heading extends StatelessWidget {
 /// Points in a bordered card, numbered or bulleted.
 class NumberedListCard extends StatelessWidget {
   const NumberedListCard({
-    super.key,required this.items, required this.ordered});
+    super.key,
+    required this.items,
+    required this.ordered,
+    this.highlightedIndex,
+  });
 
   final List<String> items;
   final bool ordered;
+
+  /// The point being read aloud, drawn in the accent colour.
+  final int? highlightedIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -114,13 +121,17 @@ class NumberedListCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
                     width: 24.r,
                     height: 24.r,
                     margin: EdgeInsets.only(top: 2.h),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: ColorsManager.primarySoft,
+                      color:
+                          i == highlightedIndex
+                              ? ColorsManager.primaryPurple
+                              : ColorsManager.primarySoft,
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child:
@@ -129,14 +140,20 @@ class NumberedListCard extends StatelessWidget {
                               toArabicDigits('${i + 1}'),
                               style: TextStyles.chipLabel.copyWith(
                                 fontWeight: FontWeight.w800,
-                                color: ColorsManager.purpleText,
+                                color:
+                                    i == highlightedIndex
+                                        ? ColorsManager.white
+                                        : ColorsManager.purpleText,
                               ),
                             )
                             : Container(
                               width: 6.r,
                               height: 6.r,
                               decoration: BoxDecoration(
-                                color: ColorsManager.purpleText,
+                                color:
+                                    i == highlightedIndex
+                                        ? ColorsManager.white
+                                        : ColorsManager.purpleText,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -149,6 +166,10 @@ class NumberedListCard extends StatelessWidget {
                         fontSize: 14.sp,
                         height: 1.8,
                         fontWeight: FontWeight.w500,
+                        color:
+                            i == highlightedIndex
+                                ? ColorsManager.purpleText
+                                : null,
                       ),
                     ),
                   ),

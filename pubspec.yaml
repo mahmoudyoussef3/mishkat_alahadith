@@ -70,6 +70,7 @@ dependencies:
   sign_in_with_apple: ^8.1.0
   connectivity_plus: ^7.1.1
   mushaf_text: ^1.4.0
+  flutter_tts: ^4.2.5
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0

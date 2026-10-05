@@ -146,7 +146,7 @@ Future<void> shareHadithLink(
 
   try {
     await SharePlus.instance.share(
-      ShareParams(text: shareText, sharePositionOrigin: _shareOrigin(context)),
+      ShareParams(text: shareText, sharePositionOrigin: shareOriginOf(context)),
     );
   } on PlatformException {
     showToast('تعذر مشاركة الرابط', ColorsManager.error);
@@ -170,7 +170,7 @@ Future<void> shareHadithText(
 
   try {
     await SharePlus.instance.share(
-      ShareParams(text: shareText, sharePositionOrigin: _shareOrigin(context)),
+      ShareParams(text: shareText, sharePositionOrigin: shareOriginOf(context)),
     );
   } on PlatformException {
     showToast('تعذر مشاركة الحديث', ColorsManager.error);
@@ -188,7 +188,7 @@ Future<void> copyHadithText(BuildContext context, String text) async {
 
 /// iPad shows the share sheet as a popover anchored to this rect, and
 /// share_plus rejects a rect that is not inside the screen.
-Rect _shareOrigin(BuildContext context) {
+Rect shareOriginOf(BuildContext context) {
   final screen = Offset.zero & MediaQuery.sizeOf(context);
   final box = context.findRenderObject();
   if (box is RenderBox && box.hasSize) {

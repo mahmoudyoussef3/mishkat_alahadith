@@ -7,7 +7,8 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/widgets/dashed_divider.dart';
 import 'package:mishkat_almasabih/core/widgets/app_badge.dart';
-import 'package:mishkat_almasabih/features/reading_preferences/presentation/ui/hadith_text.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/entities/speech_track.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_text.dart';
 
 /// One button in the row under a hadith (copy, share, card).
 class HadithCardAction {
@@ -24,6 +25,8 @@ class HadithCardAction {
 
 /// The hadith being read, at full length: number and grade, the chain of
 /// narrators in a quiet tone, the words in large Amiri, and actions.
+///
+/// Under a read-aloud host, the word being read aloud is highlighted.
 class HadithReadingCard extends StatelessWidget {
   const HadithReadingCard({
     super.key,
@@ -31,6 +34,7 @@ class HadithReadingCard extends StatelessWidget {
     this.number,
     this.grade,
     this.gradeLabel,
+    this.headerAction,
     this.footer,
     this.actions = const [],
   });
@@ -43,6 +47,9 @@ class HadithReadingCard extends StatelessWidget {
   /// ("حسن · قاله النووي").
   final String? gradeLabel;
 
+  /// Shown at the end of the badge row, such as the listen button.
+  final Widget? headerAction;
+
   /// Extra line under the text, such as where the hadith is recorded.
   final Widget? footer;
   final List<HadithCardAction> actions;
@@ -53,9 +60,12 @@ class HadithReadingCard extends StatelessWidget {
     final number = this.number;
     final grade = this.grade;
     final gradeLabel = this.gradeLabel;
+    final headerAction = this.headerAction;
     final isnad = parts.isnad;
     final hasBadges =
-        (number != null && number.isNotEmpty) || grade != null || gradeLabel != null;
+        (number != null && number.isNotEmpty) ||
+        grade != null ||
+        gradeLabel != null;
 
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 16.h),
@@ -67,41 +77,52 @@ class HadithReadingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (hasBadges) ...[
-            Wrap(
-              spacing: 6.w,
-              runSpacing: 6.h,
-              crossAxisAlignment: WrapCrossAlignment.center,
+          if (hasBadges || headerAction != null) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (number != null && number.isNotEmpty)
-                  Container(
-                    height: 26.r,
-                    padding: EdgeInsets.symmetric(horizontal: 10.w),
-                    decoration: BoxDecoration(
-                      color: ColorsManager.primaryText,
-                      borderRadius: BorderRadius.circular(9.r),
-                    ),
-                    // widthFactor 1 keeps the badge as wide as its label.
-                    child: Center(
-                      widthFactor: 1,
-                      child: Text(
-                      toArabicDigits('حديث $number'),
-                      style: TextStyles.chipLabel.copyWith(
-                        fontWeight: FontWeight.w800,
-                          color: ColorsManager.secondaryBackground,
+                Expanded(
+                  child: Wrap(
+                    spacing: 6.w,
+                    runSpacing: 6.h,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      if (number != null && number.isNotEmpty)
+                        Container(
+                          height: 26.r,
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          decoration: BoxDecoration(
+                            color: ColorsManager.primaryText,
+                            borderRadius: BorderRadius.circular(9.r),
+                          ),
+                          // widthFactor 1 keeps the badge as wide as its label.
+                          child: Center(
+                            widthFactor: 1,
+                            child: Text(
+                              toArabicDigits('حديث $number'),
+                              style: TextStyles.chipLabel.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: ColorsManager.secondaryBackground,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      if (gradeLabel != null)
+                        AppBadge(
+                          label: gradeLabel,
+                          icon: Icons.verified_rounded,
+                          background: _gradeColors(grade).$1,
+                          foreground: _gradeColors(grade).$2,
+                        )
+                      else if (grade != null)
+                        GradeBadge(grade: grade, withIcon: true),
+                    ],
                   ),
-                if (gradeLabel != null)
-                  AppBadge(
-                    label: gradeLabel,
-                    icon: Icons.verified_rounded,
-                    background: _gradeColors(grade).$1,
-                    foreground: _gradeColors(grade).$2,
-                  )
-                else if (grade != null)
-                  GradeBadge(grade: grade, withIcon: true),
+                ),
+                if (headerAction != null) ...[
+                  SizedBox(width: 8.w),
+                  headerAction,
+                ],
               ],
             ),
             SizedBox(height: 12.h),
@@ -111,8 +132,9 @@ class HadithReadingCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (isnad != null) ...[
-                  HadithText(
+                  ReadAloudText(
                     isnad,
+                    part: SpeechPart.isnad,
                     style: TextStyles.readingMedium.copyWith(
                       fontSize: 15.sp,
                       height: 1.9,
@@ -121,8 +143,9 @@ class HadithReadingCard extends StatelessWidget {
                   ),
                   SizedBox(height: 10.h),
                 ],
-                HadithText(
+                ReadAloudText(
                   parts.matn,
+                  part: SpeechPart.matn,
                   style: TextStyles.readingLarge.copyWith(
                     fontSize: 23.sp,
                     height: 2.0,
