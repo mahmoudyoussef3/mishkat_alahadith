@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 
 /// One-pixel dashed rule that separates a card's body from its footer.
 class DashedDivider extends StatelessWidget {
@@ -10,7 +10,9 @@ class DashedDivider extends StatelessWidget {
     return SizedBox(
       height: 1,
       width: double.infinity,
-      child: CustomPaint(painter: _DashPainter(ColorsManager.mediumGray)),
+      child: CustomPaint(
+        painter: _DashPainter(AppPaletteOverride.of(context).mediumGray),
+      ),
     );
   }
 }

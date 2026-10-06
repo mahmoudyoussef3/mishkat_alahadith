@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
-import 'package:mishkat_almasabih/core/theming/quran_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
+import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
 import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_badge.dart';
+import 'package:mishkat_almasabih/core/widgets/dashed_divider.dart';
+import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/ayah_details.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
-import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/quran_message_view.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/quran_sheet.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/rule_swatch.dart';
 import 'package:mushaf_text/mushaf_text.dart';
@@ -47,18 +52,15 @@ final class FollowRuleIntent extends AyahSheetIntent {
 Future<AyahSheetIntent?> showAyahActionsSheet(
   BuildContext context, {
   required MushafReaderCubit readerCubit,
-  required MushafColors mushafColors,
   required int ayahId,
 }) {
   final state = readerCubit.state;
   final tajweed = state is MushafReaderReady && state.settings.tajweedEnabled;
   final naturalMadd =
       state is MushafReaderReady && state.settings.naturalMaddEnabled;
-  final colors = QuranSurfaceColors.mushaf(mushafColors);
 
   return showQuranSheet<AyahSheetIntent>(
     context: context,
-    colors: colors,
     initialChildSize: 0.62,
     builder:
         (context, controller) => MultiBlocProvider(
@@ -77,23 +79,18 @@ Future<AyahSheetIntent?> showAyahActionsSheet(
                   AyahDetailsLoading() => ListView(
                     controller: controller,
                     children: [
-                      QuranSheetHandle(colors: colors),
+                      const QuranSheetHandle(),
                       SizedBox(height: 80.h),
-                      Center(
-                        child: CircularProgressIndicator(color: colors.accent),
-                      ),
+                      const Center(child: CircularProgressIndicator()),
                     ],
                   ),
                   AyahDetailsFailure(:final message) => ListView(
                     controller: controller,
                     children: [
-                      QuranSheetHandle(colors: colors),
-                      QuranMessageView(
-                        colors: colors,
-                        icon: Icons.error_outline_rounded,
+                      const QuranSheetHandle(),
+                      StateMessage.error(
                         message: message,
-                        actionLabel: 'إعادة المحاولة',
-                        onAction:
+                        onRetry:
                             () => context.read<AyahDetailsCubit>().load(
                               ayahId,
                               includeNaturalMadd: naturalMadd,
@@ -103,7 +100,6 @@ Future<AyahSheetIntent?> showAyahActionsSheet(
                   ),
                   AyahDetailsLoaded(:final details) => _AyahDetailsBody(
                     controller: controller,
-                    colors: colors,
                     details: details,
                     tajweedEnabled: tajweed,
                   ),
@@ -115,19 +111,18 @@ Future<AyahSheetIntent?> showAyahActionsSheet(
 
 class _AyahDetailsBody extends StatelessWidget {
   final ScrollController controller;
-  final QuranSurfaceColors colors;
   final AyahDetails details;
   final bool tajweedEnabled;
 
   const _AyahDetailsBody({
     required this.controller,
-    required this.colors,
     required this.details,
     required this.tajweedEnabled,
   });
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPaletteOverride.of(context);
     final ayah = details.ayah;
     final rules = [
       for (final key in details.ruleKeys)
@@ -136,92 +131,96 @@ class _AyahDetailsBody extends StatelessWidget {
 
     return ListView(
       controller: controller,
-      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 28.h),
+      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
       children: [
-        QuranSheetHandle(colors: colors),
-        SizedBox(height: 6.h),
-        Text(
-          'سورة ${details.surah.nameArabic}',
-          style: QuranTextStyles.sheetTitle(colors.title),
+        const QuranSheetHandle(),
+        QuranSheetHeader(
+          title: 'سورة ${details.surah.nameArabic}',
+          subtitle: [
+            'الآية ${toArabicNumerals(ayah.number)}',
+            juzTitle(ayah.juz),
+            'الصفحة ${toArabicNumerals(ayah.page)}',
+          ].join(' · '),
+          trailing:
+              ayah.isSajdah
+                  ? AppBadge(
+                    label: '۩ موضع سجدة',
+                    background: palette.goldSoft,
+                    foreground: palette.goldInk,
+                  )
+                  : null,
         ),
-        SizedBox(height: 8.h),
-        Wrap(
-          spacing: 8.w,
-          runSpacing: 6.h,
-          children: [
-            _InfoChip(
-              label: 'الآية ${toArabicNumerals(ayah.number)}',
-              colors: colors,
-            ),
-            _InfoChip(
-              label: 'الجزء ${toArabicNumerals(ayah.juz)}',
-              colors: colors,
-            ),
-            _InfoChip(
-              label: 'الصفحة ${toArabicNumerals(ayah.page)}',
-              colors: colors,
-            ),
-            if (ayah.isSajdah)
-              _InfoChip(
-                label: '۩ موضع سجدة',
-                colors: colors,
-                color: colors.mushaf.gold,
-              ),
-          ],
-        ),
-        SizedBox(height: 14.h),
+        SizedBox(height: 16.h),
         Container(
-          padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 14.w),
-          decoration: QuranDecorations.quranTextBox(colors),
-          child: Text.rich(_ayahSpan(), textAlign: TextAlign.center),
-        ),
-        SizedBox(height: 14.h),
-        Row(
-          children: [
-            Expanded(
-              child: _SheetAction(
-                colors: colors,
-                icon: Icons.copy_rounded,
-                label: 'نسخ',
-                onTap: () => Navigator.of(context).pop(CopyAyahIntent(details)),
+          padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 14.h),
+          decoration: BoxDecoration(
+            color: palette.cardBackground,
+            borderRadius: BorderRadius.circular(24.r),
+            border: Border.all(color: palette.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text.rich(_ayahSpan(palette), textAlign: TextAlign.center),
+              SizedBox(height: 14.h),
+              const DashedDivider(),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SheetAction(
+                      icon: Icons.content_copy_rounded,
+                      label: 'نسخ',
+                      onTap:
+                          () => Navigator.of(
+                            context,
+                          ).pop(CopyAyahIntent(details)),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: _SheetAction(
+                      icon: Icons.share_rounded,
+                      label: 'مشاركة',
+                      onTap:
+                          () => Navigator.of(
+                            context,
+                          ).pop(ShareAyahIntent(details)),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(child: _BookmarkAction(details: details)),
+                ],
               ),
-            ),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: _SheetAction(
-                colors: colors,
-                icon: Icons.share_rounded,
-                label: 'مشاركة',
-                onTap:
-                    () => Navigator.of(context).pop(ShareAyahIntent(details)),
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Expanded(child: _BookmarkAction(colors: colors, details: details)),
-          ],
+            ],
+          ),
         ),
         if (rules.isNotEmpty) ...[
           SizedBox(height: 22.h),
-          Text(
-            'أحكام التجويد في هذه الآية',
-            style: QuranTextStyles.sectionTitle(colors.title),
+          Semantics(
+            header: true,
+            child: Text(
+              'أحكام التجويد في هذه الآية',
+              style: TextStyles.sectionTitle.copyWith(
+                fontSize: 16.sp,
+                color: palette.primaryText,
+              ),
+            ),
           ),
-          SizedBox(height: 2.h),
           Text(
-            'اضغط على أي حكم لشرحه وتتبّع مواضعه في الصفحة',
-            style: QuranTextStyles.sectionHint(colors.subtitle),
+            'اضغط على حكم لشرحه وتتبّع مواضعه في الصفحة',
+            style: TextStyles.caption.copyWith(
+              fontSize: 13.sp,
+              color: palette.secondaryText,
+            ),
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 12.h),
           Wrap(
             spacing: 8.w,
             runSpacing: 8.h,
             children: [
               for (final rule in rules)
-                _RuleChip(
-                  rule: rule,
-                  colors: colors,
-                  onTap: () => _explain(context, rule),
-                ),
+                _RuleChip(rule: rule, onTap: () => _explain(context, rule)),
             ],
           ),
         ],
@@ -230,10 +229,14 @@ class _AyahDetailsBody extends StatelessWidget {
   }
 
   /// The verse with its tajweed in colour when the reader has it switched on.
-  TextSpan _ayahSpan() {
+  TextSpan _ayahSpan(AppPalette palette) {
     final text = details.ayah.text;
-    final base = QuranTextStyles.mushafText(color: colors.title, size: 24.sp);
+    final base = QuranTextStyles.mushafText(
+      color: palette.primaryText,
+      size: 24.sp,
+    );
     if (!tajweedEnabled) return TextSpan(text: text, style: base);
+    final ruleColors = MushafPalette.of(palette);
     return styledRanges(
       text: text,
       base: base,
@@ -243,7 +246,7 @@ class _AyahDetailsBody extends StatelessWidget {
             (
               start: segment.start,
               end: segment.end,
-              style: TextStyle(color: colors.ruleColor(rule)),
+              style: TextStyle(color: ruleColors.tajweedColor(rule)),
             ),
       ],
     );
@@ -252,7 +255,6 @@ class _AyahDetailsBody extends StatelessWidget {
   Future<void> _explain(BuildContext context, TajweedRule rule) async {
     final follow = await showTajweedRuleSheet(
       context,
-      colors: colors,
       rule: rule,
       canFollow: true,
     );
@@ -262,69 +264,74 @@ class _AyahDetailsBody extends StatelessWidget {
   }
 }
 
-class _InfoChip extends StatelessWidget {
-  final String label;
-  final QuranSurfaceColors colors;
-  final Color? color;
-
-  const _InfoChip({required this.label, required this.colors, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: QuranDecorations.infoChip(colors),
-      child: Text(label, style: QuranTextStyles.chip(color ?? colors.accent)),
-    );
-  }
-}
-
+/// One of the ayah's actions, drawn like the actions under a hadith.
 class _SheetAction extends StatelessWidget {
-  final QuranSurfaceColors colors;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final bool active;
 
+  /// Read instead of [label] when the short label needs its context.
+  final String? semanticLabel;
+
   const _SheetAction({
-    required this.colors,
     required this.icon,
     required this.label,
     required this.onTap,
     this.active = false,
+    this.semanticLabel,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: Ink(
-        decoration: QuranDecorations.actionButton(colors, active: active),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(14.r),
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: colors.accent, size: 22.sp),
-                SizedBox(height: 4.h),
-                Text(label, style: QuranTextStyles.actionLabel(colors.title)),
-              ],
-            ),
+    final palette = AppPaletteOverride.of(context);
+    final ink = active ? palette.purpleText : palette.primaryText;
+    final button = Material(
+      color: active ? palette.primarySoft : palette.secondaryBackground,
+      borderRadius: BorderRadius.circular(12.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12.r),
+        child: SizedBox(
+          height: 42.h,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18.r, color: ink),
+              SizedBox(width: 6.w),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyles.labelLarge.copyWith(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: ink,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+    final semanticLabel = this.semanticLabel;
+    if (semanticLabel == null) return button;
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: button,
     );
   }
 }
 
 class _BookmarkAction extends StatelessWidget {
-  final QuranSurfaceColors colors;
   final AyahDetails details;
 
-  const _BookmarkAction({required this.colors, required this.details});
+  const _BookmarkAction({required this.details});
 
   @override
   Widget build(BuildContext context) {
@@ -335,13 +342,14 @@ class _BookmarkAction extends StatelessWidget {
               state.isAyahBookmarked(details.ayah.id),
       builder:
           (context, bookmarked) => _SheetAction(
-            colors: colors,
             active: bookmarked,
             icon:
                 bookmarked
                     ? Icons.bookmark_remove_rounded
                     : Icons.bookmark_add_outlined,
-            label: bookmarked ? 'إزالة العلامة' : 'حفظ الآية',
+            // A third of the sheet's width: the icon carries the rest.
+            label: bookmarked ? 'إزالة' : 'حفظ',
+            semanticLabel: bookmarked ? 'إزالة علامة الآية' : 'حفظ الآية',
             onTap:
                 () => Navigator.of(
                   context,
@@ -353,35 +361,35 @@ class _BookmarkAction extends StatelessWidget {
 
 class _RuleChip extends StatelessWidget {
   final TajweedRule rule;
-  final QuranSurfaceColors colors;
   final VoidCallback onTap;
 
-  const _RuleChip({
-    required this.rule,
-    required this.colors,
-    required this.onTap,
-  });
+  const _RuleChip({required this.rule, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final ruleColor = colors.ruleColor(rule);
+    final palette = AppPaletteOverride.of(context);
+    final ruleColor = MushafPalette.of(palette).tajweedColor(rule);
     return Material(
-      type: MaterialType.transparency,
-      child: Ink(
-        decoration: QuranDecorations.ruleChip(ruleColor),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20.r),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RuleSwatch(color: ruleColor, size: 10),
-                SizedBox(width: 6.w),
-                Text(rule.label, style: QuranTextStyles.chip(ruleColor)),
-              ],
-            ),
+      color: ruleColor.withValues(alpha: 0.12),
+      shape: const StadiumBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RuleSwatch(color: ruleColor, size: 10),
+              SizedBox(width: 6.w),
+              Text(
+                rule.label,
+                style: TextStyles.chipLabel.copyWith(
+                  fontSize: 12.5.sp,
+                  color: palette.primaryText,
+                ),
+              ),
+            ],
           ),
         ),
       ),

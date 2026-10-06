@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/core/theming/quran_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
+import 'package:mishkat_almasabih/core/theming/app_theme.dart';
+import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
+import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
+import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_metrics.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_surah.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
-import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/quran_message_view.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/go_to_page_dialog.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_page_item.dart';
-import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_reader_app_bar.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_reader_bottom_bar.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_reader_header.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/tajweed_focus_bar.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/ayah_actions_sheet.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/page_rules_sheet.dart';
@@ -23,6 +26,9 @@ import 'package:mushaf_text/mushaf_text.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// The Madinah Mushaf, page by page, read right to left.
+///
+/// The whole reader — page, bars, sheets and dialogs — is drawn in the
+/// palette of the paper the reader chose, which may differ from the app's.
 class MushafReaderScreen extends StatelessWidget {
   final int initialPage;
 
@@ -30,11 +36,12 @@ class MushafReaderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
+    // Read here, outside the override below, so it is the app's brightness.
+    final appBrightness = Theme.of(context).brightness;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: BlocBuilder<MushafReaderCubit, MushafReaderState>(
-        // Only the state kind and the paper colour reshape the whole screen;
+        // Only the state kind and the paper reshape the whole screen;
         // everything else is picked up by the small selectors below.
         buildWhen:
             (previous, current) =>
@@ -42,30 +49,31 @@ class MushafReaderScreen extends StatelessWidget {
                 (previous is MushafReaderReady &&
                     current is MushafReaderReady &&
                     previous.settings.themeMode != current.settings.themeMode),
-        builder:
-            (context, state) => switch (state) {
-              MushafReaderLoading() => Scaffold(
-                backgroundColor:
-                    resolveMushafColors(
-                      MushafThemeMode.system,
-                      brightness,
-                    ).paper,
-                body: const Center(child: CircularProgressIndicator()),
-              ),
-              MushafReaderFailure(:final message) => _ReaderFailure(
-                message: message,
-                initialPage: initialPage,
-                colors: resolveMushafColors(MushafThemeMode.system, brightness),
-              ),
-              MushafReaderReady() => _MushafReaderView(
-                initialPage: state.page,
-                surahs: state.surahs,
-                colors: resolveMushafColors(
-                  state.settings.themeMode,
-                  brightness,
+        builder: (context, state) {
+          final mode = switch (state) {
+            MushafReaderReady(:final settings) => settings.themeMode,
+            _ => MushafThemeMode.system,
+          };
+          final palette = readerPalette(mode, appBrightness);
+          return AppPaletteOverride(
+            palette: palette,
+            child: AnnotatedRegion<SystemUiOverlayStyle>(
+              value: AppTheme.systemBarsStyle(palette.brightness),
+              child: switch (state) {
+                MushafReaderLoading() => const _ReaderLoading(),
+                MushafReaderFailure(:final message) => _ReaderFailure(
+                  message: message,
+                  initialPage: initialPage,
                 ),
-              ),
-            },
+                MushafReaderReady() => _MushafReaderView(
+                  initialPage: state.page,
+                  surahs: state.surahs,
+                  appBrightness: appBrightness,
+                ),
+              },
+            ),
+          );
+        },
       ),
     );
   }
@@ -74,12 +82,14 @@ class MushafReaderScreen extends StatelessWidget {
 class _MushafReaderView extends StatefulWidget {
   final int initialPage;
   final List<QuranSurah> surahs;
-  final MushafColors colors;
+
+  /// The app's own brightness, which automatic paper follows.
+  final Brightness appBrightness;
 
   const _MushafReaderView({
     required this.initialPage,
     required this.surahs,
-    required this.colors,
+    required this.appBrightness,
   });
 
   @override
@@ -90,8 +100,6 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
   late final PageController _pageController;
 
   MushafReaderCubit get _cubit => context.read<MushafReaderCubit>();
-
-  MushafColors get _colors => widget.colors;
 
   @override
   void initState() {
@@ -109,52 +117,53 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = _colors;
+    final colors = MushafPalette.of(AppPaletteOverride.of(context));
     return Scaffold(
       backgroundColor: colors.paper,
-      appBar: MushafReaderAppBar(
-        colors: colors,
-        onToggleTajweed: _toggleTajweed,
-        onTogglePageBookmark: _togglePageBookmark,
-        onOpenSettings: _openSettings,
+      bottomNavigationBar: MushafReaderBottomBar(
+        surahs: widget.surahs,
+        onJumpToPage: _jumpToPage,
+        onOpenIndex: _openIndex,
+        onGoToPage: _goToPage,
+        onOpenPageRules: _openPageRules,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                PageView.builder(
-                  controller: _pageController,
-                  // Keeps the neighbouring pages laid out, so a swipe never
-                  // reveals a blank page.
-                  allowImplicitScrolling: true,
-                  itemCount: QuranMetrics.pageCount,
-                  onPageChanged: (index) => _cubit.onPageChanged(index + 1),
-                  itemBuilder:
-                      (context, index) => MushafPageItem(
-                        page: index + 1,
-                        colors: colors,
-                        onAyahTap: _onAyahTap,
-                        onTajweedTap: _onTajweedTap,
-                      ),
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: TajweedFocusBar(colors: colors),
-                ),
-                const _FocusBackHandler(),
-              ],
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            MushafReaderHeader(
+              onToggleTajweed: _toggleTajweed,
+              onTogglePageBookmark: _togglePageBookmark,
+              onOpenSettings: _openSettings,
             ),
-          ),
-          MushafReaderBottomBar(
-            colors: colors,
-            surahs: widget.surahs,
-            onJumpToPage: _jumpToPage,
-            onOpenIndex: _openIndex,
-            onGoToPage: _goToPage,
-            onOpenPageRules: _openPageRules,
-          ),
-        ],
+            Expanded(
+              child: Stack(
+                children: [
+                  PageView.builder(
+                    controller: _pageController,
+                    // Keeps the neighbouring pages laid out, so a swipe never
+                    // reveals a blank page.
+                    allowImplicitScrolling: true,
+                    itemCount: QuranMetrics.pageCount,
+                    onPageChanged: (index) => _cubit.onPageChanged(index + 1),
+                    itemBuilder:
+                        (context, index) => MushafPageItem(
+                          page: index + 1,
+                          colors: colors,
+                          onAyahTap: _onAyahTap,
+                          onTajweedTap: _onTajweedTap,
+                        ),
+                  ),
+                  const Align(
+                    alignment: Alignment.bottomCenter,
+                    child: TajweedFocusBar(),
+                  ),
+                  const _FocusBackHandler(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -177,7 +186,6 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
     final intent = await showAyahActionsSheet(
       context,
       readerCubit: cubit,
-      mushafColors: _colors,
       ayahId: ayahId,
     );
     if (!mounted) return;
@@ -190,7 +198,7 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
         await Clipboard.setData(
           ClipboardData(text: formatAyahForSharing(details)),
         );
-        if (mounted) showBookmarkSnackbar(context, 'تم نسخ الآية');
+        if (mounted) showInfoSnackbar(context, 'تم نسخ الآية');
       case ShareAyahIntent(:final details):
         await SharePlus.instance.share(
           ShareParams(
@@ -209,7 +217,6 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
   Future<void> _onTajweedTap(TajweedHit hit) async {
     final follow = await showTajweedRuleSheet(
       context,
-      colors: QuranSurfaceColors.mushaf(_colors),
       rule: hit.rule,
       word: hit.word,
       start: hit.start,
@@ -226,7 +233,7 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
     }
   }
 
-  // ── toolbar ─────────────────────────────────────────────────────────────
+  // ── header ──────────────────────────────────────────────────────────────
 
   Future<void> _toggleTajweed() async {
     final state = _cubit.state;
@@ -251,9 +258,9 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
     final target = ayah ? 'الآية' : 'الصفحة';
     switch (result) {
       case BookmarkToggleResult.added:
-        showBookmarkSnackbar(context, 'تم حفظ $target في العلامات');
+        showInfoSnackbar(context, 'تم حفظ $target في العلامات');
       case BookmarkToggleResult.removed:
-        showBookmarkSnackbar(context, 'تمت إزالة علامة $target');
+        showInfoSnackbar(context, 'تمت إزالة علامة $target');
       case BookmarkToggleResult.failed:
         showErrorSnackbar(context, 'تعذر تحديث العلامات، حاول مرة أخرى');
     }
@@ -262,7 +269,7 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
   Future<void> _openSettings() => showReaderSettingsSheet(
     context,
     readerCubit: _cubit,
-    mushafColors: _colors,
+    appBrightness: widget.appBrightness,
   );
 
   // ── bottom bar ──────────────────────────────────────────────────────────
@@ -271,7 +278,6 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
     final cubit = _cubit;
     final target = await showReaderIndexSheet(
       context,
-      mushafColors: _colors,
       currentPage: _currentPage,
     );
     if (!mounted) return;
@@ -284,17 +290,13 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
   }
 
   Future<void> _goToPage() async {
-    final page = await showGoToPageDialog(context, colors: _colors);
+    final page = await showGoToPageDialog(context, currentPage: _currentPage);
     if (page != null && mounted) _jumpToPage(page);
   }
 
   Future<void> _openPageRules() async {
     final cubit = _cubit;
-    final ruleKey = await showPageRulesSheet(
-      context,
-      readerCubit: cubit,
-      mushafColors: _colors,
-    );
+    final ruleKey = await showPageRulesSheet(context, readerCubit: cubit);
     if (ruleKey != null && mounted) await _followRule(ruleKey);
   }
 }
@@ -320,36 +322,52 @@ class _FocusBackHandler extends StatelessWidget {
   }
 }
 
-class _ReaderFailure extends StatelessWidget {
-  final String message;
-  final int initialPage;
-  final MushafColors colors;
-
-  const _ReaderFailure({
-    required this.message,
-    required this.initialPage,
-    required this.colors,
-  });
+class _ReaderLoading extends StatelessWidget {
+  const _ReaderLoading();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: colors.paper,
-      appBar: AppBar(
-        backgroundColor: colors.paper,
-        foregroundColor: colors.accent,
-        elevation: 0,
-      ),
-      body: Center(
-        child: QuranMessageView(
-          colors: QuranSurfaceColors.mushaf(colors),
-          icon: Icons.menu_book_outlined,
-          message: message,
-          actionLabel: 'إعادة المحاولة',
-          onAction:
-              () => context.read<MushafReaderCubit>().init(
-                initialPage: initialPage,
+      backgroundColor:
+          MushafPalette.of(AppPaletteOverride.of(context)).paper,
+      body: const Center(child: CircularProgressIndicator()),
+    );
+  }
+}
+
+class _ReaderFailure extends StatelessWidget {
+  final String message;
+  final int initialPage;
+
+  const _ReaderFailure({required this.message, required this.initialPage});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor:
+          MushafPalette.of(AppPaletteOverride.of(context)).paper,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const DetailHeader(title: 'المصحف الشريف', showDivider: false),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: StateMessage(
+                    icon: Icons.menu_book_outlined,
+                    title: 'تعذر فتح المصحف',
+                    subtitle: message,
+                    actionLabel: 'إعادة المحاولة',
+                    actionIcon: Icons.refresh_rounded,
+                    onAction:
+                        () => context.read<MushafReaderCubit>().init(
+                          initialPage: initialPage,
+                        ),
+                  ),
+                ),
               ),
+            ),
+          ],
         ),
       ),
     );

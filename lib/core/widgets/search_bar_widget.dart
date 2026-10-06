@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
 /// Search field with a soft focus ring and a clear button that appears
@@ -12,6 +12,9 @@ class SearchBarWidget extends StatefulWidget {
   final String? hintText;
   final VoidCallback? onTap;
 
+  /// Focuses the field, and so opens the keyboard, as soon as it is shown.
+  final bool autofocus;
+
   const SearchBarWidget({
     super.key,
     required this.controller,
@@ -19,6 +22,7 @@ class SearchBarWidget extends StatefulWidget {
     this.onChanged,
     this.onTap,
     this.hintText,
+    this.autofocus = false,
   });
 
   @override
@@ -35,6 +39,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPaletteOverride.of(context);
     final radius = BorderRadius.circular(16.r);
 
     return Focus(
@@ -43,16 +48,15 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         duration: const Duration(milliseconds: 180),
         height: 52.h,
         decoration: BoxDecoration(
-          color: ColorsManager.cardBackground,
+          color: palette.cardBackground,
           borderRadius: radius,
           border: Border.all(
-            color:
-                _focused ? ColorsManager.primaryPurple : ColorsManager.border,
+            color: _focused ? palette.primaryPurple : palette.border,
             width: _focused ? 1.5 : 1,
           ),
           boxShadow: [
             if (_focused)
-              BoxShadow(color: ColorsManager.primarySoft, spreadRadius: 4),
+              BoxShadow(color: palette.primarySoft, spreadRadius: 4),
           ],
         ),
         child: Row(
@@ -61,7 +65,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
               padding: EdgeInsetsDirectional.only(start: 16.w, end: 10.w),
               child: Icon(
                 Icons.search_rounded,
-                color: ColorsManager.purpleText,
+                color: palette.purpleText,
                 size: 22.r,
               ),
             ),
@@ -69,18 +73,20 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
               child: TextField(
                 onTap: widget.onTap,
                 controller: widget.controller,
+                autofocus: widget.autofocus,
                 onSubmitted: widget.onSearch,
                 onChanged: widget.onChanged,
                 textInputAction: TextInputAction.search,
                 style: TextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                   fontSize: 15.sp,
+                  color: palette.primaryText,
                 ),
                 decoration: InputDecoration(
                   isCollapsed: true,
                   hintText: widget.hintText ?? 'ابحث في الأحاديث…',
                   hintStyle: TextStyles.bodyMedium.copyWith(
-                    color: ColorsManager.gray,
+                    color: palette.gray,
                     fontWeight: FontWeight.w500,
                   ),
                   border: InputBorder.none,
@@ -101,7 +107,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                             onPressed: _clear,
                             icon: Icon(
                               Icons.close_rounded,
-                              color: ColorsManager.gray,
+                              color: palette.gray,
                               size: 20.r,
                             ),
                           ),

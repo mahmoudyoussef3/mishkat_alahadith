@@ -1,5 +1,7 @@
-import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 
 const _base = TextStyle(fontSize: 10);
@@ -43,6 +45,33 @@ void main() {
       );
 
       expect(_pieces(span), ['a', 'bc']);
+    });
+  });
+
+  group('readerPalette', () {
+    test('follows the app when the paper is left on automatic', () {
+      expect(
+        readerPalette(MushafThemeMode.system, Brightness.light),
+        same(AppPalette.light),
+      );
+      expect(
+        readerPalette(MushafThemeMode.system, Brightness.dark),
+        same(AppPalette.dark),
+      );
+    });
+
+    test('keeps day paper light in a dark app', () {
+      expect(
+        readerPalette(MushafThemeMode.day, Brightness.dark),
+        same(AppPalette.light),
+      );
+    });
+
+    test('keeps night paper dark in a light app', () {
+      expect(
+        readerPalette(MushafThemeMode.night, Brightness.light),
+        same(AppPalette.dark),
+      );
     });
   });
 

@@ -42,6 +42,50 @@ class ArabicNoun {
     accusative: 'باباً',
   );
 
+  static const ayah = ArabicNoun(
+    singular: 'آية',
+    dual: 'آيتان',
+    plural: 'آيات',
+    accusative: 'آية',
+  );
+
+  static const surah = ArabicNoun(
+    singular: 'سورة',
+    dual: 'سورتان',
+    plural: 'سور',
+    accusative: 'سورة',
+  );
+
+  static const juz = ArabicNoun(
+    singular: 'جزء',
+    dual: 'جزءان',
+    plural: 'أجزاء',
+    accusative: 'جزءاً',
+  );
+
+  static const page = ArabicNoun(
+    singular: 'صفحة',
+    dual: 'صفحتان',
+    plural: 'صفحات',
+    accusative: 'صفحة',
+  );
+
+  /// A ruling, such as a rule of tajweed ("٢٦ حكماً").
+  static const ruling = ArabicNoun(
+    singular: 'حكم',
+    dual: 'حكمان',
+    plural: 'أحكام',
+    accusative: 'حكماً',
+  );
+
+  /// A place in the text where something occurs ("١٢ موضعاً").
+  static const occurrence = ArabicNoun(
+    singular: 'موضع',
+    dual: 'موضعان',
+    plural: 'مواضع',
+    accusative: 'موضعاً',
+  );
+
   /// Genitive dual, for use after a preposition ("بعد دقيقتين").
   static const minute = ArabicNoun(
     singular: 'دقيقة',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 enum AppIconButtonVariant {
@@ -40,19 +41,20 @@ class AppIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPaletteOverride.of(context);
     final (background, foreground, border) = switch (variant) {
       AppIconButtonVariant.outlined => (
-        ColorsManager.cardBackground,
-        ColorsManager.primaryText,
-        ColorsManager.border,
+        palette.cardBackground,
+        palette.primaryText,
+        palette.border,
       ),
       AppIconButtonVariant.tonal => (
-        ColorsManager.primarySoft,
-        ColorsManager.purpleText,
+        palette.primarySoft,
+        palette.purpleText,
         Colors.transparent,
       ),
       AppIconButtonVariant.filled => (
-        ColorsManager.primaryPurple,
+        palette.primaryPurple,
         ColorsManager.white,
         Colors.transparent,
       ),
@@ -70,7 +72,7 @@ class AppIconButton extends StatelessWidget {
       color:
           enabled || variant != AppIconButtonVariant.filled
               ? background
-              : ColorsManager.lightGray,
+              : palette.lightGray,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14.r),
@@ -86,7 +88,7 @@ class AppIconButton extends StatelessWidget {
                   enabled
                       ? foreground
                       : variant == AppIconButtonVariant.filled
-                      ? ColorsManager.disabledText
+                      ? palette.disabledText
                       : foreground.withValues(alpha: 0.35),
               size: dimension * 0.5,
             ),

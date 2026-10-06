@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 
@@ -29,6 +29,7 @@ class DetailHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPaletteOverride.of(context);
     final subtitle = this.subtitle;
     final bottom = this.bottom;
 
@@ -36,7 +37,7 @@ class DetailHeader extends StatelessWidget {
       decoration: BoxDecoration(
         border:
             showDivider
-                ? Border(bottom: BorderSide(color: ColorsManager.border))
+                ? Border(bottom: BorderSide(color: palette.border))
                 : null,
       ),
       child: Padding(
@@ -66,6 +67,7 @@ class DetailHeader extends StatelessWidget {
                           style: TextStyles.sectionTitle.copyWith(
                             fontSize: 17.sp,
                             height: 1.3,
+                            color: palette.primaryText,
                           ),
                         ),
                       ),
@@ -74,7 +76,9 @@ class DetailHeader extends StatelessWidget {
                           subtitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyles.caption,
+                          style: TextStyles.caption.copyWith(
+                            color: palette.secondaryText,
+                          ),
                         ),
                     ],
                   ),

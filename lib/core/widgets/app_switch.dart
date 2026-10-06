@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 
 /// Compact on/off switch: brand track when on, sand track when off.
@@ -21,6 +22,7 @@ class AppSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPaletteOverride.of(context);
     final enabled = onChanged != null;
     final width = 46.r;
     final height = 28.r;
@@ -43,7 +45,7 @@ class AppSwitch extends StatelessWidget {
             padding: EdgeInsets.all((height - thumb) / 2),
             decoration: BoxDecoration(
               color:
-                  value ? ColorsManager.primaryPurple : ColorsManager.mediumGray,
+                  value ? palette.primaryPurple : palette.mediumGray,
               borderRadius: BorderRadius.circular(height / 2),
             ),
             child: AnimatedAlign(
@@ -61,7 +63,7 @@ class AppSwitch extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: ColorsManager.shadow,
+                      color: palette.shadow,
                       blurRadius: 3,
                       offset: const Offset(0, 1),
                     ),

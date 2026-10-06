@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
 /// Centered icon, title and hint for empty and error states, with an
@@ -40,6 +40,7 @@ class StateMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPaletteOverride.of(context);
     final subtitle = this.subtitle;
     final actionLabel = this.actionLabel;
 
@@ -52,23 +53,30 @@ class StateMessage extends StatelessWidget {
             width: 64.r,
             height: 64.r,
             decoration: BoxDecoration(
-              color: ColorsManager.primarySoft,
+              color: palette.primarySoft,
               borderRadius: BorderRadius.circular(20.r),
             ),
-            child: Icon(icon, size: 30.r, color: ColorsManager.purpleText),
+            child: Icon(icon, size: 30.r, color: palette.purpleText),
           ),
           SizedBox(height: 14.h),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyles.titleLarge.copyWith(fontWeight: FontWeight.w800),
+            style: TextStyles.titleLarge.copyWith(
+              fontWeight: FontWeight.w800,
+              color: palette.primaryText,
+            ),
           ),
           if (subtitle != null && subtitle.isNotEmpty) ...[
             SizedBox(height: 4.h),
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: TextStyles.caption.copyWith(fontSize: 13.sp, height: 1.6),
+              style: TextStyles.caption.copyWith(
+                fontSize: 13.sp,
+                height: 1.6,
+                color: palette.secondaryText,
+              ),
             ),
           ],
           if (actionLabel != null) ...[

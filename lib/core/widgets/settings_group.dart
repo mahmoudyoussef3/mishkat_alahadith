@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
 /// Titled card of settings rows separated by hairlines, with optional
@@ -19,34 +19,23 @@ class SettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPaletteOverride.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Semantics(
-            header: true,
-            child: Text(
-              title,
-              style: TextStyles.caption.copyWith(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
+        SettingsGroupTitle(title),
         SizedBox(height: 8.h),
         Material(
-          color: ColorsManager.cardBackground,
+          color: palette.cardBackground,
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.r),
-            side: BorderSide(color: ColorsManager.border),
+            side: BorderSide(color: palette.border),
           ),
           child: Column(
             children: [
               for (var i = 0; i < children.length; i++) ...[
-                if (i > 0) Divider(height: 1, color: ColorsManager.lightGray),
+                if (i > 0) Divider(height: 1, color: palette.lightGray),
                 children[i],
               ],
             ],
@@ -54,6 +43,32 @@ class SettingsGroup extends StatelessWidget {
         ),
         if (footer != null) ...[SizedBox(height: 8.h), footer!],
       ],
+    );
+  }
+}
+
+/// The small title over a [SettingsGroup], for settings that are not rows,
+/// such as a row of previews.
+class SettingsGroupTitle extends StatelessWidget {
+  const SettingsGroupTitle(this.title, {super.key});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
+      child: Semantics(
+        header: true,
+        child: Text(
+          title,
+          style: TextStyles.caption.copyWith(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: AppPaletteOverride.of(context).secondaryText,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -87,13 +102,14 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPaletteOverride.of(context);
     final subtitle = this.subtitle;
     final (wellColor, glyphColor) =
         destructive
-            ? (ColorsManager.errorSoft, ColorsManager.error)
+            ? (palette.errorSoft, palette.error)
             : (
-              iconBackground ?? ColorsManager.primarySoft,
-              iconColor ?? ColorsManager.purpleText,
+              iconBackground ?? palette.primarySoft,
+              iconColor ?? palette.purpleText,
             );
     final trailing =
         this.trailing ??
@@ -101,7 +117,7 @@ class SettingsTile extends StatelessWidget {
             ? Icon(
               Icons.chevron_right_rounded,
               size: 20.r,
-              color: ColorsManager.gray,
+              color: palette.gray,
             )
             : null);
 
@@ -130,15 +146,16 @@ class SettingsTile extends StatelessWidget {
                     style: TextStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.w700,
                       color:
-                          destructive
-                              ? ColorsManager.error
-                              : ColorsManager.primaryText,
+                          destructive ? palette.error : palette.primaryText,
                     ),
                   ),
                   if (subtitle != null && subtitle.isNotEmpty)
                     Text(
                       subtitle,
-                      style: TextStyles.caption.copyWith(height: 1.6),
+                      style: TextStyles.caption.copyWith(
+                        height: 1.6,
+                        color: palette.secondaryText,
+                      ),
                     ),
                 ],
               ),
