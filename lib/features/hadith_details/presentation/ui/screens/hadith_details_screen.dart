@@ -20,7 +20,6 @@ import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widget
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/siraj_prompt_card.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/hadith_speech_request.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_cubit.dart';
-import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_settings_cubit.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_button.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_host.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_player.dart';
@@ -309,9 +308,9 @@ class _HadithDetailView extends StatelessWidget {
   }
 }
 
-/// Keeps a reading going through the chapter. When a hadith has been read
-/// and "next hadith" is on, steps to the next one; when the reader steps to
-/// another hadith while listening, reads that one instead.
+/// Keeps a reading going through the chapter: when a finished reading
+/// asks for the next hadith, steps to it; when the screen moves to another
+/// hadith, lets the reading follow.
 class _ChapterReading extends StatelessWidget {
   const _ChapterReading({required this.speechFor, required this.child});
 
@@ -327,40 +326,19 @@ class _ChapterReading extends StatelessWidget {
           listenWhen:
               (previous, current) =>
                   current.ownedBy(owner) &&
-                  previous.status != current.status &&
-                  current.status == ReadAloudStatus.completed,
-          listener: (context, _) {
-            final settings = context.read<ReadAloudSettingsCubit>().state;
-            final reader = context.read<HadithReaderCubit>();
-            if (settings.settings.autoContinue &&
-                reader.state.hasNext &&
-                !reader.state.isLoading) {
-              reader.next();
-            }
-          },
+                  current.continueToNext &&
+                  !previous.continueToNext,
+          listener:
+              (context, _) => context.read<HadithReaderCubit>().nextWhenReady(),
         ),
         BlocListener<HadithReaderCubit, HadithReaderState>(
           listenWhen:
               (previous, current) => previous.hadithId != current.hadithId,
-          listener: (context, reader) {
-            final readAloud = context.read<ReadAloudCubit>();
-            final state = readAloud.state;
-            if (!state.ownedBy(owner)) return;
-            final autoContinue =
-                context
-                    .read<ReadAloudSettingsCubit>()
-                    .state
-                    .settings
-                    .autoContinue;
-            final keepReading =
-                state.isPlaying ||
-                (state.status == ReadAloudStatus.completed && autoContinue);
-            if (keepReading && reader.text.trim().isNotEmpty) {
-              readAloud.play(owner, speechFor(reader));
-            } else {
-              readAloud.stop();
-            }
-          },
+          listener:
+              (context, reader) => context.read<ReadAloudCubit>().follow(
+                owner,
+                speechFor(reader),
+              ),
         ),
       ],
       child: child,

@@ -79,6 +79,9 @@ class SpeechEngineReport {
   final List<String> engines;
   final String? defaultEngine;
   final String? currentEngine;
+
+  /// The chosen engine could not start; the system default reads instead.
+  final bool chosenEngineFailed;
   final SpeechRateRange rateRange;
   final int? maxInputLength;
 
@@ -91,6 +94,7 @@ class SpeechEngineReport {
     this.engines = const [],
     this.defaultEngine,
     this.currentEngine,
+    this.chosenEngineFailed = false,
     this.rateRange = SpeechRateRange.fallback,
     this.maxInputLength,
   });

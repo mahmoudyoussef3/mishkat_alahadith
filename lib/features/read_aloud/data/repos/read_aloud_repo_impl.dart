@@ -19,6 +19,10 @@ class ReadAloudRepoImpl implements ReadAloudRepo {
 
   ReadAloudRepoImpl(this._tts, this._local);
 
+  /// Bounds calls that wait on the engine starting: flutter_tts holds them
+  /// until it has, which a broken engine never does.
+  static const Duration _engineTimeout = Duration(seconds: 25);
+
   /// Settings for this session; storage is read once.
   ReadAloudSettings? _settings;
   final StreamController<ReadAloudSettings> _settingsChanges =
@@ -73,7 +77,7 @@ class ReadAloudRepoImpl implements ReadAloudRepo {
 
   @override
   Future<ApiResult<SpeechEngineSnapshot>> inspectEngine({String? engine}) =>
-      _guard(() async {
+      _guard(timeout: _engineTimeout, () async {
         await _tts.configure();
         await _tts.useEngine(engine);
         final range = await _tts.rateRange();
@@ -114,26 +118,27 @@ class ReadAloudRepoImpl implements ReadAloudRepo {
   ) => _guard(() => _tts.areLanguagesInstalled(locales));
 
   @override
-  Future<ApiResult<void>> applyVoice(SpeechVoiceSetup setup) => _guard(() async {
-    await _tts.configure();
-    // Setting the language on iOS drops the chosen voice, so it goes first.
-    await _tts.setLanguage(setup.locale);
-    final voice = setup.voice;
-    final voiceSet =
-        voice != null &&
-        await _tts.setVoice(SpeechVoiceMapper.toPlatform(voice));
-    if (!voiceSet) {
-      // Back to the engine default, which may not be Arabic, then onto the
-      // default voice of the Arabic locale.
-      await _tts.clearVoice();
-      if (!await _tts.setLanguage(setup.locale)) {
-        throw const TextToSpeechException('Arabic is not available');
-      }
-    }
-    await _tts.setSpeechRate(setup.rate);
-    await _tts.setPitch(setup.pitch);
-    await _tts.setVolume(setup.volume);
-  });
+  Future<ApiResult<void>> applyVoice(SpeechVoiceSetup setup) =>
+      _guard(timeout: _engineTimeout, () async {
+        await _tts.configure();
+        // Setting the language on iOS drops the chosen voice, so it goes first.
+        await _tts.setLanguage(setup.locale);
+        final voice = setup.voice;
+        final voiceSet =
+            voice != null &&
+            await _tts.setVoice(SpeechVoiceMapper.toPlatform(voice));
+        if (!voiceSet) {
+          // Back to the engine default, which may not be Arabic, then onto the
+          // default voice of the Arabic locale.
+          await _tts.clearVoice();
+          if (!await _tts.setLanguage(setup.locale)) {
+            throw const TextToSpeechException('Arabic is not available');
+          }
+        }
+        await _tts.setSpeechRate(setup.rate);
+        await _tts.setPitch(setup.pitch);
+        await _tts.setVolume(setup.volume);
+      });
 
   @override
   Future<ApiResult<void>> speak(String text) => _guard(() async {
@@ -166,10 +171,17 @@ class ReadAloudRepoImpl implements ReadAloudRepo {
     return _tts.synthesizeToFile(text, name);
   });
 
-  /// Runs a platform call, mapping anything it throws to a [SpeechFailure].
-  static Future<ApiResult<T>> _guard<T>(Future<T> Function() call) async {
+  /// Runs a platform call, mapping anything it throws, or taking longer
+  /// than [timeout], to a [SpeechFailure].
+  static Future<ApiResult<T>> _guard<T>(
+    Future<T> Function() call, {
+    Duration? timeout,
+  }) async {
     try {
-      return ApiResult.success(await call());
+      final result = call();
+      return ApiResult.success(
+        await (timeout == null ? result : result.timeout(timeout)),
+      );
     } catch (_) {
       return const ApiResult.failure(SpeechFailure());
     }

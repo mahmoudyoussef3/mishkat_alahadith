@@ -53,7 +53,10 @@ class ReadAloudSettingsCubit extends Cubit<ReadAloudSettingsState> {
     // A newer choice is already being inspected.
     if (isClosed || state.settings.engine != settings.engine) return;
     emit(switch (result) {
-      ApiSuccess(:final data) => state.copyWith(report: data, inspecting: false),
+      ApiSuccess(:final data) => state.copyWith(
+        report: data,
+        inspecting: false,
+      ),
       ApiFailure() => state.copyWith(inspecting: false, inspectionFailed: true),
     });
   }
@@ -104,13 +107,9 @@ class ReadAloudSettingsCubit extends Cubit<ReadAloudSettingsState> {
     reinspect: true,
   );
 
-  Future<void> reset() =>
-      _update(ReadAloudSettings.defaults, reinspect: true);
+  Future<void> reset() => _update(ReadAloudSettings.defaults, reinspect: true);
 
-  Future<void> _update(
-    ReadAloudSettings next, {
-    bool reinspect = false,
-  }) async {
+  Future<void> _update(ReadAloudSettings next, {bool reinspect = false}) async {
     final normalized = next.normalized();
     if (normalized == state.settings) return;
     emit(state.copyWith(settings: normalized));

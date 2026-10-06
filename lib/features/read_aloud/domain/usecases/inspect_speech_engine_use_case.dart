@@ -41,6 +41,8 @@ class InspectSpeechEngineUseCase {
       engines: snapshot.engines,
       defaultEngine: snapshot.defaultEngine,
       currentEngine: snapshot.currentEngine,
+      chosenEngineFailed:
+          settings.engine != null && snapshot.currentEngine != settings.engine,
       rateRange: snapshot.rateRange,
       maxInputLength: snapshot.maxInputLength,
     );
@@ -70,7 +72,9 @@ class InspectSpeechEngineUseCase {
     if (voice == null) {
       final available = await _repo.isLanguageAvailable(locale);
       if (available case ApiSuccess(data: false)) {
-        return ApiResult.success(report(voices: voices, missingLocales: missing));
+        return ApiResult.success(
+          report(voices: voices, missingLocales: missing),
+        );
       }
     }
 

@@ -83,6 +83,14 @@ void main() {
       expect(report.arabicAvailable, isFalse);
     });
 
+    test('flags a chosen engine that could not start', () async {
+      final report = _data(
+        await inspect(quietSettings.copyWith(engine: 'com.broken')),
+      );
+
+      expect(report.chosenEngineFailed, isTrue);
+    });
+
     test('inspects the chosen engine', () async {
       await inspect(quietSettings.copyWith(engine: 'com.google.android.tts'));
 
@@ -100,6 +108,16 @@ void main() {
       expect(setup.rate, 0.75);
       expect(setup.pitch, 1.2);
       expect(setup.volume, 0.6);
+    });
+
+    test('reuses an earlier report without inspecting again', () async {
+      final report = _data(await inspect(quietSettings));
+      repo.inspections = 0;
+
+      await prepare(quietSettings.copyWith(rate: 0.5), reuse: report);
+
+      expect(repo.inspections, 0);
+      expect(repo.applied.single.rate, 0.25);
     });
 
     test('fails clearly when there is no Arabic voice', () async {

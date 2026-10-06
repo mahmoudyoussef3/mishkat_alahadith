@@ -43,7 +43,8 @@ abstract final class SpokenArabic {
       (unit >= 0x2066 && unit <= 0x2069);
 
   /// Quotes, brackets and markup: not read, but they separate words.
-  static final Set<int> _separators = '«»"“”„‹›()[]{}﴾﴿<>*#_~|`'.codeUnits.toSet();
+  static final Set<int> _separators =
+      '«»"“”„‹›()[]{}﴾﴿<>*#_~|`'.codeUnits.toSet();
 
   static bool _isLineBreak(int unit) =>
       unit == 0x0A || unit == 0x0D || unit == 0x2028 || unit == 0x2029;
@@ -105,7 +106,8 @@ abstract final class SpokenArabic {
     var i = start;
     scan:
     while (i < stop) {
-      for (final MapEntry(key: pattern, value: words) in _abbreviations.entries) {
+      for (final MapEntry(key: pattern, value: words)
+          in _abbreviations.entries) {
         if (i + pattern.length <= stop && source.startsWith(pattern, i)) {
           markBreak(i);
           put(words, i, i + pattern.length);

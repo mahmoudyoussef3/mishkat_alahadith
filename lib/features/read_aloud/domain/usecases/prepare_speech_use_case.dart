@@ -13,14 +13,23 @@ class PrepareSpeechUseCase {
 
   PrepareSpeechUseCase(this._repo, this._inspect);
 
-  Future<ApiResult<SpeechEngineReport>> call(ReadAloudSettings settings) async {
-    final inspected = await _inspect(settings);
+  /// Pass the report of an earlier setup as [reuse] when only the rate,
+  /// pitch or volume changed since: the engine is then not looked over
+  /// again.
+  Future<ApiResult<SpeechEngineReport>> call(
+    ReadAloudSettings settings, {
+    SpeechEngineReport? reuse,
+  }) async {
     final SpeechEngineReport report;
-    switch (inspected) {
-      case ApiSuccess(:final data):
-        report = data;
-      case ApiFailure(:final failure):
-        return ApiResult.failure(failure);
+    if (reuse != null) {
+      report = reuse;
+    } else {
+      switch (await _inspect(settings)) {
+        case ApiSuccess(:final data):
+          report = data;
+        case ApiFailure(:final failure):
+          return ApiResult.failure(failure);
+      }
     }
 
     final locale = report.locale;

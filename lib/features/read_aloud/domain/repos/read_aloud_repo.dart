@@ -43,5 +43,8 @@ abstract class ReadAloudRepo {
   Future<ApiResult<void>> stop({bool release = false});
 
   /// Writes [text] read aloud to an audio file and returns its path.
-  Future<ApiResult<String>> synthesizeToFile(String text, {required String name});
+  Future<ApiResult<String>> synthesizeToFile(
+    String text, {
+    required String name,
+  });
 }

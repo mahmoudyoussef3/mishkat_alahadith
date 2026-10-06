@@ -81,7 +81,13 @@ class FakeReadAloudRepo implements ReadAloudRepo {
   final synthesized = <String>[];
   int pauses = 0;
   int resumes = 0;
+  int inspections = 0;
   String? inspectedEngine;
+
+  /// While set, stopping or applying a voice waits for it, like an engine
+  /// that is slow to answer.
+  Completer<void>? stopGate;
+  Completer<void>? applyGate;
 
   void emit(SpeechEvent event) => _events.add(event);
 
@@ -106,6 +112,7 @@ class FakeReadAloudRepo implements ReadAloudRepo {
   Future<ApiResult<SpeechEngineSnapshot>> inspectEngine({
     String? engine,
   }) async {
+    inspections++;
     inspectedEngine = engine;
     return ApiResult.success(snapshot);
   }
@@ -122,6 +129,7 @@ class FakeReadAloudRepo implements ReadAloudRepo {
   @override
   Future<ApiResult<void>> applyVoice(SpeechVoiceSetup setup) async {
     applied.add(setup);
+    await applyGate?.future;
     return failApply
         ? const ApiResult.failure(SpeechFailure())
         : const ApiResult.success(null);
@@ -150,6 +158,7 @@ class FakeReadAloudRepo implements ReadAloudRepo {
   @override
   Future<ApiResult<void>> stop({bool release = false}) async {
     stops.add(release);
+    await stopGate?.future;
     return const ApiResult.success(null);
   }
 

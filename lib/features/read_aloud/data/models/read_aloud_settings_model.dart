@@ -78,7 +78,8 @@ class ReadAloudSettingsModel {
     return SpeechVoiceRef(
       name: name,
       locale: locale,
-      identifier: identifier is String && identifier.isNotEmpty ? identifier : null,
+      identifier:
+          identifier is String && identifier.isNotEmpty ? identifier : null,
     );
   }
 }

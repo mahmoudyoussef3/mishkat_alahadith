@@ -24,6 +24,9 @@ class HadithReaderCubit extends Cubit<HadithReaderState> {
   String _chapterNumber = '';
   bool _isLocal = false;
 
+  /// The hadith to step on from once its neighbours are known.
+  String? _nextOnceLoaded;
+
   /// Shows [text] and, when [withNavigation], finds its neighbours.
   Future<void> start({
     required String hadithId,
@@ -37,11 +40,20 @@ class HadithReaderCubit extends Cubit<HadithReaderState> {
     _chapterNumber = chapterNumber;
     _isLocal = isLocal;
     final canNavigate = withNavigation && hadithId.isNotEmpty;
-    emit(HadithReaderState(hadithId: hadithId, text: text, isLoading: canNavigate));
+    emit(
+      HadithReaderState(hadithId: hadithId, text: text, isLoading: canNavigate),
+    );
     if (canNavigate) await _loadNeighbours();
   }
 
   Future<void> next() => _moveTo(state.next);
+
+  /// Steps to the next hadith as soon as it is known: at once, or when the
+  /// current hadith's neighbours finish loading.
+  Future<void> nextWhenReady() async {
+    if (!state.isLoading) return next();
+    _nextOnceLoaded = state.hadithId;
+  }
 
   Future<void> previous() => _moveTo(state.previous);
 
@@ -82,7 +94,12 @@ class HadithReaderCubit extends Cubit<HadithReaderState> {
             isLoading: false,
           ),
         );
+        if (_nextOnceLoaded == hadithId) {
+          _nextOnceLoaded = null;
+          await next();
+        }
       case ApiFailure():
+        if (_nextOnceLoaded == hadithId) _nextOnceLoaded = null;
         emit(state.copyWith(isLoading: false, failed: true));
     }
   }

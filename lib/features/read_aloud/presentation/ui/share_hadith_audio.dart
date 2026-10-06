@@ -65,7 +65,9 @@ class _RecordingDialog extends StatelessWidget {
       canPop: false,
       child: Dialog(
         backgroundColor: ColorsManager.elevatedSurface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 22.h),
           child: Directionality(

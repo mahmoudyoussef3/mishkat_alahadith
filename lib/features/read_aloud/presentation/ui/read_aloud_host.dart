@@ -86,7 +86,8 @@ class _ReadAloudHostState extends State<ReadAloudHost>
                 current.notice != previous.notice &&
                 identical(current.notice!.owner, _owner),
         listener:
-            (context, state) => showErrorSnackbar(context, state.notice!.message),
+            (context, state) =>
+                showErrorSnackbar(context, state.notice!.message),
         child: widget.child,
       ),
     );

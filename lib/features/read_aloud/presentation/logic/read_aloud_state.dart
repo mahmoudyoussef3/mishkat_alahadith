@@ -40,6 +40,10 @@ class ReadAloudState {
 
   /// The hadith is being recorded to a file.
   final bool exporting;
+
+  /// The reading finished with "next hadith" on: the screen should move on
+  /// to the next hadith, which is then read too.
+  final bool continueToNext;
   final ReadAloudNotice? notice;
 
   const ReadAloudState({
@@ -51,6 +55,7 @@ class ReadAloudState {
     this.word,
     this.previewing = false,
     this.exporting = false,
+    this.continueToNext = false,
     this.notice,
   });
 
@@ -97,6 +102,7 @@ class ReadAloudState {
     bool clearWord = false,
     bool? previewing,
     bool? exporting,
+    bool? continueToNext,
     ReadAloudNotice? notice,
   }) {
     return ReadAloudState(
@@ -108,6 +114,7 @@ class ReadAloudState {
       word: clearWord ? null : word ?? this.word,
       previewing: previewing ?? this.previewing,
       exporting: exporting ?? this.exporting,
+      continueToNext: continueToNext ?? this.continueToNext,
       notice: notice ?? this.notice,
     );
   }

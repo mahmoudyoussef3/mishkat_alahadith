@@ -93,8 +93,15 @@ class BuildHadithSpeechTrackUseCase {
 
   /// Reads [source] in chunks, each mapped back onto it word by word.
   void _read(List<SpeechSegment> segments, SpeechPart part, String source) {
-    for (final range in SpokenArabic.chunks(source, maxLength: maxSegmentLength)) {
-      final spoken = SpokenArabic.from(source, start: range.start, end: range.end);
+    for (final range in SpokenArabic.chunks(
+      source,
+      maxLength: maxSegmentLength,
+    )) {
+      final spoken = SpokenArabic.from(
+        source,
+        start: range.start,
+        end: range.end,
+      );
       if (spoken.isEmpty) continue;
       segments.add(
         SpeechSegment(
@@ -115,8 +122,15 @@ class BuildHadithSpeechTrackUseCase {
     int item,
     String text,
   ) {
-    for (final range in SpokenArabic.chunks(text, maxLength: maxSegmentLength)) {
-      final spoken = SpokenArabic.from(text, start: range.start, end: range.end);
+    for (final range in SpokenArabic.chunks(
+      text,
+      maxLength: maxSegmentLength,
+    )) {
+      final spoken = SpokenArabic.from(
+        text,
+        start: range.start,
+        end: range.end,
+      );
       if (spoken.isEmpty) continue;
       segments.add(SpeechSegment(part: part, item: item, spoken: spoken.text));
     }

@@ -32,15 +32,15 @@ abstract final class SpeechVoiceMapper {
     );
   }
 
-  static SpeechVoiceQuality _quality(String? value) =>
-      switch (value?.toLowerCase()) {
-        'very high' || 'premium' => SpeechVoiceQuality.veryHigh,
-        'high' || 'enhanced' => SpeechVoiceQuality.high,
-        'normal' || 'default' => SpeechVoiceQuality.normal,
-        'low' => SpeechVoiceQuality.low,
-        'very low' => SpeechVoiceQuality.veryLow,
-        _ => SpeechVoiceQuality.unknown,
-      };
+  static SpeechVoiceQuality _quality(String? value) => switch (value
+      ?.toLowerCase()) {
+    'very high' || 'premium' => SpeechVoiceQuality.veryHigh,
+    'high' || 'enhanced' => SpeechVoiceQuality.high,
+    'normal' || 'default' => SpeechVoiceQuality.normal,
+    'low' => SpeechVoiceQuality.low,
+    'very low' => SpeechVoiceQuality.veryLow,
+    _ => SpeechVoiceQuality.unknown,
+  };
 
   /// The map `setVoice` expects: Android matches name and locale, iOS
   /// prefers the identifier.

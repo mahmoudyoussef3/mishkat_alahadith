@@ -89,7 +89,13 @@ class SpeechTrack {
       starts.add(total);
       total += segment.spoken.length;
     }
-    return SpeechTrack._(key, title, List.unmodifiable(segments), starts, total);
+    return SpeechTrack._(
+      key,
+      title,
+      List.unmodifiable(segments),
+      starts,
+      total,
+    );
   }
 
   bool get isEmpty => segments.isEmpty;

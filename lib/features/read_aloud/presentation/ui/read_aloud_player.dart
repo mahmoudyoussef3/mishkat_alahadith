@@ -25,7 +25,8 @@ class ReadAloudBottomBar extends StatelessWidget {
       children: [
         const ReadAloudPlayer(),
         // The bar below keeps clear of the home indicator itself.
-        below ?? const SafeArea(top: false, child: SizedBox(width: double.infinity)),
+        below ??
+            const SafeArea(top: false, child: SizedBox(width: double.infinity)),
       ],
     );
   }
@@ -293,7 +294,11 @@ class _PlayPauseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<ReadAloudCubit>();
     final (tooltip, icon, onPressed) = switch (status) {
-      ReadAloudStatus.playing => ('إيقاف مؤقت', Icons.pause_rounded, cubit.pause),
+      ReadAloudStatus.playing => (
+        'إيقاف مؤقت',
+        Icons.pause_rounded,
+        cubit.pause,
+      ),
       ReadAloudStatus.preparing => ('إيقاف مؤقت', null, cubit.pause),
       ReadAloudStatus.completed => (
         'إعادة القراءة',

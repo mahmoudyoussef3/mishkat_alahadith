@@ -132,6 +132,20 @@ class _EngineStatus extends StatelessWidget {
                     child: const LinearProgressIndicator(minHeight: 2),
                   )
                   : null;
+        } else if (report.chosenEngineFailed) {
+          notice = _Notice(
+            icon: Icons.memory_rounded,
+            color: ColorsManager.goldInk,
+            background: ColorsManager.goldSoft,
+            title: 'تعذر تشغيل المحرك المختار',
+            body: 'تتم القراءة بمحرك النظام الافتراضي.',
+            action: TextButton(
+              onPressed:
+                  () =>
+                      context.read<ReadAloudSettingsCubit>().selectEngine(null),
+              child: const Text('استخدام الافتراضي'),
+            ),
+          );
         } else if (!report.arabicAvailable) {
           notice = _Notice(
             icon: Icons.record_voice_over_outlined,
@@ -202,7 +216,10 @@ class _Notice extends StatelessWidget {
                 SizedBox(height: 2.h),
                 Text(body, style: TextStyles.caption.copyWith(height: 1.6)),
                 if (action != null)
-                  Align(alignment: AlignmentDirectional.centerEnd, child: action),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: action,
+                  ),
               ],
             ),
           ),
@@ -325,7 +342,9 @@ class _EngineSection extends StatelessWidget {
                 icon: Icons.settings_suggest_rounded,
                 title: 'افتراضي النظام',
                 subtitle:
-                    defaultEngine == null ? null : speechEngineLabel(defaultEngine),
+                    defaultEngine == null
+                        ? null
+                        : speechEngineLabel(defaultEngine),
                 selected: chosen == null,
                 onTap: () => cubit.selectEngine(null),
               ),
@@ -399,7 +418,9 @@ class _RateSection extends StatelessWidget {
     const rates = ReadAloudSettings.rates;
     var selected = 0;
     for (var i = 1; i < rates.length; i++) {
-      if ((rates[i] - rate).abs() < (rates[selected] - rate).abs()) selected = i;
+      if ((rates[i] - rate).abs() < (rates[selected] - rate).abs()) {
+        selected = i;
+      }
     }
     return _Labeled(
       title: 'سرعة القراءة',
@@ -428,10 +449,10 @@ class _SoundSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<ReadAloudSettingsCubit>();
-    final (pitch, volume) = context.select<
-      ReadAloudSettingsCubit,
-      (double, double)
-    >((cubit) => (cubit.state.settings.pitch, cubit.state.settings.volume));
+    final (pitch, volume) = context
+        .select<ReadAloudSettingsCubit, (double, double)>(
+          (cubit) => (cubit.state.settings.pitch, cubit.state.settings.volume),
+        );
 
     return SettingsGroup(
       title: 'الصوت والنبرة',

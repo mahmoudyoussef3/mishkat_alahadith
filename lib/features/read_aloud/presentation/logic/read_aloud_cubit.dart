@@ -5,6 +5,7 @@ import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/hadith_speech_request.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/read_aloud_settings.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/entities/speech_engine.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/speech_event.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/speech_track.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/build_hadith_speech_track_use_case.dart';
@@ -68,8 +69,9 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
   ReadAloudSettings _settings = ReadAloudSettings.defaults;
   bool _settingsLoaded = false;
 
-  /// The settings the engine was last set up with.
+  /// The settings the engine was last set up with, and what it reported.
   ReadAloudSettings? _preparedFor;
+  SpeechEngineReport? _report;
   int _generation = 0;
 
   /// The generation the engine's current utterance was started in.
@@ -98,17 +100,45 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
     if (same && current.status == ReadAloudStatus.paused) return resume();
     if (same && current.isPlaying) return Future.value();
 
+    final track = _buildTrack(request, _settings);
+    if (track.isEmpty) {
+      return current.ownedBy(owner) ? stop() : Future.value();
+    }
     final generation = _bump();
     _awaitingStart = true;
-    return _serial(() => _start(generation, owner, request));
+    _enginePaused = false;
+    _offset = 0;
+    // Owned from the tap on, so closing or covering the screen while the
+    // engine gets ready still stops or pauses it.
+    emit(
+      ReadAloudState(
+        owner: owner,
+        track: track,
+        status: ReadAloudStatus.preparing,
+        notice: current.notice,
+      ),
+    );
+    return _serial(() => _start(generation, request));
+  }
+
+  /// The owner's screen moved on to [request]: reads it when the owner was
+  /// reading, or finished with "next hadith" on; otherwise ends the reading.
+  Future<void> follow(Object owner, HadithSpeechRequest request) {
+    final current = state;
+    if (!current.ownedBy(owner)) return Future.value();
+    return current.isPlaying || current.continueToNext
+        ? play(owner, request)
+        : stop();
   }
 
   Future<void> pause() {
-    if (!state.isPlaying) return Future.value();
+    final current = state;
+    if (!current.isPlaying) return Future.value();
     final generation = _bump();
-    final speaking = !_awaitingStart && state.status == ReadAloudStatus.playing;
+    final speaking =
+        !_awaitingStart && current.status == ReadAloudStatus.playing;
     _awaitingStart = false;
-    emit(state.copyWith(status: ReadAloudStatus.paused));
+    emit(current.copyWith(status: ReadAloudStatus.paused));
     return _serial(() async {
       if (generation != _generation || isClosed) return;
       _enginePaused = false;
@@ -153,10 +183,14 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
   /// already at its start.
   Future<void> previous() => _skip(-1);
 
+  /// Reads the whole reading again from its start.
+  Future<void> restart() => state.isActive ? _jumpTo(0) : Future.value();
+
   Future<void> stop() {
     _bump();
     _awaitingStart = false;
     _enginePaused = false;
+    _offset = 0;
     emit(const ReadAloudState());
     return _serial(() => _stop(release: true));
   }
@@ -182,8 +216,7 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
         owner: current.owner ?? owner,
         track: current.track,
         index: current.index,
-        status:
-            current.isPlaying ? ReadAloudStatus.paused : current.status,
+        status: current.isPlaying ? ReadAloudStatus.paused : current.status,
         spokenOffset: current.spokenOffset,
         word: current.word,
         previewing: true,
@@ -202,49 +235,61 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
     });
   }
 
-  /// Records [request] to an audio file and returns its path. A reading in
-  /// progress pauses: recording needs the engine.
+  /// Records [request] to an audio file and returns its path. Recording
+  /// needs the engine, so a reading in progress pauses and a voice sample
+  /// ends.
   Future<ApiResult<String>> exportAudio(HadithSpeechRequest request) {
     if (state.exporting) {
       return Future.value(const ApiResult.failure(SpeechFailure()));
     }
-    if (state.isPlaying) pause();
-    emit(state.copyWith(exporting: true));
+    // Recording stops whatever the engine is saying; the reading carries on
+    // later from the word it reached.
+    _bump();
+    _awaitingStart = false;
+    _enginePaused = false;
+    final current = state;
+    emit(
+      current.copyWith(
+        status: current.isPlaying ? ReadAloudStatus.paused : null,
+        previewing: false,
+        exporting: true,
+      ),
+    );
     return _serial(() async {
       await _ensureSettings();
       final result = await _export(request, _settings);
-      // Recording stops whatever the engine held and sets the voice up
-      // itself; the next reading starts afresh.
-      _enginePaused = false;
+      // The recording set the voice up itself; the next reading does it
+      // afresh.
       _preparedFor = null;
+      _report = null;
       if (!isClosed) emit(state.copyWith(exporting: false));
       return result;
     });
   }
 
-  Future<void> _start(
-    int generation,
-    Object owner,
-    HadithSpeechRequest request,
-  ) async {
+  Future<void> _start(int generation, HadithSpeechRequest request) async {
     if (generation != _generation || isClosed) return;
-    await _ensureSettings();
-    final track = _buildTrack(request, _settings);
-    if (generation != _generation || isClosed) return;
-    if (track.isEmpty) {
-      _awaitingStart = false;
-      return;
+    if (!_settingsLoaded) {
+      await _ensureSettings();
+      if (generation != _generation || isClosed) return;
+      // The track was laid out before the saved settings were known.
+      final track = _buildTrack(request, _settings);
+      if (track.isEmpty) {
+        _awaitingStart = false;
+        emit(const ReadAloudState());
+        return;
+      }
+      emit(
+        ReadAloudState(
+          owner: state.owner,
+          track: track,
+          status: ReadAloudStatus.preparing,
+          notice: state.notice,
+        ),
+      );
     }
     // Whatever was read before, by this screen or another, ends here.
     await _stop();
-    emit(
-      ReadAloudState(
-        owner: owner,
-        track: track,
-        status: ReadAloudStatus.preparing,
-        notice: state.notice,
-      ),
-    );
     await _speakSegment(generation, 0);
   }
 
@@ -252,18 +297,15 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
     final track = state.track;
     if (track == null || !state.isActive) return Future.value();
     final completed = state.status == ReadAloudStatus.completed;
+    if (completed && step > 0) return Future.value();
     var target = state.index + step;
-    if (step < 0 && (completed || state.spokenOffset > _restartAfter)) {
+    if (step < 0 &&
+        (completed || state.spokenOffset > _restartAfter || target < 0)) {
       target = state.index;
     }
-    if (target < 0 || target >= track.segments.length) return Future.value();
-    if (completed && step > 0) return Future.value();
+    if (target >= track.segments.length) return Future.value();
     return _jumpTo(target);
   }
-
-  /// Reads the whole reading again from its start.
-  Future<void> restart() =>
-      state.isActive ? _jumpTo(0) : Future.value();
 
   Future<void> _jumpTo(int target) {
     final generation = _bump();
@@ -276,6 +318,7 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
         clearWord: true,
         status: ReadAloudStatus.playing,
         previewing: false,
+        continueToNext: false,
       ),
     );
     return _serial(() => _speakSegment(generation, 0));
@@ -307,11 +350,13 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
     final next = state.index + 1;
     if (next >= track.segments.length) {
       _awaitingStart = false;
+      _offset = 0;
       emit(
         state.copyWith(
           status: ReadAloudStatus.completed,
           spokenOffset: track.segments.last.spoken.length,
           clearWord: true,
+          continueToNext: _settings.autoContinue,
         ),
       );
       await _stop(release: true);
@@ -347,9 +392,8 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
         _onCompleted();
       case SpeechFailed():
         _onFailed();
-      // Our own pause and stop cause these, and the state already shows it.
       case SpeechPaused() || SpeechCancelled():
-        break;
+        _onHalted(paused: event is SpeechPaused);
     }
   }
 
@@ -377,19 +421,27 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
     _offset = start;
     final word = segment.sourceRange(start, end);
     emit(
-      current.copyWith(spokenOffset: start, word: word, clearWord: word == null),
+      current.copyWith(
+        spokenOffset: start,
+        word: word,
+        clearWord: word == null,
+      ),
     );
   }
 
   void _onCompleted() {
-    if (state.previewing) {
-      if (_utterance == _generation) {
-        _awaitingStart = false;
-        emit(state.copyWith(previewing: false));
+    final current = state;
+    if (current.previewing) {
+      if (_utterance != _generation) return;
+      _awaitingStart = false;
+      emit(current.copyWith(previewing: false));
+      // The sample took the audio; give it back unless a reading waits.
+      if (current.status != ReadAloudStatus.paused) {
+        _serial(() => _stop(release: true));
       }
       return;
     }
-    if (state.status != ReadAloudStatus.playing ||
+    if (current.status != ReadAloudStatus.playing ||
         _awaitingStart ||
         _utterance != _generation) {
       return;
@@ -399,8 +451,29 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
     _serial(() => _advance(generation));
   }
 
+  /// The engine paused or dropped the utterance by itself: another app or
+  /// a call took the audio. Pauses where it stopped, ready to carry on.
+  /// The app's own pause and stop change the state before these arrive.
+  void _onHalted({required bool paused}) {
+    final current = state;
+    if (current.status != ReadAloudStatus.playing ||
+        current.previewing ||
+        _awaitingStart ||
+        _utterance != _generation) {
+      return;
+    }
+    _bump();
+    _enginePaused = paused;
+    emit(current.copyWith(status: ReadAloudStatus.paused));
+  }
+
   void _onFailed() {
-    if (!state.previewing && state.status != ReadAloudStatus.playing) return;
+    final current = state;
+    // A failure of an utterance the reading has moved past means nothing.
+    if (_utterance != _generation) return;
+    if (!current.previewing && current.status != ReadAloudStatus.playing) {
+      return;
+    }
     _bump();
     _fail(const SpeechFailure().message);
   }
@@ -455,11 +528,21 @@ class ReadAloudCubit extends Cubit<ReadAloudState> {
   Future<bool> _ensurePrepared(int generation) async {
     if (_isPrepared) return true;
     final settings = _settings;
-    final result = await _prepare(settings);
+    final previous = _preparedFor;
+    // With the same engine and voice only the sound changed, so the
+    // engine's voices need not be looked over again.
+    final reuse =
+        previous != null &&
+                previous.engine == settings.engine &&
+                previous.voice == settings.voice
+            ? _report
+            : null;
+    final result = await _prepare(settings, reuse: reuse);
     if (generation != _generation || isClosed) return false;
     switch (result) {
-      case ApiSuccess():
+      case ApiSuccess(:final data):
         _preparedFor = settings;
+        _report = data;
         return true;
       case ApiFailure(:final failure):
         _fail(failure.message);

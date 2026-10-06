@@ -95,8 +95,12 @@ class _ReadAloudTextState extends State<ReadAloudText> {
   void _revealAfterLayout(({int start, int end}) word) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _revealed != word) return;
-      final paragraph = _paragraphIn(_textKey.currentContext?.findRenderObject());
-      if (paragraph == null || !paragraph.attached || !paragraph.hasSize) return;
+      final paragraph = _paragraphIn(
+        _textKey.currentContext?.findRenderObject(),
+      );
+      if (paragraph == null || !paragraph.attached || !paragraph.hasSize) {
+        return;
+      }
       final boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: word.start, extentOffset: word.end),
       );

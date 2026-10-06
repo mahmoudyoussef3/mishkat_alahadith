@@ -13,7 +13,17 @@ import '../../domain/entities/speech_event.dart';
 /// flutter_tts sends every callback to the last [FlutterTts] created, so
 /// the app must hold exactly one: register this class as a singleton.
 class TextToSpeechDataSource {
-  TextToSpeechDataSource([FlutterTts? tts]) : _tts = tts ?? FlutterTts() {
+  TextToSpeechDataSource({
+    FlutterTts? tts,
+    TargetPlatform? platform,
+    Future<Directory> Function()? temporaryDirectory,
+  }) : _tts = tts ?? FlutterTts(),
+       _isAndroid =
+           !kIsWeb &&
+           (platform ?? defaultTargetPlatform) == TargetPlatform.android,
+       _isIOS =
+           !kIsWeb && (platform ?? defaultTargetPlatform) == TargetPlatform.iOS,
+       _temporaryDirectory = temporaryDirectory ?? getTemporaryDirectory {
     _tts
       ..setStartHandler(() => _emit(const SpeechStarted()))
       ..setCompletionHandler(() => _emit(const SpeechCompleted()))
@@ -28,20 +38,26 @@ class TextToSpeechDataSource {
   }
 
   final FlutterTts _tts;
+  final bool _isAndroid;
+  final bool _isIOS;
+  final Future<Directory> Function() _temporaryDirectory;
   final StreamController<SpeechEvent> _events =
       StreamController<SpeechEvent>.broadcast();
   Future<void>? _configured;
   String? _engine;
   String? _lastUtterance;
   bool _sessionActive = false;
-  bool _synthesizing = false;
+
+  /// Engines that failed to start; not tried again this session, as each
+  /// try restarts the engine in use.
+  final Set<String> _failedEngines = {};
+
+  /// Set while a recording runs: its callbacks are not a reading's, and an
+  /// error ends the recording at once.
+  Completer<void>? _synthesisFailed;
 
   static const Duration _engineSwitchTimeout = Duration(seconds: 10);
-  static const Duration _synthesisTimeout = Duration(seconds: 90);
-
-  static bool get _isAndroid => !kIsWeb && Platform.isAndroid;
-
-  static bool get _isIOS => !kIsWeb && Platform.isIOS;
+  static const Duration _synthesisTimeout = Duration(seconds: 60);
 
   Stream<SpeechEvent> get events => _events.stream;
 
@@ -49,9 +65,13 @@ class TextToSpeechDataSource {
   String? get currentEngine => _engine;
 
   void _emit(SpeechEvent event) {
-    // A recording reports through the same callbacks; it is not a reading.
-    if (_synthesizing || _events.isClosed) return;
-    _events.add(event);
+    final synthesis = _synthesisFailed;
+    if (synthesis != null) {
+      // Android reports a failed recording only through this callback.
+      if (event is SpeechFailed && !synthesis.isCompleted) synthesis.complete();
+      return;
+    }
+    if (!_events.isClosed) _events.add(event);
   }
 
   /// One-time engine setup, retried on the next call if it fails.
@@ -77,12 +97,13 @@ class TextToSpeechDataSource {
     }
     if (_isIOS) {
       // Spoken audio, like an audiobook: heard with the silent switch on,
-      // and other audio pauses rather than plays underneath. The session
-      // stays active between the parts of a reading and is released when
-      // the reading ends, so other apps are not resumed between sentences.
+      // with other apps' audio lowered underneath, as Android's audio focus
+      // does. The session stays active between the parts of a reading, so
+      // their audio does not swell between sentences, and is released when
+      // the reading ends, which brings it back up.
       await _tts.setIosAudioCategory(
         IosTextToSpeechAudioCategory.playback,
-        const [],
+        const [IosTextToSpeechAudioCategoryOptions.duckOthers],
         IosTextToSpeechAudioMode.spokenAudio,
       );
       await _tts.autoStopSharedSession(false);
@@ -113,7 +134,8 @@ class TextToSpeechDataSource {
 
   /// Switches the Android engine; null returns to the system default. When
   /// [engine] cannot start, the system default is restored and false
-  /// returned. Switches run one at a time: each restarts the engine.
+  /// returned, then and on later calls. Switches run one at a time: each
+  /// restarts the engine.
   Future<bool> useEngine(String? engine) {
     final switched = _engineSwitch.then((_) => _useEngine(engine));
     _engineSwitch = switched.then((_) {}, onError: (_) {});
@@ -124,18 +146,25 @@ class TextToSpeechDataSource {
 
   Future<bool> _useEngine(String? engine) async {
     if (!_isAndroid || engine == _engine) return true;
+    if (engine != null && _failedEngines.contains(engine)) return false;
     final target = engine ?? await defaultEngine();
     if (target == null) return false;
+    // flutter_tts swaps engines without stopping the one in use, which
+    // would otherwise keep talking over the new one.
+    await _tts.stop();
     try {
       await _tts.setEngine(target).timeout(_engineSwitchTimeout);
       _engine = engine;
       return true;
     } catch (_) {
-      final fallback = await defaultEngine();
+      if (engine != null) _failedEngines.add(engine);
+      _engine = null;
+      // While an engine starts, flutter_tts holds every call, so the way
+      // back is bounded too.
+      final fallback = await defaultEngine().timeout(_engineSwitchTimeout);
       if (fallback != null && fallback != target) {
         await _tts.setEngine(fallback).timeout(_engineSwitchTimeout);
       }
-      _engine = null;
       return false;
     }
   }
@@ -213,24 +242,31 @@ class TextToSpeechDataSource {
   /// Writes [text] read aloud to `<temp>/<name>.wav` (`.caf` on iOS, its
   /// native format) and returns the path.
   Future<String> synthesizeToFile(String text, String name) async {
-    final directory = await getTemporaryDirectory();
+    final directory = await _temporaryDirectory();
     final path = '${directory.path}/$name.${_isIOS ? 'caf' : 'wav'}';
     final file = File(path);
     if (await file.exists()) await file.delete();
 
     await _tts.stop();
     _lastUtterance = null;
-    _synthesizing = true;
+    final failed = _synthesisFailed = Completer<void>();
     try {
-      final result = await _tts
-          .synthesizeToFile(text, path, true)
-          .timeout(_synthesisTimeout);
-      if (!_isTrue(result) || !await file.exists() || await file.length() == 0) {
+      // Android answers a failed recording with an error callback only,
+      // never completing the call itself.
+      final result = await Future.any<Object?>([
+        _tts.synthesizeToFile(text, path, true),
+        failed.future.then<Object?>(
+          (_) => throw const TextToSpeechException('The recording failed'),
+        ),
+      ]).timeout(_synthesisTimeout);
+      if (!_isTrue(result) ||
+          !await file.exists() ||
+          await file.length() == 0) {
         throw const TextToSpeechException('No audio was written');
       }
       return path;
     } finally {
-      _synthesizing = false;
+      _synthesisFailed = null;
     }
   }
 

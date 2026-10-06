@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/entities/hadith_speech_request.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/read_aloud_settings.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/speech_event.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/build_hadith_speech_track_use_case.dart';
@@ -415,6 +418,226 @@ void main() {
       final result = await cubit.exportAudio(bookHadith);
 
       expect(result, isA<ApiFailure<String>>());
+    });
+  });
+
+  group('getting ready', () {
+    test('closing the screen while the engine gets ready stops it', () async {
+      final starting = cubit.play(owner, bookHadith);
+      final releasing = cubit.release(owner);
+      await starting;
+      await releasing;
+
+      expect(cubit.state.status, ReadAloudStatus.idle);
+      expect(repo.spoken, isEmpty);
+    });
+
+    test(
+      'stopping while the old reading is being stopped is not undone',
+      () async {
+        await startReading();
+        repo.stopGate = Completer<void>();
+        final starting = cubit.play(Object(), bookHadith);
+        await _settle();
+
+        final stopping = cubit.stop();
+        repo.stopGate!.complete();
+        await starting;
+        await stopping;
+
+        expect(cubit.state.status, ReadAloudStatus.idle);
+        expect(repo.spoken, [isnadText]);
+      },
+    );
+
+    test(
+      'a new reading paused while the voice is set up starts at its start',
+      () async {
+        const otherHadith = BookHadithSpeech(
+          title: 'صحيح البخاري · حديث ٢',
+          text: '$isnadText «$matnText»',
+          bookName: 'صحيح البخاري',
+          bookSlug: 'bukhari',
+          number: '2',
+        );
+        await startReading();
+        repo.emit(_reached(isnadText, 'مسلمة'));
+        await cubit.pause();
+        await repo.saveSettings(quietSettings.copyWith(rate: 1.25));
+        repo.applyGate = Completer<void>();
+        final starting = cubit.play(owner, otherHadith);
+        await _settle();
+
+        final pausing = cubit.pause();
+        repo.applyGate!.complete();
+        await starting;
+        await pausing;
+        await cubit.resume();
+
+        expect(repo.spoken.last, isnadText);
+      },
+    );
+  });
+
+  group('interruptions', () {
+    test('the system pausing the utterance pauses the reading', () async {
+      await startReading();
+
+      repo.emit(const SpeechPaused());
+      await cubit.resume();
+
+      expect(repo.resumes, 1);
+      expect(cubit.state.status, ReadAloudStatus.playing);
+    });
+
+    test(
+      'the system dropping the utterance pauses, to restart from the word',
+      () async {
+        await startReading();
+        repo.emit(_reached(isnadText, 'مسلمة'));
+
+        repo.emit(const SpeechCancelled());
+        expect(cubit.state.status, ReadAloudStatus.paused);
+        await cubit.resume();
+
+        expect(repo.resumes, 0);
+        expect(
+          repo.spoken.last,
+          isnadText.substring(isnadText.indexOf('مسلمة')),
+        );
+      },
+    );
+
+    test('a failure of an utterance already left behind is ignored', () async {
+      await startReading();
+
+      repo.emit(const SpeechCompleted());
+      repo.emit(const SpeechFailed('late'));
+      await _settle();
+
+      expect(cubit.state.notice, isNull);
+      expect(repo.spoken.last, matnText);
+    });
+  });
+
+  group('chapter reading', () {
+    const nextHadith = BookHadithSpeech(
+      title: 'صحيح البخاري · حديث ٢',
+      text: '$isnadText «$matnText»',
+      bookName: 'صحيح البخاري',
+      bookSlug: 'bukhari',
+      number: '2',
+    );
+
+    Future<void> finishReading() async {
+      await startReading();
+      await cubit.next();
+      repo.emit(const SpeechStarted());
+      repo.emit(const SpeechCompleted());
+      await _settle();
+    }
+
+    test('finishing with next hadith on asks for the next hadith', () async {
+      repo.settings = quietSettings.copyWith(autoContinue: true);
+
+      await finishReading();
+
+      expect(cubit.state.continueToNext, isTrue);
+    });
+
+    test('finishing with next hadith off does not', () async {
+      await finishReading();
+
+      expect(cubit.state.continueToNext, isFalse);
+    });
+
+    test('the screen moving on while reading reads the new hadith', () async {
+      await startReading();
+
+      await cubit.follow(owner, nextHadith);
+
+      expect(cubit.state.track?.key, nextHadith.key);
+      expect(cubit.state.isPlaying, isTrue);
+    });
+
+    test(
+      'the screen moving on after asking for it reads the new hadith',
+      () async {
+        repo.settings = quietSettings.copyWith(autoContinue: true);
+        await finishReading();
+
+        await cubit.follow(owner, nextHadith);
+
+        expect(cubit.state.track?.key, nextHadith.key);
+      },
+    );
+
+    test('the screen moving on from a paused reading ends it', () async {
+      await startReading();
+      await cubit.pause();
+
+      await cubit.follow(owner, nextHadith);
+
+      expect(cubit.state.status, ReadAloudStatus.idle);
+    });
+
+    test('another screen moving on leaves the reading alone', () async {
+      await startReading();
+
+      await cubit.follow(Object(), nextHadith);
+
+      expect(cubit.state.track?.key, bookHadith.key);
+    });
+  });
+
+  group('review fixes', () {
+    test('previous at the very start restarts the first part', () async {
+      await startReading();
+      repo.emit(_reached(isnadText, 'عبد'));
+
+      await cubit.previous();
+
+      expect(repo.spoken, [isnadText, isnadText]);
+    });
+
+    test('a speed change re-applies the sound without re-inspecting', () async {
+      await startReading();
+
+      await repo.saveSettings(quietSettings.copyWith(rate: 1.25));
+      await _settle();
+
+      expect(repo.inspections, 1);
+      expect(repo.applied, hasLength(2));
+    });
+
+    test('a voice change inspects the engine again', () async {
+      await startReading();
+
+      await repo.saveSettings(
+        quietSettings.copyWith(voice: secondArabicVoice.ref),
+      );
+      await _settle();
+
+      expect(repo.inspections, 2);
+      expect(repo.applied.last.voice, secondArabicVoice);
+    });
+
+    test('recording ends a voice sample', () async {
+      await cubit.preview(owner: owner);
+
+      await cubit.exportAudio(bookHadith);
+
+      expect(cubit.state.previewing, isFalse);
+    });
+
+    test('a sample with no reading under it hands the audio back', () async {
+      await cubit.preview(owner: owner);
+      repo.emit(const SpeechStarted());
+
+      repo.emit(const SpeechCompleted());
+      await _settle();
+
+      expect(repo.stops.last, isTrue);
     });
   });
 }

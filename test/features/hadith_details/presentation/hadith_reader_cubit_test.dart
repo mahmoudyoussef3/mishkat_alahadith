@@ -158,4 +158,40 @@ void main() {
     expect(repo.remoteCalls, isEmpty);
     expect(cubit.state.isLoading, isFalse);
   });
+
+  group('nextWhenReady', () {
+    test('steps at once when the neighbours are known', () async {
+      await startAt('9');
+
+      await cubit.nextWhenReady();
+
+      expect(cubit.state.hadithId, '10');
+    });
+
+    test('steps once the neighbours finish loading', () async {
+      repo.hold = Completer();
+      final starting = startAt('9');
+
+      await cubit.nextWhenReady();
+      expect(cubit.state.hadithId, '9');
+      repo.hold!.complete();
+      await starting;
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cubit.state.hadithId, '10');
+    });
+
+    test('stays when the neighbours fail to load', () async {
+      repo.hold = Completer();
+      repo.fail = true;
+      final starting = startAt('9');
+
+      await cubit.nextWhenReady();
+      repo.hold!.complete();
+      await starting;
+
+      expect(cubit.state.hadithId, '9');
+      expect(cubit.state.failed, isTrue);
+    });
+  });
 }
