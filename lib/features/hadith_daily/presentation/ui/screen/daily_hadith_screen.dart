@@ -11,7 +11,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
-import 'package:mishkat_almasabih/core/widgets/hero_surface.dart';
+// import 'package:mishkat_almasabih/core/widgets/hero_surface.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/category_entity.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_cubit.dart';
@@ -24,16 +24,16 @@ import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collectio
 import 'package:mishkat_almasabih/features/hadith_daily/presentation/ui/widgets/hadith_tabs.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/bookmark_appbar_action.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_reading_card.dart';
-import 'package:mishkat_almasabih/features/read_aloud/domain/entities/hadith_speech_request.dart';
+// import 'package:mishkat_almasabih/features/read_aloud/domain/entities/hadith_speech_request.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/speech_track.dart';
-import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_button.dart';
+// import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_button.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_host.dart';
-import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_player.dart';
+// import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_player.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_text.dart';
-import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/share_hadith_audio.dart';
+// import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/share_hadith_audio.dart';
 import 'package:mishkat_almasabih/features/reading_preferences/presentation/ui/hadith_font_size_sheet.dart';
-import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
-import 'package:mishkat_almasabih/features/serag/presentation/ui/open_siraj.dart';
+// import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
+// import 'package:mishkat_almasabih/features/serag/presentation/ui/open_siraj.dart';
 
 /// A hadith with its explanation, lessons and word meanings: the hadith of
 /// the day, a topic's hadith, or one opened from a link. All of it can be
@@ -96,24 +96,26 @@ class _ExplainedHadithView extends StatelessWidget {
     return value == null || value.isEmpty ? null : value;
   }
 
-  ExplainedHadithSpeech get _speech {
-    final heading = hadith.title?.trim();
-    return ExplainedHadithSpeech(
-      title: heading == null || heading.isEmpty ? title : heading,
-      hadith: hadith,
-    );
-  }
+  // Read aloud is disabled for now; uncomment to bring it back.
+  // ExplainedHadithSpeech get _speech {
+  //   final heading = hadith.title?.trim();
+  //   return ExplainedHadithSpeech(
+  //     title: heading == null || heading.isEmpty ? title : heading,
+  //     hadith: hadith,
+  //   );
+  // }
 
-  void _askSiraj(BuildContext context) => openSiraj(
-    context,
-    hadith: SeragHadithContext(
-      hadeeth: _text,
-      gradeAr: hadith.grade ?? '',
-      source: hadith.reference ?? '',
-      takhrijAr: hadith.attribution ?? '',
-    ),
-    title: _attribution,
-  );
+  // Siraj is disabled for now; uncomment to bring it back.
+  // void _askSiraj(BuildContext context) => openSiraj(
+  //   context,
+  //   hadith: SeragHadithContext(
+  //     hadeeth: _text,
+  //     gradeAr: hadith.grade ?? '',
+  //     source: hadith.reference ?? '',
+  //     takhrijAr: hadith.attribution ?? '',
+  //   ),
+  //   title: _attribution,
+  // );
 
   List<CategoryEntity> _topics(CategoriesState state) {
     final ids = hadith.categories ?? const <String>[];
@@ -144,14 +146,15 @@ class _ExplainedHadithView extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: ColorsManager.secondaryBackground,
-        bottomNavigationBar: ReadAloudBottomBar(
-          below:
-              _text.isEmpty
-                  ? null
-                  : _SirajBar(onTap: () => _askSiraj(context)),
-        ),
+        // Read aloud and Siraj are disabled for now; uncomment to bring
+        // them back.
+        // bottomNavigationBar: const ReadAloudBottomBar(
+        //   below:
+        //       _text.isEmpty
+        //           ? null
+        //           : _SirajBar(onTap: () => _askSiraj(context)),
+        // ),
         body: SafeArea(
-          bottom: false,
           child: Column(
             children: [
               DetailHeader(
@@ -181,10 +184,12 @@ class _ExplainedHadithView extends StatelessWidget {
                       text: _text.isEmpty ? 'نص الحديث غير متوفر' : _text,
                       grade: HadithGrade.tryParse(grade),
                       gradeLabel: grade == null || grade.isEmpty ? null : grade,
-                      headerAction:
-                          _text.isEmpty
-                              ? null
-                              : ReadAloudButton(request: _speech),
+                      // Read aloud is disabled for now; uncomment to bring
+                      // it back.
+                      // headerAction:
+                      //     _text.isEmpty
+                      //         ? null
+                      //         : ReadAloudButton(request: _speech),
                       footer:
                           _attribution == null
                               ? null
@@ -244,12 +249,14 @@ class _ExplainedHadithView extends StatelessWidget {
                                                 : HadithLink.build(id)?.toString(),
                                       ),
                                 ),
-                                HadithCardAction(
-                                  icon: Icons.graphic_eq_rounded,
-                                  label: 'صوت',
-                                  onTap:
-                                      () => shareHadithAudio(context, _speech),
-                                ),
+                                // Read aloud is disabled for now; uncomment
+                                // to bring it back.
+                                // HadithCardAction(
+                                //   icon: Icons.graphic_eq_rounded,
+                                //   label: 'صوت',
+                                //   onTap:
+                                //       () => shareHadithAudio(context, _speech),
+                                // ),
                               ],
                     ),
                     SizedBox(height: 16.h),
@@ -308,52 +315,53 @@ class _ExplainedHadithView extends StatelessWidget {
   }
 }
 
-/// "اسأل سراج عن الحديث", pinned under the content.
-class _SirajBar extends StatelessWidget {
-  const _SirajBar({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ColorsManager.cardBackground,
-        border: Border(top: BorderSide(color: ColorsManager.border)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
-          child: HeroSurface(
-            showImage: false,
-            radius: 14.r,
-            padding: EdgeInsets.zero,
-            onTap: onTap,
-            child: SizedBox(
-              height: 46.h,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 19.r,
-                    color: ColorsManager.goldBright,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    'اسأل سراج عن الحديث',
-                    style: TextStyles.titleSmall.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: ColorsManager.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// Siraj is disabled for now; uncomment to bring it back.
+// /// "اسأل سراج عن الحديث", pinned under the content.
+// class _SirajBar extends StatelessWidget {
+//   const _SirajBar({required this.onTap});
+//
+//   final VoidCallback onTap;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return DecoratedBox(
+//       decoration: BoxDecoration(
+//         color: ColorsManager.cardBackground,
+//         border: Border(top: BorderSide(color: ColorsManager.border)),
+//       ),
+//       child: SafeArea(
+//         top: false,
+//         child: Padding(
+//           padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
+//           child: HeroSurface(
+//             showImage: false,
+//             radius: 14.r,
+//             padding: EdgeInsets.zero,
+//             onTap: onTap,
+//             child: SizedBox(
+//               height: 46.h,
+//               child: Row(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   Icon(
+//                     Icons.auto_awesome_rounded,
+//                     size: 19.r,
+//                     color: ColorsManager.goldBright,
+//                   ),
+//                   SizedBox(width: 6.w),
+//                   Text(
+//                     'اسأل سراج عن الحديث',
+//                     style: TextStyles.titleSmall.copyWith(
+//                       fontWeight: FontWeight.w700,
+//                       color: ColorsManager.white,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

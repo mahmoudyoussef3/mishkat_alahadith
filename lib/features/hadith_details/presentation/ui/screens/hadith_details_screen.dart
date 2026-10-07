@@ -11,22 +11,22 @@ import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
-import 'package:mishkat_almasabih/features/hadith_analysis/presentation/ui/siraj_analysis_args.dart';
+// import 'package:mishkat_almasabih/features/hadith_analysis/presentation/ui/siraj_analysis_args.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/logic/hadith_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/bookmark_appbar_action.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_reader_bar.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_reading_card.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_source_card.dart';
-import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/siraj_prompt_card.dart';
+// import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/siraj_prompt_card.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/hadith_speech_request.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_cubit.dart';
-import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_button.dart';
+// import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_button.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_host.dart';
-import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_player.dart';
-import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/share_hadith_audio.dart';
+// import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_player.dart';
+// import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/share_hadith_audio.dart';
 import 'package:mishkat_almasabih/features/reading_preferences/presentation/ui/hadith_font_size_sheet.dart';
-import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
-import 'package:mishkat_almasabih/features/serag/presentation/ui/open_siraj.dart';
+// import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
+// import 'package:mishkat_almasabih/features/serag/presentation/ui/open_siraj.dart';
 
 /// A hadith from a book at full length, with its source, Siraj, steps to
 /// the neighbouring hadiths of the chapter, and reading aloud.
@@ -122,12 +122,13 @@ class _HadithDetailView extends StatelessWidget {
     number: hadithId,
   );
 
-  SeragHadithContext _sirajContext(String text) => SeragHadithContext(
-    hadeeth: text,
-    gradeAr: screen.grade ?? '',
-    source: screen.bookName ?? '',
-    takhrijAr: screen.narrator ?? '',
-  );
+  // Siraj is disabled for now; uncomment to bring it back.
+  // SeragHadithContext _sirajContext(String text) => SeragHadithContext(
+  //   hadeeth: text,
+  //   gradeAr: screen.grade ?? '',
+  //   source: screen.bookName ?? '',
+  //   takhrijAr: screen.narrator ?? '',
+  // );
 
   @override
   Widget build(BuildContext context) {
@@ -137,9 +138,11 @@ class _HadithDetailView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: ColorsManager.secondaryBackground,
-      bottomNavigationBar: ReadAloudBottomBar(
-        below: withNavigation ? const HadithReaderBar() : null,
-      ),
+      // Read aloud is disabled for now; uncomment to bring it back.
+      // bottomNavigationBar: ReadAloudBottomBar(
+      //   below: withNavigation ? const HadithReaderBar() : null,
+      // ),
+      bottomNavigationBar: withNavigation ? const HadithReaderBar() : null,
       body: SafeArea(
         bottom: !withNavigation,
         child: BlocBuilder<HadithReaderCubit, HadithReaderState>(
@@ -186,12 +189,14 @@ class _HadithDetailView extends StatelessWidget {
                           text: text.isEmpty ? 'نص الحديث غير متوفر' : text,
                           number: hadithId,
                           grade: grade,
-                          headerAction:
-                              text.trim().isEmpty
-                                  ? null
-                                  : ReadAloudButton(
-                                    request: speech(text, hadithId),
-                                  ),
+                          // Read aloud is disabled for now; uncomment to
+                          // bring it back.
+                          // headerAction:
+                          //     text.trim().isEmpty
+                          //         ? null
+                          //         : ReadAloudButton(
+                          //           request: speech(text, hadithId),
+                          //         ),
                           actions: [
                             HadithCardAction(
                               icon: Icons.content_copy_rounded,
@@ -224,38 +229,42 @@ class _HadithDetailView extends StatelessWidget {
                                     source: _sourceLine(hadithId),
                                   ),
                             ),
-                            if (text.trim().isNotEmpty)
-                              HadithCardAction(
-                                icon: Icons.graphic_eq_rounded,
-                                label: 'صوت',
-                                onTap:
-                                    () => shareHadithAudio(
-                                      context,
-                                      speech(text, hadithId),
-                                    ),
-                              ),
+                            // Read aloud is disabled for now; uncomment to
+                            // bring it back.
+                            // if (text.trim().isNotEmpty)
+                            //   HadithCardAction(
+                            //     icon: Icons.graphic_eq_rounded,
+                            //     label: 'صوت',
+                            //     onTap:
+                            //         () => shareHadithAudio(
+                            //           context,
+                            //           speech(text, hadithId),
+                            //         ),
+                            //   ),
                           ],
                         ),
-                        SizedBox(height: 16.h),
-                        SirajPromptCard(
-                          onAnalyze:
-                              () => openSirajAnalysis(
-                                context,
-                                SirajAnalysisArgs(
-                                  hadith: text,
-                                  attribution: screen.author ?? '',
-                                  grade: screen.grade ?? '',
-                                  reference: screen.bookName ?? '',
-                                  title: _sourceLine(hadithId),
-                                ),
-                              ),
-                          onAsk:
-                              () => openSiraj(
-                                context,
-                                hadith: _sirajContext(text),
-                                title: _sourceLine(hadithId),
-                              ),
-                        ),
+                        // Siraj and its hadith analysis are disabled for
+                        // now; uncomment to bring them back.
+                        // SizedBox(height: 16.h),
+                        // SirajPromptCard(
+                        //   onAnalyze:
+                        //       () => openSirajAnalysis(
+                        //         context,
+                        //         SirajAnalysisArgs(
+                        //           hadith: text,
+                        //           attribution: screen.author ?? '',
+                        //           grade: screen.grade ?? '',
+                        //           reference: screen.bookName ?? '',
+                        //           title: _sourceLine(hadithId),
+                        //         ),
+                        //       ),
+                        //   onAsk:
+                        //       () => openSiraj(
+                        //         context,
+                        //         hadith: _sirajContext(text),
+                        //         title: _sourceLine(hadithId),
+                        //       ),
+                        // ),
                         SizedBox(height: 16.h),
                         HadithSourceCard(
                           rows: [

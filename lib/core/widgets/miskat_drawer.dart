@@ -93,6 +93,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   title: 'الرئيسية',
                   onTap: () => _openTab(context, MainTab.home),
                 ),
+/*
                 _buildDrawerItem(
                   context,
                   icon: Icons.auto_stories_rounded,
@@ -102,6 +103,8 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.quranScreen);
                   },
                 ),
+*/
+
                 _buildDrawerItem(
                   context,
                   icon: Icons.bookmark_rounded,
