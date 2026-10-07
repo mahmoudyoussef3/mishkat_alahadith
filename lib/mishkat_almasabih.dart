@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +12,9 @@ import 'package:mishkat_almasabih/core/theming/app_palette_scope.dart';
 import 'package:mishkat_almasabih/core/theming/app_theme.dart';
 import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
 import 'package:mishkat_almasabih/features/theme/domain/entities/app_theme_mode.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/logic/hadith_font_scale_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_settings_cubit.dart';
 import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
 import 'core/routing/app_router.dart';
 import 'core/routing/routes.dart';
@@ -48,12 +50,10 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
     log("Start screen: $_startScreen");
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(
-        _deepLinkHandler.init((uri) async {
-          if (kDebugMode) debugPrint('Received deep link: $uri');
-          await DeepLinkRouter.handle(uri);
-        }),
-      );
+      _deepLinkHandler.init((uri) async {
+        if (kDebugMode) debugPrint('Received deep link: $uri');
+        await DeepLinkRouter.handle(uri);
+      });
     });
   }
 
@@ -69,6 +69,11 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
       providers: [
         BlocProvider(create: (_) => getIt<SessionCubit>()..checkSession()),
         BlocProvider.value(value: getIt<ThemeCubit>()),
+        BlocProvider.value(value: getIt<HadithFontScaleCubit>()),
+        // App-wide: the device has one speech engine, and the settings
+        // sheet opens above any screen.
+        BlocProvider.value(value: getIt<ReadAloudCubit>()),
+        BlocProvider.value(value: getIt<ReadAloudSettingsCubit>()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),

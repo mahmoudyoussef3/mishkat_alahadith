@@ -1,12 +1,13 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/helpers/functions.dart';
+import 'package:mishkat_almasabih/core/helpers/hadith_grade.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/hadith_decorations.dart';
-import 'package:mishkat_almasabih/core/theming/hadith_styles.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_badge.dart';
+import 'package:mishkat_almasabih/core/widgets/dashed_divider.dart';
 
+/// Hadith preview card used by every hadith list: topic and grade badges,
+/// up to four lines of the text in Amiri, and the source with a read cue.
 class ChapterAhadithCard extends StatelessWidget {
   const ChapterAhadithCard({
     super.key,
@@ -22,6 +23,8 @@ class ChapterAhadithCard extends StatelessWidget {
   final String number;
   final String text;
   final String? narrator;
+
+  /// A grade ("صحيح") or, on some lists, the hadith's position.
   final String? grade;
   final String? reference;
   final String? bookName;
@@ -29,151 +32,86 @@ class ChapterAhadithCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradeColor = getGradeColor(grade);
+    final parsedGrade = HadithGrade.tryParse(grade);
+    final position = parsedGrade == null ? _nonEmpty(grade) : null;
+    final category = _nonEmpty(hadithCategory);
+    final source = _source();
+    final hasBadges =
+        category != null || parsedGrade != null || position != null;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOut,
-      margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-      decoration: HadithDecorations.chapterCard(gradeColor),
-      child: Stack(
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 6.h, horizontal: 20.w),
+      padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 12.h),
+      decoration: BoxDecoration(
+        color: ColorsManager.cardBackground,
+        borderRadius: BorderRadius.circular(22.r),
+        border: Border.all(color: ColorsManager.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Positioned(
-            top: -15,
-            right: -15,
-            child: Container(
-              width: 80.w,
-              height: 80.h,
-              decoration: HadithDecorations.patternOverlay(gradeColor, 40),
-            ),
-          ),
-
-          Padding(
-            padding: EdgeInsets.all(20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          if (hasBadges) ...[
+            Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(8.w),
-                            decoration: HadithDecorations.headerIcon(
-                              gradeColor,
-                            ),
-                            child: Icon(
-                              Icons.menu_book,
-                              color: gradeColor,
-                              size: 20.r,
-                            ),
-                          ),
-                          SizedBox(width: 10.w),
-                          Expanded(
-                            child: Text(
-                              hadithCategory == null
-                                  ? 'نص الحديث'
-                                  : hadithCategory!,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              style: HadithTextStyles.headerCategoryTitle,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (grade != null && grade!.isNotEmpty)
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 8.h,
-                        ),
-                        decoration: HadithDecorations.gradeBadge(gradeColor),
-                        child: Text(
-                          grade!,
-                          style: HadithTextStyles.gradeLabel(gradeColor),
-                        ),
-                      ),
-                  ],
-                ),
-
-                SizedBox(height: 8.h),
-
-                if (text.isNotEmpty)
-                  Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: HadithDecorations.hadithTextContainer(
-                      gradeColor,
-                    ),
-                    child: Text(
-                      text,
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.right,
-                      style: HadithTextStyles.hadithArabic,
-                    ),
+                if (category != null) Flexible(child: AppBadge.tag(category)),
+                if (parsedGrade != null) ...[
+                  SizedBox(width: 6.w),
+                  GradeBadge(grade: parsedGrade),
+                ],
+                if (position != null) ...[
+                  SizedBox(width: 6.w),
+                  AppBadge(
+                    label: position,
+                    background: ColorsManager.lightGray,
+                    foreground: ColorsManager.secondaryText,
                   ),
-
-                SizedBox(height: 18.h),
-
-                Row(
-                  children: [
-                    if (reference != null && reference!.isNotEmpty)
-                      Flexible(
-                        child: _buildGradientPill(
-                          text: reference!,
-                          colors: [
-                            gradeColor.withOpacity(0.8),
-                            gradeColor.withOpacity(0.6),
-                          ],
-                          textColor: gradeColor,
-                        ),
-                      ),
-                    SizedBox(width: 12.w),
-                    if (bookName != null && bookName!.isNotEmpty)
-                      Flexible(
-                        child: _buildGradientPill(
-                          text: bookName!,
-                          colors: [
-                            ColorsManager.primaryPurple.withOpacity(0.8),
-                            ColorsManager.primaryPurple.withOpacity(0.6),
-                          ],
-                          textColor: ColorsManager.purpleText,
-                        ),
-                      ),
-                  ],
-                ),
-
-                SizedBox(height: 16.h),
-                Container(
-                  height: 2.h,
-                  decoration: HadithDecorations.bottomLine(gradeColor),
-                ),
+                ],
               ],
             ),
+            SizedBox(height: 10.h),
+          ],
+          if (text.isNotEmpty)
+            Text(
+              text,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyles.hadithPreview,
+            ),
+          SizedBox(height: 10.h),
+          const DashedDivider(),
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  source,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyles.caption,
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Text('اقرأ', style: TextStyles.actionLabel),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18.r,
+                color: ColorsManager.purpleText,
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGradientPill({
-    required String text,
-    required List<Color> colors,
-    required Color textColor,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-      decoration: HadithDecorations.pill(colors),
-      child: Text(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: HadithTextStyles.pillLabel(textColor),
-        textAlign: TextAlign.center,
-      ),
-    );
+  String _source() {
+    final parts = [bookName, reference].map(_nonEmpty).nonNulls;
+    if (parts.isNotEmpty) return parts.join(' · ');
+    return _nonEmpty(narrator) ?? '';
+  }
+
+  static String? _nonEmpty(String? value) {
+    final trimmed = value?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
   }
 }

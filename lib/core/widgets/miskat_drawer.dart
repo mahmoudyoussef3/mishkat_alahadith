@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/features/authentication/session/presentation/ui/session_builder.dart';
+import 'package:mishkat_almasabih/features/authentication/session/presentation/ui/sign_out_dialog.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
@@ -7,6 +8,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
 
 class MishkatDrawer extends StatefulWidget {
   const MishkatDrawer({super.key});
@@ -89,8 +91,9 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   context,
                   icon: Icons.home_rounded,
                   title: 'الرئيسية',
-                  onTap: () => Navigator.pop(context),
+                  onTap: () => _openTab(context, MainTab.home),
                 ),
+/*
                 _buildDrawerItem(
                   context,
                   icon: Icons.auto_stories_rounded,
@@ -100,14 +103,13 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                     context.pushNamed(Routes.quranScreen);
                   },
                 ),
+*/
+
                 _buildDrawerItem(
                   context,
                   icon: Icons.bookmark_rounded,
                   title: 'المحفوظات',
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.pushNamed(Routes.bookmarkScreen);
-                  },
+                  onTap: () => _openTab(context, MainTab.saved),
                 ),
                 _buildDrawerItem(
                   context,
@@ -121,10 +123,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   context,
                   icon: Icons.menu_book_rounded,
                   title: 'مكتبة مشكاة',
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.pushNamed(Routes.libraryScreen);
-                  },
+                  onTap: () => _openTab(context, MainTab.library),
                 ),
                 _buildDrawerItem(
                   context,
@@ -150,10 +149,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   context,
                   icon: Icons.person_rounded,
                   title: 'الملف الشخصي',
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.pushNamed(Routes.profileScreen);
-                  },
+                  onTap: () => _openTab(context, MainTab.profile),
                 ),
                 _buildDrawerItem(
                   context,
@@ -194,7 +190,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                             icon: Icons.logout_rounded,
                             title: 'تسجيل الخروج',
                             color: ColorsManager.error,
-                            onTap: () => _showLogoutDialog(context),
+                            onTap: () => confirmSignOut(context),
                           ),
                         )
                         : const SizedBox.shrink(),
@@ -203,6 +199,13 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
         ],
       ),
     );
+  }
+
+  /// Closes the drawer and switches the app shell to [tab].
+  void _openTab(BuildContext context, MainTab tab) {
+    final navigation = context.read<MainNavigationCubit>();
+    Navigator.pop(context);
+    navigation.select(tab);
   }
 
   Widget _buildDrawerItem(
@@ -254,70 +257,6 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
           ),
         ),
       ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: const Text(
-              'تسجيل الخروج',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            content: const Text(
-              'هل أنت متأكد أنك تريد تسجيل الخروج؟',
-              style: TextStyle(fontSize: 16),
-            ),
-            actionsAlignment: MainAxisAlignment.start,
-            actions: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorsManager.primaryPurple,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () async {
-                  final signedOut =
-                      await context.read<SessionCubit>().signOut();
-                  if (!context.mounted) return;
-                  if (!signedOut) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('تعذر تسجيل الخروج، حاول مرة أخرى'),
-                      ),
-                    );
-                    return;
-                  }
-                  context.pushReplacementNamed(Routes.loginScreen);
-                },
-                child: const Text('نعم', style: TextStyle(color: Colors.white)),
-              ),
-              SizedBox(width: 12.w),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: ColorsManager.primaryPurple),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'إلغاء',
-                  style: TextStyle(color: ColorsManager.primaryPurple),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

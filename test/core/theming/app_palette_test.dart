@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mishkat_almasabih/core/helpers/hadith_grade.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette.dart';
 
 double _contrast(Color a, Color b) {
@@ -61,10 +62,73 @@ void main() {
         );
       });
 
+      test('grade labels meet WCAG AA on their tinted badges', () {
+        for (final (text, fill) in [
+          (palette.success, palette.successSoft),
+          (palette.hadithGood, palette.goldSoft),
+          (palette.error, palette.errorSoft),
+        ]) {
+          expect(_contrast(text, fill), greaterThan(4.5));
+        }
+      });
+
+      test('text on gold surfaces meets WCAG AA', () {
+        expect(_contrast(palette.goldInk, palette.goldSoft), greaterThan(4.5));
+        expect(
+          _contrast(palette.onGoldBright, palette.goldBright),
+          greaterThan(4.5),
+        );
+      });
+
+      test('white text meets WCAG AAA on the hero surface', () {
+        expect(_contrast(Colors.white, palette.heroBackground), greaterThan(7));
+      });
+
+      test('the selected filter pill keeps its label readable', () {
+        // Selected pills invert: page background text on a primary text fill.
+        expect(
+          _contrast(palette.secondaryBackground, palette.primaryText),
+          greaterThan(7),
+        );
+      });
+
       test('white header text meets WCAG AA across the header gradient', () {
         for (final stop in [palette.headerStart, palette.headerEnd]) {
           expect(_contrast(Colors.white, stop), greaterThan(4.5));
         }
+      });
+
+      test('grade accents meet WCAG AA as small text on cards', () {
+        for (final accent in [palette.gradeSahih, palette.gradeHasan]) {
+          expect(_contrast(accent, palette.cardBackground), greaterThan(4.5));
+        }
+      });
+
+      test('grade badges meet WCAG AA on their tinted fills', () {
+        for (final grade in HadithGrade.values) {
+          expect(
+            _contrast(palette.gradeAccent(grade), palette.gradeSoft(grade)),
+            greaterThan(4.5),
+          );
+        }
+      });
+
+      test('hadith of the day text stays readable on its parchment wash', () {
+        expect(
+          _contrast(palette.primaryText, palette.featuredWash),
+          greaterThan(7),
+        );
+        expect(
+          _contrast(palette.secondaryText, palette.featuredWash),
+          greaterThan(4.5),
+        );
+      });
+
+      test('the ornament glyph stays visible on the parchment wash', () {
+        expect(
+          _contrast(palette.ornamentInk, palette.featuredWash),
+          greaterThan(3),
+        );
       });
     });
   }

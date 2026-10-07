@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/quran_decorations.dart';
 import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_badge.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_search_results.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mushaf_text/mushaf_text.dart' show toArabicNumerals;
@@ -18,35 +19,41 @@ class QuranSearchHitTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ayah = hit.ayah;
     return Material(
-      type: MaterialType.transparency,
-      child: Ink(
-        decoration: QuranDecorations.searchHitCard(),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16.r),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 10.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'سورة ${hit.surahName} · الآية ${toArabicNumerals(ayah.number)}',
-                        style: QuranTextStyles.searchHitReference,
+      color: ColorsManager.cardBackground,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.r),
+        side: BorderSide(color: ColorsManager.border),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 12.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: AppBadge.tag(
+                        '${hit.surahName} · ${toArabicNumerals(ayah.number)}',
                       ),
                     ),
-                    Text(
-                      'ص ${toArabicNumerals(ayah.page)}',
-                      style: QuranTextStyles.searchHitPage,
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    'ص ${toArabicNumerals(ayah.page)}',
+                    style: TextStyles.caption.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                ),
-                SizedBox(height: 8.h),
-                Text.rich(_highlighted(), textAlign: TextAlign.start),
-              ],
-            ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
+              Text.rich(_highlighted(), textAlign: TextAlign.start),
+            ],
           ),
         ),
       ),
@@ -55,7 +62,7 @@ class QuranSearchHitTile extends StatelessWidget {
 
   TextSpan _highlighted() {
     final mark = TextStyle(
-      backgroundColor: QuranDecorations.searchMatchHighlight,
+      backgroundColor: ColorsManager.primaryGold.withValues(alpha: 0.28),
     );
     return styledRanges(
       text: hit.ayah.text,

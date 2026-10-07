@@ -1,38 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/profile_styles.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mishkat_almasabih/core/widgets/app_switch.dart';
+import 'package:mishkat_almasabih/core/widgets/settings_group.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/domain/entities/hadith_font_scale.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/logic/hadith_font_scale_cubit.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/ui/hadith_font_size_sheet.dart';
+import 'package:mishkat_almasabih/features/theme/domain/entities/app_theme_mode.dart';
+import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
 
-import 'dark_mode_toggle.dart';
-
+/// Night mode and hadith text size.
 class AppearanceSection extends StatelessWidget {
   const AppearanceSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 4.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  FontAwesomeIcons.palette,
-                  size: 20.sp,
-                  color: ColorsManager.purpleText,
-                ),
-                SizedBox(width: 8.w),
-                Text('المظهر', style: ProfileTextStyles.sectionHeaderText),
-              ],
-            ),
-            SizedBox(height: 16.h),
-            const DarkModeToggle(),
-          ],
+    return SettingsGroup(
+      title: 'المظهر',
+      children: [
+        BlocBuilder<ThemeCubit, AppThemeMode>(
+          builder: (context, mode) {
+            final toggle = context.read<ThemeCubit>().toggle;
+            return SettingsTile(
+              icon: Icons.dark_mode_rounded,
+              title: 'الوضع الليلي',
+              subtitle: mode.isDark ? 'مفعّل' : 'معطّل',
+              onTap: toggle,
+              trailing: AppSwitch(
+                value: mode.isDark,
+                semanticLabel: 'الوضع الليلي',
+                onChanged: (_) => toggle(),
+              ),
+            );
+          },
         ),
-      ),
+        BlocBuilder<HadithFontScaleCubit, HadithFontScale>(
+          builder:
+              (context, scale) => SettingsTile(
+                icon: Icons.format_size_rounded,
+                title: 'حجم خط الحديث',
+                subtitle: scale.label,
+                onTap: () => showHadithFontSizeSheet(context),
+              ),
+        ),
+      ],
     );
   }
 }

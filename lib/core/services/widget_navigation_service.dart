@@ -13,20 +13,6 @@ class WidgetNavigationService {
         case 'openHadithOfTheDay':
           await _navigateToHadithOfTheDay();
           return;
-        case 'openHadithLink':
-          final link = call.arguments as String?;
-          if (link == null || link.trim().isEmpty) return;
-          try {
-            final uri = Uri.parse(link);
-            navigatorKey.currentState?.pushNamed(
-              Routes.shareHadithLink,
-              arguments:
-                  uri.pathSegments.isNotEmpty
-                      ? uri.pathSegments.last
-                      : (uri.queryParameters['id'] ?? ''),
-            );
-          } catch (_) {}
-          return;
         case 'openPrayerTimes':
           navigatorKey.currentState?.pushNamed(Routes.prayerTimesScreen);
           return;

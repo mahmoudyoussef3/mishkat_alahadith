@@ -121,9 +121,11 @@ class FakeQuranRepo implements QuranRepo {
   bool failSurahs;
   bool failAyahs;
   bool failCounts;
+  bool failTajweed;
 
   int allAyahsCalls = 0;
   final List<({int page, bool includeNaturalMadd})> countRequests = [];
+  final List<({int ayahId, bool includeNaturalMadd})> tajweedRequests = [];
 
   /// Per-page gates for [getPageAyahs], to order concurrent loads.
   final Map<int, Completer<void>> pageGates = {};
@@ -136,6 +138,7 @@ class FakeQuranRepo implements QuranRepo {
     this.failSurahs = false,
     this.failAyahs = false,
     this.failCounts = false,
+    this.failTajweed = false,
   });
 
   @override
@@ -171,7 +174,14 @@ class FakeQuranRepo implements QuranRepo {
   Future<ApiResult<List<TajweedSegment>>> getAyahTajweed(
     int ayahId, {
     required bool includeNaturalMadd,
-  }) async => ApiResult.success(tajweed[ayahId] ?? const []);
+  }) async {
+    tajweedRequests.add((
+      ayahId: ayahId,
+      includeNaturalMadd: includeNaturalMadd,
+    ));
+    if (failTajweed) return const ApiResult.failure(CacheFailure('no rules'));
+    return ApiResult.success(tajweed[ayahId] ?? const []);
+  }
 
   @override
   Future<ApiResult<List<TajweedRuleCount>>> getPageTajweedCounts(

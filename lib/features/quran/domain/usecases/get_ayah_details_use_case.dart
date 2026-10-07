@@ -2,6 +2,7 @@ import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 
 import '../entities/ayah_details.dart';
+import '../entities/quran_surah.dart';
 import '../repos/quran_repo.dart';
 
 /// One ayah with its surah and tajweed, for the ayah sheet.
@@ -31,8 +32,7 @@ class GetAyahDetailsUseCase {
         ApiSuccess(data: final surahs),
         ApiSuccess(data: final tajweed),
       ):
-        final surah =
-            surahs.where((s) => s.number == ayah.surahNumber).firstOrNull;
+        final surah = QuranSurah.numbered(surahs, ayah.surahNumber);
         if (surah == null) return const ApiResult.failure(UnexpectedFailure());
         return ApiResult.success(
           AyahDetails(ayah: ayah, surah: surah, tajweed: tajweed),

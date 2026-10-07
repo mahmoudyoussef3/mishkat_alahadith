@@ -19,6 +19,7 @@ class PrayerNotificationScheduler {
   static const String _userDisabledKey = 'prayer_notifications_user_disabled';
   static const PrayerTimesCalculator _calculator = PrayerTimesCalculator();
   static const String _scheduleKey = 'prayer_notification_schedule';
+  static const String _lastSyncKey = 'prayer_notification_last_sync';
   static const int _daysAhead = 366;
 
   static bool _bootstrapped = false;
@@ -109,6 +110,7 @@ class PrayerNotificationScheduler {
       if (scheduledCount == null || scheduledCount <= 0) {
         throw StateError('Android did not schedule a prayer notification');
       }
+      await prefs.setInt(_lastSyncKey, DateTime.now().millisecondsSinceEpoch);
       await PrayerTimesHomeWidgetSync.refresh();
 
       return PrayerNotificationActionResult(
@@ -126,6 +128,13 @@ class PrayerNotificationScheduler {
         message: 'تعذر مزامنة إشعارات مواقيت الصلاة',
       );
     }
+  }
+
+  /// When the schedule was last written successfully, or null if never.
+  static Future<DateTime?> lastSyncedAt() async {
+    final prefs = await SharedPreferences.getInstance();
+    final millis = prefs.getInt(_lastSyncKey);
+    return millis == null ? null : DateTime.fromMillisecondsSinceEpoch(millis);
   }
 
   static Future<PrayerNotificationActionResult> cancelAll() async {

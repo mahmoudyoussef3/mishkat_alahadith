@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mishkat_almasabih/core/deep_links/hadith_link.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/ui/widgets/share_image_editor.dart';
@@ -96,24 +99,7 @@ void setupErrorState(BuildContext context, String error) {
       textColor: Colors.white,
       fontSize: 16.0);
 }
-String convertToArabicNumber(int number) {
-  const englishToArabic = {
-    '0': '٠',
-    '1': '١',
-    '2': '٢',
-    '3': '٣',
-    '4': '٤',
-    '5': '٥',
-    '6': '٦',
-    '7': '٧',
-    '8': '٨',
-    '9': '٩',
-  };
-
-  String english = number.toString();
-  String arabic = english.split('').map((digit) => englishToArabic[digit] ?? digit).join();
-  return arabic;
-}
+String convertToArabicNumber(int number) => toArabicDigits('$number');
 
 
   String normalizeArabic(String text) {
@@ -128,22 +114,25 @@ String convertToArabicNumber(int number) {
 
     return result.trim();
   }
+/// Opens the share-as-image editor for [text]. [source] is printed at the
+/// foot of the card and [deepLink] added to the caption.
 Future<void> shareHadithAsImage(
   BuildContext context, {
   required String text,
   String? deepLink,
+  String? source,
 }) async {
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
-    builder: (_) {
-      return ShareImageEditorBottomSheet(
-        text: text,
-        deepLink: deepLink,
-      );
-    },
+    builder:
+        (_) => ShareImageEditorBottomSheet(
+          text: text,
+          deepLink: deepLink,
+          source: source,
+        ),
   );
 }
 
@@ -151,12 +140,64 @@ Future<void> shareHadithLink(
   BuildContext context, {
   required String? hadithId,
 }) async {
-  if (hadithId == null || hadithId.toString().isEmpty) {
-    return;
+  final link = hadithId == null ? null : HadithLink.build(hadithId);
+  if (link == null) return;
+  final shareText = "اقرأ هذا الحديث عبر الرابط:\n$link";
+
+  try {
+    await SharePlus.instance.share(
+      ShareParams(text: shareText, sharePositionOrigin: shareOriginOf(context)),
+    );
+  } on PlatformException {
+    showToast('تعذر مشاركة الرابط', ColorsManager.error);
   }
-  final String link = "https://api.hadith-shareef.com/api/hadith/$hadithId";
-  final String shareText = "اقرأ هذا الحديث عبر الرابط:\n$link";
-  Share.share(shareText);
+}
+
+/// Shares the hadith as text: its words, its source and, when it has an
+/// id, a link that opens it in the app.
+Future<void> shareHadithText(
+  BuildContext context, {
+  required String text,
+  String? source,
+  String? hadithId,
+}) async {
+  final link = hadithId == null ? null : HadithLink.build(hadithId);
+  final shareText = [
+    text.trim(),
+    if (source != null && source.trim().isNotEmpty) '— ${source.trim()}',
+    if (link != null) '\n$link',
+  ].join('\n');
+
+  try {
+    await SharePlus.instance.share(
+      ShareParams(text: shareText, sharePositionOrigin: shareOriginOf(context)),
+    );
+  } on PlatformException {
+    showToast('تعذر مشاركة الحديث', ColorsManager.error);
+  }
+}
+
+/// Copies [text] and confirms it.
+Future<void> copyHadithText(BuildContext context, String text) async {
+  await Clipboard.setData(ClipboardData(text: text.trim()));
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(const SnackBar(content: Text('تم نسخ الحديث')));
+}
+
+/// iPad shows the share sheet as a popover anchored to this rect, and
+/// share_plus rejects a rect that is not inside the screen.
+Rect shareOriginOf(BuildContext context) {
+  final screen = Offset.zero & MediaQuery.sizeOf(context);
+  final box = context.findRenderObject();
+  if (box is RenderBox && box.hasSize) {
+    final visible = (box.localToGlobal(Offset.zero) & box.size).intersect(
+      screen,
+    );
+    if (!visible.isEmpty) return visible;
+  }
+  return Rect.fromCenter(center: screen.center, width: 1, height: 1);
 }
 
   bool checkBookSlug(String bookSlug) {

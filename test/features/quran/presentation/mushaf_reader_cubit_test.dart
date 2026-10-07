@@ -128,6 +128,16 @@ void main() {
       await cubit.close();
     });
 
+    test('counts the page rules on opening with the defaults', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 1);
+
+      expect(_ready(cubit).settings.tajweedEnabled, isTrue);
+      expect(_ready(cubit).ruleCounts, _pageOneCounts);
+      await cubit.close();
+    });
+
     test('fails when the surah table cannot be loaded', () async {
       quran.failSurahs = true;
       final cubit = _cubit(quran, reading);
@@ -192,8 +202,100 @@ void main() {
     });
   });
 
+  group('surah being read', () {
+    test('is the surah the opening page opens with', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 30);
+
+      expect(_ready(cubit).readingSurah, baqarah);
+      expect(_ready(cubit).surahPages, (first: 2, last: 49));
+      await cubit.close();
+    });
+
+    test('is the surah opened, on a page another surah opens', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 106, surahNumber: 5);
+
+      expect(_ready(cubit).readingSurah, maidah);
+      expect(_ready(cubit).surahPages, (first: 106, last: 127));
+      await cubit.close();
+    });
+
+    test('moves on to the next surah once its last page is turned', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 106);
+
+      cubit.onPageChanged(107);
+
+      expect(_ready(cubit).readingSurah, maidah);
+      await cubit.close();
+    });
+
+    test('stays while its own pages are turned back', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 107);
+
+      cubit.onPageChanged(106);
+
+      expect(_ready(cubit).readingSurah, maidah);
+      await cubit.close();
+    });
+
+    test('readSurah reads the surah picked once its page is turned to', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 30);
+      cubit.onPageChanged(106);
+
+      cubit.readSurah(5);
+
+      expect(_ready(cubit).readingSurah, maidah);
+      await cubit.close();
+    });
+
+    test('readSurah ignores a surah that is not on the page', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 30);
+
+      cubit.readSurah(5);
+
+      expect(_ready(cubit).readingSurah, baqarah);
+      await cubit.close();
+    });
+
+    test('is the surah the header names', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 106, surahNumber: 5);
+
+      expect(_ready(cubit).headerSurah, maidah);
+      await cubit.close();
+    });
+
+    test('names the page bookmark', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 106, surahNumber: 5);
+
+      await cubit.togglePageBookmark();
+
+      expect(reading.bookmarks.single.surahNumber, 5);
+      await cubit.close();
+    });
+
+    test('spans the whole mushaf when no surah covers the page', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 300);
+
+      expect(_ready(cubit).surahPages, (first: 1, last: 604));
+      await cubit.close();
+    });
+  });
+
   group('settings', () {
     test('turning tajweed on saves it and loads the page rules', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: false);
       final cubit = _cubit(quran, reading);
       await cubit.init(initialPage: 1);
 
@@ -229,7 +331,59 @@ void main() {
       await cubit.close();
     });
 
+    test('switching to the flowing layout saves it without recounting', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: true);
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 1);
+      final before = quran.countRequests.length;
+
+      final saved = await cubit.setLayoutMode(MushafLayoutMode.flowing);
+
+      expect(saved, isTrue);
+      expect(_ready(cubit).settings.layoutMode, MushafLayoutMode.flowing);
+      expect(reading.settings.layoutMode, MushafLayoutMode.flowing);
+      expect(quran.countRequests, hasLength(before));
+      await cubit.close();
+    });
+
+    test('changing the font size saves it', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 1);
+
+      final saved = await cubit.setFontScale(QuranFontScale.extraLarge);
+
+      expect(saved, isTrue);
+      expect(_ready(cubit).settings.fontScale, QuranFontScale.extraLarge);
+      expect(reading.settings.fontScale, QuranFontScale.extraLarge);
+      await cubit.close();
+    });
+
+    test('changing the font size keeps the rule being followed', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: true);
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 1);
+      await cubit.followRule('ikhfa');
+      cubit.focusNext();
+
+      await cubit.setFontScale(QuranFontScale.large);
+
+      expect(_ready(cubit).focusRuleKey, 'ikhfa');
+      expect(_ready(cubit).focusIndex, 1);
+      await cubit.close();
+    });
+
+    test('choosing the size already in use saves nothing', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 1);
+
+      await cubit.setFontScale(QuranFontScale.medium);
+
+      expect(reading.savedSettings, isEmpty);
+      await cubit.close();
+    });
+
     test('a setting that cannot be saved still applies now', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: false);
       final cubit = _cubit(quran, reading);
       await cubit.init(initialPage: 1);
       reading.failWrites = true;
@@ -244,6 +398,7 @@ void main() {
 
   group('following a rule', () {
     test('switches the colouring on and frames the first occurrence', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: false);
       final cubit = _cubit(quran, reading);
       await cubit.init(initialPage: 1);
 

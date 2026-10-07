@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/ayah_details.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_ayah.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_juz.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_metrics.dart';
@@ -20,6 +21,97 @@ void main() {
 
     test('is null for a page no surah covers', () {
       expect(QuranSurah.openingAt(sampleSurahs, 300), isNull);
+    });
+  });
+
+  group('QuranSurah.numbered', () {
+    test('finds the surah with that number', () {
+      expect(QuranSurah.numbered(sampleSurahs, 5), maidah);
+    });
+
+    test('is null for a number the list does not have', () {
+      expect(QuranSurah.numbered(sampleSurahs, 3), isNull);
+    });
+
+    test('is null when no number is given', () {
+      expect(QuranSurah.numbered(sampleSurahs, null), isNull);
+    });
+  });
+
+  group('QuranSurah.readingAt', () {
+    test('keeps the surah being read on a page another surah opens', () {
+      expect(QuranSurah.readingAt(sampleSurahs, 106, current: maidah), maidah);
+    });
+
+    test('moves on to the surah the page opens with past its end', () {
+      expect(QuranSurah.readingAt(sampleSurahs, 107, current: nisa), maidah);
+    });
+
+    test('is the surah the page opens with when none is being read', () {
+      expect(QuranSurah.readingAt(sampleSurahs, 106), nisa);
+    });
+  });
+
+  group('QuranSurah.printsBasmala', () {
+    test('is true for a surah that opens with the basmala', () {
+      expect(baqarah.printsBasmala, isTrue);
+    });
+
+    test('is false for Al-Fatihah, whose basmala is its first ayah', () {
+      expect(fatihah.printsBasmala, isFalse);
+    });
+
+    test('is false for At-Tawbah, which has none', () {
+      const tawbah = QuranSurah(
+        number: 9,
+        nameArabic: 'التوبة',
+        nameEnglish: 'At-Tawbah',
+        ayahCount: 129,
+        startPage: 187,
+        endPage: 207,
+      );
+
+      expect(tawbah.printsBasmala, isFalse);
+    });
+  });
+
+  test('the mushaf is coloured with tajweed by default', () {
+    expect(MushafReaderSettings.defaults.tajweedEnabled, isTrue);
+  });
+
+  test('the mushaf opens as the printed page at the designed size', () {
+    expect(MushafReaderSettings.defaults.layoutMode, MushafLayoutMode.page);
+    expect(MushafReaderSettings.defaults.fontScale, QuranFontScale.medium);
+  });
+
+  test('settings differing only in font size are not equal', () {
+    const larger = MushafReaderSettings(fontScale: QuranFontScale.large);
+
+    expect(larger == MushafReaderSettings.defaults, isFalse);
+  });
+
+  group('QuranFontScale', () {
+    test('sizes grow from small to huge, with medium as designed', () {
+      final factors = [for (final scale in QuranFontScale.values) scale.factor];
+
+      expect(factors, [...factors]..sort());
+      expect(QuranFontScale.medium.factor, 1.0);
+    });
+
+    test('larger steps up one size', () {
+      expect(QuranFontScale.medium.larger, QuranFontScale.large);
+    });
+
+    test('larger stays at the largest size', () {
+      expect(QuranFontScale.huge.larger, QuranFontScale.huge);
+    });
+
+    test('smaller steps down one size', () {
+      expect(QuranFontScale.medium.smaller, QuranFontScale.small);
+    });
+
+    test('smaller stays at the smallest size', () {
+      expect(QuranFontScale.small.smaller, QuranFontScale.small);
     });
   });
 

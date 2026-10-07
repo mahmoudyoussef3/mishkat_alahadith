@@ -44,8 +44,13 @@ class MushafReaderCubit extends Cubit<MushafReaderState> {
   ) : super(const MushafReaderLoading());
 
   /// [highlightAyahId] washes one ayah on arrival — used when opening the
-  /// mushaf from a search hit or an ayah bookmark.
-  Future<void> init({required int initialPage, int? highlightAyahId}) async {
+  /// mushaf from a search hit or an ayah bookmark. [surahNumber] is the surah
+  /// opened, read even on a page that opens with the surah before it.
+  Future<void> init({
+    required int initialPage,
+    int? highlightAyahId,
+    int? surahNumber,
+  }) async {
     emit(const MushafReaderLoading());
     final page = QuranMetrics.clampPage(initialPage);
     final (settingsResult, surahsResult, bookmarksResult) =
@@ -65,6 +70,11 @@ class MushafReaderCubit extends Cubit<MushafReaderState> {
               ApiFailure() => MushafReaderSettings.defaults,
             },
             surahs: surahs,
+            readingSurah: QuranSurah.readingAt(
+              surahs,
+              page,
+              current: QuranSurah.numbered(surahs, surahNumber),
+            ),
             bookmarks: switch (bookmarksResult) {
               ApiSuccess(:final data) => data,
               ApiFailure() => const [],
@@ -84,6 +94,12 @@ class MushafReaderCubit extends Cubit<MushafReaderState> {
     emit(
       current.copyWith(
         page: page,
+        readingSurah:
+            () => QuranSurah.readingAt(
+              current.surahs,
+              page,
+              current: current.readingSurah,
+            ),
         pageInfo: () => null,
         ruleCounts: const [],
         ruleCountsFailed: false,
@@ -97,6 +113,20 @@ class MushafReaderCubit extends Cubit<MushafReaderState> {
     unawaited(_loadRuleCounts());
   }
 
+  /// Reads [surahNumber] from here on, as when it is picked from the index
+  /// and its page turned to. Ignored unless the surah is on the current page.
+  void readSurah(int surahNumber) {
+    final current = state;
+    if (current is! MushafReaderReady) return;
+    final surah = QuranSurah.numbered(current.surahs, surahNumber);
+    if (surah == null ||
+        !surah.containsPage(current.page) ||
+        surah == current.readingSurah) {
+      return;
+    }
+    emit(current.copyWith(readingSurah: () => surah));
+  }
+
   // ── settings ────────────────────────────────────────────────────────────
 
   Future<bool> setTajweedEnabled(bool enabled) =>
@@ -107,6 +137,12 @@ class MushafReaderCubit extends Cubit<MushafReaderState> {
 
   Future<bool> setThemeMode(MushafThemeMode mode) =>
       _updateSettings((s) => s.copyWith(themeMode: mode));
+
+  Future<bool> setLayoutMode(MushafLayoutMode mode) =>
+      _updateSettings((s) => s.copyWith(layoutMode: mode));
+
+  Future<bool> setFontScale(QuranFontScale scale) =>
+      _updateSettings((s) => s.copyWith(fontScale: scale));
 
   /// Applies the change at once and persists it; `false` if it could not be
   /// saved for next time.

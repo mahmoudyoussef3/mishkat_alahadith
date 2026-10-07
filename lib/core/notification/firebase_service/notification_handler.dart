@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/ui/screens/bookmark_screen.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/home_screen.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/features/profile/presentation/ui/profile_screen.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -21,8 +21,9 @@ class ProjectStatus implements NotificationHandler {
 class OrderStatus implements NotificationHandler {
   @override
   void handleOnTap() {
-    navigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      Routes.homeScreen,
+      (route) => false,
     );
   }
 }

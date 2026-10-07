@@ -2,402 +2,170 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_plurals.dart';
 import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/core/widgets/empty_search_state.dart';
-import 'package:mishkat_almasabih/core/widgets/hadith_card_shimer.dart';
+import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
+import 'package:mishkat_almasabih/core/widgets/filter_pill.dart';
+import 'package:mishkat_almasabih/core/widgets/search_bar_widget.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
+import 'package:mishkat_almasabih/core/widgets/state_message.dart';
+import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/chapter_hadith_tile.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/hadith_entity.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_state.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_details/hadith_by_category_details_cubit.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/hadith_category_card.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/error_widget.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/category_style.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/ui/hadith_text.dart';
 
+/// The hadiths of one topic, narrowed by sub-topic or by words, opening
+/// each with its explanation.
 class AhadithListScreen extends StatefulWidget {
-  final String categoryId;
-  final String? categoryTitle;
+  const AhadithListScreen({super.key, required this.args});
 
-  const AhadithListScreen({
-    super.key,
-    required this.categoryId,
-    this.categoryTitle,
-  });
+  final CategoryHadithsArgs args;
 
   @override
   State<AhadithListScreen> createState() => _AhadithListScreenState();
 }
 
 class _AhadithListScreenState extends State<AhadithListScreen> {
-  late final ScrollController _scrollController;
-  late final TextEditingController _searchController;
-  String _searchQuery = '';
+  final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
+  late String _selectedId = widget.args.categoryId;
+  String _query = '';
+
+  /// The hadith whose explanation is being fetched.
+  String? _openingId;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController()..addListener(_onScroll);
-    _searchController = TextEditingController();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_searchQuery.trim().isNotEmpty) return;
-    if (!_scrollController.hasClients) return;
-    if (_scrollController.position.extentAfter < 320) {
+    if (_query.isNotEmpty || !_scrollController.hasClients) return;
+    if (_scrollController.position.extentAfter < 400) {
       context.read<HadithByCategoryCubit>().loadMore();
     }
   }
 
+  void _select(String categoryId) {
+    if (categoryId == _selectedId) return;
+    setState(() => _selectedId = categoryId);
+    context.read<HadithByCategoryCubit>().getAhadithByCategory(categoryId);
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: BlocProvider(
-        create: (context) => getIt<HadithByCategoryDetailsCubit>(),
-        child: BlocListener<
-          HadithByCategoryDetailsCubit,
-          HadithByCategoryDetailsState
-        >(
-          listener: (context, state) {
-            if (state is HadithByCategoryDetailsLoaded) {
-              Navigator.pushNamed(
-                context,
-                Routes.hadithOfTheDay,
-                arguments: {
-                  'model': state.dailyHadithModel,
-                  'title':
-                      widget.categoryTitle?.isNotEmpty == true
-                          ? widget.categoryTitle
-                          : 'تفاصيل الحديث',
-                  'description': 'نص حديث نبوي شريف مع شرحه',
-                },
-              );
-            } else if (state is HadithByCategoryDetailsError) {
-              showErrorSnackbar(context, state.message);
-            }
-          },
-          child: Scaffold(
-            backgroundColor: ColorsManager.primaryBackground,
-            body: SafeArea(
-              child: RefreshIndicator(
-                color: ColorsManager.primaryPurple,
-                onRefresh: () async {
-                  await context
-                      .read<HadithByCategoryCubit>()
-                      .getAhadithByCategory(widget.categoryId, refresh: true);
-                },
-                child:
-                    BlocBuilder<HadithByCategoryCubit, HadithByCategoryState>(
-                      builder: (context, state) {
-                        return CustomScrollView(
-                          controller: _scrollController,
-                          physics: const BouncingScrollPhysics(),
-                          slivers: [
-                            BuildHeaderAppBar(
-                              title:
-                                  widget.categoryTitle?.isNotEmpty == true
-                                      ? widget.categoryTitle!
-                                      : 'أحاديث التصنيف',
-                              description:
-                                  'تصفح الأحاديث المتعلقة بهذا التصنيف',
-                              pinned: true,
-                            ),
-                            SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-                            SliverToBoxAdapter(
-                              child: _AhadithSearchField(
-                                controller: _searchController,
-                                onChanged: (value) {
-                                  setState(() => _searchQuery = value);
-                                },
-                                onClear: () {
-                                  _searchController.clear();
-                                  setState(() => _searchQuery = '');
-                                },
-                              ),
-                            ),
-                            SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-                            ..._buildContentSlivers(context, state),
-                            SliverToBoxAdapter(child: SizedBox(height: 20.h)),
-                          ],
-                        );
-                      },
-                    ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+    final args = widget.args;
+    final style = CategoryStyle.of(args.title);
 
-  List<Widget> _buildContentSlivers(
-    BuildContext context,
-    HadithByCategoryState state,
-  ) {
-    return switch (state) {
-      HadithByCategoryInitial() ||
-      HadithByCategoryLoading() => _buildLoadingSlivers(),
-      HadithByCategoryLoaded() => _buildLoadedSlivers(state),
-      HadithByCategoryError(message: final message) => [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: CategoriesErrorWidget(
-            message: message,
-            onRetry:
-                () => context
-                    .read<HadithByCategoryCubit>()
-                    .getAhadithByCategory(widget.categoryId),
-          ),
-        ),
-      ],
-    };
-  }
-
-  List<Widget> _buildLoadingSlivers() {
-    return [
-      SliverPadding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
-        sliver: SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => Padding(
-              padding: EdgeInsets.only(bottom: 12.h),
-              child: const HadithCardShimmer(),
-            ),
-            childCount: 6,
-          ),
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildLoadedSlivers(HadithByCategoryLoaded state) {
-    final query = _searchQuery.trim();
-    final visibleAhadith =
-        query.isEmpty
-            ? state.ahadith
-            : state.ahadith
-                .where((hadith) => hadith.title.contains(query))
-                .toList();
-
-    if (visibleAhadith.isEmpty) {
-      return [
-        EmptySliverState(
-          title:
-              query.isEmpty
-                  ? 'لا توجد أحاديث في هذا التصنيف'
-                  : 'لا توجد نتائج مطابقة',
-          subtitle:
-              query.isEmpty
-                  ? 'جرّب تصنيفاً آخر أو أعد المحاولة لاحقاً.'
-                  : 'جرّب كلمات أخرى داخل أحاديث هذا التصنيف.',
-          icon: query.isEmpty ? Icons.menu_book_outlined : Icons.search_off,
-        ),
-      ];
-    }
-
-    return [
-      SliverToBoxAdapter(
-        child: _CategoryResultSummary(
-          totalItems: state.meta.totalItems,
-          currentCount: visibleAhadith.length,
-          currentPage: state.meta.currentPage,
-          lastPage: state.meta.lastPage,
-        ),
-      ),
-      SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-      SliverPadding(
-        padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
-        sliver: SliverList(
-          delegate: SliverChildBuilderDelegate((context, index) {
-            final hadith = visibleAhadith[index];
-            return Column(
-              children: [
-                GestureDetector(
-                  onTap:
-                      () => navigateToHadithDetailsScreen(context, hadith.id),
-                  child: HadithCategoryCard(hadith: hadith, index: index + 1),
-                ),
-                if (index != visibleAhadith.length - 1) SizedBox(height: 14.h),
-              ],
+    return BlocProvider(
+      create: (_) => getIt<HadithByCategoryDetailsCubit>(),
+      child: BlocListener<HadithByCategoryDetailsCubit, HadithByCategoryDetailsState>(
+        listener: (context, state) {
+          if (state is HadithByCategoryDetailsLoaded) {
+            setState(() => _openingId = null);
+            Navigator.pushNamed(
+              context,
+              Routes.hadithOfTheDay,
+              arguments: {
+                'model': state.dailyHadithModel,
+                'title': args.title,
+                'description': 'نص حديث نبوي شريف مع شرحه',
+              },
             );
-          }, childCount: visibleAhadith.length),
-        ),
-      ),
-      if (query.isEmpty) _buildPaginationFooter(state),
-    ];
-  }
-
-  Widget _buildPaginationFooter(HadithByCategoryLoaded state) {
-    if (state.isLoadingMore) {
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: Center(
-            child: CircularProgressIndicator(
-              color: ColorsManager.primaryPurple,
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (state.paginationError != null) {
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: ColorsManager.error.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: ColorsManager.error.withOpacity(0.25)),
-            ),
-            child: Row(
-              textDirection: TextDirection.rtl,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  color: ColorsManager.error,
-                  size: 20.sp,
-                ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: Text(
-                    state.paginationError ?? 'حدث خطأ ما',
-                    style: TextStyles.bodySmall.copyWith(
-                      color: ColorsManager.error,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed:
-                      () => context.read<HadithByCategoryCubit>().loadMore(),
-                  child: Text(
-                    'إعادة المحاولة',
-                    style: TextStyles.labelMedium.copyWith(
-                      color: ColorsManager.purpleText,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (!state.hasMore) {
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 24.h),
-          child: Center(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: ColorsManager.primaryPurple.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Text(
-                'تم عرض جميع الأحاديث',
-                style: TextStyles.labelMedium.copyWith(
-                  color: ColorsManager.purpleText,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return const SliverToBoxAdapter(child: SizedBox.shrink());
-  }
-
-  Future<void> navigateToHadithDetailsScreen(
-    BuildContext context,
-    String hadithId,
-  ) async {
-    await context.read<HadithByCategoryDetailsCubit>().fetchById(hadithId);
-  }
-}
-
-class _AhadithSearchField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onClear;
-
-  const _AhadithSearchField({
-    required this.controller,
-    required this.onChanged,
-    required this.onClear,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: ColorsManager.black.withOpacity(0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: TextField(
-          controller: controller,
-          onChanged: onChanged,
+          } else if (state is HadithByCategoryDetailsError) {
+            setState(() => _openingId = null);
+            showErrorSnackbar(context, state.message);
+          }
+        },
+        child: Directionality(
           textDirection: TextDirection.rtl,
-          textInputAction: TextInputAction.search,
-          decoration: InputDecoration(
-            hintText: 'ابحث داخل أحاديث التصنيف...',
-            hintStyle: TextStyles.bodyMedium.copyWith(
-              color: ColorsManager.secondaryText,
-            ),
-            prefixIcon: Icon(
-              Icons.search_rounded,
-              color: ColorsManager.purpleText,
-            ),
-            suffixIcon:
-                controller.text.isEmpty
-                    ? null
-                    : IconButton(
-                      onPressed: onClear,
-                      icon: const Icon(Icons.close_rounded),
-                      color: ColorsManager.secondaryText,
-                      tooltip: 'مسح البحث',
-                    ),
-            filled: true,
-            fillColor: ColorsManager.secondaryBackground,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 14.h,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(
-                color: ColorsManager.primaryPurple.withOpacity(0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(
-                color: ColorsManager.primaryPurple,
-                width: 1.5,
+          child: Scaffold(
+            backgroundColor: ColorsManager.secondaryBackground,
+            body: SafeArea(
+              bottom: false,
+              child: BlocBuilder<HadithByCategoryCubit, HadithByCategoryState>(
+                builder: (context, state) {
+                  final total =
+                      state is HadithByCategoryLoaded
+                          ? state.meta.totalItems
+                          : args.hadithsCount;
+                  return Column(
+                    children: [
+                      DetailHeader(
+                        title: args.title,
+                        subtitle:
+                            total == null
+                                ? null
+                                : arabicCount(total, ArabicNoun.hadith),
+                        leading: Container(
+                          width: 42.r,
+                          height: 42.r,
+                          decoration: BoxDecoration(
+                            color: style.background,
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          child: Icon(style.icon, size: 22.r, color: style.foreground),
+                        ),
+                        bottom: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SearchBarWidget(
+                              controller: _searchController,
+                              hintText: 'ابحث داخل ${args.title}…',
+                              onChanged:
+                                  (value) => setState(
+                                    () => _query = normalizeArabic(value),
+                                  ),
+                            ),
+                            if (args.subcategories.isNotEmpty) ...[
+                              SizedBox(height: 12.h),
+                              _SubcategoryChips(
+                                parent: args,
+                                selectedId: _selectedId,
+                                onSelected: _select,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: RefreshIndicator(
+                          onRefresh:
+                              () => context
+                                  .read<HadithByCategoryCubit>()
+                                  .getAhadithByCategory(_selectedId, refresh: true),
+                          child: CustomScrollView(
+                            controller: _scrollController,
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            slivers: [
+                              SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+                              ..._body(context, state),
+                              SliverToBoxAdapter(child: SizedBox(height: 24.h)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -405,133 +173,263 @@ class _AhadithSearchField extends StatelessWidget {
       ),
     );
   }
+
+  List<Widget> _body(BuildContext context, HadithByCategoryState state) {
+    final cubit = context.read<HadithByCategoryCubit>();
+    switch (state) {
+      case HadithByCategoryError(:final message):
+        return [
+          SliverToBoxAdapter(
+            child: StateMessage.error(
+              message: message,
+              onRetry: () => cubit.getAhadithByCategory(_selectedId, refresh: true),
+            ),
+          ),
+        ];
+      case HadithByCategoryLoaded():
+        final visible =
+            _query.isEmpty
+                ? state.ahadith
+                : state.ahadith
+                    .where((h) => normalizeArabic(h.title).contains(_query))
+                    .toList();
+        if (visible.isEmpty) {
+          return [
+            SliverToBoxAdapter(
+              child: StateMessage(
+                icon:
+                    _query.isEmpty
+                        ? Icons.menu_book_outlined
+                        : Icons.search_off_rounded,
+                title:
+                    _query.isEmpty
+                        ? 'لا توجد أحاديث في هذا التصنيف'
+                        : 'لا توجد نتائج مطابقة',
+                subtitle:
+                    _query.isEmpty
+                        ? 'جرّب تصنيفاً آخر'
+                        : 'البحث يشمل الأحاديث المحمّلة فقط؛ حمّل المزيد أو جرّب كلمة أخرى.',
+              ),
+            ),
+            if (_query.isNotEmpty && state.hasMore)
+              SliverToBoxAdapter(child: _Footer(state: state, onLoadMore: cubit.loadMore)),
+          ];
+        }
+        return [
+          SliverList.builder(
+            itemCount: visible.length,
+            itemBuilder:
+                (context, index) => _CategoryHadithTile(
+                  hadith: visible[index],
+                  number: index + 1,
+                  opening: _openingId == visible[index].id,
+                  onTap:
+                      _openingId != null
+                          ? null
+                          : () {
+                            setState(() => _openingId = visible[index].id);
+                            context
+                                .read<HadithByCategoryDetailsCubit>()
+                                .fetchById(visible[index].id);
+                          },
+                ),
+          ),
+          SliverToBoxAdapter(child: _Footer(state: state, onLoadMore: cubit.loadMore)),
+        ];
+      default:
+        return [
+          SliverList.builder(
+            itemCount: 4,
+            itemBuilder: (_, _) => const ChapterHadithTileShimmer(),
+          ),
+        ];
+    }
+  }
 }
 
-class _CategoryResultSummary extends StatelessWidget {
-  final int totalItems;
-  final int currentCount;
-  final int currentPage;
-  final int lastPage;
-
-  const _CategoryResultSummary({
-    required this.totalItems,
-    required this.currentCount,
-    required this.currentPage,
-    required this.lastPage,
+class _SubcategoryChips extends StatelessWidget {
+  const _SubcategoryChips({
+    required this.parent,
+    required this.selectedId,
+    required this.onSelected,
   });
+
+  final CategoryHadithsArgs parent;
+  final String selectedId;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36.h,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          FilterPill(
+            label: 'الكل',
+            selected: selectedId == parent.categoryId,
+            onTap: () => onSelected(parent.categoryId),
+          ),
+          for (final child in parent.subcategories)
+            Padding(
+              padding: EdgeInsetsDirectional.only(start: 6.w),
+              child: FilterPill(
+                label: child.title,
+                selected: selectedId == child.id,
+                onTap: () => onSelected(child.id),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryHadithTile extends StatelessWidget {
+  const _CategoryHadithTile({
+    required this.hadith,
+    required this.number,
+    required this.opening,
+    required this.onTap,
+  });
+
+  final HadithEntity hadith;
+  final int number;
+  final bool opening;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: ColorsManager.secondaryBackground,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: ColorsManager.black.withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
+      child: Material(
+        color: ColorsManager.cardBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+          side: BorderSide(color: ColorsManager.border),
         ),
-        child: Row(
-          children: [
-            _SummaryItem(
-              icon: Icons.format_list_numbered_rtl_rounded,
-              label: 'المعروض',
-              value: convertToArabicNumber(currentCount),
-              color: ColorsManager.primaryPurple,
-            ),
-            Container(
-              height: 40.h,
-              width: 1.w,
-              color: ColorsManager.mediumGray.withOpacity(0.5),
-            ),
-            SizedBox(width: 16.w),
-            _SummaryItem(
-              icon: Icons.library_books_rounded,
-              label: 'الإجمالي',
-              value: convertToArabicNumber(totalItems),
-              color: ColorsManager.primaryGold,
-            ),
-            Container(
-              height: 40.h,
-              width: 1.w,
-              color: ColorsManager.mediumGray.withOpacity(0.5),
-            ),
-            SizedBox(width: 16.w),
-            _SummaryItem(
-              icon: Icons.layers_rounded,
-              label: 'الصفحة',
-              value:
-                  '${convertToArabicNumber(currentPage)}/${convertToArabicNumber(lastPage)}',
-              color: ColorsManager.hadithAuthentic,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SummaryItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  const _SummaryItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Row(
-        children: [
-          Container(
-            width: 36.w,
-            height: 36.w,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Icon(icon, color: color, size: 18.sp),
-          ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Column(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 12.h),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyles.titleMedium.copyWith(
-                    color: ColorsManager.primaryText,
-                    fontWeight: FontWeight.bold,
-                    height: 1.1,
+                Container(
+                  constraints: BoxConstraints(minWidth: 30.r),
+                  height: 30.r,
+                  padding: EdgeInsets.symmetric(horizontal: 6.w),
+                  decoration: BoxDecoration(
+                    color: ColorsManager.primarySoft,
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Center(
+                    widthFactor: 1,
+                    child: Text(
+                      toArabicDigits('$number'),
+                      style: TextStyles.chipLabel.copyWith(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w800,
+                        color: ColorsManager.purpleText,
+                      ),
+                    ),
                   ),
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyles.labelSmall.copyWith(
-                    color: ColorsManager.secondaryText,
-                    fontWeight: FontWeight.w600,
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      HadithText(
+                        hadith.title,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyles.readingMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 6.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (opening)
+                            SizedBox.square(
+                              dimension: 16.r,
+                              child: const CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          else ...[
+                            Text('اقرأ مع الشرح', style: TextStyles.actionLabel),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              size: 18.r,
+                              color: ColorsManager.purpleText,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// How much of the topic is listed, with loading of the next page.
+class _Footer extends StatelessWidget {
+  const _Footer({required this.state, required this.onLoadMore});
+
+  final HadithByCategoryLoaded state;
+  final VoidCallback onLoadMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = state.ahadith.length;
+    final total = state.meta.totalItems;
+    final error = state.paginationError;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+      child: Column(
+        children: [
+          Text(
+            toArabicDigits('عرض $shown من $total'),
+            style: TextStyles.caption,
+          ),
+          SizedBox(height: 8.h),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2.r),
+            child: LinearProgressIndicator(
+              value: total == 0 ? 1 : (shown / total).clamp(0.0, 1.0),
+              minHeight: 4.h,
+              backgroundColor: ColorsManager.lightGray,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          if (state.isLoadingMore)
+            const CircularProgressIndicator()
+          else if (error != null)
+            TextButton.icon(
+              onPressed: onLoadMore,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('تعذر التحميل، أعد المحاولة'),
+            )
+          else if (state.hasMore)
+            OutlinedButton.icon(
+              onPressed: onLoadMore,
+              icon: const Icon(Icons.expand_more_rounded),
+              label: const Text('تحميل المزيد'),
+            )
+          else
+            Text(
+              'تم عرض جميع الأحاديث',
+              style: TextStyles.caption.copyWith(color: ColorsManager.gray),
+            ),
         ],
       ),
     );

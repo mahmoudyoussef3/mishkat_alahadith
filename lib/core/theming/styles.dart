@@ -122,6 +122,57 @@ class TextStyles {
 
   static TextStyle get hadithText => readingMedium;
 
+  /// Hadith preview inside list cards: Amiri 19 on a 2.0 line.
+  static TextStyle get hadithPreview => TextStyle(
+    fontFamily: 'Amiri',
+    fontSize: 19.sp,
+    height: 2.0,
+    color: ColorsManager.primaryText,
+  );
+
+  /// Large page title ("المكتبة", "البحث").
+  static TextStyle get screenTitle => TextStyle(
+    fontFamily: 'Cairo',
+    fontSize: 26.sp,
+    fontWeight: FontWeightHelper.extraBold,
+    height: 1.3,
+    color: ColorsManager.primaryText,
+  );
+
+  /// Title of a section inside a page ("الكتب الأكثر رواجاً").
+  static TextStyle get sectionTitle => TextStyle(
+    fontFamily: 'Cairo',
+    fontSize: 18.sp,
+    fontWeight: FontWeightHelper.extraBold,
+    height: 1.4,
+    color: ColorsManager.primaryText,
+  );
+
+  /// Secondary line under a title, and metadata such as hadith counts.
+  static TextStyle get caption => TextStyle(
+    fontFamily: 'Cairo',
+    fontSize: 12.sp,
+    fontWeight: FontWeightHelper.medium,
+    color: ColorsManager.secondaryText,
+  );
+
+  /// Inline text actions ("عرض الكل", "اقرأ").
+  static TextStyle get actionLabel => TextStyle(
+    fontFamily: 'Cairo',
+    fontSize: 13.sp,
+    fontWeight: FontWeightHelper.bold,
+    color: ColorsManager.purpleText,
+  );
+
+  /// Labels inside chips, badges and pills.
+  static TextStyle get chipLabel => TextStyle(
+    fontFamily: 'Cairo',
+    fontSize: 12.sp,
+    fontWeight: FontWeightHelper.bold,
+    height: 1.4,
+    color: ColorsManager.primaryText,
+  );
+
   /// Body copy for explanations, lessons and word meanings: regular weight
   /// and roomy lines, since these passages are read end to end.
   static TextStyle get explanationBody => TextStyle(

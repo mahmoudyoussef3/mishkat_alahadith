@@ -20,4 +20,26 @@ void main() {
   test('rolls over the month and year', () {
     expect(DateTime(2026, 12, 31, 23, 59).nextCalendarDay, DateTime(2027));
   });
+
+  group('daysInMonth', () {
+    test('is 30 for a 30-day month', () {
+      expect(DateTime(2026, 9, 15).daysInMonth, 30);
+    });
+
+    test('is 31 for a 31-day month', () {
+      expect(DateTime(2026, 10, 7).daysInMonth, 31);
+    });
+
+    test('is 28 for February in a common year', () {
+      expect(DateTime(2026, 2, 1).daysInMonth, 28);
+    });
+
+    test('is 29 for February in a leap year', () {
+      expect(DateTime(2028, 2, 29).daysInMonth, 29);
+    });
+
+    test('is 31 for December without spilling into the next year', () {
+      expect(DateTime(2026, 12, 31, 23, 59).daysInMonth, 31);
+    });
+  });
 }
