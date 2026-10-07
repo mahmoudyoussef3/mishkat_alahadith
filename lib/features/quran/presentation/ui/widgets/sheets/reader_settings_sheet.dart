@@ -6,7 +6,9 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
 import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/core/widgets/app_switch.dart';
+import 'package:mishkat_almasabih/core/widgets/segmented_tabs.dart';
 import 'package:mishkat_almasabih/core/widgets/settings_group.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
@@ -100,6 +102,42 @@ class _ReaderSettingsContent extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 22.h),
+                const SettingsGroupTitle('طريقة العرض'),
+                SizedBox(height: 8.h),
+                SegmentedTabs(
+                  labels: [
+                    for (final mode in MushafLayoutMode.values) mode.label,
+                  ],
+                  selectedIndex: settings.layoutMode.index,
+                  onChanged:
+                      (index) => _apply(
+                        context,
+                        cubit.setLayoutMode(MushafLayoutMode.values[index]),
+                      ),
+                ),
+                SizedBox(height: 8.h),
+                _Hint(settings.layoutMode.description),
+                SizedBox(height: 22.h),
+                const SettingsGroupTitle('حجم خط الآيات'),
+                SizedBox(height: 8.h),
+                _FontSizePreview(
+                  scale: settings.fontScale,
+                  colors: MushafPalette.of(palette),
+                ),
+                SizedBox(height: 12.h),
+                _FontScalePicker(
+                  scale: settings.fontScale,
+                  onChanged:
+                      (scale) => _apply(context, cubit.setFontScale(scale)),
+                ),
+                if (settings.layoutMode == MushafLayoutMode.page) ...[
+                  SizedBox(height: 8.h),
+                  const _Hint(
+                    'صفحة المصحف تملأ عرض الشاشة بسطورها كما طُبعت، فيُطبَّق '
+                    'الحجم على النص المتدفق ونافذة الآية.',
+                  ),
+                ],
+                SizedBox(height: 22.h),
                 SettingsGroup(
                   title: 'التجويد',
                   children: [
@@ -155,6 +193,115 @@ class _ReaderSettingsContent extends StatelessWidget {
         'تعذر حفظ الإعداد، سيُطبَّق في هذه الجلسة فقط',
       );
     }
+  }
+}
+
+extension on MushafLayoutMode {
+  String get label => switch (this) {
+    MushafLayoutMode.page => 'صفحة المصحف',
+    MushafLayoutMode.flowing => 'نص متدفق',
+  };
+
+  String get description => switch (this) {
+    MushafLayoutMode.page =>
+      'السطور كما في المصحف المطبوع، بحجم يملأ عرض الشاشة.',
+    MushafLayoutMode.flowing =>
+      'الآيات نصًّا متصلًا بالحجم الذي تختاره، وتُمرَّر الصفحة إلى الأسفل.',
+  };
+}
+
+/// A line of explanation under a setting.
+class _Hint extends StatelessWidget {
+  final String text;
+
+  const _Hint(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
+      child: Text(
+        text,
+        style: TextStyles.caption.copyWith(
+          fontSize: 12.5.sp,
+          height: 1.6,
+          color: AppPaletteOverride.of(context).secondaryText,
+        ),
+      ),
+    );
+  }
+}
+
+/// An ayah at the chosen size, on the reader's paper.
+class _FontSizePreview extends StatelessWidget {
+  static const String _sample = 'ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ';
+
+  final QuranFontScale scale;
+  final MushafColors colors;
+
+  const _FontSizePreview({required this.scale, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: colors.paper,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: AppPaletteOverride.of(context).border),
+      ),
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 180),
+        alignment: Alignment.topCenter,
+        child: Text(
+          _sample,
+          textAlign: TextAlign.center,
+          style: QuranTextStyles.mushafText(
+            color: colors.ink,
+            size: quranFontSize(scale),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Smaller and larger buttons around the sizes, each named by its share of
+/// the designed size.
+class _FontScalePicker extends StatelessWidget {
+  final QuranFontScale scale;
+  final ValueChanged<QuranFontScale> onChanged;
+
+  const _FontScalePicker({required this.scale, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        AppIconButton(
+          tooltip: 'تصغير الخط',
+          icon: Icons.text_decrease_rounded,
+          onPressed: scale.isSmallest ? null : () => onChanged(scale.smaller),
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: SegmentedTabs(
+            labels: [
+              for (final option in QuranFontScale.values)
+                '${toArabicNumerals((option.factor * 100).round())}٪',
+            ],
+            selectedIndex: scale.index,
+            onChanged: (index) => onChanged(QuranFontScale.values[index]),
+          ),
+        ),
+        SizedBox(width: 8.w),
+        AppIconButton(
+          tooltip: 'تكبير الخط',
+          icon: Icons.text_increase_rounded,
+          onPressed: scale.isLargest ? null : () => onChanged(scale.larger),
+        ),
+      ],
+    );
   }
 }
 

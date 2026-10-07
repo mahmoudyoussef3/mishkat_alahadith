@@ -52,8 +52,67 @@ void main() {
     });
   });
 
+  group('QuranSurah.printsBasmala', () {
+    test('is true for a surah that opens with the basmala', () {
+      expect(baqarah.printsBasmala, isTrue);
+    });
+
+    test('is false for Al-Fatihah, whose basmala is its first ayah', () {
+      expect(fatihah.printsBasmala, isFalse);
+    });
+
+    test('is false for At-Tawbah, which has none', () {
+      const tawbah = QuranSurah(
+        number: 9,
+        nameArabic: 'التوبة',
+        nameEnglish: 'At-Tawbah',
+        ayahCount: 129,
+        startPage: 187,
+        endPage: 207,
+      );
+
+      expect(tawbah.printsBasmala, isFalse);
+    });
+  });
+
   test('the mushaf is coloured with tajweed by default', () {
     expect(MushafReaderSettings.defaults.tajweedEnabled, isTrue);
+  });
+
+  test('the mushaf opens as the printed page at the designed size', () {
+    expect(MushafReaderSettings.defaults.layoutMode, MushafLayoutMode.page);
+    expect(MushafReaderSettings.defaults.fontScale, QuranFontScale.medium);
+  });
+
+  test('settings differing only in font size are not equal', () {
+    const larger = MushafReaderSettings(fontScale: QuranFontScale.large);
+
+    expect(larger == MushafReaderSettings.defaults, isFalse);
+  });
+
+  group('QuranFontScale', () {
+    test('sizes grow from small to huge, with medium as designed', () {
+      final factors = [for (final scale in QuranFontScale.values) scale.factor];
+
+      expect(factors, [...factors]..sort());
+      expect(QuranFontScale.medium.factor, 1.0);
+    });
+
+    test('larger steps up one size', () {
+      expect(QuranFontScale.medium.larger, QuranFontScale.large);
+    });
+
+    test('larger stays at the largest size', () {
+      expect(QuranFontScale.huge.larger, QuranFontScale.huge);
+    });
+
+    test('smaller steps down one size', () {
+      expect(QuranFontScale.medium.smaller, QuranFontScale.small);
+    });
+
+    test('smaller stays at the smallest size', () {
+      expect(QuranFontScale.small.smaller, QuranFontScale.small);
+    });
   });
 
   group('QuranJuz.containingPage', () {

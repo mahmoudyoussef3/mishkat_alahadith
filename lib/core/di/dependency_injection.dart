@@ -214,6 +214,7 @@ import 'package:mishkat_almasabih/features/quran/domain/repos/quran_reading_repo
 import 'package:mishkat_almasabih/features/quran/domain/repos/quran_repo.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/filter_surahs_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_ayah_details_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_flowing_page_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_juz_index_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_last_read_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_mushaf_settings_use_case.dart';
@@ -227,6 +228,7 @@ import 'package:mishkat_almasabih/features/quran/domain/usecases/save_mushaf_set
 import 'package:mishkat_almasabih/features/quran/domain/usecases/search_quran_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/toggle_quran_bookmark_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/flowing_page/flowing_page_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
@@ -878,6 +880,9 @@ void _registerQuran() {
   getIt.registerLazySingleton<GetPageTajweedCountsUseCase>(
     () => GetPageTajweedCountsUseCase(getIt()),
   );
+  getIt.registerLazySingleton<GetFlowingPageUseCase>(
+    () => GetFlowingPageUseCase(getIt()),
+  );
   // A singleton so its search index is built once per app run.
   getIt.registerLazySingleton<SearchQuranUseCase>(
     () => SearchQuranUseCase(getIt()),
@@ -928,6 +933,7 @@ void _registerQuran() {
     ),
   );
   getIt.registerFactory<AyahDetailsCubit>(() => AyahDetailsCubit(getIt()));
+  getIt.registerFactory<FlowingPageCubit>(() => FlowingPageCubit(getIt()));
   getIt.registerFactory<QuranSearchCubit>(() => QuranSearchCubit(getIt()));
 }
 

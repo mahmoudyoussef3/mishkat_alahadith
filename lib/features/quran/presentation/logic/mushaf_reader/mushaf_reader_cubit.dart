@@ -138,6 +138,12 @@ class MushafReaderCubit extends Cubit<MushafReaderState> {
   Future<bool> setThemeMode(MushafThemeMode mode) =>
       _updateSettings((s) => s.copyWith(themeMode: mode));
 
+  Future<bool> setLayoutMode(MushafLayoutMode mode) =>
+      _updateSettings((s) => s.copyWith(layoutMode: mode));
+
+  Future<bool> setFontScale(QuranFontScale scale) =>
+      _updateSettings((s) => s.copyWith(fontScale: scale));
+
   /// Applies the change at once and persists it; `false` if it could not be
   /// saved for next time.
   Future<bool> _updateSettings(

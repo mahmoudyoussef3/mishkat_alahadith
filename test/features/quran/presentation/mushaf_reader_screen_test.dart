@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette_scope.dart';
@@ -10,6 +11,8 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/tajweed_info.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_ayah_details_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_flowing_page_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_mushaf_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_page_info_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_page_tajweed_counts_use_case.dart';
@@ -18,8 +21,12 @@ import 'package:mishkat_almasabih/features/quran/domain/usecases/get_surahs_use_
 import 'package:mishkat_almasabih/features/quran/domain/usecases/save_last_read_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/save_mushaf_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/toggle_quran_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/flowing_page/flowing_page_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_reader_screen.dart';
+import 'package:mushaf_text/mushaf_text.dart';
 
 import '../quran_fakes.dart';
 
@@ -325,6 +332,136 @@ void main() {
         (cubit.state as MushafReaderReady).settings.tajweedEnabled,
         isTrue,
       );
+      await cubit.close();
+    });
+  });
+
+  group('text size', () {
+    setUp(() {
+      final quran = FakeQuranRepo();
+      getIt
+        ..registerFactory<FlowingPageCubit>(
+          () => FlowingPageCubit(GetFlowingPageUseCase(quran)),
+        )
+        ..registerFactory<AyahDetailsCubit>(
+          () => AyahDetailsCubit(GetAyahDetailsUseCase(quran)),
+        );
+    });
+    tearDown(() => getIt.reset());
+
+    const flowing = MushafReaderSettings(
+      layoutMode: MushafLayoutMode.flowing,
+      fontScale: QuranFontScale.large,
+    );
+
+    Finder flowingText(String containing) => find.byWidgetPredicate(
+      (w) => w is RichText && w.text.toPlainText().contains(containing),
+    );
+
+    Future<void> openSettings(WidgetTester tester) async {
+      await tester.tap(find.byTooltip('إعدادات القراءة'));
+      await tester.pumpAndSettle();
+    }
+
+    /// Scrolls the settings sheet, which builds its rows lazily, to [finder].
+    Future<void> scrollSettingsTo(WidgetTester tester, Finder finder) =>
+        tester.scrollUntilVisible(
+          finder,
+          150,
+          scrollable:
+              find
+                  .ancestor(
+                    of: find.text('لون الصفحة'),
+                    matching: find.byType(Scrollable),
+                  )
+                  .first,
+        );
+
+    testWidgets('the flowing layout shows the page as running text', (
+      tester,
+    ) async {
+      final cubit = await _pumpReader(tester, settings: flowing);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(MushafPage), findsNothing);
+      expect(find.text('سُورَةُ الفاتحة'), findsOneWidget);
+      expect(flowingText(hamd.text), findsOneWidget);
+      await cubit.close();
+    });
+
+    testWidgets('the flowing layout draws the ayahs at the chosen size', (
+      tester,
+    ) async {
+      final cubit = await _pumpReader(tester, settings: flowing);
+      await tester.pump();
+
+      final text = tester.widget<RichText>(flowingText(hamd.text));
+      expect(text.text.style?.fontSize, quranFontSize(QuranFontScale.large));
+      await cubit.close();
+    });
+
+    testWidgets('tapping a word of the flowing text selects its ayah', (
+      tester,
+    ) async {
+      final cubit = await _pumpReader(tester, settings: flowing);
+      await tester.pump();
+
+      await tester.tap(flowingText(hamd.text));
+      await tester.pump();
+
+      expect(
+        (cubit.state as MushafReaderReady).selectedAyahId,
+        anyOf(basmalah.id, hamd.id),
+      );
+      await tester.pumpAndSettle();
+      await cubit.close();
+    });
+
+    testWidgets('the settings switch the reader to flowing text', (
+      tester,
+    ) async {
+      final cubit = await _pumpReader(tester);
+      await openSettings(tester);
+
+      await tester.tap(find.text('نص متدفق'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(
+        (cubit.state as MushafReaderReady).settings.layoutMode,
+        MushafLayoutMode.flowing,
+      );
+      expect(find.byType(MushafPage), findsNothing);
+      await cubit.close();
+    });
+
+    testWidgets('the larger button steps the size up', (tester) async {
+      final cubit = await _pumpReader(tester, settings: flowing);
+      await openSettings(tester);
+      final larger = find.byTooltip('تكبير الخط');
+      await scrollSettingsTo(tester, larger);
+      await tester.pumpAndSettle();
+
+      await tester.tap(larger);
+      await tester.pumpAndSettle();
+
+      expect(
+        (cubit.state as MushafReaderReady).settings.fontScale,
+        QuranFontScale.extraLarge,
+      );
+      await cubit.close();
+    });
+
+    testWidgets('the printed page explains where the size applies', (
+      tester,
+    ) async {
+      final cubit = await _pumpReader(tester);
+      await openSettings(tester);
+      final hint = find.textContaining('فيُطبَّق الحجم على النص المتدفق');
+      await scrollSettingsTo(tester, hint);
+
+      expect(hint, findsOneWidget);
       await cubit.close();
     });
   });

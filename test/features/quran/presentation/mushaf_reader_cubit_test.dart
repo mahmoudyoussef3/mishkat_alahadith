@@ -331,6 +331,57 @@ void main() {
       await cubit.close();
     });
 
+    test('switching to the flowing layout saves it without recounting', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: true);
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 1);
+      final before = quran.countRequests.length;
+
+      final saved = await cubit.setLayoutMode(MushafLayoutMode.flowing);
+
+      expect(saved, isTrue);
+      expect(_ready(cubit).settings.layoutMode, MushafLayoutMode.flowing);
+      expect(reading.settings.layoutMode, MushafLayoutMode.flowing);
+      expect(quran.countRequests, hasLength(before));
+      await cubit.close();
+    });
+
+    test('changing the font size saves it', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 1);
+
+      final saved = await cubit.setFontScale(QuranFontScale.extraLarge);
+
+      expect(saved, isTrue);
+      expect(_ready(cubit).settings.fontScale, QuranFontScale.extraLarge);
+      expect(reading.settings.fontScale, QuranFontScale.extraLarge);
+      await cubit.close();
+    });
+
+    test('changing the font size keeps the rule being followed', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: true);
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 1);
+      await cubit.followRule('ikhfa');
+      cubit.focusNext();
+
+      await cubit.setFontScale(QuranFontScale.large);
+
+      expect(_ready(cubit).focusRuleKey, 'ikhfa');
+      expect(_ready(cubit).focusIndex, 1);
+      await cubit.close();
+    });
+
+    test('choosing the size already in use saves nothing', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 1);
+
+      await cubit.setFontScale(QuranFontScale.medium);
+
+      expect(reading.savedSettings, isEmpty);
+      await cubit.close();
+    });
+
     test('a setting that cannot be saved still applies now', () async {
       reading.settings = const MushafReaderSettings(tajweedEnabled: false);
       final cubit = _cubit(quran, reading);

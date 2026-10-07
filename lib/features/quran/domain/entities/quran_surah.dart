@@ -19,6 +19,11 @@ class QuranSurah {
 
   bool containsPage(int page) => page >= startPage && page <= endPage;
 
+  /// Whether the basmala is printed above the surah's first ayah: every surah
+  /// but At-Tawbah, which has none, and Al-Fātiḥah, whose basmala is its
+  /// first ayah.
+  bool get printsBasmala => number != 1 && number != 9;
+
   /// The surah a page opens with — the one its header names in print.
   ///
   /// A page shared by two surahs belongs to the one that is still running at

@@ -94,6 +94,12 @@ class QuranReadingRepoImpl implements QuranReadingRepo {
           themeMode:
               MushafThemeMode.values.asNameMap()[stored.themeMode] ??
               defaults.themeMode,
+          layoutMode:
+              MushafLayoutMode.values.asNameMap()[stored.layoutMode] ??
+              defaults.layoutMode,
+          fontScale:
+              QuranFontScale.values.asNameMap()[stored.fontScale] ??
+              defaults.fontScale,
         ),
       );
     } catch (_) {
@@ -108,6 +114,8 @@ class QuranReadingRepoImpl implements QuranReadingRepo {
         tajweed: settings.tajweedEnabled,
         naturalMadd: settings.naturalMaddEnabled,
         themeMode: settings.themeMode.name,
+        layoutMode: settings.layoutMode.name,
+        fontScale: settings.fontScale.name,
       );
       return const ApiResult.success(null);
     } catch (_) {

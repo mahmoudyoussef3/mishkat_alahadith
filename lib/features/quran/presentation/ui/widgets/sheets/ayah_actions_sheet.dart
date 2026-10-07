@@ -11,6 +11,7 @@ import 'package:mishkat_almasabih/core/widgets/app_badge.dart';
 import 'package:mishkat_almasabih/core/widgets/dashed_divider.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/ayah_details.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
@@ -58,6 +59,10 @@ Future<AyahSheetIntent?> showAyahActionsSheet(
   final tajweed = state is MushafReaderReady && state.settings.tajweedEnabled;
   final naturalMadd =
       state is MushafReaderReady && state.settings.naturalMaddEnabled;
+  final fontScale =
+      state is MushafReaderReady
+          ? state.settings.fontScale
+          : QuranFontScale.medium;
 
   return showQuranSheet<AyahSheetIntent>(
     context: context,
@@ -102,6 +107,7 @@ Future<AyahSheetIntent?> showAyahActionsSheet(
                     controller: controller,
                     details: details,
                     tajweedEnabled: tajweed,
+                    fontScale: fontScale,
                   ),
                 },
           ),
@@ -113,11 +119,13 @@ class _AyahDetailsBody extends StatelessWidget {
   final ScrollController controller;
   final AyahDetails details;
   final bool tajweedEnabled;
+  final QuranFontScale fontScale;
 
   const _AyahDetailsBody({
     required this.controller,
     required this.details,
     required this.tajweedEnabled,
+    required this.fontScale,
   });
 
   @override
@@ -233,7 +241,7 @@ class _AyahDetailsBody extends StatelessWidget {
     final text = details.ayah.text;
     final base = QuranTextStyles.mushafText(
       color: palette.primaryText,
-      size: 24.sp,
+      size: quranFontSize(fontScale),
     );
     if (!tajweedEnabled) return TextSpan(text: text, style: base);
     final ruleColors = MushafPalette.of(palette);
