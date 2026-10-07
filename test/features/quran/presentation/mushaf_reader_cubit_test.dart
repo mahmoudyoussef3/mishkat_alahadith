@@ -128,6 +128,16 @@ void main() {
       await cubit.close();
     });
 
+    test('counts the page rules on opening with the defaults', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 1);
+
+      expect(_ready(cubit).settings.tajweedEnabled, isTrue);
+      expect(_ready(cubit).ruleCounts, _pageOneCounts);
+      await cubit.close();
+    });
+
     test('fails when the surah table cannot be loaded', () async {
       quran.failSurahs = true;
       final cubit = _cubit(quran, reading);
@@ -192,8 +202,100 @@ void main() {
     });
   });
 
+  group('surah being read', () {
+    test('is the surah the opening page opens with', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 30);
+
+      expect(_ready(cubit).readingSurah, baqarah);
+      expect(_ready(cubit).surahPages, (first: 2, last: 49));
+      await cubit.close();
+    });
+
+    test('is the surah opened, on a page another surah opens', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 106, surahNumber: 5);
+
+      expect(_ready(cubit).readingSurah, maidah);
+      expect(_ready(cubit).surahPages, (first: 106, last: 127));
+      await cubit.close();
+    });
+
+    test('moves on to the next surah once its last page is turned', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 106);
+
+      cubit.onPageChanged(107);
+
+      expect(_ready(cubit).readingSurah, maidah);
+      await cubit.close();
+    });
+
+    test('stays while its own pages are turned back', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 107);
+
+      cubit.onPageChanged(106);
+
+      expect(_ready(cubit).readingSurah, maidah);
+      await cubit.close();
+    });
+
+    test('readSurah reads the surah picked once its page is turned to', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 30);
+      cubit.onPageChanged(106);
+
+      cubit.readSurah(5);
+
+      expect(_ready(cubit).readingSurah, maidah);
+      await cubit.close();
+    });
+
+    test('readSurah ignores a surah that is not on the page', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 30);
+
+      cubit.readSurah(5);
+
+      expect(_ready(cubit).readingSurah, baqarah);
+      await cubit.close();
+    });
+
+    test('is the surah the header names', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 106, surahNumber: 5);
+
+      expect(_ready(cubit).headerSurah, maidah);
+      await cubit.close();
+    });
+
+    test('names the page bookmark', () async {
+      final cubit = _cubit(quran, reading);
+      await cubit.init(initialPage: 106, surahNumber: 5);
+
+      await cubit.togglePageBookmark();
+
+      expect(reading.bookmarks.single.surahNumber, 5);
+      await cubit.close();
+    });
+
+    test('spans the whole mushaf when no surah covers the page', () async {
+      final cubit = _cubit(quran, reading);
+
+      await cubit.init(initialPage: 300);
+
+      expect(_ready(cubit).surahPages, (first: 1, last: 604));
+      await cubit.close();
+    });
+  });
+
   group('settings', () {
     test('turning tajweed on saves it and loads the page rules', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: false);
       final cubit = _cubit(quran, reading);
       await cubit.init(initialPage: 1);
 
@@ -230,6 +332,7 @@ void main() {
     });
 
     test('a setting that cannot be saved still applies now', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: false);
       final cubit = _cubit(quran, reading);
       await cubit.init(initialPage: 1);
       reading.failWrites = true;
@@ -244,6 +347,7 @@ void main() {
 
   group('following a rule', () {
     test('switches the colouring on and frames the first occurrence', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: false);
       final cubit = _cubit(quran, reading);
       await cubit.init(initialPage: 1);
 

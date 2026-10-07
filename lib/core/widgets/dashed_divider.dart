@@ -3,7 +3,10 @@ import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 
 /// One-pixel dashed rule that separates a card's body from its footer.
 class DashedDivider extends StatelessWidget {
-  const DashedDivider({super.key});
+  const DashedDivider({super.key, this.color});
+
+  /// Defaults to the palette's medium gray.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +14,9 @@ class DashedDivider extends StatelessWidget {
       height: 1,
       width: double.infinity,
       child: CustomPaint(
-        painter: _DashPainter(AppPaletteOverride.of(context).mediumGray),
+        painter: _DashPainter(
+          color ?? AppPaletteOverride.of(context).mediumGray,
+        ),
       ),
     );
   }

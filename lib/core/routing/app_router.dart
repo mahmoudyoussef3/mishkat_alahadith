@@ -451,8 +451,12 @@ class AppRouter {
                         getIt<MushafReaderCubit>()..init(
                           initialPage: args.initialPage,
                           highlightAyahId: args.highlightAyahId,
+                          surahNumber: args.surahNumber,
                         ),
-                child: MushafReaderScreen(initialPage: args.initialPage),
+                child: MushafReaderScreen(
+                  initialPage: args.initialPage,
+                  surahNumber: args.surahNumber,
+                ),
               ),
         );
       case Routes.quranSearch:

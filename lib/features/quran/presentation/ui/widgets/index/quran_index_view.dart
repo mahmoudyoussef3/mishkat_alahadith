@@ -25,7 +25,8 @@ enum QuranIndexTab {
   final String label;
 }
 
-typedef OpenQuranPage = void Function(int page, {int? ayahId});
+typedef OpenQuranPage =
+    void Function(int page, {int? ayahId, int? surahNumber});
 
 /// The surah index, the juz index and the bookmarks behind one switch.
 ///
@@ -162,7 +163,11 @@ class _SurahList extends StatelessWidget {
                 isFirst: i == 0,
                 isLast: i == surahs.length - 1,
                 isCurrent: page != null && surah.containsPage(page),
-                onTap: () => onOpenPage(surah.startPage),
+                onTap:
+                    () => onOpenPage(
+                      surah.startPage,
+                      surahNumber: surah.number,
+                    ),
               );
             },
           ),
@@ -260,7 +265,12 @@ class _BookmarkList extends StatelessWidget {
                 bookmark: bookmark,
                 isFirst: i == 0,
                 isLast: i == bookmarks.length - 1,
-                onTap: () => onOpenPage(bookmark.page, ayahId: bookmark.ayahId),
+                onTap:
+                    () => onOpenPage(
+                      bookmark.page,
+                      ayahId: bookmark.ayahId,
+                      surahNumber: bookmark.surahNumber,
+                    ),
                 onDelete: () => _delete(context, bookmark),
               );
             },

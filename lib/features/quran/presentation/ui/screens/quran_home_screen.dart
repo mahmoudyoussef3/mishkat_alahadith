@@ -25,7 +25,13 @@ class QuranHomeScreen extends StatelessWidget {
         body: SafeArea(
           bottom: false,
           child: QuranIndexView(
-            onOpenPage: (page, {ayahId}) => _openReader(context, page, ayahId),
+            onOpenPage:
+                (page, {ayahId, surahNumber}) => _openReader(
+                  context,
+                  page,
+                  ayahId: ayahId,
+                  surahNumber: surahNumber,
+                ),
             leadingSlivers: [
               SliverToBoxAdapter(
                 child: ScreenTitleHeader(
@@ -54,7 +60,7 @@ class QuranHomeScreen extends StatelessWidget {
                 padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 4.h),
                 sliver: SliverToBoxAdapter(
                   child: ContinueReadingCard(
-                    onOpenPage: (page) => _openReader(context, page, null),
+                    onOpenPage: (page) => _openReader(context, page),
                   ),
                 ),
               ),
@@ -65,12 +71,20 @@ class QuranHomeScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _openReader(BuildContext context, int page, int? ayahId) =>
-      _openAndRefresh(
-        context,
-        Routes.mushafReader,
-        arguments: MushafReaderArgs(initialPage: page, highlightAyahId: ayahId),
-      );
+  Future<void> _openReader(
+    BuildContext context,
+    int page, {
+    int? ayahId,
+    int? surahNumber,
+  }) => _openAndRefresh(
+    context,
+    Routes.mushafReader,
+    arguments: MushafReaderArgs(
+      initialPage: page,
+      highlightAyahId: ayahId,
+      surahNumber: surahNumber,
+    ),
+  );
 
   /// Reading changes the last page and the bookmarks, so they are re-read on
   /// the way back.

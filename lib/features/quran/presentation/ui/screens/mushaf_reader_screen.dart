@@ -9,7 +9,6 @@ import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_metrics.dart';
-import 'package:mishkat_almasabih/features/quran/domain/entities/quran_surah.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/go_to_page_dialog.dart';
@@ -32,7 +31,14 @@ import 'package:share_plus/share_plus.dart';
 class MushafReaderScreen extends StatelessWidget {
   final int initialPage;
 
-  const MushafReaderScreen({super.key, required this.initialPage});
+  /// The surah opened, if any, kept when the reader retries a failed load.
+  final int? surahNumber;
+
+  const MushafReaderScreen({
+    super.key,
+    required this.initialPage,
+    this.surahNumber,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,10 +70,10 @@ class MushafReaderScreen extends StatelessWidget {
                 MushafReaderFailure(:final message) => _ReaderFailure(
                   message: message,
                   initialPage: initialPage,
+                  surahNumber: surahNumber,
                 ),
                 MushafReaderReady() => _MushafReaderView(
                   initialPage: state.page,
-                  surahs: state.surahs,
                   appBrightness: appBrightness,
                 ),
               },
@@ -81,14 +87,12 @@ class MushafReaderScreen extends StatelessWidget {
 
 class _MushafReaderView extends StatefulWidget {
   final int initialPage;
-  final List<QuranSurah> surahs;
 
   /// The app's own brightness, which automatic paper follows.
   final Brightness appBrightness;
 
   const _MushafReaderView({
     required this.initialPage,
-    required this.surahs,
     required this.appBrightness,
   });
 
@@ -121,7 +125,6 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
     return Scaffold(
       backgroundColor: colors.paper,
       bottomNavigationBar: MushafReaderBottomBar(
-        surahs: widget.surahs,
         onJumpToPage: _jumpToPage,
         onOpenIndex: _openIndex,
         onGoToPage: _goToPage,
@@ -132,7 +135,6 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
         child: Column(
           children: [
             MushafReaderHeader(
-              onToggleTajweed: _toggleTajweed,
               onTogglePageBookmark: _togglePageBookmark,
               onOpenSettings: _openSettings,
             ),
@@ -235,20 +237,6 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
 
   // ── header ──────────────────────────────────────────────────────────────
 
-  Future<void> _toggleTajweed() async {
-    final state = _cubit.state;
-    if (state is! MushafReaderReady) return;
-    final saved = await _cubit.setTajweedEnabled(
-      !state.settings.tajweedEnabled,
-    );
-    if (!saved && mounted) {
-      showErrorSnackbar(
-        context,
-        'تعذر حفظ الإعداد، سيُطبَّق في هذه الجلسة فقط',
-      );
-    }
-  }
-
   Future<void> _togglePageBookmark() async {
     final result = await _cubit.togglePageBookmark();
     if (mounted) _showBookmarkResult(result, ayah: false);
@@ -285,6 +273,9 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
     await cubit.reloadBookmarks();
     if (target == null) return;
     _jumpToPage(target.page);
+    if (target.surahNumber case final surahNumber?) {
+      cubit.readSurah(surahNumber);
+    }
     final ayahId = target.ayahId;
     if (ayahId != null) cubit.selectAyah(ayahId);
   }
@@ -338,8 +329,13 @@ class _ReaderLoading extends StatelessWidget {
 class _ReaderFailure extends StatelessWidget {
   final String message;
   final int initialPage;
+  final int? surahNumber;
 
-  const _ReaderFailure({required this.message, required this.initialPage});
+  const _ReaderFailure({
+    required this.message,
+    required this.initialPage,
+    required this.surahNumber,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -362,6 +358,7 @@ class _ReaderFailure extends StatelessWidget {
                     onAction:
                         () => context.read<MushafReaderCubit>().init(
                           initialPage: initialPage,
+                          surahNumber: surahNumber,
                         ),
                   ),
                 ),

@@ -23,20 +23,23 @@ import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_
 
 import '../quran_fakes.dart';
 
-/// The reader on page 1, in a light app, with [settings] saved.
+/// The reader on [page], in a light app, with [settings] saved.
 ///
 /// Only the reader's chrome is checked: the page itself loads the mushaf's
 /// text from the package's assets, which these tests leave pending.
 Future<MushafReaderCubit> _pumpReader(
   WidgetTester tester, {
+  int page = 1,
+  int? surahNumber,
   MushafReaderSettings settings = MushafReaderSettings.defaults,
   Map<int, List<TajweedRuleCount>> pageCounts = const {},
+  FakeQuranRepo? quranRepo,
 }) async {
   tester.view.physicalSize = const Size(1080, 2340);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
 
-  final quran = FakeQuranRepo(pageCounts: pageCounts);
+  final quran = quranRepo ?? FakeQuranRepo(pageCounts: pageCounts);
   final reading = FakeQuranReadingRepo(settings: settings);
   final cubit = MushafReaderCubit(
     GetMushafSettingsUseCase(reading),
@@ -48,7 +51,7 @@ Future<MushafReaderCubit> _pumpReader(
     ToggleQuranBookmarkUseCase(reading),
     SaveLastReadUseCase(reading),
   );
-  await cubit.init(initialPage: 1);
+  await cubit.init(initialPage: page, surahNumber: surahNumber);
 
   await tester.pumpWidget(
     ScreenUtilInit(
@@ -59,7 +62,10 @@ Future<MushafReaderCubit> _pumpReader(
             home: AppPaletteScope(
               child: BlocProvider.value(
                 value: cubit,
-                child: const MushafReaderScreen(initialPage: 1),
+                child: MushafReaderScreen(
+                  initialPage: page,
+                  surahNumber: surahNumber,
+                ),
               ),
             ),
           ),
@@ -68,6 +74,9 @@ Future<MushafReaderCubit> _pumpReader(
   await tester.pump();
   return cubit;
 }
+
+Slider _pageSlider(WidgetTester tester) =>
+    tester.widget<Slider>(find.byType(Slider));
 
 Color _readerBackground(WidgetTester tester) =>
     tester.widget<Scaffold>(find.byType(Scaffold).first).backgroundColor!;
@@ -81,6 +90,92 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('سورة الفاتحة'), findsOneWidget);
     expect(find.text('الجزء ١ · الصفحة ١'), findsOneWidget);
+    await cubit.close();
+  });
+
+  testWidgets('the header has no tajweed switch', (tester) async {
+    final cubit = await _pumpReader(tester);
+
+    expect(find.byTooltip('تلوين أحكام التجويد'), findsNothing);
+    expect(find.byTooltip('إخفاء ألوان التجويد'), findsNothing);
+    await cubit.close();
+  });
+
+  group('page slider', () {
+    testWidgets('spans only the pages of the open surah', (tester) async {
+      final cubit = await _pumpReader(tester, page: 30);
+
+      final slider = _pageSlider(tester);
+      expect(slider.min, 2);
+      expect(slider.max, 49);
+      expect(slider.value, 30);
+      await cubit.close();
+    });
+
+    testWidgets('spans the surah opened on a page another surah opens', (
+      tester,
+    ) async {
+      final cubit = await _pumpReader(tester, page: 106, surahNumber: 5);
+
+      final slider = _pageSlider(tester);
+      expect(slider.min, 106);
+      expect(slider.max, 127);
+      await cubit.close();
+    });
+
+    testWidgets('dragged to its end, turns to the surah\'s last page', (
+      tester,
+    ) async {
+      final cubit = await _pumpReader(tester, page: 30);
+
+      // Right to left, so the surah's end is on the left.
+      await tester.drag(find.byType(Slider), const Offset(-1000, 0));
+      await tester.pumpAndSettle();
+
+      expect((cubit.state as MushafReaderReady).page, 49);
+      await cubit.close();
+    });
+
+    testWidgets('spans the next surah once the open one is read', (
+      tester,
+    ) async {
+      final cubit = await _pumpReader(tester, page: 106);
+      expect(_pageSlider(tester).max, 106);
+
+      cubit.onPageChanged(107);
+      await tester.pumpAndSettle();
+
+      final slider = _pageSlider(tester);
+      expect(slider.min, 106);
+      expect(slider.max, 127);
+      await cubit.close();
+    });
+
+    testWidgets('is still for a surah on a single page', (
+      tester,
+    ) async {
+      final cubit = await _pumpReader(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(_pageSlider(tester).onChanged, isNull);
+      await cubit.close();
+    });
+  });
+
+  testWidgets('retrying a failed load keeps the surah opened', (tester) async {
+    final quran = FakeQuranRepo(failSurahs: true);
+    final cubit = await _pumpReader(
+      tester,
+      page: 106,
+      surahNumber: 5,
+      quranRepo: quran,
+    );
+    quran.failSurahs = false;
+
+    await tester.tap(find.text('إعادة المحاولة'));
+    await tester.pumpAndSettle();
+
+    expect((cubit.state as MushafReaderReady).readingSurah, maidah);
     await cubit.close();
   });
 
@@ -217,7 +312,10 @@ void main() {
     });
 
     testWidgets('offers to switch the colouring on', (tester) async {
-      final cubit = await _pumpReader(tester);
+      final cubit = await _pumpReader(
+        tester,
+        settings: const MushafReaderSettings(tajweedEnabled: false),
+      );
       await openRules(tester);
 
       await tester.tap(find.text('تلوين أحكام التجويد'));

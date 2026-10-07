@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/helpers/hadith_grade.dart';
 
 @immutable
 class AppPalette {
@@ -72,6 +73,36 @@ class AppPalette {
   /// Drop shadow under book covers, the only shadowed element in the UI.
   final Color coverShadow;
 
+  /// Warm "manuscript" frame around the hadith of the day.
+  final Color featuredBorder;
+
+  /// Inner rule of the hadith of the day's double frame.
+  final Color featuredInnerBorder;
+
+  /// Parchment wash at the top of the hadith of the day, fading into
+  /// [cardBackground].
+  final Color featuredWash;
+
+  /// Soft gold glow under the hadith of the day; clear in dark mode, where
+  /// the frame carries the elevation.
+  final Color featuredGlow;
+
+  /// Gold hairlines beside the ornament on the hadith of the day.
+  final Color ornament;
+
+  /// The ornament glyph ("۞") itself.
+  final Color ornamentInk;
+
+  /// Authentic ("sahih") grade as text or a thin accent; brighter than
+  /// [success] in dark mode so a 4px bar still reads.
+  final Color gradeSahih;
+
+  /// Fill behind [gradeSahih] text.
+  final Color gradeSahihSoft;
+
+  /// Good ("hasan") grade as text or a thin accent.
+  final Color gradeHasan;
+
   const AppPalette._({
     required this.brightness,
     required this.primaryPurple,
@@ -110,9 +141,33 @@ class AppPalette {
     required this.successSoft,
     required this.errorSoft,
     required this.coverShadow,
+    required this.featuredBorder,
+    required this.featuredInnerBorder,
+    required this.featuredWash,
+    required this.featuredGlow,
+    required this.ornament,
+    required this.ornamentInk,
+    required this.gradeSahih,
+    required this.gradeSahihSoft,
+    required this.gradeHasan,
   });
 
   bool get isDark => brightness == Brightness.dark;
+
+  /// Accent for [grade] in hadith lists: the bar beside a hadith and its
+  /// grade label.
+  Color gradeAccent(HadithGrade grade) => switch (grade) {
+    HadithGrade.sahih => gradeSahih,
+    HadithGrade.hasan => gradeHasan,
+    HadithGrade.daif => error,
+  };
+
+  /// Fill behind a [grade] badge, paired with [gradeAccent] text.
+  Color gradeSoft(HadithGrade grade) => switch (grade) {
+    HadithGrade.sahih => gradeSahihSoft,
+    HadithGrade.hasan => goldSoft,
+    HadithGrade.daif => errorSoft,
+  };
 
   /// Warm "paper and ink" palette for long reading sessions: no pure white
   /// surfaces and no pure black text, keeping body text around 13:1 contrast.
@@ -154,6 +209,17 @@ class AppPalette {
     successSoft: Color(0xFFE3EFE7),
     errorSoft: Color(0xFFF7E4E2),
     coverShadow: Color(0x8C24202C),
+    featuredBorder: Color(0xFFE5D9BF),
+    featuredInnerBorder: Color(0xFFEADFC6),
+    featuredWash: Color(0xFFFBF6EA),
+    featuredGlow: Color(0x99A2741C),
+    ornament: Color(0xFFD9C08A),
+    ornamentInk: Color(0xFFA2741C),
+    // The design's #2E7D55 and #A2741C, darkened just enough to meet
+    // WCAG AA as small text.
+    gradeSahih: Color(0xFF2A7350),
+    gradeSahihSoft: Color(0xFFE3EFE7),
+    gradeHasan: Color(0xFF8A6418),
   );
 
   /// Soft night palette: deep charcoal instead of pure black (avoids halation
@@ -196,5 +262,14 @@ class AppPalette {
     successSoft: Color(0xFF1A2620),
     errorSoft: Color(0xFF2B1A19),
     coverShadow: Color(0x99000000),
+    featuredBorder: Color(0xFF3A3123),
+    featuredInnerBorder: Color(0xFF332C20),
+    featuredWash: Color(0xFF241F18),
+    featuredGlow: Color(0x00000000),
+    ornament: Color(0xFF8C6F3A),
+    ornamentInk: Color(0xFFE8C77E),
+    gradeSahih: Color(0xFF7FD3A2),
+    gradeSahihSoft: Color(0xFF17301F),
+    gradeHasan: Color(0xFFE8C77E),
   );
 }

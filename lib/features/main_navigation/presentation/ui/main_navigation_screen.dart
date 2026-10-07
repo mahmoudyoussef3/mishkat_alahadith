@@ -7,6 +7,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/miskat_drawer.dart';
 import 'package:mishkat_almasabih/core/widgets/screen_title_header.dart';
 import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
+import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/delete_bookmark/delete_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
@@ -162,6 +163,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           create: (_) => getIt<RandomAhadithCubit>()..emitRandomStats(),
         ),
         BlocProvider(create: (_) => getIt<PrayerTimesCubit>()..init()),
+        // Saves the hadith of the day from its card.
+        BlocProvider(create: (_) => getIt<AddCubitCubit>()),
       ],
       child: const HomeScreen(),
     ),

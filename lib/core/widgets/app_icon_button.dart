@@ -15,6 +15,9 @@ enum AppIconButtonVariant {
 
   /// Translucent white, for buttons drawn over dark imagery.
   glass,
+
+  /// No fill or border, for quiet actions in a card's footer.
+  ghost,
 }
 
 /// Rounded-square icon button used in headers, toolbars and cards.
@@ -62,6 +65,11 @@ class AppIconButton extends StatelessWidget {
         ColorsManager.white.withValues(alpha: 0.14),
         ColorsManager.white,
         ColorsManager.white.withValues(alpha: 0.22),
+      ),
+      AppIconButtonVariant.ghost => (
+        Colors.transparent,
+        palette.secondaryText,
+        Colors.transparent,
       ),
     };
     final dimension = size ?? 42.r;

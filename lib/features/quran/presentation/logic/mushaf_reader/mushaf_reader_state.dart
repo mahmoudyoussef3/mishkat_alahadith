@@ -17,6 +17,11 @@ final class MushafReaderReady extends MushafReaderState {
   final List<QuranSurah> surahs;
   final List<QuranBookmark> bookmarks;
 
+  /// The surah being read, which the page slider spans: the one opened, kept
+  /// while its pages are turned, then the surah the reader turns into. Null
+  /// only when no surah covers the page.
+  final QuranSurah? readingSurah;
+
   /// Null until the current page's details have loaded.
   final QuranPageInfo? pageInfo;
 
@@ -39,6 +44,7 @@ final class MushafReaderReady extends MushafReaderState {
     required this.settings,
     required this.surahs,
     required this.bookmarks,
+    this.readingSurah,
     this.pageInfo,
     this.ruleCounts = const [],
     this.ruleCountsFailed = false,
@@ -47,9 +53,21 @@ final class MushafReaderReady extends MushafReaderState {
     this.selectedAyahId,
   });
 
-  /// The surah the header names, available even before [pageInfo] loads.
+  /// The surah the header names: the one being read, or else the one the
+  /// page opens with, available even before [pageInfo] loads.
   QuranSurah? get headerSurah =>
-      pageInfo?.openingSurah ?? QuranSurah.openingAt(surahs, page);
+      readingSurah ??
+      pageInfo?.openingSurah ??
+      QuranSurah.openingAt(surahs, page);
+
+  /// The pages of [readingSurah], which the page slider scrubs, or the whole
+  /// mushaf when no surah covers the page.
+  ({int first, int last}) get surahPages {
+    final surah = readingSurah;
+    return surah == null
+        ? (first: QuranMetrics.firstPage, last: QuranMetrics.pageCount)
+        : (first: surah.startPage, last: surah.endPage);
+  }
 
   bool get isPageBookmarked =>
       bookmarks.any((b) => b.isPageBookmark && b.page == page);
@@ -71,6 +89,7 @@ final class MushafReaderReady extends MushafReaderState {
     int? page,
     MushafReaderSettings? settings,
     List<QuranBookmark>? bookmarks,
+    QuranSurah? Function()? readingSurah,
     QuranPageInfo? Function()? pageInfo,
     List<TajweedRuleCount>? ruleCounts,
     bool? ruleCountsFailed,
@@ -83,6 +102,7 @@ final class MushafReaderReady extends MushafReaderState {
       settings: settings ?? this.settings,
       surahs: surahs,
       bookmarks: bookmarks ?? this.bookmarks,
+      readingSurah: readingSurah != null ? readingSurah() : this.readingSurah,
       pageInfo: pageInfo != null ? pageInfo() : this.pageInfo,
       ruleCounts: ruleCounts ?? this.ruleCounts,
       ruleCountsFailed: ruleCountsFailed ?? this.ruleCountsFailed,

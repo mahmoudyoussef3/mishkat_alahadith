@@ -10,6 +10,7 @@ enum MushafThemeMode {
 }
 
 class MushafReaderSettings {
+  /// On by default; the reading settings can still switch it off.
   final bool tajweedEnabled;
 
   /// The natural madd is by far the most frequent rule, so colouring it tints
@@ -18,7 +19,7 @@ class MushafReaderSettings {
   final MushafThemeMode themeMode;
 
   const MushafReaderSettings({
-    this.tajweedEnabled = false,
+    this.tajweedEnabled = true,
     this.naturalMaddEnabled = false,
     this.themeMode = MushafThemeMode.system,
   });

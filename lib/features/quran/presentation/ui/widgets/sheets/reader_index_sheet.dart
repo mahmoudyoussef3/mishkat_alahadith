@@ -6,7 +6,7 @@ import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/quran_sheet.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/index/quran_index_view.dart';
 
-typedef QuranTarget = ({int page, int? ayahId});
+typedef QuranTarget = ({int page, int? ayahId, int? surahNumber});
 
 /// The surah, juz and bookmark index over the mushaf, with the surah and juz
 /// being read marked. Resolves to the place the reader picked.
@@ -41,9 +41,9 @@ Future<QuranTarget?> showReaderIndexSheet(
               ),
             ],
             onOpenPage:
-                (page, {ayahId}) => Navigator.of(
+                (page, {ayahId, surahNumber}) => Navigator.of(
                   sheetContext,
-                ).pop((page: page, ayahId: ayahId)),
+                ).pop((page: page, ayahId: ayahId, surahNumber: surahNumber)),
           ),
         ),
   );

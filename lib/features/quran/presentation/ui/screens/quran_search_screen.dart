@@ -240,6 +240,7 @@ class _SearchResults extends StatelessWidget {
               arguments: MushafReaderArgs(
                 initialPage: hit.ayah.page,
                 highlightAyahId: hit.ayah.id,
+                surahNumber: hit.ayah.surahNumber,
               ),
             );
           },

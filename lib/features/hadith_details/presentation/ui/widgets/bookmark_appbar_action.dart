@@ -22,6 +22,10 @@ class BookmarkAppBarAction extends StatelessWidget {
   /// hadith; a random one is used when this is null too.
   final String? bookmarkId;
 
+  final AppIconButtonVariant variant;
+  final IconData icon;
+  final double? size;
+
   const BookmarkAppBarAction({
     super.key,
     required this.bookName,
@@ -30,6 +34,9 @@ class BookmarkAppBarAction extends StatelessWidget {
     required this.hadithNumber,
     required this.hadithText,
     this.bookmarkId,
+    this.variant = AppIconButtonVariant.tonal,
+    this.icon = Icons.bookmark_rounded,
+    this.size,
   });
 
   Future<void> _save(BuildContext context) async {
@@ -70,8 +77,9 @@ class BookmarkAppBarAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppIconButton(
       tooltip: 'حفظ الحديث',
-      icon: Icons.bookmark_rounded,
-      variant: AppIconButtonVariant.tonal,
+      icon: icon,
+      variant: variant,
+      size: size,
       onPressed: () => _save(context),
     );
   }

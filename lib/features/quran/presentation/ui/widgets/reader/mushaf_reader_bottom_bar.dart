@@ -5,14 +5,12 @@ import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_metrics.dart';
-import 'package:mishkat_almasabih/features/quran/domain/entities/quran_surah.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mushaf_text/mushaf_text.dart' show toArabicNumerals;
 
-/// Index, page scrubber, page number and the page's rules — the ways to move
-/// around the mushaf, kept below the page so the page keeps its height.
+/// Index, the surah's page scrubber, page number and the page's rules — the
+/// ways to move around the mushaf, kept below the page so it keeps its height.
 class MushafReaderBottomBar extends StatelessWidget {
-  final List<QuranSurah> surahs;
   final ValueChanged<int> onJumpToPage;
   final VoidCallback onOpenIndex;
   final VoidCallback onGoToPage;
@@ -20,7 +18,6 @@ class MushafReaderBottomBar extends StatelessWidget {
 
   const MushafReaderBottomBar({
     super.key,
-    required this.surahs,
     required this.onJumpToPage,
     required this.onOpenIndex,
     required this.onGoToPage,
@@ -46,9 +43,7 @@ class MushafReaderBottomBar extends StatelessWidget {
                 icon: Icons.menu_book_rounded,
                 onPressed: onOpenIndex,
               ),
-              Expanded(
-                child: _PageSlider(surahs: surahs, onJumpToPage: onJumpToPage),
-              ),
+              Expanded(child: _PageSlider(onJumpToPage: onJumpToPage)),
               _PageChip(onTap: onGoToPage),
               SizedBox(width: 8.w),
               AppIconButton(
@@ -64,13 +59,13 @@ class MushafReaderBottomBar extends StatelessWidget {
   }
 }
 
-/// Scrubs through all 604 pages, naming the surah under the thumb, and only
-/// turns the page when the thumb is let go.
+/// Scrubs through the pages of the surah being read, and only turns the page
+/// when the thumb is let go. Once the reader turns past the surah's last
+/// page, the slider spans the next surah.
 class _PageSlider extends StatefulWidget {
-  final List<QuranSurah> surahs;
   final ValueChanged<int> onJumpToPage;
 
-  const _PageSlider({required this.surahs, required this.onJumpToPage});
+  const _PageSlider({required this.onJumpToPage});
 
   @override
   State<_PageSlider> createState() => _PageSliderState();
@@ -78,12 +73,6 @@ class _PageSlider extends StatefulWidget {
 
 class _PageSliderState extends State<_PageSlider> {
   double? _dragValue;
-
-  String _label(int page) {
-    final surah = QuranSurah.openingAt(widget.surahs, page);
-    final number = 'ص ${toArabicNumerals(page)}';
-    return surah == null ? number : '$number · ${surah.nameArabic}';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,18 +83,45 @@ class _PageSliderState extends State<_PageSlider> {
             ? (palette.elevatedSurface, palette.primaryText)
             : (palette.primaryText, palette.cardBackground);
 
-    return BlocSelector<MushafReaderCubit, MushafReaderState, int>(
-      selector:
-          (state) =>
-              state is MushafReaderReady ? state.page : QuranMetrics.firstPage,
-      builder: (context, page) {
-        final value = _dragValue ?? page.toDouble();
+    return BlocSelector<
+      MushafReaderCubit,
+      MushafReaderState,
+      ({int page, String? surahName, int first, int last})
+    >(
+      selector: (state) {
+        if (state is! MushafReaderReady) {
+          return (
+            page: QuranMetrics.firstPage,
+            surahName: null,
+            first: QuranMetrics.firstPage,
+            last: QuranMetrics.pageCount,
+          );
+        }
+        final pages = state.surahPages;
+        return (
+          page: state.page,
+          surahName: state.readingSurah?.nameArabic,
+          first: pages.first,
+          last: pages.last,
+        );
+      },
+      builder: (context, slider) {
+        final first = slider.first.toDouble();
+        final last = slider.last.toDouble();
+        final value = (_dragValue ?? slider.page.toDouble()).clamp(first, last);
+        // A surah on a single page has nothing to scrub.
+        final scrubbable = last > first;
+        final number = 'ص ${toArabicNumerals(value.round())}';
+        final surahName = slider.surahName;
         return SliderTheme(
           data: SliderTheme.of(context).copyWith(
             trackHeight: 4,
             activeTrackColor: palette.primaryPurple,
             inactiveTrackColor: palette.mediumGray,
             thumbColor: palette.primaryPurple,
+            disabledActiveTrackColor: palette.mediumGray,
+            disabledInactiveTrackColor: palette.mediumGray,
+            disabledThumbColor: palette.gray,
             overlayColor: palette.primaryPurple.withValues(alpha: 0.12),
             tickMarkShape: SliderTickMarkShape.noTickMark,
             valueIndicatorColor: bubble,
@@ -119,12 +135,13 @@ class _PageSliderState extends State<_PageSlider> {
             height: 44.r,
             child: Slider(
               value: value,
-              min: QuranMetrics.firstPage.toDouble(),
-              max: QuranMetrics.pageCount.toDouble(),
-              divisions: QuranMetrics.pageCount - QuranMetrics.firstPage,
-              label: _label(value.round()),
+              min: first,
+              max: last,
+              divisions: scrubbable ? slider.last - slider.first : null,
+              label: surahName == null ? number : '$number · $surahName',
               semanticFormatterCallback: (v) => 'الصفحة ${v.round()}',
-              onChanged: (v) => setState(() => _dragValue = v),
+              onChanged:
+                  scrubbable ? (v) => setState(() => _dragValue = v) : null,
               onChangeEnd: (v) {
                 setState(() => _dragValue = null);
                 widget.onJumpToPage(v.round());

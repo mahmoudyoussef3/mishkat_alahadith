@@ -30,6 +30,27 @@ class QuranSurah {
     return null;
   }
 
+  /// The surah numbered [number], if the list has it.
+  static QuranSurah? numbered(List<QuranSurah> surahs, int? number) =>
+      number == null
+          ? null
+          : surahs.where((s) => s.number == number).firstOrNull;
+
+  /// The surah being read on [page] by a reader who was in [current]:
+  /// [current] for as long as the page is one of its own, then the surah the
+  /// page opens with.
+  ///
+  /// So a reader who opens Al-Māʾidah on page 106 stays in it, though the
+  /// page opens with An-Nisāʾ.
+  static QuranSurah? readingAt(
+    List<QuranSurah> surahs,
+    int page, {
+    QuranSurah? current,
+  }) =>
+      current != null && current.containsPage(page)
+          ? current
+          : openingAt(surahs, page);
+
   @override
   bool operator ==(Object other) =>
       other is QuranSurah && other.number == number;
