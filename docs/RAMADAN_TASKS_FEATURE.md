@@ -804,7 +804,7 @@ totalCompletions = sum(dailyCompleted(d) for d in 1..todayDay)
 
 | Element | Style |
 |---|---|
-| Fonts | Cairo / Amiri (inherited from app theme) |
+| Fonts | Cairo / Almarai (inherited from app theme) |
 | Primary color | `ColorsManager.primaryPurple` (#7440E9) |
 | Accent color | `ColorsManager.primaryGold` (#FFB300) |
 | Success color | `ColorsManager.success` (#4CAF50) |

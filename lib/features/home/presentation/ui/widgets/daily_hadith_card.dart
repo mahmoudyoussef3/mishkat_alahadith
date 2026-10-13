@@ -311,7 +311,7 @@ class _Ornament extends StatelessWidget {
           Text(
             '۞',
             style: TextStyle(
-              fontFamily: 'Amiri',
+              fontFamily: 'Almarai',
               fontSize: 20.sp,
               height: 1,
               color: palette.ornamentInk,

@@ -10,7 +10,7 @@ class AuthTextStyles {
     fontSize: 24.sp,
     fontWeight: FontWeight.bold,
     color: ColorsManager.primaryText,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle get headerSubtitle => TextStyle(
@@ -18,40 +18,40 @@ class AuthTextStyles {
     fontWeight: FontWeight.w400,
     color: ColorsManager.secondaryText,
     height: 1.4,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle get cardLabel => TextStyle(
     color: ColorsManager.darkGray,
     fontSize: 16.sp,
     fontWeight: FontWeight.w500,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle get termsGray => TextStyles.bodySmall.copyWith(
     color: ColorsManager.gray,
     height: 1.5,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle get termsLink => TextStyles.bodySmall.copyWith(
     color: ColorsManager.darkPurpleText,
     fontWeight: FontWeight.w500,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle get prompt14 => TextStyle(
     fontSize: 14.sp,
     fontWeight: FontWeight.w500,
     color: ColorsManager.secondaryText,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle actionLink14(Color color) => TextStyle(
     fontSize: 14.sp,
     fontWeight: FontWeight.w600,
     color: color,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle get inputHint => TextStyle(
@@ -65,12 +65,12 @@ class AuthTextStyles {
     fontSize: 16.sp,
     fontWeight: FontWeight.w600,
     color: ColorsManager.white,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle validationText({required bool validated}) => TextStyle(
     fontSize: 13.sp,
     color: validated ? ColorsManager.gray : ColorsManager.darkPurpleText,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 }

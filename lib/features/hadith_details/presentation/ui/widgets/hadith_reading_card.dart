@@ -24,7 +24,7 @@ class HadithCardAction {
 }
 
 /// The hadith being read, at full length: number and grade, the chain of
-/// narrators in a quiet tone, the words in large Amiri, and actions.
+/// narrators in a quiet tone, the words in large Almarai, and actions.
 ///
 /// Under a read-aloud host, the word being read aloud is highlighted.
 class HadithReadingCard extends StatelessWidget {

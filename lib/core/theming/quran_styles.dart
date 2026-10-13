@@ -16,10 +16,10 @@ class QuranTextStyles {
     );
   }
 
-  /// A line of the didactic poem a tajweed rule is taken from: Amiri with
+  /// A line of the didactic poem a tajweed rule is taken from: Almarai with
   /// room between lines for its diacritics.
   static TextStyle matnVerse(Color color) => TextStyle(
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
     fontSize: 16.sp,
     height: 2.0,
     color: color,

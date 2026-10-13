@@ -22,7 +22,7 @@ enum ShareAspect {
 }
 
 enum ShareFont {
-  amiri('Amiri', 'أميري', FontWeight.w700),
+  Almarai('Almarai', 'أميري', FontWeight.w700),
   cairo('Cairo', 'القاهرة', FontWeight.w600);
 
   const ShareFont(this.family, this.label, this.weight);
@@ -71,10 +71,20 @@ abstract final class ShareColors {
   static const green = Color(0xFF2E7D55);
   static const muted = Color(0xFF6A6373);
 
-  static const backgrounds = [paper, sand, gold, meadow, lilac, night, ink, forest];
+  static const backgrounds = [
+    paper,
+    sand,
+    gold,
+    meadow,
+    lilac,
+    night,
+    ink,
+    forest,
+  ];
   static const inks = [ink, white, purple, goldInk, green, muted];
 
-  static bool isDark(Color color) => color == night || color == ink || color == forest;
+  static bool isDark(Color color) =>
+      color == night || color == ink || color == forest;
 }
 
 const shareTemplates = [
@@ -126,7 +136,7 @@ class ShareCardStyle {
     this.accent = ShareColors.purple,
     this.mosqueImage = false,
     this.photo,
-    this.font = ShareFont.amiri,
+    this.font = ShareFont.Almarai,
     this.fontSize = 20,
     this.lineHeight = 1.9,
     this.align = TextAlign.right,

@@ -7,7 +7,7 @@ import 'package:mishkat_almasabih/core/widgets/app_badge.dart';
 import 'package:mishkat_almasabih/core/widgets/dashed_divider.dart';
 
 /// Hadith preview card used by every hadith list: topic and grade badges,
-/// up to four lines of the text in Amiri, and the source with a read cue.
+/// up to four lines of the text in Almarai, and the source with a read cue.
 class ChapterAhadithCard extends StatelessWidget {
   const ChapterAhadithCard({
     super.key,

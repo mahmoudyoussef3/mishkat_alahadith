@@ -66,7 +66,7 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                         color: ColorsManager.white,
                         fontSize: 22.sp,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'Amiri',
+                        fontFamily: 'Almarai',
                       ),
                     ),
                     SizedBox(height: 6.h),
@@ -93,7 +93,8 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   title: 'الرئيسية',
                   onTap: () => _openTab(context, MainTab.home),
                 ),
-/*
+
+                /*
                 _buildDrawerItem(
                   context,
                   icon: Icons.auto_stories_rounded,
@@ -104,7 +105,6 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                   },
                 ),
 */
-
                 _buildDrawerItem(
                   context,
                   icon: Icons.bookmark_rounded,

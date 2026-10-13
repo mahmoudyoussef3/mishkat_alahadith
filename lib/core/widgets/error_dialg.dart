@@ -5,7 +5,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 class ErrorState extends StatelessWidget {
   final String error;
   final VoidCallback? onRetry;
-  
+
   const ErrorState({super.key, required this.error, this.onRetry});
 
   @override
@@ -57,7 +57,7 @@ class ErrorState extends StatelessWidget {
               fontSize: 20.sp,
               fontWeight: FontWeight.w800,
               color: ColorsManager.primaryText,
-              fontFamily: 'Amiri',
+              fontFamily: 'Almarai',
             ),
           ),
           SizedBox(height: 12.h),
@@ -66,7 +66,7 @@ class ErrorState extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               color: ColorsManager.secondaryText,
-              fontFamily: 'Amiri',
+              fontFamily: 'Almarai',
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -100,14 +100,14 @@ class ErrorState extends StatelessWidget {
                         color: ColorsManager.purpleText,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'Amiri',
+                        fontFamily: 'Almarai',
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          ]
+          ],
         ],
       ),
     );

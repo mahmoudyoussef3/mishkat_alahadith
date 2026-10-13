@@ -90,6 +90,8 @@ dependencies {
     implementation "com.google.firebase:firebase-crashlytics-ndk"
     implementation "com.google.firebase:firebase-analytics"
     implementation "com.google.firebase:firebase-perf"
+
+    testImplementation "junit:junit:4.13.2"
 }
 
 configurations.configureEach {

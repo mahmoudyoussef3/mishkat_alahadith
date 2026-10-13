@@ -6,7 +6,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 
 /// Typesets an AI answer: section titles, paragraphs, numbered points in a
-/// card, and quoted hadiths in Amiri.
+/// card, and quoted hadiths in Almarai.
 class AnswerView extends StatelessWidget {
   const AnswerView({
     super.key,
@@ -38,8 +38,7 @@ class AnswerView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var i = 0; i < blocks.length; i++) ...[
-          if (i > 0)
-            SizedBox(height: blocks[i] is AnswerHeading ? 16.h : 10.h),
+          if (i > 0) SizedBox(height: blocks[i] is AnswerHeading ? 16.h : 10.h),
           switch (blocks[i]) {
             AnswerHeading(:final text) => _Heading(
               text: text,
@@ -47,7 +46,9 @@ class AnswerView extends StatelessWidget {
             ),
             AnswerParagraph(:final text) => _RichLine(
               text,
-              style: TextStyles.explanationBody.copyWith(fontWeight: FontWeight.w500),
+              style: TextStyles.explanationBody.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
             ),
             AnswerList(:final items, :final ordered) => NumberedListCard(
               items: items,
