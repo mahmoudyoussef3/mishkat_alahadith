@@ -204,7 +204,14 @@ object PrayerNotificationScheduler {
                 contentIntent,
             ).build()
 
-            val customView = RemoteViews(context.packageName, R.layout.notification_prayer).apply {
+            // Separate layouts per state: Android 12+ caps the collapsed custom
+            // view at 48dp, which clipped the old shared layout. Only set ids that
+            // exist in each layout, or SystemUI fails to inflate the notification.
+            val collapsedView = RemoteViews(context.packageName, R.layout.notification_prayer_collapsed).apply {
+                setTextViewText(R.id.notification_title, reminderTitle)
+                setTextViewText(R.id.notification_time, reminderTime)
+            }
+            val expandedView = RemoteViews(context.packageName, R.layout.notification_prayer_expanded).apply {
                 setTextViewText(R.id.notification_title, reminderTitle)
                 setTextViewText(R.id.notification_subtitle, reminderSubtitle)
                 setTextViewText(R.id.notification_time, reminderTime)
@@ -218,8 +225,8 @@ object PrayerNotificationScheduler {
                 // match the brand purple used by the custom card below.
                 .setColor(BRAND_ACCENT_COLOR)
                 .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(customView)
-                .setCustomBigContentView(customView)
+                .setCustomContentView(collapsedView)
+                .setCustomBigContentView(expandedView)
                 .setContentTitle(reminderTitle)
                 .setContentText(reminderContentText)
                 .setWhen(entry.fireAtMillis)

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Expanded prayer notification: headline row (badge, status + prayer name,
+     time pill) followed by the verse on prayer times. Stays well under the
+     256dp expanded-content limit. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/notification_card_background"
+    android:layoutDirection="rtl">
+
+    <!-- Decorative watermark; kept inside the card so it never bleeds past
+         the rounded corners. -->
+    <ImageView
+        android:layout_width="84dp"
+        android:layout_height="84dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/ic_prayer_crescent"
+        android:alpha="0.08"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <FrameLayout
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="@drawable/notification_icon_badge">
+
+                <ImageView
+                    android:id="@+id/notification_icon"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_prayer_crescent"
+                    android:tint="@color/notification_prayer_accent"
+                    android:scaleType="fitCenter"
+                    android:importantForAccessibility="no" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/notification_subtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/notification_prayer_text_secondary"
+                    android:textSize="12sp"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/notification_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/notification_prayer_text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/notification_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/notification_time_pill"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:textColor="@color/notification_prayer_on_accent"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:includeFontPadding="false"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <!-- Divider. FrameLayout because RemoteViews can't inflate a plain View. -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="14dp"
+            android:background="@color/notification_prayer_divider" />
+
+        <!-- Top padding leaves room for stacked diacritics, since font
+             padding is off. No custom fontFamily anywhere in this layout:
+             SystemUI inflates it in a restricted context that ignores
+             @font resources. -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingTop="6dp"
+            android:text="@string/notification_prayer_verse"
+            android:textColor="@color/notification_prayer_text_primary"
+            android:textSize="16sp"
+            android:includeFontPadding="false"
+            android:gravity="start"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/notification_prayer_verse_source"
+            android:textColor="@color/notification_prayer_text_muted"
+            android:textSize="11sp"
+            android:includeFontPadding="false"
+            android:gravity="start"
+            android:maxLines="1" />
+    </LinearLayout>
+</FrameLayout>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Crescent and star glyph for the prayer notification card. White fill so
+     it can be tinted (badge) or faded with alpha (watermark). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M10.99,4 A8.5,8.5 0 1,0 18.96,15.47 A7,7 0 1,1 10.99,4 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M18.6,3.4 L19.22,5.15 L21.07,5.2 L19.6,6.32 L20.13,8.1 L18.6,7.05 L17.07,8.1 L17.6,6.32 L16.13,5.2 L17.98,5.15 Z" />
+</vector>
