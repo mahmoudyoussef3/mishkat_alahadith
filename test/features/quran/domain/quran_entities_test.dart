@@ -90,29 +90,11 @@ void main() {
     expect(larger == MushafReaderSettings.defaults, isFalse);
   });
 
-  group('QuranFontScale', () {
-    test('sizes grow from small to huge, with medium as designed', () {
-      final factors = [for (final scale in QuranFontScale.values) scale.factor];
+  test('font sizes grow from small to huge, with medium as designed', () {
+    final factors = [for (final scale in QuranFontScale.values) scale.factor];
 
-      expect(factors, [...factors]..sort());
-      expect(QuranFontScale.medium.factor, 1.0);
-    });
-
-    test('larger steps up one size', () {
-      expect(QuranFontScale.medium.larger, QuranFontScale.large);
-    });
-
-    test('larger stays at the largest size', () {
-      expect(QuranFontScale.huge.larger, QuranFontScale.huge);
-    });
-
-    test('smaller steps down one size', () {
-      expect(QuranFontScale.medium.smaller, QuranFontScale.small);
-    });
-
-    test('smaller stays at the smallest size', () {
-      expect(QuranFontScale.small.smaller, QuranFontScale.small);
-    });
+    expect(factors, [...factors]..sort());
+    expect(QuranFontScale.medium.factor, 1.0);
   });
 
   group('QuranJuz.containingPage', () {

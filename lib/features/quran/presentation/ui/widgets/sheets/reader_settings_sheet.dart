@@ -6,8 +6,8 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
 import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/core/widgets/app_switch.dart';
+import 'package:mishkat_almasabih/core/widgets/font_size_stepper.dart';
 import 'package:mishkat_almasabih/core/widgets/segmented_tabs.dart';
 import 'package:mishkat_almasabih/core/widgets/settings_group.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
@@ -125,10 +125,17 @@ class _ReaderSettingsContent extends StatelessWidget {
                   colors: MushafPalette.of(palette),
                 ),
                 SizedBox(height: 12.h),
-                _FontScalePicker(
-                  scale: settings.fontScale,
+                FontSizeStepper(
+                  labels: [
+                    for (final scale in QuranFontScale.values)
+                      '${toArabicNumerals((scale.factor * 100).round())}٪',
+                  ],
+                  selectedIndex: settings.fontScale.index,
                   onChanged:
-                      (scale) => _apply(context, cubit.setFontScale(scale)),
+                      (index) => _apply(
+                        context,
+                        cubit.setFontScale(QuranFontScale.values[index]),
+                      ),
                 ),
                 if (settings.layoutMode == MushafLayoutMode.page) ...[
                   SizedBox(height: 8.h),
@@ -262,45 +269,6 @@ class _FontSizePreview extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Smaller and larger buttons around the sizes, each named by its share of
-/// the designed size.
-class _FontScalePicker extends StatelessWidget {
-  final QuranFontScale scale;
-  final ValueChanged<QuranFontScale> onChanged;
-
-  const _FontScalePicker({required this.scale, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        AppIconButton(
-          tooltip: 'تصغير الخط',
-          icon: Icons.text_decrease_rounded,
-          onPressed: scale.isSmallest ? null : () => onChanged(scale.smaller),
-        ),
-        SizedBox(width: 8.w),
-        Expanded(
-          child: SegmentedTabs(
-            labels: [
-              for (final option in QuranFontScale.values)
-                '${toArabicNumerals((option.factor * 100).round())}٪',
-            ],
-            selectedIndex: scale.index,
-            onChanged: (index) => onChanged(QuranFontScale.values[index]),
-          ),
-        ),
-        SizedBox(width: 8.w),
-        AppIconButton(
-          tooltip: 'تكبير الخط',
-          icon: Icons.text_increase_rounded,
-          onPressed: scale.isLargest ? null : () => onChanged(scale.larger),
-        ),
-      ],
     );
   }
 }

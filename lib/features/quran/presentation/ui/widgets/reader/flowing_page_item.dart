@@ -43,41 +43,48 @@ class FlowingPageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The natural madd changes which rules the text carries, so the page is
-    // loaded again when it is switched.
-    return BlocSelector<MushafReaderCubit, MushafReaderState, bool>(
-      selector:
-          (state) =>
-              state is MushafReaderReady && state.settings.naturalMaddEnabled,
-      builder:
-          (context, naturalMadd) => BlocProvider(
-            key: ValueKey(naturalMadd),
-            create:
-                (_) =>
-                    getIt<FlowingPageCubit>()
-                      ..load(page, includeNaturalMadd: naturalMadd),
-            child: _FlowingPageBody(
-              page: page,
-              naturalMadd: naturalMadd,
-              colors: colors,
-              onAyahTap: onAyahTap,
-              onTajweedTap: onTajweedTap,
+    return BlocProvider(
+      create:
+          (context) =>
+              getIt<FlowingPageCubit>()..load(
+                page,
+                includeNaturalMadd: _naturalMadd(
+                  context.read<MushafReaderCubit>().state,
+                ),
+              ),
+      // The natural madd changes which rules the text carries, so the page
+      // is loaded again — in place, keeping where the reader had scrolled to.
+      child: BlocListener<MushafReaderCubit, MushafReaderState>(
+        listenWhen:
+            (previous, current) =>
+                _naturalMadd(previous) != _naturalMadd(current),
+        listener:
+            (context, state) => context.read<FlowingPageCubit>().load(
+              page,
+              includeNaturalMadd: _naturalMadd(state),
             ),
-          ),
+        child: _FlowingPageBody(
+          page: page,
+          colors: colors,
+          onAyahTap: onAyahTap,
+          onTajweedTap: onTajweedTap,
+        ),
+      ),
     );
   }
 }
 
+bool _naturalMadd(MushafReaderState state) =>
+    state is MushafReaderReady && state.settings.naturalMaddEnabled;
+
 class _FlowingPageBody extends StatelessWidget {
   final int page;
-  final bool naturalMadd;
   final MushafColors colors;
   final ValueChanged<int> onAyahTap;
   final ValueChanged<TajweedHit> onTajweedTap;
 
   const _FlowingPageBody({
     required this.page,
-    required this.naturalMadd,
     required this.colors,
     required this.onAyahTap,
     required this.onTajweedTap,
@@ -98,7 +105,9 @@ class _FlowingPageBody extends StatelessWidget {
                   onRetry:
                       () => context.read<FlowingPageCubit>().load(
                         page,
-                        includeNaturalMadd: naturalMadd,
+                        includeNaturalMadd: _naturalMadd(
+                          context.read<MushafReaderCubit>().state,
+                        ),
                       ),
                 ),
               ),
@@ -160,38 +169,42 @@ class _FlowingPageText extends StatelessWidget {
         );
         final focus = _focus(view);
 
-        return SingleChildScrollView(
-          // Room at the end for the focus bar that floats over the page.
-          padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 96.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final section in page.sections) ...[
-                if (section.opensHere)
-                  _SurahTitle(
-                    surah: section.surah,
-                    fontSize: fontSize,
-                    colors: colors,
-                  ),
-                if (section.showsBasmala)
-                  Text(
-                    flowingBasmala,
-                    textAlign: TextAlign.center,
-                    textScaler: TextScaler.noScaling,
+        return Semantics(
+          container: true,
+          label: 'صفحة ${toArabicNumerals(page.page)} من المصحف',
+          child: SingleChildScrollView(
+            // Room at the end for the focus bar that floats over the page.
+            padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 96.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final section in page.sections) ...[
+                  if (section.opensHere)
+                    _SurahTitle(
+                      surah: section.surah,
+                      fontSize: fontSize,
+                      colors: colors,
+                    ),
+                  if (section.showsBasmala)
+                    Text(
+                      flowingBasmala,
+                      textAlign: TextAlign.center,
+                      textScaler: TextScaler.noScaling,
+                      style: style,
+                    ),
+                  _FlowingSectionText(
+                    ayahs: section.ayahs,
                     style: style,
+                    colors: colors,
+                    tajweed: view.tajweed,
+                    selectedAyahId: view.selectedAyahId,
+                    focus: focus,
+                    onAyahTap: onAyahTap,
+                    onTajweedTap: onTajweedTap,
                   ),
-                _FlowingSectionText(
-                  ayahs: section.ayahs,
-                  style: style,
-                  colors: colors,
-                  tajweed: view.tajweed,
-                  selectedAyahId: view.selectedAyahId,
-                  focus: focus,
-                  onAyahTap: onAyahTap,
-                  onTajweedTap: onTajweedTap,
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },
@@ -202,7 +215,7 @@ class _FlowingPageText extends StatelessWidget {
     final key = view.focusRuleKey;
     final rule = key == null ? null : tajweedRuleOf(key);
     if (key == null || rule == null) return null;
-    final word = focusedFlowingWord(page, key, view.focusIndex);
+    final word = page.focusStop(key, view.focusIndex);
     if (word == null) return null;
     return (
       word: word,
@@ -245,12 +258,8 @@ class _FlowingSectionTextState extends State<_FlowingSectionText> {
   void initState() {
     super.initState();
     _run = _buildRun();
-    // Arriving at an ayah from search or a bookmark brings it into view.
-    final selected = widget.selectedAyahId;
-    if (widget.focus != null) {
+    if (widget.focus != null || widget.selectedAyahId != null) {
       _revealAfterLayout();
-    } else if (selected != null) {
-      _revealAfterLayout(ayahId: selected);
     }
   }
 
@@ -258,10 +267,13 @@ class _FlowingSectionTextState extends State<_FlowingSectionText> {
   void didUpdateWidget(_FlowingSectionText oldWidget) {
     super.didUpdateWidget(oldWidget);
     _run = _buildRun();
-    // Stepping through a rule follows it down a page longer than the screen.
-    if (widget.focus != null && widget.focus != oldWidget.focus) {
-      _revealAfterLayout();
-    }
+    // Only a move matters: the tint also changes with the paper.
+    final focusMoved =
+        widget.focus != null && widget.focus?.word != oldWidget.focus?.word;
+    final selectionMoved =
+        widget.selectedAyahId != null &&
+        widget.selectedAyahId != oldWidget.selectedAyahId;
+    if (focusMoved || selectionMoved) _revealAfterLayout();
   }
 
   FlowingRun _buildRun() => buildFlowingRun(
@@ -278,31 +290,64 @@ class _FlowingSectionTextState extends State<_FlowingSectionText> {
     return box is RenderParagraph ? box : null;
   }
 
-  /// Scrolls the focused word, or else the first word of [ayahId], into view
-  /// once it has been laid out. Does nothing when it is in another section
-  /// or already on screen.
-  void _revealAfterLayout({int? ayahId}) {
+  /// Once laid out, scrolls the focused word into view, so stepping through
+  /// a rule follows it down a page longer than the screen.
+  ///
+  /// Without a focus, scrolls to the first word of the selected ayah — one
+  /// arrived at from search, a bookmark or the index — unless some of the
+  /// ayah is already on screen, as it is when the reader tapped it.
+  ///
+  /// Does nothing when the word is in another section.
+  void _revealAfterLayout() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final focus = widget.focus;
-      final word =
-          focus != null
-              ? _run.find(focus.word)
-              : ayahId == null
-              ? null
-              : _run.firstWordOf(ayahId);
       final paragraph = _paragraph;
-      if (word == null || paragraph == null) return;
+      if (!mounted || paragraph == null) return;
+      final focus = widget.focus;
+      final selected = widget.selectedAyahId;
+      final FlowingWord? word;
+      if (focus != null) {
+        word = _run.find(focus.word);
+      } else if (selected != null && !_isOnScreen(paragraph, selected)) {
+        word = _run.firstWordOf(selected);
+      } else {
+        word = null;
+      }
+      if (word == null) return;
       final boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: word.start, extentOffset: word.end),
       );
       if (boxes.isEmpty) return;
+      // Room above and below only: wider than the page, the rect would
+      // scroll the page view sideways too.
+      final rect = boxes.first.toRect();
+      final margin = widget.style.fontSize ?? 0;
       paragraph.showOnScreen(
-        rect: boxes.first.toRect().inflate(widget.style.fontSize ?? 0),
+        rect: Rect.fromLTRB(
+          rect.left,
+          rect.top - margin,
+          rect.right,
+          rect.bottom + margin,
+        ),
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
       );
     });
+  }
+
+  /// Whether any line of [ayahId] shows inside the page's scroll view.
+  bool _isOnScreen(RenderParagraph paragraph, int ayahId) {
+    final words = _run.words.where((w) => w.ayahId == ayahId);
+    final viewport = Scrollable.maybeOf(context)?.context.findRenderObject();
+    if (words.isEmpty || viewport is! RenderBox) return false;
+    final visible = viewport.localToGlobal(Offset.zero) & viewport.size;
+    final origin = paragraph.localToGlobal(Offset.zero);
+    final boxes = paragraph.getBoxesForSelection(
+      TextSelection(
+        baseOffset: words.first.start,
+        extentOffset: words.last.end,
+      ),
+    );
+    return boxes.any((box) => box.toRect().shift(origin).overlaps(visible));
   }
 
   void _onTapUp(TapUpDetails details) {

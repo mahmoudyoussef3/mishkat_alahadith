@@ -32,16 +32,6 @@ enum QuranFontScale {
   const QuranFontScale(this.factor);
 
   final double factor;
-
-  bool get isSmallest => this == values.first;
-
-  bool get isLargest => this == values.last;
-
-  /// The next size up, or this one when already the largest.
-  QuranFontScale get larger => isLargest ? this : values[index + 1];
-
-  /// The next size down, or this one when already the smallest.
-  QuranFontScale get smaller => isSmallest ? this : values[index - 1];
 }
 
 class MushafReaderSettings {

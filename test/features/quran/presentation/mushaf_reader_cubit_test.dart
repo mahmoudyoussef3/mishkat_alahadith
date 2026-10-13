@@ -55,6 +55,28 @@ class _CountingRepo extends FakeQuranRepo {
   }
 }
 
+/// A repo whose rule counts wait for [gate], and that completes [asked] when
+/// they are first requested.
+class _GatedCountsRepo extends FakeQuranRepo {
+  final Completer<void> gate = Completer<void>();
+  final Completer<void> asked = Completer<void>();
+
+  _GatedCountsRepo() : super(pageCounts: {1: _pageOneCounts});
+
+  @override
+  Future<ApiResult<List<TajweedRuleCount>>> getPageTajweedCounts(
+    int page, {
+    required bool includeNaturalMadd,
+  }) async {
+    if (!asked.isCompleted) asked.complete();
+    await gate.future;
+    return super.getPageTajweedCounts(
+      page,
+      includeNaturalMadd: includeNaturalMadd,
+    );
+  }
+}
+
 MushafReaderReady _ready(MushafReaderCubit cubit) =>
     cubit.state as MushafReaderReady;
 
@@ -369,6 +391,22 @@ void main() {
 
       expect(_ready(cubit).focusRuleKey, 'ikhfa');
       expect(_ready(cubit).focusIndex, 1);
+      await cubit.close();
+    });
+
+    test('changing the size while the rules load keeps the counts', () async {
+      reading.settings = const MushafReaderSettings(tajweedEnabled: false);
+      final repo = _GatedCountsRepo();
+      final cubit = _cubit(repo, reading);
+      await cubit.init(initialPage: 1);
+
+      final turningOn = cubit.setTajweedEnabled(true);
+      await repo.asked.future;
+      await cubit.setFontScale(QuranFontScale.large);
+      repo.gate.complete();
+      await turningOn;
+
+      expect(_ready(cubit).ruleCounts, _pageOneCounts);
       await cubit.close();
     });
 

@@ -318,10 +318,13 @@ class MushafReaderCubit extends Cubit<MushafReaderState> {
       includeNaturalMadd: settings.naturalMaddEnabled,
     );
     final latest = state;
+    // Only the colouring decides the counts; the paper, layout or size can
+    // change while they load without making them stale.
     if (isClosed ||
         latest is! MushafReaderReady ||
         latest.page != page ||
-        latest.settings != settings) {
+        latest.settings.tajweedEnabled != settings.tajweedEnabled ||
+        latest.settings.naturalMaddEnabled != settings.naturalMaddEnabled) {
       return;
     }
     emit(switch (result) {

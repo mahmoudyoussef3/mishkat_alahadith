@@ -10,11 +10,10 @@ import '../quran_fakes.dart';
 
 const _style = TextStyle(fontSize: 20);
 
-/// «ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ»: words at 0, 10, 18 and 24.
-const _hamdWords = [0, 10, 18, 24];
-
-QuranFlowingAyah _flowing(QuranAyah ayah, [List<TajweedSegment> rules = const []]) =>
-    QuranFlowingAyah(ayah: ayah, tajweed: rules);
+QuranFlowingAyah _flowing(
+  QuranAyah ayah, [
+  List<TajweedSegment> rules = const [],
+]) => QuranFlowingAyah(ayah: ayah, tajweed: rules);
 
 FlowingRun _run(
   List<QuranFlowingAyah> ayahs, {
@@ -42,59 +41,6 @@ String _textOn(InlineSpan span, Color background, [TextStyle? inherited]) {
 }
 
 void main() {
-  group('ayahWordRanges', () {
-    test('splits an ayah into the runs between its spaces', () {
-      final words = ayahWordRanges(hamd.text);
-
-      expect(words.map((w) => w.start), _hamdWords);
-      expect(hamd.text.substring(words[1].start, words[1].end), 'لِلَّهِ');
-    });
-
-    test('skips repeated and trailing spaces', () {
-      expect(ayahWordRanges('ab  c '), [
-        (start: 0, end: 2),
-        (start: 4, end: 5),
-      ]);
-    });
-  });
-
-  group('focusedFlowingWord', () {
-    const ikhfa = 'ikhfa';
-    final page = QuranFlowingPage(
-      page: 1,
-      sections: [
-        QuranFlowingSection(
-          surah: fatihah,
-          opensHere: true,
-          ayahs: [
-            // Twice in the first word, so it is still one stop.
-            _flowing(basmalah, const [
-              TajweedSegment(start: 0, end: 1, ruleKey: ikhfa),
-              TajweedSegment(start: 2, end: 3, ruleKey: ikhfa),
-            ]),
-            _flowing(hamd, const [
-              TajweedSegment(start: 19, end: 20, ruleKey: ikhfa),
-              TajweedSegment(start: 10, end: 11, ruleKey: 'ghunna'),
-            ]),
-          ],
-        ),
-      ],
-    );
-
-    test('counts each word carrying the rule once, in reading order', () {
-      expect(focusedFlowingWord(page, ikhfa, 0), (ayahId: 1, charStart: 0));
-      expect(focusedFlowingWord(page, ikhfa, 1), (ayahId: 2, charStart: 18));
-    });
-
-    test('wraps past the last word back to the first', () {
-      expect(focusedFlowingWord(page, ikhfa, 2), (ayahId: 1, charStart: 0));
-    });
-
-    test('is null for a rule that is not on the page', () {
-      expect(focusedFlowingWord(page, 'iqlab', 0), isNull);
-    });
-  });
-
   group('buildFlowingRun', () {
     test('places every word and marker where it sits in the run text', () {
       final run = _run([_flowing(basmalah), _flowing(hamd)]);

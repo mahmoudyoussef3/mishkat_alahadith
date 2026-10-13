@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_flowing_page.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/tajweed_info.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
@@ -6,59 +7,6 @@ import 'package:mushaf_text/mushaf_text.dart';
 
 /// The basmala the mushaf prints above every surah but At-Tawbah.
 const String flowingBasmala = 'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ';
-
-/// A word of the flowing layout: which ayah, and where it starts in that
-/// ayah's text.
-typedef FlowingWordRef = ({int ayahId, int charStart});
-
-/// `[start, end)` of each word of [text]: the runs between spaces, split the
-/// way the printed page splits them, so its marks stay on their letters.
-List<({int start, int end})> ayahWordRanges(String text) {
-  final words = <({int start, int end})>[];
-  var at = 0;
-  while (at < text.length) {
-    if (text[at] == ' ') {
-      at++;
-      continue;
-    }
-    var end = at;
-    while (end < text.length && text[end] != ' ') {
-      end++;
-    }
-    words.add((start: at, end: end));
-    at = end;
-  }
-  return words;
-}
-
-/// The word the tajweed focus is on: the [index]th word of [page] that
-/// carries [ruleKey], in reading order, wrapping.
-///
-/// The printed page counts the same stops — a word carrying the rule twice is
-/// still one — so the focus bar's «ن من م» holds in both layouts.
-FlowingWordRef? focusedFlowingWord(
-  QuranFlowingPage page,
-  String ruleKey,
-  int index,
-) {
-  final stops = <FlowingWordRef>[];
-  for (final section in page.sections) {
-    for (final flowing in section.ayahs) {
-      final segments = [
-        for (final s in flowing.tajweed)
-          if (s.ruleKey == ruleKey) s,
-      ];
-      if (segments.isEmpty) continue;
-      for (final word in ayahWordRanges(flowing.ayah.text)) {
-        if (segments.any((s) => s.start < word.end && s.end > word.start)) {
-          stops.add((ayahId: flowing.ayah.id, charStart: word.start));
-        }
-      }
-    }
-  }
-  if (stops.isEmpty) return null;
-  return stops[index % stops.length];
-}
 
 /// A word laid into a [FlowingRun].
 class FlowingWord {
@@ -171,7 +119,7 @@ FlowingRun buildFlowingRun({
     final ayah = ayahs[a].ayah;
     final selected = ayah.id == selectedAyahId;
     final wash = selected ? colors.highlight : null;
-    final ranges = ayahWordRanges(ayah.text);
+    final ranges = ayahs[a].words;
 
     for (var i = 0; i < ranges.length; i++) {
       if (i > 0) addText(' ', background: wash);
@@ -219,7 +167,7 @@ FlowingRun buildFlowingRun({
     // Plain text rather than a widget: a paragraph hands its widgets the
     // places on a line from left to right, so two rosettes on one right to
     // left line would trade numbers.
-    final marker = ayahMarkerText(ayah.number, style);
+    final marker = ayahMarkerText(ayah.number);
     words.add(
       FlowingWord(
         ayahId: ayah.id,
@@ -262,16 +210,20 @@ bool? _markerDigitsReversed;
 /// [number] in the order the mushaf font folds into a single rosette glyph.
 ///
 /// Whether the shaper receives a run of digits in the order given depends on
-/// the platform, so — as the printed page does — the order is measured once:
-/// the one that ligates comes out narrower.
-String ayahMarkerText(int number, TextStyle style) {
+/// the platform, so — as the printed page does — the order is measured once,
+/// in the mushaf font: the one that ligates comes out narrower.
+String ayahMarkerText(int number) {
   final digits = toArabicNumerals(number);
-  final reversed = _markerDigitsReversed ??= _digitsReversed(style);
+  final reversed = _markerDigitsReversed ??= _digitsReversed();
   return reversed ? digits.split('').reversed.join() : digits;
 }
 
-bool _digitsReversed(TextStyle style) {
+bool _digitsReversed() {
   const probe = '٢٥٣';
+  final style = QuranTextStyles.mushafText(
+    color: const Color(0xFF000000),
+    size: 100,
+  );
   double width(String text) {
     final painter = TextPainter(
       text: TextSpan(text: text, style: style),
