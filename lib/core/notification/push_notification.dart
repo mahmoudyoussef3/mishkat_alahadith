@@ -185,7 +185,9 @@ class PushNotification {
       }
 
       if (context.mounted) {
-        Navigator.of(context).pushNamed(Routes.homeScreen);
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(Routes.homeScreen, (route) => false);
 
         log("✅ Navigated to Hadith Screen");
       }

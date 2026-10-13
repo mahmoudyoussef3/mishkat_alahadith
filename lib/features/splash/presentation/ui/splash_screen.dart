@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -18,6 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _fadeController;
   late AnimationController _scaleController;
   late AnimationController _slideController;
+  final List<Timer> _timers = [];
 
   @override
   void initState() {
@@ -44,22 +47,43 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _startAnimations() {
     _fadeController.forward();
-    Future.delayed(SplashDecorations.scaleAnimationDelay, () {
-      _scaleController.forward();
-    });
-    Future.delayed(SplashDecorations.slideAnimationDelay, () {
-      _slideController.forward();
-    });
+    _timers.add(
+      Timer(SplashDecorations.scaleAnimationDelay, _scaleController.forward),
+    );
+    _timers.add(
+      Timer(SplashDecorations.slideAnimationDelay, _slideController.forward),
+    );
   }
 
   void _navigateToNextScreen() {
-    Future.delayed(SplashDecorations.navigationDelay, () {
-      Navigator.pushReplacementNamed(context, Routes.homeScreen);
-    });
+    _timers.add(Timer(SplashDecorations.navigationDelay, _replaceWithHome));
+  }
+
+  void _replaceWithHome() {
+    final navigator = Navigator.of(context);
+    final route = ModalRoute.of(context);
+    if (route == null || route.isCurrent) {
+      navigator.pushReplacementNamed(Routes.homeScreen);
+      return;
+    }
+    // Already on its way out (e.g. a hadith link reset the stack).
+    if (!route.isActive) return;
+
+    // Something opened over the splash (a hadith link, a widget tap). Put
+    // Home in the splash's place beneath it; pushReplacementNamed would
+    // replace that screen instead.
+    final home = navigator.widget.onGenerateRoute?.call(
+      const RouteSettings(name: Routes.homeScreen),
+    );
+    if (home != null) navigator.replace(oldRoute: route, newRoute: home);
   }
 
   @override
   void dispose() {
+    // Timers must not fire into disposed controllers or a dead context.
+    for (final timer in _timers) {
+      timer.cancel();
+    }
     _fadeController.dispose();
     _scaleController.dispose();
     _slideController.dispose();

@@ -1,18 +1,27 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_plurals.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
+import 'package:mishkat_almasabih/core/helpers/functions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/hero_surface.dart';
+import 'package:mishkat_almasabih/core/widgets/screen_title_header.dart';
+import 'package:mishkat_almasabih/core/widgets/search_bar_widget.dart';
+import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/category_entity.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_state.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/category_card.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/error_widget.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/widgets/loading_shimmer.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/category_style.dart';
+import 'package:shimmer/shimmer.dart';
 
+/// Hadiths by topic: the largest topic featured, the rest in a grid sized
+/// by how many hadiths each holds.
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
 
@@ -21,217 +30,188 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
+  final _searchController = TextEditingController();
   String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _open(CategoryEntity category, CategoriesLoaded state) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    context.pushNamed(
+      Routes.ahadithListScreen,
+      arguments: CategoryHadithsArgs(
+        categoryId: category.id,
+        title: category.title,
+        hadithsCount: category.hadeethsCount,
+        subcategories: state.childrenOf(category.id),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: ColorsManager.primaryBackground,
+        backgroundColor: ColorsManager.secondaryBackground,
         body: SafeArea(
-          child: CustomScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            slivers: [
-              const BuildHeaderAppBar(
-                title: 'تصنيفات الأحاديث',
-                description: 'استكشف الأحاديث حسب الموضوع',
-                pinned: true,
-              ),
-              SliverToBoxAdapter(child: SizedBox(height: 14.h)),
-              BlocBuilder<CategoriesCubit, CategoriesState>(
-                builder: (context, state) {
-                  return switch (state) {
-                    CategoriesInitial() || CategoriesLoading() =>
-                      const SliverToBoxAdapter(child: CategoriesShimmer()),
-                    CategoriesLoaded(categories: final categories) =>
-                      _buildLoadedContent(categories),
-                    CategoriesError(message: final message) =>
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: CategoriesErrorWidget(
+          bottom: false,
+          child: BlocBuilder<CategoriesCubit, CategoriesState>(
+            builder: (context, state) {
+              final roots =
+                  state is CategoriesLoaded
+                      ? state.roots
+                      : const <CategoryEntity>[];
+              final total = state is CategoriesLoaded ? state.totalHadiths : 0;
+
+              return CustomScrollView(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: ScreenTitleHeader(
+                      title: 'تصنيفات الأحاديث',
+                      subtitle:
+                          roots.isEmpty
+                              ? 'استكشف الأحاديث حسب الموضوع'
+                              : '${arabicCount(roots.length, _category)} · '
+                                  '${arabicCount(total, ArabicNoun.hadith)} حسب الموضوع',
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 28.h),
+                    sliver: switch (state) {
+                      CategoriesLoaded() => _content(state, roots, total),
+                      CategoriesError(:final message) => SliverToBoxAdapter(
+                        child: StateMessage.error(
                           message: message,
-                          onRetry:
-                              () =>
-                                  context
-                                      .read<CategoriesCubit>()
-                                      .getCategories(),
+                          onRetry: context.read<CategoriesCubit>().getCategories,
                         ),
                       ),
-                  };
-                },
-              ),
-              SliverToBoxAdapter(child: SizedBox(height: 24.h)),
-            ],
+                      _ => const SliverToBoxAdapter(child: _CategoriesLoading()),
+                    },
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLoadedContent(List<CategoryEntity> categories) {
-    final rootCategories =
-        categories.where(_isRootCategory).toList()
-          ..sort((a, b) => b.hadeethsCount.compareTo(a.hadeethsCount));
-    final query = _query.trim();
-    final visibleCategories =
-        query.isEmpty
-            ? rootCategories
-            : rootCategories
-                .where((category) => category.title.contains(query))
-                .toList();
+  Widget _content(
+    CategoriesLoaded state,
+    List<CategoryEntity> roots,
+    int total,
+  ) {
+    final query = normalizeArabic(_query);
+    final searching = query.isNotEmpty;
+    final matches =
+        searching
+            ? roots.where((c) => normalizeArabic(c.title).contains(query)).toList()
+            : roots;
+    final featured = !searching && roots.isNotEmpty ? roots.first : null;
+    final grid = featured == null ? matches : matches.skip(1).toList();
+    // Guards the bar ratio against topics that all report no hadiths.
+    final largest = roots.isEmpty ? 1 : max(1, roots.first.hadeethsCount);
 
     return SliverMainAxisGroup(
       slivers: [
         SliverToBoxAdapter(
-          child: _CategoriesOverview(
-            categoriesCount: rootCategories.length,
-            hadithsCount: rootCategories.fold<int>(
-              0,
-              (sum, category) => sum + category.hadeethsCount,
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(child: SizedBox(height: 12.h)),
-        SliverToBoxAdapter(
-          child: _CategoriesSearchField(
+          child: SearchBarWidget(
+            controller: _searchController,
+            hintText: 'ابحث باسم التصنيف…',
             onChanged: (value) => setState(() => _query = value),
           ),
         ),
-        SliverToBoxAdapter(child: SizedBox(height: 12.h)),
-        if (visibleCategories.isEmpty)
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: _EmptyCategoriesState(
-              message:
-                  query.isEmpty
-                      ? 'لا توجد تصنيفات متاحة حالياً'
-                      : 'لا توجد نتائج مطابقة للبحث',
+        SliverToBoxAdapter(child: SizedBox(height: 14.h)),
+        if (featured != null) ...[
+          SliverToBoxAdapter(
+            child: _FeaturedCategory(
+              category: featured,
+              share: total == 0 ? 0 : featured.hadeethsCount / total,
+              onTap: () => _open(featured, state),
             ),
+          ),
+          SliverToBoxAdapter(child: SizedBox(height: 14.h)),
+        ],
+        if (matches.isEmpty)
+          SliverToBoxAdapter(
+            child:
+                searching
+                    ? const StateMessage(
+                      icon: Icons.search_off_rounded,
+                      title: 'لا يوجد تصنيف بهذا الاسم',
+                      subtitle: 'جرّب كلمة أخرى',
+                    )
+                    : const StateMessage(
+                      icon: Icons.category_outlined,
+                      title: 'لا توجد تصنيفات متاحة حالياً',
+                    ),
           )
         else
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                if (index.isOdd) {
-                  return SizedBox(height: 10.h);
-                }
-
-                final category = visibleCategories[index ~/ 2];
-                return CategoryCard(
-                  category: category,
-                  onExploreSubcategories: () {},
-                  onViewAllHadiths: () {
-                    _navigateToHadithListScreen(
-                      categoryId: category.id,
-                      categoryTitle: category.title,
-                    );
-                  },
-                );
-              }, childCount: visibleCategories.length * 2 - 1),
+          SliverGrid.builder(
+            itemCount: grid.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 10.h,
+              crossAxisSpacing: 10.w,
+              mainAxisExtent: 140.h,
             ),
+            itemBuilder:
+                (context, index) => _CategoryTile(
+                  category: grid[index],
+                  share: grid[index].hadeethsCount / largest,
+                  onTap: () => _open(grid[index], state),
+                ),
           ),
       ],
     );
   }
 
-  bool _isRootCategory(CategoryEntity category) {
-    return category.parentId == null ||
-        category.parentId == '0' ||
-        category.parentId == '';
-  }
-
-  void _navigateToHadithListScreen({
-    required String categoryId,
-    required String categoryTitle,
-  }) {
-    context.pushNamed(
-      Routes.ahadithListScreen,
-      arguments: {'categoryId': categoryId, 'categoryTitle': categoryTitle},
-    );
-  }
+  static const _category = ArabicNoun(
+    singular: 'تصنيف',
+    dual: 'تصنيفان',
+    plural: 'تصنيفات',
+    accusative: 'تصنيفاً',
+  );
 }
 
-class _CategoriesOverview extends StatelessWidget {
-  final int categoriesCount;
-  final int hadithsCount;
-
-  const _CategoriesOverview({
-    required this.categoriesCount,
-    required this.hadithsCount,
+class _FeaturedCategory extends StatelessWidget {
+  const _FeaturedCategory({
+    required this.category,
+    required this.share,
+    required this.onTap,
   });
+
+  final CategoryEntity category;
+
+  /// Fraction of all hadiths that are in this category.
+  final double share;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: ColorsManager.secondaryBackground,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: ColorsManager.black.withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            _OverviewItem(
-              icon: Icons.category_rounded,
-              label: 'تصنيف',
-              value: '$categoriesCount',
-              color: ColorsManager.primaryPurple,
-            ),
-            Container(
-              height: 40.h,
-              width: 1.w,
-              color: ColorsManager.mediumGray.withOpacity(0.5),
-            ),
-            SizedBox(width: 16.w),
-            _OverviewItem(
-              icon: Icons.auto_stories_rounded,
-              label: 'حديث',
-              value: '$hadithsCount',
-              color: ColorsManager.primaryGold,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+    final style = CategoryStyle.of(category.title);
+    final muted = ColorsManager.white.withValues(alpha: 0.78);
 
-class _OverviewItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  const _OverviewItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
+    return HeroSurface(
+      scrim: HeroScrim.horizontal,
+      onTap: onTap,
       child: Row(
         children: [
           Container(
-            width: 44.w,
-            height: 44.w,
+            width: 48.r,
+            height: 48.r,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(12.r),
+              color: ColorsManager.goldBright,
+              borderRadius: BorderRadius.circular(16.r),
             ),
-            child: Icon(icon, color: color, size: 22.sp),
+            child: Icon(style.icon, size: 26.r, color: ColorsManager.onGoldBright),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -239,25 +219,38 @@ class _OverviewItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyles.headlineSmall.copyWith(
-                    color: ColorsManager.primaryText,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
+                  'الأكبر',
+                  style: TextStyles.caption.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: ColorsManager.goldBright,
                   ),
                 ),
                 Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyles.bodyMedium.copyWith(
-                    color: ColorsManager.secondaryText,
-                    fontWeight: FontWeight.w600,
+                  category.title,
+                  style: TextStyles.sectionTitle.copyWith(
+                    fontSize: 19.sp,
+                    color: ColorsManager.white,
                   ),
                 ),
+                Text(
+                  '${arabicCount(category.hadeethsCount, ArabicNoun.hadith)} · '
+                  '${toArabicDigits('${(share * 100).round()}')}٪ من المجموع',
+                  style: TextStyles.caption.copyWith(color: muted),
+                ),
               ],
+            ),
+          ),
+          Container(
+            width: 40.r,
+            height: 40.r,
+            decoration: BoxDecoration(
+              color: ColorsManager.white.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(13.r),
+            ),
+            child: Icon(
+              Icons.chevron_right_rounded,
+              size: 20.r,
+              color: ColorsManager.white,
             ),
           ),
         ],
@@ -266,56 +259,73 @@ class _OverviewItem extends StatelessWidget {
   }
 }
 
-class _CategoriesSearchField extends StatelessWidget {
-  final ValueChanged<String> onChanged;
+class _CategoryTile extends StatelessWidget {
+  const _CategoryTile({
+    required this.category,
+    required this.share,
+    required this.onTap,
+  });
 
-  const _CategoriesSearchField({required this.onChanged});
+  final CategoryEntity category;
+
+  /// Size relative to the largest category, for the bar.
+  final double share;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: ColorsManager.black.withOpacity(0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: TextField(
-          onChanged: onChanged,
-          textDirection: TextDirection.rtl,
-          decoration: InputDecoration(
-            hintText: 'ابحث باسم التصنيف...',
-            hintStyle: TextStyles.bodyMedium.copyWith(
-              color: ColorsManager.secondaryText,
-            ),
-            prefixIcon: Icon(
-              Icons.search_rounded,
-              color: ColorsManager.purpleText,
-            ),
-            filled: true,
-            fillColor: ColorsManager.secondaryBackground,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 14.h,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(
-                color: ColorsManager.primaryPurple.withOpacity(0.1),
+    final style = CategoryStyle.of(category.title);
+    return Material(
+      color: ColorsManager.cardBackground,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.r),
+        side: BorderSide(color: ColorsManager.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.all(14.r),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Container(
+                  width: 42.r,
+                  height: 42.r,
+                  decoration: BoxDecoration(
+                    color: style.background,
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
+                  child: Icon(style.icon, size: 22.r, color: style.foreground),
+                ),
               ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(
-                color: ColorsManager.primaryPurple,
-                width: 1.5,
+              const Spacer(),
+              Text(
+                category.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyles.titleSmall.copyWith(
+                  fontWeight: FontWeight.w700,
+                  height: 1.5,
+                ),
               ),
-            ),
+              Text(
+                arabicCount(category.hadeethsCount, ArabicNoun.hadith),
+                style: TextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 10.h),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(2.r),
+                child: LinearProgressIndicator(
+                  value: share.clamp(0.03, 1.0),
+                  minHeight: 4.h,
+                  color: style.foreground,
+                  backgroundColor: ColorsManager.lightGray,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -323,31 +333,38 @@ class _CategoriesSearchField extends StatelessWidget {
   }
 }
 
-class _EmptyCategoriesState extends StatelessWidget {
-  final String message;
-
-  const _EmptyCategoriesState({required this.message});
+class _CategoriesLoading extends StatelessWidget {
+  const _CategoriesLoading();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(24.w),
+    Widget block(double height, {double radius = 20}) => Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: ColorsManager.shimmerBase,
+        borderRadius: BorderRadius.circular(radius.r),
+      ),
+    );
+
+    return Shimmer.fromColors(
+      baseColor: ColorsManager.shimmerBase,
+      highlightColor: ColorsManager.shimmerHighlight,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.search_off_rounded,
-            color: ColorsManager.secondaryText,
-            size: 42.sp,
-          ),
-          SizedBox(height: 10.h),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: TextStyles.bodyLarge.copyWith(
-              color: ColorsManager.secondaryText,
+          block(52.h, radius: 16),
+          SizedBox(height: 14.h),
+          block(92.h, radius: 24),
+          SizedBox(height: 14.h),
+          for (var row = 0; row < 3; row++) ...[
+            Row(
+              children: [
+                Expanded(child: block(140.h)),
+                SizedBox(width: 10.w),
+                Expanded(child: block(140.h)),
+              ],
             ),
-          ),
+            SizedBox(height: 10.h),
+          ],
         ],
       ),
     );

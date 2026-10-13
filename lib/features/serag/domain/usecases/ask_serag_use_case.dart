@@ -1,5 +1,6 @@
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 
+import '../entities/chat_message.dart';
 import '../entities/serag_hadith_context.dart';
 import '../repos/serag_repo.dart';
 
@@ -10,6 +11,6 @@ class AskSeragUseCase {
 
   Future<ApiResult<String>> call({
     required SeragHadithContext hadith,
-    required String question,
-  }) => _repo.ask(hadith: hadith, question: question);
+    required List<ChatMessage> conversation,
+  }) => _repo.ask(hadith: hadith, conversation: conversation);
 }

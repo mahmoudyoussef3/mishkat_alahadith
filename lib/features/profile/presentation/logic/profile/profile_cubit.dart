@@ -57,6 +57,9 @@ class ProfileCubit extends Cubit<ProfileState> {
     );
   }
 
+  /// Shows the profile returned by the edit screen without refetching it.
+  void applyUpdatedProfile(UserProfile user) => emit(ProfileLoaded(user));
+
   Future<void> refreshProfile() async {
     log('🔃 [ProfileCubit] Force refresh profile');
     emit(ProfileLoading());

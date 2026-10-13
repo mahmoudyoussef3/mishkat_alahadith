@@ -22,7 +22,9 @@ import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
 import 'package:mishkat_almasabih/features/onboarding/domain/usecases/is_first_launch_use_case.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/initialize_ramadan_config_use_case.dart';
 import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/logic/hadith_font_scale_cubit.dart';
 import 'package:mishkat_almasabih/firebase_options.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'mishkat_almasabih.dart';
 
@@ -42,6 +44,10 @@ Future<void> bootstrapApp() async {
     return true;
   };
 
+  // Must run after the Crashlytics handlers above: Sentry wraps the existing
+  // error handlers, so both Crashlytics and Sentry keep receiving errors.
+  await _runIsolated('SentryFlutter.init', _initializeSentry);
+
   await setUpGetIt();
   await HiveService.init();
   await initializeDateFormatting('ar', null);
@@ -49,7 +55,10 @@ Future<void> bootstrapApp() async {
   WidgetNavigationService.initialize();
 
   final isFirstTime = await getIt<IsFirstLaunchUseCase>()();
-  await getIt<ThemeCubit>().load();
+  await Future.wait([
+    getIt<ThemeCubit>().load(),
+    getIt<HadithFontScaleCubit>().load(),
+  ]);
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
@@ -62,6 +71,16 @@ Future<void> bootstrapApp() async {
   );
 
   unawaited(_initializeBackgroundServices());
+}
+
+// A DSN is public by design: it only allows sending events, not reading them.
+const _sentryDsn =
+    'https://9a662228433950e5a027dd66d34c9a4e@o4511762064998400.ingest.us.sentry.io/4511762243518464';
+
+Future<void> _initializeSentry() {
+  return SentryFlutter.init((options) {
+    options.dsn = _sentryDsn;
+  });
 }
 
 Future<void> _initializeBackgroundServices() async {

@@ -94,6 +94,8 @@ void main() {
         tajweedEnabled: true,
         naturalMaddEnabled: true,
         themeMode: MushafThemeMode.night,
+        layoutMode: MushafLayoutMode.flowing,
+        fontScale: QuranFontScale.huge,
       );
       await repo.saveSettings(settings);
 
@@ -106,6 +108,22 @@ void main() {
       final settings = dataOf(await repo.getSettings());
 
       expect(settings.themeMode, MushafThemeMode.system);
+    });
+
+    test('fall back to the printed page for an unknown stored layout', () async {
+      SharedPreferences.setMockInitialValues({'quran_layout_mode': 'scroll'});
+
+      final settings = dataOf(await repo.getSettings());
+
+      expect(settings.layoutMode, MushafLayoutMode.page);
+    });
+
+    test('fall back to the designed size for an unknown stored size', () async {
+      SharedPreferences.setMockInitialValues({'quran_font_scale': 'giant'});
+
+      final settings = dataOf(await repo.getSettings());
+
+      expect(settings.fontScale, QuranFontScale.medium);
     });
   });
 }

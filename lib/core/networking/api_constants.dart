@@ -142,8 +142,10 @@ final Map<String, String> booksMap = {
   'صحيح مسلم': 'sahih-muslim',
   'سنن أبي داود': 'abu-dawood',
   'سنن الترمذي': 'al-tirmidhi',
+  'جامع الترمذي': 'al-tirmidhi',
   'سنن النسائي': 'sunan-nasai',
   'سنن ابن ماجة': 'ibn-e-majah',
+  'سنن ابن ماجه': 'ibn-e-majah',
   'موطأ مالك': 'malik',
   'مسند أحمد': 'musnad-ahmad',
   'سنن الدارمي': 'darimi',
@@ -157,4 +159,5 @@ final Map<String, String> booksMap = {
   'الشمائل المحمدية': 'shamail_muhammadiyah',
   'حصن المسلم': 'hisnul_muslim',
   'الاربعون الرياضية': 'riyadiah40',
+  'الأربعون الرياضية': 'riyadiah40',
 };

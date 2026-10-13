@@ -1,54 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/quran_decorations.dart';
-import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_plurals.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_surah.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mushaf_text/mushaf_text.dart' show toArabicNumerals;
 
-import 'index_tile_frame.dart';
+import 'quran_index_row.dart';
 
 class SurahTile extends StatelessWidget {
   final QuranSurah surah;
-  final QuranSurfaceColors colors;
   final bool isCurrent;
+  final bool isFirst;
+  final bool isLast;
   final VoidCallback onTap;
 
   const SurahTile({
     super.key,
     required this.surah,
-    required this.colors,
     required this.onTap,
+    required this.isFirst,
+    required this.isLast,
     this.isCurrent = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return IndexTileFrame(
-      colors: colors,
-      isCurrent: isCurrent,
+    return QuranIndexRow(
+      isFirst: isFirst,
+      isLast: isLast,
       onTap: onTap,
-      leading: IndexNumberBadge(
+      leading: QuranIndexWell(
         label: toArabicNumerals(surah.number),
-        colors: colors,
+        highlighted: isCurrent,
       ),
-      title: Text(
-        'سورة ${surah.nameArabic}',
-        style: QuranTextStyles.surahName(colors.title),
-      ),
-      subtitle:
-          '${ltrIsolate(surah.nameEnglish)} · ${toArabicNumerals(surah.ayahCount)} آية',
-      trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'ص ${toArabicNumerals(surah.startPage)}',
-            style: QuranTextStyles.tileTrailing(colors.accent),
-          ),
-          if (isCurrent)
-            Text('تقرأ الآن', style: QuranTextStyles.tileMeta(colors.accent)),
-        ],
-      ),
+      title: surah.nameArabic,
+      subtitle: [
+        ltrIsolate(surah.nameEnglish),
+        arabicCount(surah.ayahCount, ArabicNoun.ayah),
+        if (isCurrent) 'تقرأ الآن',
+      ].join(' · '),
+      trailing: QuranPageLabel('ص ${toArabicNumerals(surah.startPage)}'),
     );
   }
 }

@@ -22,7 +22,7 @@ class SplashTextStyles {
     fontWeight: FontWeight.w500,
     color: ColorsManager.white.withOpacity(0.9),
     height: 1.6,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static const String appNameText = 'مشكاة الأحاديث';

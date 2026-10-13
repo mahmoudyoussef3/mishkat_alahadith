@@ -7,94 +7,105 @@
     android:padding="10dp"
     android:layoutDirection="rtl">
 
-    <!-- Header: Icon + Title -->
     <LinearLayout
-        android:id="@+id/header_container"
-        android:layout_width="wrap_content"
+        android:id="@+id/hadith_widget_header"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
+        android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_book"
-            android:tint="@color/prayer_widget_accent" />
+        android:paddingBottom="8dp">
 
         <TextView
+            android:id="@+id/hadith_widget_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:fontFamily="@font/cairo_medium"
+            android:gravity="start"
             android:text="حديث اليوم"
             android:textColor="@color/prayer_widget_accent"
             android:textSize="11sp"
-            android:maxLines="1" />
+            android:fontFamily="@font/cairo_regular"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/hadith_widget_attribution"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:gravity="end"
+            android:textColor="@color/prayer_widget_text_secondary"
+            android:textSize="11sp"
+            android:fontFamily="@font/cairo_regular"
+            android:maxLines="1"
+            android:ellipsize="end" />
     </LinearLayout>
 
-    <!-- Hadith Text -->
+    <RelativeLayout
+        android:id="@+id/hadith_widget_footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:id="@+id/hadith_grade"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:maxWidth="120dp"
+            android:background="@drawable/prayer_time_item_default"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/prayer_widget_text_secondary"
+            android:textSize="11sp"
+            android:fontFamily="@font/cairo_medium"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/hadith_read_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/prayer_time_item_active"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:text="اقرأ الحديث"
+            android:textColor="@color/prayer_widget_accent"
+            android:textSize="11sp"
+            android:fontFamily="@font/cairo_bold"
+            android:maxLines="1" />
+    </RelativeLayout>
+
     <TextView
         android:id="@+id/hadith_text"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/header_container"
-        android:layout_above="@id/footer_container"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_height="match_parent"
+        android:layout_below="@id/hadith_widget_header"
+        android:layout_above="@id/hadith_widget_footer"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/prayer_time_item_default"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:text="جاري تحميل الحديث..."
         android:textColor="@color/prayer_widget_text_primary"
-        android:textSize="16sp"
+        android:textSize="15sp"
         android:fontFamily="@font/ya_modernpro_bold"
         android:gravity="start|center_vertical"
         android:textDirection="rtl"
         android:maxLines="4"
         android:ellipsize="end"
-        android:lineSpacingExtra="3dp" />
-
-    <!-- Footer Container -->
-    <RelativeLayout
-        android:id="@+id/footer_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
-
-        <!-- Read Button -->
-        <LinearLayout
-            android:id="@+id/read_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:background="@drawable/read_button_background"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="اقرأ الحديث"
-                android:textColor="@color/prayer_widget_text_primary"
-                android:textSize="11sp"
-                android:fontFamily="@font/cairo_medium"
-                android:maxLines="1" />
-        </LinearLayout>
-
-        <!-- Decorative Quote Icon -->
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/ic_quote"
-            android:background="@drawable/quote_background"
-            android:padding="7dp"
-            android:contentDescription="@null"
-            android:tint="@color/prayer_widget_accent" />
-    </RelativeLayout>
+        android:lineSpacingExtra="2dp" />
 
 </RelativeLayout>

@@ -11,6 +11,8 @@ class QuranReadingLocalDataSource {
   static const String _tajweedKey = 'quran_tajweed_enabled';
   static const String _naturalMaddKey = 'quran_natural_madd_enabled';
   static const String _themeModeKey = 'quran_theme_mode';
+  static const String _layoutModeKey = 'quran_layout_mode';
+  static const String _fontScaleKey = 'quran_font_scale';
 
   Future<({int page, int savedAtMillis})?> getLastRead() async {
     final prefs = await SharedPreferences.getInstance();
@@ -51,13 +53,23 @@ class QuranReadingLocalDataSource {
     );
   }
 
-  Future<({bool? tajweed, bool? naturalMadd, String? themeMode})>
+  Future<
+    ({
+      bool? tajweed,
+      bool? naturalMadd,
+      String? themeMode,
+      String? layoutMode,
+      String? fontScale,
+    })
+  >
   getSettings() async {
     final prefs = await SharedPreferences.getInstance();
     return (
       tajweed: prefs.getBool(_tajweedKey),
       naturalMadd: prefs.getBool(_naturalMaddKey),
       themeMode: prefs.getString(_themeModeKey),
+      layoutMode: prefs.getString(_layoutModeKey),
+      fontScale: prefs.getString(_fontScaleKey),
     );
   }
 
@@ -65,10 +77,14 @@ class QuranReadingLocalDataSource {
     required bool tajweed,
     required bool naturalMadd,
     required String themeMode,
+    required String layoutMode,
+    required String fontScale,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_tajweedKey, tajweed);
     await prefs.setBool(_naturalMaddKey, naturalMadd);
     await prefs.setString(_themeModeKey, themeMode);
+    await prefs.setString(_layoutModeKey, layoutMode);
+    await prefs.setString(_fontScaleKey, fontScale);
   }
 }

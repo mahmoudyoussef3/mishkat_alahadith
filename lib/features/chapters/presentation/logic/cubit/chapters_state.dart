@@ -13,11 +13,15 @@ final class ChaptersSuccess extends ChaptersState {
   final bool isRefreshing;
   final bool isFromCache;
 
+  /// The chapter to offer under "continue reading", if any.
+  final LastReadChapter? lastRead;
+
   ChaptersSuccess({
     required this.allChapters,
     required this.filteredChapters,
     this.isRefreshing = false,
     this.isFromCache = false,
+    this.lastRead,
   });
 
   ChaptersSuccess copyWith({
@@ -25,12 +29,14 @@ final class ChaptersSuccess extends ChaptersState {
     List<BookChapter>? filteredChapters,
     bool? isRefreshing,
     bool? isFromCache,
+    LastReadChapter? lastRead,
   }) {
     return ChaptersSuccess(
       allChapters: allChapters ?? this.allChapters,
       filteredChapters: filteredChapters ?? this.filteredChapters,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       isFromCache: isFromCache ?? this.isFromCache,
+      lastRead: lastRead ?? this.lastRead,
     );
   }
 }

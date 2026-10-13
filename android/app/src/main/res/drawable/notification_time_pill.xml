@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Gold-tinted rounded pill that highlights the prayer time inside the
-     prayer notification card. -->
+<!-- Solid gold pill that makes the prayer time the focal point of the
+     prayer notification card. Lighter at the top for a subtle lift. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#33FFB300" />
-    <corners android:radius="20dp" />
-    <stroke
-        android:width="1dp"
-        android:color="#66FFB300" />
+    <gradient
+        android:angle="90"
+        android:startColor="@color/notification_prayer_accent_deep"
+        android:endColor="@color/notification_prayer_accent" />
+    <corners android:radius="100dp" />
 </shape>

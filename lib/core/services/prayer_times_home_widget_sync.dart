@@ -1,3 +1,4 @@
+import 'package:mishkat_almasabih/core/helpers/arabic_time_format.dart';
 import 'package:adhan/adhan.dart';
 import 'package:mishkat_almasabih/core/prayer/prayer_location_store.dart';
 import 'package:mishkat_almasabih/core/prayer/prayer_times_calculator.dart';
@@ -160,19 +161,6 @@ class PrayerTimesHomeWidgetSync {
     return '$hour:$minute';
   }
 
-  static String _arabicWeekday(int weekday) {
-    return switch (weekday) {
-      DateTime.monday => 'الاثنين',
-      DateTime.tuesday => 'الثلاثاء',
-      DateTime.wednesday => 'الأربعاء',
-      DateTime.thursday => 'الخميس',
-      DateTime.friday => 'الجمعة',
-      DateTime.saturday => 'السبت',
-      DateTime.sunday => 'الأحد',
-      _ => 'اليوم',
-    };
-  }
-
   static String _formatHijriDate(DateTime now) {
     HijriCalendar.setLocal('ar');
     final hijri = HijriCalendar.fromDate(now);
@@ -195,7 +183,7 @@ class PrayerTimesHomeWidgetSync {
       'ديسمبر',
     ];
 
-    return '${_arabicWeekday(now.weekday)}، ${_toArabicNumerals(now.day)} ${months[now.month - 1]} ${_toArabicNumerals(now.year)} م';
+    return '${arabicWeekday(now)}، ${_toArabicNumerals(now.day)} ${months[now.month - 1]} ${_toArabicNumerals(now.year)} م';
   }
 
   static String _toArabicNumerals(int number) {

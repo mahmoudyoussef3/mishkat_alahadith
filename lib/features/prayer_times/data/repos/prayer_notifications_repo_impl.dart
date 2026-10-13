@@ -10,13 +10,16 @@ class PrayerNotificationsRepoImpl implements PrayerNotificationsRepo {
   @override
   Future<ApiResult<PrayerNotificationSettings>> getSettings() =>
       guardApiCall(() async {
-        final results = await Future.wait([
-          PrayerNotificationScheduler.isEnabled(),
-          PrayerNotificationScheduler.hasBatteryOptimizationExemption(),
-        ]);
+        final (enabled, batteryOptimizationIgnored, lastSyncedAt) =
+            await (
+              PrayerNotificationScheduler.isEnabled(),
+              PrayerNotificationScheduler.hasBatteryOptimizationExemption(),
+              PrayerNotificationScheduler.lastSyncedAt(),
+            ).wait;
         return PrayerNotificationSettings(
-          enabled: results[0],
-          batteryOptimizationIgnored: results[1],
+          enabled: enabled,
+          batteryOptimizationIgnored: batteryOptimizationIgnored,
+          lastSyncedAt: lastSyncedAt,
         );
       });
 

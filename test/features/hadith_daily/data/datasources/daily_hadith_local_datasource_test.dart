@@ -38,12 +38,51 @@ void main() {
         const NewDailyHadithModel(id: '1', hadeeth: 'حديث جديد'),
       );
 
-      expect(calls.map((call) => call.method), [
-        'saveWidgetData',
-        'updateWidget',
-      ]);
-      expect(calls[0].arguments, {'id': 'hadith_text', 'data': 'حديث جديد'});
-      expect(calls[1].arguments, containsPair('name', 'HadithWidgetProvider'));
+      expect(calls.map((call) => call.method).last, 'updateWidget');
+      expect(calls.first.arguments, {'id': 'hadith_text', 'data': 'حديث جديد'});
+      expect(
+        calls.last.arguments,
+        containsPair('name', 'HadithWidgetProvider'),
+      );
+    });
+
+    test(
+      'pushes the attribution and grade to the home screen widget',
+      () async {
+        final calls = _mockHomeWidget();
+
+        await DailyHadithLocalDataSource().saveHadith(
+          const NewDailyHadithModel(
+            id: '1',
+            hadeeth: 'حديث جديد',
+            attribution: 'متفق عليه',
+            grade: 'صحيح',
+          ),
+        );
+
+        final saved = calls.where((call) => call.method == 'saveWidgetData');
+        expect(
+          saved.map((call) => call.arguments),
+          containsAll([
+            {'id': 'hadith_attribution', 'data': 'متفق عليه'},
+            {'id': 'hadith_grade', 'data': 'صحيح'},
+          ]),
+        );
+      },
+    );
+
+    test('clears a stale grade when the new hadith has none', () async {
+      final calls = _mockHomeWidget();
+
+      await DailyHadithLocalDataSource().saveHadith(
+        const NewDailyHadithModel(id: '1', hadeeth: 'حديث جديد'),
+      );
+
+      final saved = calls.where((call) => call.method == 'saveWidgetData');
+      expect(
+        saved.map((call) => call.arguments),
+        contains(equals({'id': 'hadith_grade', 'data': null})),
+      );
     });
 
     test('leaves the widget untouched when the hadith text is empty', () async {

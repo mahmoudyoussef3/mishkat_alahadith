@@ -36,6 +36,7 @@ object PrayerNotificationScheduler {
     private const val PREFS_NAME = "prayer_notification_scheduler"
     private const val KEY_SCHEDULES = "schedules_json"
     private const val KEY_ROLLING_SCHEDULER_MIGRATED = "rolling_scheduler_migrated"
+    private const val KEY_LEGACY_NOTIFICATIONS_CLEARED = "legacy_prayer_notifications_cleared"
     private const val CHANNEL_ID = "prayer_notifications"
     private const val CHANNEL_NAME = "Prayer Time Notifications"
     private const val CHANNEL_DESCRIPTION = "Exact prayer time reminders"
@@ -204,7 +205,14 @@ object PrayerNotificationScheduler {
                 contentIntent,
             ).build()
 
-            val customView = RemoteViews(context.packageName, R.layout.notification_prayer).apply {
+            // Separate layouts per state: Android 12+ caps the collapsed custom
+            // view at 48dp, which clipped the old shared layout. Only set ids that
+            // exist in each layout, or SystemUI fails to inflate the notification.
+            val collapsedView = RemoteViews(context.packageName, R.layout.notification_prayer_collapsed).apply {
+                setTextViewText(R.id.notification_title, reminderTitle)
+                setTextViewText(R.id.notification_time, reminderTime)
+            }
+            val expandedView = RemoteViews(context.packageName, R.layout.notification_prayer_expanded).apply {
                 setTextViewText(R.id.notification_title, reminderTitle)
                 setTextViewText(R.id.notification_subtitle, reminderSubtitle)
                 setTextViewText(R.id.notification_time, reminderTime)
@@ -218,8 +226,8 @@ object PrayerNotificationScheduler {
                 // match the brand purple used by the custom card below.
                 .setColor(BRAND_ACCENT_COLOR)
                 .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(customView)
-                .setCustomBigContentView(customView)
+                .setCustomContentView(collapsedView)
+                .setCustomBigContentView(expandedView)
                 .setContentTitle(reminderTitle)
                 .setContentText(reminderContentText)
                 .setWhen(entry.fireAtMillis)
@@ -233,10 +241,37 @@ object PrayerNotificationScheduler {
                 .setDefaults(NotificationCompat.DEFAULT_SOUND or NotificationCompat.DEFAULT_VIBRATE)
                 .build()
 
-            notificationManager.notify(entry.id, notification)
-            Log.d(TAG, "showPrayerNotification: posted notification id=${entry.id} for ${entry.prayerKey} at $reminderTime")
+            notificationManager.notify(PrayerNotificationCleanup.NOTIFICATION_TAG, entry.id, notification)
+            cancelPreviousPrayerNotifications(context, notificationManager, entry.id)
+            Log.d(TAG, "showPrayerNotification: posted notification tag=${PrayerNotificationCleanup.NOTIFICATION_TAG} id=${entry.id} for ${entry.prayerKey} at $reminderTime")
         } catch (e: Exception) {
             Log.e(TAG, "showPrayerNotification: failed for prayer=${entry.prayerKey} id=${entry.id}", e)
+        }
+    }
+
+    // Reminders left unopened while the app is closed would otherwise stack up;
+    // only the prayer that is firing now should stay visible.
+    private fun cancelPreviousPrayerNotifications(
+        context: Context,
+        notificationManager: NotificationManager,
+        currentId: Int,
+    ) {
+        val prefs = getPrefs(context)
+        val clearLegacy = !prefs.getBoolean(KEY_LEGACY_NOTIFICATIONS_CLEARED, false)
+
+        try {
+            notificationManager.activeNotifications
+                .filter {
+                    PrayerNotificationCleanup.isPreviousReminder(it.tag, it.id, currentId) ||
+                        (clearLegacy && PrayerNotificationCleanup.isLegacyReminder(it.tag, it.id))
+                }
+                .forEach { notificationManager.cancel(it.tag, it.id) }
+
+            if (clearLegacy) {
+                prefs.edit().putBoolean(KEY_LEGACY_NOTIFICATIONS_CLEARED, true).apply()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "cancelPreviousPrayerNotifications: failed to clear earlier reminders", e)
         }
     }
 

@@ -13,4 +13,12 @@ void main() {
   test('leaves Western digits and other characters alone', () {
     expect(toWesternDigits('page 12 ص'), 'page 12 ص');
   });
+
+  test('writes Western digits as Arabic-Indic digits', () {
+    expect(toArabicDigits('255'), '٢٥٥');
+  });
+
+  test('leaves non-digits alone when writing Arabic-Indic digits', () {
+    expect(toArabicDigits('3:12 م'), '٣:١٢ م');
+  });
 }

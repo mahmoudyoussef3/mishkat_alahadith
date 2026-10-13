@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/quran_decorations.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
+import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
 import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/quran_sheet.dart';
@@ -15,7 +16,6 @@ import 'package:mushaf_text/mushaf_text.dart';
 /// Resolves to `true` when the reader asks to follow the rule across the page.
 Future<bool?> showTajweedRuleSheet(
   BuildContext context, {
-  required QuranSurfaceColors colors,
   required TajweedRule rule,
   String? word,
   int start = 0,
@@ -24,12 +24,10 @@ Future<bool?> showTajweedRuleSheet(
 }) {
   return showQuranSheet<bool>(
     context: context,
-    colors: colors,
     initialChildSize: word == null ? 0.6 : 0.72,
     builder:
         (context, controller) => _TajweedRuleSheetContent(
           controller: controller,
-          colors: colors,
           rule: rule,
           word: word,
           start: start,
@@ -41,7 +39,6 @@ Future<bool?> showTajweedRuleSheet(
 
 class _TajweedRuleSheetContent extends StatelessWidget {
   final ScrollController controller;
-  final QuranSurfaceColors colors;
   final TajweedRule rule;
   final String? word;
   final int start;
@@ -50,7 +47,6 @@ class _TajweedRuleSheetContent extends StatelessWidget {
 
   const _TajweedRuleSheetContent({
     required this.controller,
-    required this.colors,
     required this.rule,
     required this.word,
     required this.start,
@@ -60,92 +56,68 @@ class _TajweedRuleSheetContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ruleColor = colors.ruleColor(rule);
+    final palette = AppPaletteOverride.of(context);
+    final ruleColor = MushafPalette.of(palette).tajweedColor(rule);
     final word = this.word;
+    final card = BoxDecoration(
+      color: palette.cardBackground,
+      borderRadius: BorderRadius.circular(20.r),
+      border: Border.all(color: palette.border),
+    );
+
     return ListView(
       controller: controller,
-      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 28.h),
+      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
       children: [
-        QuranSheetHandle(colors: colors),
-        SizedBox(height: 8.h),
+        const QuranSheetHandle(),
         Row(
           children: [
-            RuleSwatch(color: ruleColor, size: 16),
-            SizedBox(width: 10.w),
+            RuleWell(color: ruleColor, size: 46),
+            SizedBox(width: 12.w),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(rule.label, style: QuranTextStyles.ruleTitle(ruleColor)),
-                  Text(
+              child: QuranSheetHeader(
+                title: rule.label,
+                subtitle:
                     '${rule.family.label} · ${ltrIsolate(rule.englishName)}',
-                    style: QuranTextStyles.ruleFamily(colors.subtitle),
-                  ),
-                ],
               ),
             ),
           ],
         ),
         if (word != null) ...[
           SizedBox(height: 16.h),
-          _TappedWord(
-            word: word,
-            start: start,
-            end: end,
-            ruleColor: ruleColor,
-            colors: colors,
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 12.w),
+            decoration: card,
+            child: Text.rich(
+              styledRanges(
+                text: word,
+                base: QuranTextStyles.mushafText(
+                  color: palette.primaryText,
+                  size: 34.sp,
+                ),
+                ranges: [
+                  (start: start, end: end, style: TextStyle(color: ruleColor)),
+                ],
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
         if (canFollow) ...[
           SizedBox(height: 14.h),
-          FilledButton.tonalIcon(
+          FilledButton.icon(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: ruleColor.withValues(alpha: 0.12),
-              foregroundColor: ruleColor,
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-            ),
             icon: const Icon(Icons.travel_explore_rounded),
             label: const Text('تتبّع هذا الحكم في الصفحة'),
           ),
         ],
-        SizedBox(height: 18.h),
-        TajweedRuleDetails(rule: rule, colors: colors),
-      ],
-    );
-  }
-}
-
-class _TappedWord extends StatelessWidget {
-  final String word;
-  final int start;
-  final int end;
-  final Color ruleColor;
-  final QuranSurfaceColors colors;
-
-  const _TappedWord({
-    required this.word,
-    required this.start,
-    required this.end,
-    required this.ruleColor,
-    required this.colors,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 12.w),
-      decoration: QuranDecorations.quranTextBox(colors),
-      child: Text.rich(
-        styledRanges(
-          text: word,
-          base: QuranTextStyles.mushafText(color: colors.title, size: 34.sp),
-          ranges: [
-            (start: start, end: end, style: TextStyle(color: ruleColor)),
-          ],
+        SizedBox(height: 16.h),
+        Container(
+          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+          decoration: card,
+          child: TajweedRuleDetails(rule: rule),
         ),
-        textAlign: TextAlign.center,
-      ),
+      ],
     );
   }
 }

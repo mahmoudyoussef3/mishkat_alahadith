@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_plurals.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/quran_decorations.dart';
-import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
+import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/rule_swatch.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/tajweed_rule_details.dart';
@@ -16,49 +17,59 @@ class TajweedGuideScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = QuranSurfaceColors.app();
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: ColorsManager.secondaryBackground,
         body: SafeArea(
           bottom: false,
-          child: CustomScrollView(
-            slivers: [
-              BuildHeaderAppBar(
+          child: Column(
+            children: [
+              DetailHeader(
                 title: 'دليل أحكام التجويد',
-                description:
-                    '${toArabicNumerals(TajweedRule.values.length)} حكمًا '
-                    'برواية حفص عن عاصم',
-                pinned: true,
+                subtitle: [
+                  arabicCount(TajweedRule.values.length, ArabicNoun.ruling),
+                  'برواية حفص عن عاصم',
+                ].join(' '),
               ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
-                sliver: const SliverToBoxAdapter(child: _GuideIntro()),
-              ),
-              for (final family in TajweedFamily.values) ...[
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 8.h),
-                  sliver: SliverToBoxAdapter(
-                    child: _FamilyHeader(family: family),
-                  ),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  sliver: SliverList.separated(
-                    itemCount: _rulesOf(family).length,
-                    separatorBuilder: (_, __) => SizedBox(height: 8.h),
-                    itemBuilder:
-                        (context, i) => _GuideRuleCard(
-                          rule: _rulesOf(family)[i],
-                          colors: colors,
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
+                      sliver: const SliverToBoxAdapter(child: _GuideIntro()),
+                    ),
+                    for (final family in TajweedFamily.values) ...[
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 10.h),
+                        sliver: SliverToBoxAdapter(
+                          child: _FamilyHeader(
+                            family: family,
+                            count: _rulesOf(family).length,
+                          ),
                         ),
-                  ),
+                      ),
+                      SliverPadding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        sliver: SliverToBoxAdapter(
+                          child: _FamilyCard(rules: _rulesOf(family)),
+                        ),
+                      ),
+                    ],
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 0),
+                      sliver: const SliverToBoxAdapter(
+                        child: _GuideLimitations(),
+                      ),
+                    ),
+                    SliverSafeArea(
+                      top: false,
+                      sliver: SliverToBoxAdapter(
+                        child: SizedBox(height: 32.h),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 32.h),
-                sliver: const SliverToBoxAdapter(child: _GuideLimitations()),
               ),
             ],
           ),
@@ -78,11 +89,26 @@ class _GuideIntro extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16.r),
-      decoration: QuranDecorations.guideIntroCard(),
+      decoration: BoxDecoration(
+        color: ColorsManager.primarySoft,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.menu_book_rounded, color: ColorsManager.primaryPurple),
+          Container(
+            width: 40.r,
+            height: 40.r,
+            decoration: BoxDecoration(
+              color: ColorsManager.cardBackground,
+              borderRadius: BorderRadius.circular(13.r),
+            ),
+            child: Icon(
+              Icons.menu_book_rounded,
+              size: 21.r,
+              color: ColorsManager.purpleText,
+            ),
+          ),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
@@ -90,7 +116,7 @@ class _GuideIntro extends StatelessWidget {
               'ولكل حكم مرجعه: تحفة الأطفال للجمزوري، والمقدمة الجزرية لابن '
               'الجزري، ودليل ضبط مجمّع الملك فهد. فعّل التلوين في المصحف، '
               'ثم المس أي حرف ملوّن لترى حكمه.',
-              style: QuranTextStyles.guideIntro,
+              style: TextStyles.bodyMedium.copyWith(height: 1.8),
             ),
           ),
         ],
@@ -101,69 +127,100 @@ class _GuideIntro extends StatelessWidget {
 
 class _FamilyHeader extends StatelessWidget {
   final TajweedFamily family;
+  final int count;
 
-  const _FamilyHeader({required this.family});
+  const _FamilyHeader({required this.family, required this.count});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(family.label, style: QuranTextStyles.guideFamilyTitle),
-        Text(family.englishName, style: QuranTextStyles.guideFamilySubtitle),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                header: true,
+                child: Text(
+                  family.label,
+                  style: TextStyles.sectionTitle.copyWith(fontSize: 16.sp),
+                ),
+              ),
+              Text(ltrIsolate(family.englishName), style: TextStyles.caption),
+            ],
+          ),
+        ),
+        Text(
+          toArabicNumerals(count),
+          style: TextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+        ),
       ],
     );
   }
 }
 
-class _GuideRuleCard extends StatelessWidget {
-  final TajweedRule rule;
-  final QuranSurfaceColors colors;
+/// A family's rules as expandable rows of one card.
+class _FamilyCard extends StatelessWidget {
+  final List<TajweedRule> rules;
 
-  const _GuideRuleCard({required this.rule, required this.colors});
+  const _FamilyCard({required this.rules});
 
   @override
   Widget build(BuildContext context) {
-    final ruleColor = colors.ruleColor(rule);
-    return Container(
-      decoration: QuranDecorations.guideRuleCard(),
+    return Material(
+      color: ColorsManager.cardBackground,
       clipBehavior: Clip.antiAlias,
-      child: Stack(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.r),
+        side: BorderSide(color: ColorsManager.border),
+      ),
+      child: Column(
         children: [
-          Theme(
-            // ExpansionTile draws dividers above and below itself by default.
-            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-            child: ExpansionTile(
-              tilePadding: EdgeInsetsDirectional.only(start: 18.w, end: 14.w),
-              childrenPadding: EdgeInsetsDirectional.fromSTEB(
-                18.w,
-                0,
-                14.w,
-                16.h,
-              ),
-              iconColor: colors.accent,
-              collapsedIconColor: colors.subtitle,
-              leading: RuleSwatch(color: ruleColor, size: 14),
-              title: Text(
-                rule.label,
-                style: QuranTextStyles.tileTitle(ruleColor),
-              ),
-              subtitle: Text(
-                '${ltrIsolate(rule.englishName)} · ${rule.amount}',
-                style: QuranTextStyles.tileMeta(colors.subtitle),
-              ),
-              children: [TajweedRuleDetails(rule: rule, colors: colors)],
-            ),
-          ),
-          PositionedDirectional(
-            start: 0,
-            top: 0,
-            bottom: 0,
-            width: 4,
-            child: ColoredBox(color: ruleColor),
-          ),
+          for (var i = 0; i < rules.length; i++) ...[
+            if (i > 0) Divider(height: 1, color: ColorsManager.lightGray),
+            _GuideRuleTile(rule: rules[i]),
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _GuideRuleTile extends StatelessWidget {
+  final TajweedRule rule;
+
+  const _GuideRuleTile({required this.rule});
+
+  @override
+  Widget build(BuildContext context) {
+    final ruleColor = MushafPalette.of(
+      ColorsManager.palette,
+    ).tajweedColor(rule);
+    return ExpansionTile(
+      // The card draws the dividers between rows.
+      shape: const Border(),
+      collapsedShape: const Border(),
+      tilePadding: EdgeInsetsDirectional.fromSTEB(14.w, 4.h, 10.w, 4.h),
+      childrenPadding: EdgeInsetsDirectional.fromSTEB(14.w, 0, 14.w, 16.h),
+      expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+      iconColor: ColorsManager.purpleText,
+      collapsedIconColor: ColorsManager.gray,
+      leading: RuleWell(color: ruleColor),
+      title: Text(
+        rule.label,
+        style: TextStyles.titleMedium.copyWith(
+          fontWeight: FontWeight.w700,
+          height: 1.5,
+        ),
+      ),
+      subtitle: Text(
+        '${ltrIsolate(rule.englishName)} · ${rule.amount}',
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyles.caption.copyWith(height: 1.6),
+      ),
+      children: [TajweedRuleDetails(rule: rule)],
     );
   }
 }
@@ -174,15 +231,18 @@ class _GuideLimitations extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(14.r),
-      decoration: QuranDecorations.guideNoteCard(),
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: ColorsManager.goldSoft,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
             Icons.info_outline_rounded,
-            color: ColorsManager.warning,
-            size: 20.sp,
+            color: ColorsManager.goldInk,
+            size: 20.r,
           ),
           SizedBox(width: 10.w),
           Expanded(
@@ -190,7 +250,10 @@ class _GuideLimitations extends StatelessWidget {
               'لا يُلوَّن بعدُ: السكت والإمالة والتسهيل والإشمام، ولا علامات '
               'الوقف (تظهر دون لون). والألوان اجتهاد في العرض وليست نقلًا عن '
               'مصحف ملوّن مطبوع، ويُستحسن مراجعة الأحكام مع معلّم مُجاز.',
-              style: QuranTextStyles.guideNote,
+              style: TextStyles.bodySmall.copyWith(
+                height: 1.8,
+                color: ColorsManager.goldInk,
+              ),
             ),
           ),
         ],
