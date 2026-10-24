@@ -12,7 +12,7 @@ import 'package:mishkat_almasabih/features/profile/presentation/logic/user_stats
 
 import 'widgets/account_section.dart';
 import 'widgets/appearance_section.dart';
-import 'widgets/prayer_notification_settings_section.dart';
+import 'widgets/notification_settings_section.dart';
 import 'widgets/profile_hero_card.dart';
 
 /// "حسابي": the account card (or a sign-in invitation) followed by the
@@ -80,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             SizedBox(height: 18.h),
                             const AppearanceSection(),
                             SizedBox(height: 18.h),
-                            const PrayerNotificationSettingsSection(),
+                            const NotificationSettingsSection(),
                             SizedBox(height: 18.h),
                             AccountSection(isSignedIn: isSignedIn),
                           ],

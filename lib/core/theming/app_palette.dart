@@ -76,7 +76,7 @@ class AppPalette {
   /// Warm "manuscript" frame around the hadith of the day.
   final Color featuredBorder;
 
-  /// Inner rule of the hadith of the day's double frame.
+  /// Rule between the hadith of the day and its footer actions.
   final Color featuredInnerBorder;
 
   /// Parchment wash at the top of the hadith of the day, fading into
@@ -87,10 +87,10 @@ class AppPalette {
   /// the frame carries the elevation.
   final Color featuredGlow;
 
-  /// Gold hairlines beside the ornament on the hadith of the day.
+  /// Star watermark in the corner of the hadith of the day.
   final Color ornament;
 
-  /// The ornament glyph ("۞") itself.
+  /// Gold dash before the hadith of the day's source.
   final Color ornamentInk;
 
   /// Authentic ("sahih") grade as text or a thin accent; brighter than

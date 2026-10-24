@@ -3,9 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/hadith_grade.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_badge.dart';
+import 'package:mishkat_almasabih/core/widgets/dashed_divider.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/ui/hadith_text.dart';
 
-/// One hadith in a grouped list: a bar in its grade's colour, two lines of
-/// its text, and its topic, grade and source on one line.
+/// One hadith in a list of previews: its topic and grade as badges, up to
+/// three lines of its text, and its source beside a way into its
+/// explanation.
 class CompactHadithTile extends StatelessWidget {
   const CompactHadithTile({
     super.key,
@@ -25,85 +29,85 @@ class CompactHadithTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppPaletteOverride.of(context);
+    final category = this.category;
     final grade = this.grade;
-    final accent =
-        grade == null ? palette.mediumGray : palette.gradeAccent(grade);
-    final meta = [
-      if (category case final category?)
-        TextSpan(text: category, style: TextStyle(color: palette.purpleText)),
-      if (grade != null)
-        TextSpan(text: grade.arabicLabel, style: TextStyle(color: accent)),
-      if (source case final source?) TextSpan(text: source),
-    ];
 
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        child: Row(
-          children: [
-            Expanded(
-              child: Stack(
+    return Material(
+      color: palette.cardBackground,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.r),
+        side: BorderSide(color: palette.border),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 12.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (category != null || grade != null) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child:
+                          category == null
+                              ? const SizedBox.shrink()
+                              : Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: AppBadge.tag(category),
+                              ),
+                    ),
+                    if (grade != null) ...[
+                      SizedBox(width: 8.w),
+                      GradeBadge(grade: grade),
+                    ],
+                  ],
+                ),
+                SizedBox(height: 10.h),
+              ],
+              HadithText(
+                text,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyles.readingMedium.copyWith(
+                  fontSize: 16.sp,
+                  height: 1.95,
+                  color: palette.primaryText,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              const DashedDivider(),
+              SizedBox(height: 10.h),
+              Row(
                 children: [
-                  PositionedDirectional(
-                    start: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: 4.w,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: accent.withValues(
-                          alpha: palette.isDark ? 0.8 : 0.7,
-                        ),
-                        borderRadius: BorderRadius.circular(2.r),
+                  Expanded(
+                    child: Text(
+                      source ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyles.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: palette.secondaryText,
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsetsDirectional.only(start: 16.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          text,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyles.readingMedium.copyWith(
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.w700,
-                            height: 1.85,
-                            color: palette.primaryText,
-                          ),
-                        ),
-                        if (meta.isNotEmpty) ...[
-                          SizedBox(height: 4.h),
-                          Text.rich(
-                            TextSpan(
-                              children: [
-                                for (final (index, part) in meta.indexed) ...[
-                                  if (index > 0) const TextSpan(text: '  ·  '),
-                                  part,
-                                ],
-                              ],
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyles.caption.copyWith(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w600,
-                              color: palette.secondaryText,
-                            ),
-                          ),
-                        ],
-                      ],
+                  SizedBox(width: 10.w),
+                  Text(
+                    'اقرأ مع الشرح',
+                    style: TextStyles.actionLabel.copyWith(
+                      color: palette.purpleText,
                     ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18.r,
+                    color: palette.purpleText,
                   ),
                 ],
               ),
-            ),
-            SizedBox(width: 12.w),
-            Icon(Icons.chevron_right_rounded, size: 20.r, color: palette.gray),
-          ],
+            ],
+          ),
         ),
       ),
     );

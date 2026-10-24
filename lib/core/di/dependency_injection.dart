@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -74,6 +76,13 @@ import 'package:mishkat_almasabih/features/hadith_daily/domain/repos/daily_hadit
 import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/fetch_daily_hadith_use_case.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/get_saved_daily_hadith_use_case.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/data/datasources/daily_hadith_notification_datasource.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/data/repos/daily_hadith_notification_repo_impl.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/repos/daily_hadith_notification_repo.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/get_daily_hadith_notification_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/set_daily_hadith_notification_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/sync_daily_hadith_notification_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_notification_cubit.dart';
 import 'package:mishkat_almasabih/features/library/data/repos/library_repo_impl.dart';
 import 'package:mishkat_almasabih/features/library/domain/repos/library_repo.dart';
 import 'package:mishkat_almasabih/features/library/domain/usecases/get_cached_category_books_use_case.dart';
@@ -135,6 +144,9 @@ import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_pray
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/open_battery_optimization_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/set_prayer_notifications_enabled_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/notifications/prayer_notifications_cubit.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_prayer_pre_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/set_prayer_pre_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/notifications/prayer_pre_reminder_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_times_repo.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/calculate_prayer_times_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_device_position_use_case.dart';
@@ -206,6 +218,15 @@ import 'package:mishkat_almasabih/features/search_with_filters/presentation/logi
 import 'package:mishkat_almasabih/features/send_suggestion/data/datasources/suggestion_remote_datasource.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/data/repos/suggestion_repo_impl.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/domain/repos/suggestion_repo.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/data/datasources/daily_ayah_reminder_datasource.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/data/datasources/daily_ayah_widget_datasource.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/data/repos/daily_ayah_repo_impl.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/repos/daily_ayah_repo.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/get_daily_ayah_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/get_daily_ayahs_use_case.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/set_daily_ayah_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/sync_daily_ayah_use_case.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/presentation/logic/daily_ayah_reminder_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_reading_local_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_text_local_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/repos/quran_reading_repo_impl.dart';
@@ -232,6 +253,13 @@ import 'package:mishkat_almasabih/features/quran/presentation/logic/flowing_page
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran_wird/data/datasources/quran_wird_reminder_datasource.dart';
+import 'package:mishkat_almasabih/features/quran_wird/data/repos/quran_wird_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran_wird/domain/repos/quran_wird_repo.dart';
+import 'package:mishkat_almasabih/features/quran_wird/domain/usecases/get_quran_wird_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/quran_wird/domain/usecases/set_quran_wird_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/quran_wird/domain/usecases/sync_quran_wird_reminder_use_case.dart';
+import 'package:mishkat_almasabih/features/quran_wird/presentation/logic/quran_wird_reminder_cubit.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/domain/usecases/send_suggestion_use_case.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/presentation/logic/send_suggestion_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/data/repos/chat_history_repo_impl.dart';
@@ -275,7 +303,17 @@ Future<void> setUpGetIt() async {
   _registerReadingPreferences();
   _registerReadAloud();
   _registerQuran();
+  _registerDailyAyah();
+  _registerQuranWird();
   _registerMainNavigation();
+}
+
+/// What background tasks need, for the isolates they run in: those never
+/// run [setUpGetIt], and have no use for its network and Firebase setup.
+void setUpBackgroundGetIt() {
+  if (getIt.isRegistered<SyncDailyAyahUseCase>()) return;
+  _registerQuranText();
+  _registerDailyAyah();
 }
 
 void _registerCore() {
@@ -495,6 +533,21 @@ void _registerDailyHadith() {
   getIt.registerFactory<DailyHadithCubit>(
     () => DailyHadithCubit(getIt(), getIt()),
   );
+  getIt.registerLazySingleton<DailyHadithNotificationRepo>(
+    () => DailyHadithNotificationRepoImpl(DailyHadithNotificationDataSource()),
+  );
+  getIt.registerLazySingleton<GetDailyHadithNotificationEnabledUseCase>(
+    () => GetDailyHadithNotificationEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetDailyHadithNotificationEnabledUseCase>(
+    () => SetDailyHadithNotificationEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SyncDailyHadithNotificationUseCase>(
+    () => SyncDailyHadithNotificationUseCase(getIt()),
+  );
+  getIt.registerFactory<DailyHadithNotificationCubit>(
+    () => DailyHadithNotificationCubit(getIt(), getIt()),
+  );
 }
 
 void _registerCategories() {
@@ -673,6 +726,15 @@ void _registerPrayerTimes() {
   );
   getIt.registerFactory<PrayerNotificationsCubit>(
     () => PrayerNotificationsCubit(getIt(), getIt(), getIt(), getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetPrayerPreReminderEnabledUseCase>(
+    () => GetPrayerPreReminderEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetPrayerPreReminderEnabledUseCase>(
+    () => SetPrayerPreReminderEnabledUseCase(getIt()),
+  );
+  getIt.registerFactory<PrayerPreReminderCubit>(
+    () => PrayerPreReminderCubit(getIt(), getIt()),
   );
   getIt.registerFactory<PrayerTimesCubit>(
     () => PrayerTimesCubit(
@@ -854,14 +916,19 @@ void _registerReadAloud() {
   );
 }
 
-void _registerQuran() {
+/// The bundled mushaf text, which the daily ayah reads too.
+void _registerQuranText() {
   getIt.registerLazySingleton<QuranTextLocalDataSource>(
     () => QuranTextLocalDataSource(),
   );
+  getIt.registerLazySingleton<QuranRepo>(() => QuranRepoImpl(getIt()));
+}
+
+void _registerQuran() {
+  _registerQuranText();
   getIt.registerLazySingleton<QuranReadingLocalDataSource>(
     () => QuranReadingLocalDataSource(),
   );
-  getIt.registerLazySingleton<QuranRepo>(() => QuranRepoImpl(getIt()));
   getIt.registerLazySingleton<QuranReadingRepo>(
     () => QuranReadingRepoImpl(getIt()),
   );
@@ -935,6 +1002,54 @@ void _registerQuran() {
   getIt.registerFactory<AyahDetailsCubit>(() => AyahDetailsCubit(getIt()));
   getIt.registerFactory<FlowingPageCubit>(() => FlowingPageCubit(getIt()));
   getIt.registerFactory<QuranSearchCubit>(() => QuranSearchCubit(getIt()));
+}
+
+void _registerDailyAyah() {
+  getIt.registerLazySingleton<DailyAyahRepo>(
+    () => DailyAyahRepoImpl(
+      DailyAyahWidgetDataSource(),
+      DailyAyahReminderDataSource(),
+    ),
+  );
+  getIt.registerLazySingleton<GetDailyAyahsUseCase>(
+    () => GetDailyAyahsUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<SyncDailyAyahUseCase>(
+    () => SyncDailyAyahUseCase(
+      getIt(),
+      getIt(),
+      // iOS keeps only the 64 soonest notifications, shared with the prayer
+      // reminders, so it is given fewer days at a time.
+      daysAhead: Platform.isIOS ? 7 : SyncDailyAyahUseCase.defaultDaysAhead,
+    ),
+  );
+  getIt.registerLazySingleton<GetDailyAyahReminderEnabledUseCase>(
+    () => GetDailyAyahReminderEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetDailyAyahReminderEnabledUseCase>(
+    () => SetDailyAyahReminderEnabledUseCase(getIt(), getIt()),
+  );
+  getIt.registerFactory<DailyAyahReminderCubit>(
+    () => DailyAyahReminderCubit(getIt(), getIt()),
+  );
+}
+
+void _registerQuranWird() {
+  getIt.registerLazySingleton<QuranWirdRepo>(
+    () => QuranWirdRepoImpl(QuranWirdReminderDataSource()),
+  );
+  getIt.registerLazySingleton<SyncQuranWirdReminderUseCase>(
+    () => SyncQuranWirdReminderUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetQuranWirdReminderEnabledUseCase>(
+    () => GetQuranWirdReminderEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetQuranWirdReminderEnabledUseCase>(
+    () => SetQuranWirdReminderEnabledUseCase(getIt(), getIt()),
+  );
+  getIt.registerFactory<QuranWirdReminderCubit>(
+    () => QuranWirdReminderCubit(getIt(), getIt()),
+  );
 }
 
 void _registerSuggestions() {

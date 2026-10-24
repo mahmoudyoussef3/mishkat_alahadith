@@ -29,6 +29,10 @@ data class PrayerNotificationEntry(
     val title: String,
     val body: String,
     val fireAtMillis: Long,
+    // KIND_ADHAN when the prayer's time comes, KIND_PRE_REMINDER shortly before.
+    val kind: String = PrayerNotificationScheduler.KIND_ADHAN,
+    // When the prayer is due: fireAtMillis for an adhan, later for a reminder.
+    val prayerAtMillis: Long = fireAtMillis,
 )
 
 object PrayerNotificationScheduler {
@@ -48,6 +52,11 @@ object PrayerNotificationScheduler {
     const val EXTRA_TITLE = "extra_title"
     const val EXTRA_BODY = "extra_body"
     const val EXTRA_FIRE_AT_MILLIS = "extra_fire_at_millis"
+    const val EXTRA_KIND = "extra_kind"
+    const val EXTRA_PRAYER_AT_MILLIS = "extra_prayer_at_millis"
+    // The names of Dart's PrayerNotificationKind values.
+    const val KIND_ADHAN = "adhan"
+    const val KIND_PRE_REMINDER = "preReminder"
     private const val ACTION_FIRE = "com.mishkat_almasabih.app.action.PRAYER_NOTIFICATION"
 
     fun schedulePrayerNotifications(context: Context, payload: String): Int {
@@ -183,12 +192,20 @@ object PrayerNotificationScheduler {
             }
 
             val prayerLabel = entry.prayerLabel.ifBlank { prayerLabelFromKey(entry.prayerKey) }
-            val reminderTime = formatReminderTime(entry.fireAtMillis)
-            val reminderTitle = "صلاة $prayerLabel"
-            val reminderSubtitle = "حان الآن موعد الأذان"
+            val isPreReminder = entry.kind == KIND_PRE_REMINDER
+            // A reminder shows the time of the prayer it announces, not its own.
+            val reminderTime = formatReminderTime(entry.prayerAtMillis)
+            // A reminder's wording comes from Dart, which counts the minutes left.
+            val reminderTitle = if (isPreReminder) entry.title else "صلاة $prayerLabel"
+            val reminderSubtitle = if (isPreReminder) entry.body else "حان الآن موعد الأذان"
             // Fallback text used by the collapsed/system rendering and for
             // accessibility services when the custom view can't be shown.
-            val reminderContentText = "حان الآن موعد صلاة $prayerLabel — $reminderTime"
+            val reminderContentText =
+                if (isPreReminder) {
+                    "${entry.body} — $reminderTime"
+                } else {
+                    "حان الآن موعد صلاة $prayerLabel — $reminderTime"
+                }
 
             val contentIntent = PendingIntent.getActivity(
                 context,
@@ -235,7 +252,9 @@ object PrayerNotificationScheduler {
                 .setContentIntent(contentIntent)
                 .addAction(openAction)
                 .setAutoCancel(true)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setCategory(
+                    if (isPreReminder) NotificationCompat.CATEGORY_REMINDER else NotificationCompat.CATEGORY_ALARM,
+                )
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setDefaults(NotificationCompat.DEFAULT_SOUND or NotificationCompat.DEFAULT_VIBRATE)
@@ -357,6 +376,8 @@ object PrayerNotificationScheduler {
             putExtra(EXTRA_TITLE, entry.title)
             putExtra(EXTRA_BODY, entry.body)
             putExtra(EXTRA_FIRE_AT_MILLIS, entry.fireAtMillis)
+            putExtra(EXTRA_KIND, entry.kind)
+            putExtra(EXTRA_PRAYER_AT_MILLIS, entry.prayerAtMillis)
         }
 
         return PendingIntent.getBroadcast(
@@ -407,6 +428,8 @@ object PrayerNotificationScheduler {
                 .put("title", entry.title)
                 .put("body", entry.body)
                 .put("fireAtMillis", entry.fireAtMillis)
+                .put("kind", entry.kind)
+                .put("prayerAtMillis", entry.prayerAtMillis)
             json.put(item)
         }
         prefs.edit().putString(KEY_SCHEDULES, json.toString()).apply()
@@ -420,16 +443,7 @@ object PrayerNotificationScheduler {
             buildList {
                 for (index in 0 until array.length()) {
                     val item = array.getJSONObject(index)
-                    add(
-                        PrayerNotificationEntry(
-                            id = item.getInt("id"),
-                            prayerKey = item.getString("prayerKey"),
-                            prayerLabel = item.optString("prayerLabel", ""),
-                            title = item.getString("title"),
-                            body = item.getString("body"),
-                            fireAtMillis = item.getLong("fireAtMillis"),
-                        ),
-                    )
+                    add(parseEntry(item))
                 }
             }
         } catch (e: Exception) {
@@ -445,22 +459,28 @@ object PrayerNotificationScheduler {
             buildList {
                 for (index in 0 until items.length()) {
                     val item = items.getJSONObject(index)
-                    add(
-                        PrayerNotificationEntry(
-                            id = item.getInt("id"),
-                            prayerKey = item.getString("prayerKey"),
-                            prayerLabel = item.optString("prayerLabel", ""),
-                            title = item.getString("title"),
-                            body = item.getString("body"),
-                            fireAtMillis = item.getLong("fireAtMillis"),
-                        ),
-                    )
+                    add(parseEntry(item))
                 }
             }
         } catch (e: Exception) {
             Log.e(TAG, "parseEntries: failed to parse payload", e)
             emptyList()
         }
+    }
+
+    // Entries stored before reminders existed have no kind: they are adhans.
+    private fun parseEntry(item: JSONObject): PrayerNotificationEntry {
+        val fireAtMillis = item.getLong("fireAtMillis")
+        return PrayerNotificationEntry(
+            id = item.getInt("id"),
+            prayerKey = item.getString("prayerKey"),
+            prayerLabel = item.optString("prayerLabel", ""),
+            title = item.getString("title"),
+            body = item.getString("body"),
+            fireAtMillis = fireAtMillis,
+            kind = item.optString("kind", KIND_ADHAN),
+            prayerAtMillis = item.optLong("prayerAtMillis", fireAtMillis),
+        )
     }
 
     private fun getPrefs(context: Context): android.content.SharedPreferences {

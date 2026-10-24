@@ -10,6 +10,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/notification/local_notification.dart';
 import 'package:mishkat_almasabih/core/notification/notification_helper.dart';
 import 'package:mishkat_almasabih/core/notification/prayer_time_notification_scheduler.dart';
@@ -19,6 +20,9 @@ import 'package:mishkat_almasabih/core/services/hive_service.dart';
 import 'package:mishkat_almasabih/core/services/prayer_times_home_widget_sync.dart';
 import 'package:mishkat_almasabih/core/services/prayer_times_widget_background_worker.dart';
 import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/sync_daily_ayah_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/sync_daily_hadith_notification_use_case.dart';
+import 'package:mishkat_almasabih/features/quran_wird/domain/usecases/sync_quran_wird_reminder_use_case.dart';
 import 'package:mishkat_almasabih/features/onboarding/domain/usecases/is_first_launch_use_case.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/initialize_ramadan_config_use_case.dart';
 import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
@@ -84,6 +88,13 @@ Future<void> _initializeSentry() {
 }
 
 Future<void> _initializeBackgroundServices() async {
+  // First: reading how the app was launched needs no initialising, and
+  // LocalNotification.init can stop on a system settings screen, which would
+  // hold back the screen a tapped notification opens.
+  await _runIsolated(
+    'LocalNotification.handleLaunchNotification',
+    LocalNotification.handleLaunchNotification,
+  );
   await _runIsolated('NotificationHelper.init', NotificationHelper.init);
   await _runIsolated('LocalNotification.init', LocalNotification.init);
   await _runIsolated(
@@ -113,6 +124,40 @@ Future<void> _initializeBackgroundServices() async {
     '_initializeRamadanRemoteConfig',
     _initializeRamadanRemoteConfig,
   );
+  // Last, so a tapped push is handled first: these can take a while, and
+  // the topic sync waits on the network.
+  await _runIsolated('SyncDailyAyahUseCase', _syncDailyAyah);
+  await _runIsolated('SyncQuranWirdReminderUseCase', _syncQuranWird);
+  await _runIsolated(
+    'SyncDailyHadithNotificationUseCase',
+    _syncDailyHadithNotification,
+  );
+}
+
+/// Readies the coming days of "آية اليوم" — widget and notifications.
+Future<void> _syncDailyAyah() async {
+  final result = await getIt<SyncDailyAyahUseCase>()();
+  if (result case ApiFailure(:final failure)) {
+    throw StateError('Daily ayah sync failed: $failure');
+  }
+}
+
+/// Sets the daily wird reminder again if it is on, in case it was lost.
+Future<void> _syncQuranWird() async {
+  final result = await getIt<SyncQuranWirdReminderUseCase>()();
+  if (result case ApiFailure(:final failure)) {
+    throw StateError('Quran wird reminder sync failed: $failure');
+  }
+}
+
+/// Subscribes to the "حديث اليوم" push, or leaves it, as the reader chose.
+/// Offline is expected here and retried on the next start, so it is only
+/// logged.
+Future<void> _syncDailyHadithNotification() async {
+  final result = await getIt<SyncDailyHadithNotificationUseCase>()();
+  if (result case ApiFailure(:final failure)) {
+    debugPrint('Daily hadith notification not synced yet: $failure');
+  }
 }
 
 Future<void> _runIsolated(String label, Future<void> Function() step) async {

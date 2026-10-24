@@ -35,6 +35,14 @@ class PrayerNotificationsRepoImpl implements PrayerNotificationsRepo {
   Future<void> openBatteryOptimizationSettings() =>
       PrayerNotificationScheduler.openBatteryOptimizationSettings();
 
+  @override
+  Future<ApiResult<bool>> isPreReminderEnabled() =>
+      guardApiCall(PrayerNotificationScheduler.isPreReminderEnabled);
+
+  @override
+  Future<ApiResult<void>> setPreReminderEnabled(bool enabled) =>
+      _run(() => PrayerNotificationScheduler.setPreReminderEnabled(enabled));
+
   Future<ApiResult<String>> _run(
     Future<PrayerNotificationActionResult> Function() action,
   ) async {

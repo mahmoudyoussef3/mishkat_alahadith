@@ -7,16 +7,36 @@ import 'package:mishkat_almasabih/core/helpers/hadith_grade.dart';
 import 'package:mishkat_almasabih/core/helpers/hadith_text.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/widgets/section_header.dart';
+import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/ui/widgets/compact_hadith_tile.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/ui/screens/hadith_result_details.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// "أحاديث متنوعة": a refreshable selection of random hadiths, listed as
-/// compact rows inside one card.
+/// "أحاديث متنوعة": a refreshable selection of random hadiths, each in its
+/// own card.
 class RandomAhadithBlocBuilder extends StatelessWidget {
   const RandomAhadithBlocBuilder({super.key});
+
+  static const _switchDuration = Duration(milliseconds: 250);
+
+  /// Pins outgoing and incoming content to the top while they cross-fade.
+  /// The outgoing one can no longer be tapped or read out.
+  static Widget _topAligned(Widget? current, List<Widget> previous) => Stack(
+    alignment: Alignment.topCenter,
+    children: [
+      for (final child in previous)
+        IgnorePointer(child: ExcludeSemantics(child: child)),
+      if (current != null) current,
+    ],
+  );
+
+  static bool _isLoading(RandomAhadithState state) => switch (state) {
+    RandomAhadithLoading() => true,
+    RandomAhadithSuccess(:final refreshing) => refreshing,
+    _ => false,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -24,44 +44,68 @@ class RandomAhadithBlocBuilder extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: BlocSelector<RandomAhadithCubit, RandomAhadithState, bool>(
-            selector: (state) => state is RandomAhadithLoading,
+            selector: _isLoading,
             builder:
                 (context, loading) => SectionHeader(
                   title: 'أحاديث متنوعة',
                   actionLabel: 'تحديث',
                   actionIcon: Icons.refresh_rounded,
+                  actionBusy: loading,
                   onAction:
-                      loading
-                          ? null
-                          : () =>
-                              context
-                                  .read<RandomAhadithCubit>()
-                                  .emitRandomStats(),
+                      () =>
+                          context.read<RandomAhadithCubit>().emitRandomStats(),
                 ),
           ),
         ),
         SliverToBoxAdapter(
-          child: BlocBuilder<RandomAhadithCubit, RandomAhadithState>(
-            builder:
-                (context, state) => switch (state) {
-                  RandomAhadithSuccess(:final hadiths) when hadiths.isEmpty =>
-                    const StateMessage(
-                      icon: Icons.menu_book_rounded,
-                      title: 'لا توجد أحاديث لعرضها الآن',
-                    ),
-                  RandomAhadithSuccess(:final hadiths) => _HadithGroup(
-                    hadiths: hadiths,
+          child: BlocListener<RandomAhadithCubit, RandomAhadithState>(
+            listenWhen:
+                (_, current) =>
+                    current is RandomAhadithSuccess &&
+                    current.refreshFailure != null,
+            listener:
+                (context, state) => showInfoSnackbar(
+                  context,
+                  (state as RandomAhadithSuccess).refreshFailure!,
+                ),
+            child: BlocBuilder<RandomAhadithCubit, RandomAhadithState>(
+              // A refresh that starts or fails leaves the same hadiths on
+              // screen, so there is nothing to rebuild.
+              buildWhen:
+                  (previous, current) =>
+                      previous is! RandomAhadithSuccess ||
+                      current is! RandomAhadithSuccess ||
+                      !identical(previous.hadiths, current.hadiths),
+              builder:
+                  (context, state) => AnimatedSwitcher(
+                    duration: _switchDuration,
+                    layoutBuilder: _topAligned,
+                    child: switch (state) {
+                      RandomAhadithSuccess(:final hadiths)
+                          when hadiths.isEmpty =>
+                        const StateMessage(
+                          key: ValueKey('empty'),
+                          icon: Icons.menu_book_rounded,
+                          title: 'لا توجد أحاديث لعرضها الآن',
+                        ),
+                      RandomAhadithSuccess(:final hadiths) => _HadithList(
+                        key: ObjectKey(hadiths),
+                        hadiths: hadiths,
+                      ),
+                      RandomAhaditFailure(:final errMessage) =>
+                        StateMessage.error(
+                          key: const ValueKey('error'),
+                          message: errMessage,
+                          onRetry:
+                              () =>
+                                  context
+                                      .read<RandomAhadithCubit>()
+                                      .emitRandomStats(),
+                        ),
+                      _ => const _HadithListShimmer(),
+                    },
                   ),
-                  RandomAhaditFailure(:final errMessage) => StateMessage.error(
-                    message: errMessage,
-                    onRetry:
-                        () =>
-                            context
-                                .read<RandomAhadithCubit>()
-                                .emitRandomStats(),
-                  ),
-                  _ => const _HadithGroupShimmer(),
-                },
+            ),
           ),
         ),
       ],
@@ -69,33 +113,8 @@ class RandomAhadithBlocBuilder extends StatelessWidget {
   }
 }
 
-/// The bordered card that groups the rows, with hairlines between them.
-class _GroupCard extends StatelessWidget {
-  const _GroupCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppPaletteOverride.of(context);
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Material(
-        color: palette.cardBackground,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22.r),
-          side: BorderSide(color: palette.border),
-        ),
-        child: child,
-      ),
-    );
-  }
-}
-
-class _HadithGroup extends StatelessWidget {
-  const _HadithGroup({required this.hadiths});
+class _HadithList extends StatelessWidget {
+  const _HadithList({super.key, required this.hadiths});
 
   final List<ExplainedHadith> hadiths;
 
@@ -125,13 +144,12 @@ class _HadithGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final divider = AppPaletteOverride.of(context).lightGray;
-
-    return _GroupCard(
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
         children: [
           for (final (index, hadith) in hadiths.indexed) ...[
-            if (index > 0) Divider(height: 1, thickness: 1, color: divider),
+            if (index > 0) SizedBox(height: 12.h),
             CompactHadithTile(
               text: _preview(hadith),
               category: _nonEmpty(hadith.categories?.firstOrNull),
@@ -146,77 +164,80 @@ class _HadithGroup extends StatelessWidget {
   }
 }
 
-class _HadithGroupShimmer extends StatelessWidget {
-  const _HadithGroupShimmer();
+class _HadithListShimmer extends StatelessWidget {
+  const _HadithListShimmer();
 
-  static const _rows = 3;
+  static const _cards = 3;
 
   @override
   Widget build(BuildContext context) {
-    final palette = AppPaletteOverride.of(context);
-
-    return _GroupCard(
-      child: Shimmer.fromColors(
-        baseColor: palette.shimmerBase,
-        highlightColor: palette.shimmerHighlight,
-        child: Column(
-          children: [
-            for (var index = 0; index < _rows; index++) ...[
-              if (index > 0)
-                Divider(height: 1, thickness: 1, color: palette.lightGray),
-              const _SkeletonRow(),
-            ],
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Column(
+        children: [
+          for (var index = 0; index < _cards; index++) ...[
+            if (index > 0) SizedBox(height: 12.h),
+            const _SkeletonCard(),
           ],
-        ),
+        ],
       ),
     );
   }
 }
 
-class _SkeletonRow extends StatelessWidget {
-  const _SkeletonRow();
+/// Placeholder in the shape of a [CompactHadithTile]: badges, three lines
+/// of text and the footer.
+class _SkeletonCard extends StatelessWidget {
+  const _SkeletonCard();
 
   @override
   Widget build(BuildContext context) {
-    final color = AppPaletteOverride.of(context).shimmerBase;
+    final palette = AppPaletteOverride.of(context);
 
-    Widget line(double widthFactor, double height) => FractionallySizedBox(
-      alignment: AlignmentDirectional.centerStart,
-      widthFactor: widthFactor,
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(6.r),
-        ),
+    Widget block(double width, double height) => Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: palette.shimmerBase,
+        borderRadius: BorderRadius.circular(height / 2),
       ),
     );
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-      child: Row(
-        children: [
-          Container(
-            width: 4.w,
-            height: 70.h,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2.r),
+    Widget line(double widthFactor) => FractionallySizedBox(
+      alignment: AlignmentDirectional.centerStart,
+      widthFactor: widthFactor,
+      child: block(double.infinity, 14.h),
+    );
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
+      decoration: BoxDecoration(
+        color: palette.cardBackground,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: palette.border),
+      ),
+      // Only the blocks shimmer; the card itself stays put.
+      child: Shimmer.fromColors(
+        baseColor: palette.shimmerBase,
+        highlightColor: palette.shimmerHighlight,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [block(88.w, 22.h), const Spacer(), block(44.w, 22.h)],
             ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              children: [
-                line(1, 14.h),
-                SizedBox(height: 14.h),
-                line(0.75, 14.h),
-                SizedBox(height: 12.h),
-                line(0.45, 10.h),
-              ],
+            SizedBox(height: 16.h),
+            line(1),
+            SizedBox(height: 16.h),
+            line(0.92),
+            SizedBox(height: 16.h),
+            line(0.6),
+            SizedBox(height: 18.h),
+            Row(
+              children: [block(96.w, 10.h), const Spacer(), block(72.w, 10.h)],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,7 +10,9 @@ import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/domain/repos/random_ahadith_repo.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/domain/usecases/get_random_ahadith_use_case.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/presentation/ui/widgets/compact_hadith_tile.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/ui/widgets/random_ahadith_bloc_builder.dart';
+import 'package:shimmer/shimmer.dart';
 
 const _hadiths = [
   ExplainedHadith(
@@ -38,6 +42,21 @@ class _FakeRandomAhadithRepo extends Fake implements RandomAhadithRepo {
   @override
   Future<ApiResult<List<ExplainedHadith>>> getRandomAhadith() async => result;
 }
+
+/// Answers the first request with [_hadiths] and holds every later one
+/// until [refresh] completes.
+class _HeldRefreshRepo extends Fake implements RandomAhadithRepo {
+  final refresh = Completer<ApiResult<List<ExplainedHadith>>>();
+  var _requests = 0;
+
+  @override
+  Future<ApiResult<List<ExplainedHadith>>> getRandomAhadith() =>
+      _requests++ == 0
+          ? Future.value(const ApiResult.success(_hadiths))
+          : refresh.future;
+}
+
+const _firstPreview = '«القط لي حصى» فلقطت له سبع حصيات هن حصى الخذف';
 
 Future<RandomAhadithCubit> _loadedCubit(
   ApiResult<List<ExplainedHadith>> result,
@@ -77,13 +96,13 @@ Future<void> _pumpSection(
 
 void main() {
   for (final scale in [1.0, 1.3]) {
-    testWidgets('lays out the grouped rows without overflow at text scale '
-        '$scale', (tester) async {
+    testWidgets('lays out one card per hadith without overflow at text '
+        'scale $scale', (tester) async {
       final cubit = await _loadedCubit(const ApiResult.success(_hadiths));
       await _pumpSection(tester, cubit, textScale: scale);
 
       expect(find.text('أحاديث متنوعة'), findsOneWidget);
-      expect(find.byType(Divider), findsOneWidget);
+      expect(find.byType(CompactHadithTile), findsNWidgets(2));
       expect(tester.takeException(), isNull);
 
       await cubit.close();
@@ -96,24 +115,28 @@ void main() {
     final cubit = await _loadedCubit(const ApiResult.success(_hadiths));
     await _pumpSection(tester, cubit);
 
-    expect(
-      find.text('«القط لي حصى» فلقطت له سبع حصيات هن حصى الخذف'),
-      findsOneWidget,
-    );
+    expect(find.text(_firstPreview), findsOneWidget);
 
     await cubit.close();
   });
 
-  testWidgets('lists topic, grade and attribution in Arabic digits', (
-    tester,
-  ) async {
+  testWidgets('badges each hadith with its topic and grade', (tester) async {
     final cubit = await _loadedCubit(const ApiResult.success(_hadiths));
     await _pumpSection(tester, cubit);
 
-    expect(
-      find.text('مسائل الجاهلية  ·  صحيح  ·  رواه النسائي ٣٠٥٧'),
-      findsOneWidget,
-    );
+    expect(find.text('مسائل الجاهلية'), findsOneWidget);
+    expect(find.text('صحيح'), findsOneWidget);
+    expect(find.text('فضائل التوحيد'), findsOneWidget);
+    expect(find.text('حسن'), findsOneWidget);
+
+    await cubit.close();
+  });
+
+  testWidgets('shows the attribution in Arabic digits', (tester) async {
+    final cubit = await _loadedCubit(const ApiResult.success(_hadiths));
+    await _pumpSection(tester, cubit);
+
+    expect(find.text('رواه النسائي ٣٠٥٧'), findsOneWidget);
 
     await cubit.close();
   });
@@ -124,7 +147,7 @@ void main() {
     final cubit = await _loadedCubit(const ApiResult.success(_hadiths));
     await _pumpSection(tester, cubit);
 
-    expect(find.text('فضائل التوحيد  ·  حسن  ·  كتاب التوحيد'), findsOneWidget);
+    expect(find.text('كتاب التوحيد'), findsOneWidget);
 
     await cubit.close();
   });
@@ -151,5 +174,74 @@ void main() {
     expect(find.text('إعادة المحاولة'), findsOneWidget);
 
     await cubit.close();
+  });
+
+  group('while refreshing', () {
+    // Built inside each test, not in setUp, so the held request resolves in
+    // the test's fake-async zone.
+    Future<(RandomAhadithCubit, _HeldRefreshRepo)> startRefresh(
+      WidgetTester tester,
+    ) async {
+      final repo = _HeldRefreshRepo();
+      final cubit = RandomAhadithCubit(GetRandomAhadithUseCase(repo));
+      await cubit.emitRandomStats();
+      await _pumpSection(tester, cubit);
+      await tester.tap(find.text('تحديث'));
+      await tester.pump();
+      return (cubit, repo);
+    }
+
+    testWidgets('keeps the current hadiths on screen', (tester) async {
+      final (cubit, _) = await startRefresh(tester);
+      // Past any cross-fade, so a list on its way out would be gone.
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(Shimmer), findsNothing);
+      expect(find.text(_firstPreview), findsOneWidget);
+
+      await cubit.close();
+    });
+
+    testWidgets('keeps the hadiths and says why when the refresh fails', (
+      tester,
+    ) async {
+      final (cubit, repo) = await startRefresh(tester);
+
+      repo.refresh.complete(const ApiResult.failure(NetworkFailure()));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text(_firstPreview), findsOneWidget);
+      expect(find.text(FailureMessages.noConnection), findsOneWidget);
+
+      await cubit.close();
+    });
+
+    testWidgets('shows progress in place of the refresh icon', (tester) async {
+      final (cubit, _) = await startRefresh(tester);
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+
+      await cubit.close();
+    });
+
+    testWidgets('replaces the hadiths once the new ones arrive', (
+      tester,
+    ) async {
+      final (cubit, repo) = await startRefresh(tester);
+
+      repo.refresh.complete(
+        const ApiResult.success([
+          ExplainedHadith(id: '9', hadeeth: '"إنما الأعمال بالنيات"'),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('«إنما الأعمال بالنيات»'), findsOneWidget);
+      expect(find.text(_firstPreview), findsNothing);
+
+      await cubit.close();
+    });
   });
 }

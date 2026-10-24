@@ -56,4 +56,6 @@ abstract final class FailureMessages {
       'تحويل النص إلى كلام ثم أعد المحاولة.';
   static const String speechTooLong =
       'نص الحديث أطول من أن يُحفظ في ملف صوتي واحد';
+  static const String notificationsDenied =
+      'يرجى السماح بإشعارات التطبيق أولاً';
 }

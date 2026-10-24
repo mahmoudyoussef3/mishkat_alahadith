@@ -46,6 +46,14 @@ class _FakeRepo implements PrayerNotificationsRepo {
 
   @override
   Future<void> openBatteryOptimizationSettings() async {}
+
+  @override
+  Future<ApiResult<bool>> isPreReminderEnabled() async =>
+      const ApiResult.success(false);
+
+  @override
+  Future<ApiResult<void>> setPreReminderEnabled(bool enabled) async =>
+      const ApiResult.success(null);
 }
 
 final _syncTime = DateTime(2026, 10, 5, 10, 32);

@@ -69,7 +69,7 @@ class LocalNotification {
 
   static Future<void> init() async {
     await requestNotificationPermission();
-    await _configureLocalTimeZone();
+    await configureLocalTimeZone();
     const DarwinInitializationSettings iOSSettings =
         DarwinInitializationSettings(
           requestAlertPermission: true,
@@ -125,7 +125,9 @@ class LocalNotification {
     }
   }
 
-  static Future<void> _configureLocalTimeZone() async {
+  /// Points `tz.local` at the device's time zone, once per isolate — also
+  /// for background tasks, which never run [init].
+  static Future<void> configureLocalTimeZone() async {
     if (_timeZoneConfigured) return;
     try {
       tz.initializeTimeZones();
@@ -149,6 +151,17 @@ class LocalNotification {
     }
 
     streamController.add(notificationResponse);
+  }
+
+  /// Handles the tap that started the app, if a notification started it:
+  /// [onTap] only hears taps that arrive while the app is running.
+  static Future<void> handleLaunchNotification() async {
+    final details =
+        await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+    final response = details?.notificationResponse;
+    if (details == null || !details.didNotificationLaunchApp) return;
+    if (response == null) return;
+    onTap(response);
   }
 
   static Future<void> forgroundNotificationHandler(
@@ -264,7 +277,7 @@ class LocalNotification {
     required DateTime scheduledDate,
     String? payload,
   }) async {
-    await _configureLocalTimeZone();
+    await configureLocalTimeZone();
 
     const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
       presentAlert: true,

@@ -1,41 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
 import 'package:mishkat_almasabih/core/helpers/arabic_time_format.dart';
 import 'package:mishkat_almasabih/core/helpers/extensions.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
-import 'package:mishkat_almasabih/core/widgets/app_switch.dart';
 import 'package:mishkat_almasabih/core/widgets/settings_group.dart';
-import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/notifications/prayer_notifications_cubit.dart';
 
-/// Prayer notifications on/off, manual re-sync, the location times are
+/// Manual re-sync of prayer notifications, the location times are
 /// calculated for, and a battery hint when the OS may delay alerts.
+///
+/// Reads the [PrayerNotificationsCubit] provided above it, which also drives
+/// the prayer notifications' switch.
 class PrayerNotificationSettingsSection extends StatelessWidget {
   const PrayerNotificationSettingsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<PrayerNotificationsCubit>()..load(),
-      child: BlocConsumer<PrayerNotificationsCubit, PrayerNotificationsState>(
-        listenWhen:
-            (previous, current) =>
-                current.notice != null &&
-                !identical(previous.notice, current.notice),
-        listener: (context, state) {
-          final notice = state.notice!;
-          if (notice.isError) {
-            showErrorSnackbar(context, notice.message);
-          } else {
-            showInfoSnackbar(context, notice.message);
-          }
-        },
-        builder: (context, state) => _PrayerSettings(state: state),
-      ),
+    return BlocBuilder<PrayerNotificationsCubit, PrayerNotificationsState>(
+      builder: (context, state) => _PrayerSettings(state: state),
     );
   }
 }
@@ -71,19 +56,6 @@ class _PrayerSettings extends StatelessWidget {
               ? _BatteryHint(onTap: busy ? null : cubit.improveReliability)
               : null,
       children: [
-        SettingsTile(
-          icon: Icons.notifications_rounded,
-          iconBackground: ColorsManager.goldSoft,
-          iconColor: ColorsManager.primaryGold,
-          title: 'إشعارات الصلاة',
-          subtitle: 'الفجر · الظهر · العصر · المغرب · العشاء',
-          onTap: busy ? null : () => cubit.toggle(!state.enabled),
-          trailing: AppSwitch(
-            value: state.enabled,
-            semanticLabel: 'إشعارات الصلاة',
-            onChanged: busy ? null : cubit.toggle,
-          ),
-        ),
         SettingsTile(
           icon: Icons.sync_rounded,
           title: 'مزامنة الإشعارات',

@@ -11,6 +11,11 @@ class MainActivity : FlutterActivity() {
     private val PRAYER_CHANNEL = "com.mishkat_almasabih.app/prayer_notifications"
     private var methodChannel: MethodChannel? = null
 
+    // A daily ayah widget tap that started the app comes before Dart runs,
+    // when a message sent to it would be dropped, so it waits here for Dart
+    // to collect it.
+    private var launchDailyAyahPayload: String? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -18,7 +23,18 @@ class MainActivity : FlutterActivity() {
         // exists before any alarm fires, even on a fresh install or after a reboot.
         PrayerNotificationScheduler.ensureNotificationChannel(applicationContext)
 
-        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).apply {
+            setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "takeLaunchDailyAyah" -> {
+                        result.success(launchDailyAyahPayload)
+                        launchDailyAyahPayload = null
+                    }
+
+                    else -> result.notImplemented()
+                }
+            }
+        }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PRAYER_CHANNEL)
             .setMethodCallHandler { call, result ->
@@ -117,19 +133,32 @@ class MainActivity : FlutterActivity() {
             }
 
         // Handle the initial intent when app is launched from widget
-        handleIntent(intent)
+        handleIntent(intent, isLaunch = true)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleIntent(intent)
+        handleIntent(intent, isLaunch = false)
     }
 
-    private fun handleIntent(intent: Intent?) {
+    private fun handleIntent(intent: Intent?, isLaunch: Boolean) {
         intent?.let {
             val openScreen = it.getStringExtra("open_screen")
             val fromWidget = it.getBooleanExtra("from_widget", false)
+
+            // Reopened from Recents, Android replays the intent the task was
+            // started with; that is not a new tap.
+            val fromHistory =
+                it.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0
+            if (fromWidget && openScreen == DailyAyahWidgetProvider.OPEN_SCREEN && !fromHistory) {
+                val payload = it.getStringExtra(DailyAyahWidgetProvider.EXTRA_PAYLOAD)
+                if (isLaunch) {
+                    launchDailyAyahPayload = payload
+                } else {
+                    methodChannel?.invokeMethod("openDailyAyah", payload)
+                }
+            }
 
             // Handle widget tap navigation
             if (fromWidget && openScreen == "hadith_of_the_day") {

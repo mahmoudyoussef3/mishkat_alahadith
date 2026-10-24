@@ -2,6 +2,9 @@ abstract final class PrayerDefaults {
   static const double latitude = 30.0444;
   static const double longitude = 31.2357;
   static const String cityName = 'القاهرة، مصر';
+
+  /// How long before each adhan the optional reminder goes out.
+  static const Duration preReminderLead = Duration(minutes: 3);
 }
 
 abstract final class PrayerNames {

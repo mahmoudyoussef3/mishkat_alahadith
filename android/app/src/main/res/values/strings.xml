@@ -2,6 +2,11 @@
     <string name="app_name">مشكاة الأحاديث</string>
     <string name="widget_description">عرض حديث اليوم على الشاشة الرئيسية</string>
     <string name="prayer_widget_description">عرض مواقيت الصلاة اليومية على الشاشة الرئيسية</string>
+    <string name="daily_ayah_widget_description">آية من القرآن الكريم كل يوم على الشاشة الرئيسية</string>
+    <!-- Daily ayah widget before the app first writes its data: Ar-Ra'd 13:28 -->
+    <string name="daily_ayah_widget_fallback_text">﴿ٱلَّذِينَ ءَامَنُواْ وَتَطۡمَئِنُّ قُلُوبُهُم بِذِكۡرِ ٱللَّهِۗ أَلَا بِذِكۡرِ ٱللَّهِ تَطۡمَئِنُّ ٱلۡقُلُوبُ﴾</string>
+    <string name="daily_ayah_widget_fallback_reference">سورة الرعد · الآية ٢٨</string>
+    <string name="daily_ayah_widget_fallback_page">الصفحة ٢٥٢</string>
     <!-- Expanded prayer notification footer: An-Nisa 4:103 -->
     <string name="notification_prayer_verse">﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا﴾</string>
     <string name="notification_prayer_verse_source">سورة النساء: ١٠٣</string>
