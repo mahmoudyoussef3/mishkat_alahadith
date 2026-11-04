@@ -13,6 +13,33 @@ import 'package:mishkat_almasabih/core/networking/dio_factory.dart';
 import 'package:mishkat_almasabih/core/data/datasources/hadeethenc_datasource.dart';
 import 'package:mishkat_almasabih/core/networking/network_info.dart';
 import 'package:mishkat_almasabih/core/storage/token_storage.dart';
+import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_audio_cache_datasource.dart';
+import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_audio_player_datasource.dart';
+import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_catalog_local_datasource.dart';
+import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_preferences_local_datasource.dart';
+import 'package:mishkat_almasabih/features/azkar/data/repos/azkar_audio_repo_impl.dart';
+import 'package:mishkat_almasabih/features/azkar/data/repos/azkar_repo_impl.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/repos/azkar_audio_repo.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/repos/azkar_repo.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_azkar_catalog_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_azkar_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_favorite_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_suggested_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_today_azkar_progress_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/pause_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/play_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/prepare_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/reset_azkar_category_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/resume_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/save_azkar_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/search_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/set_zikr_count_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/stop_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/toggle_favorite_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_playback_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_home/azkar_home_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_reader/azkar_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith/data/repos/ahadith_repo_impl.dart';
 import 'package:mishkat_almasabih/features/ahadith/domain/repos/ahadith_repo.dart';
 import 'package:mishkat_almasabih/features/ahadith/domain/usecases/cache_chapter_ahadith_use_case.dart';
@@ -305,6 +332,7 @@ Future<void> setUpGetIt() async {
   _registerQuran();
   _registerDailyAyah();
   _registerQuranWird();
+  _registerAzkar();
   _registerMainNavigation();
 }
 
@@ -1049,6 +1077,106 @@ void _registerQuranWird() {
   );
   getIt.registerFactory<QuranWirdReminderCubit>(
     () => QuranWirdReminderCubit(getIt(), getIt()),
+  );
+}
+
+void _registerAzkar() {
+  getIt.registerLazySingleton<AzkarRepo>(
+    () => AzkarRepoImpl(
+      AzkarCatalogLocalDataSource(),
+      AzkarPreferencesLocalDataSource(),
+    ),
+  );
+  // A client of its own: the recitations come from a public CDN, which must
+  // never see the app's headers or session token. One player for the whole
+  // app, so two recitations can never overlap.
+  getIt.registerLazySingleton<AzkarAudioRepo>(
+    () => AzkarAudioRepoImpl(
+      AzkarAudioCacheDataSource(
+        Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 60),
+          ),
+        ),
+      ),
+      AzkarAudioPlayerDataSource(),
+    ),
+  );
+
+  getIt.registerLazySingleton<GetAzkarCatalogUseCase>(
+    () => GetAzkarCatalogUseCase(getIt()),
+  );
+  // A singleton so its search index is built once per catalogue.
+  getIt.registerLazySingleton<SearchAzkarUseCase>(SearchAzkarUseCase.new);
+  getIt.registerLazySingleton<GetSuggestedAzkarUseCase>(
+    GetSuggestedAzkarUseCase.new,
+  );
+  getIt.registerLazySingleton<GetTodayAzkarProgressUseCase>(
+    () => GetTodayAzkarProgressUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetZikrCountUseCase>(
+    () => SetZikrCountUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ResetAzkarCategoryUseCase>(
+    () => ResetAzkarCategoryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetFavoriteAzkarUseCase>(
+    () => GetFavoriteAzkarUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ToggleFavoriteAzkarUseCase>(
+    () => ToggleFavoriteAzkarUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetAzkarSettingsUseCase>(
+    () => GetAzkarSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveAzkarSettingsUseCase>(
+    () => SaveAzkarSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PrepareAzkarAudioUseCase>(
+    () => PrepareAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PlayAzkarAudioUseCase>(
+    () => PlayAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PauseAzkarAudioUseCase>(
+    () => PauseAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ResumeAzkarAudioUseCase>(
+    () => ResumeAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<StopAzkarAudioUseCase>(
+    () => StopAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchAzkarPlaybackUseCase>(
+    () => WatchAzkarPlaybackUseCase(getIt()),
+  );
+
+  getIt.registerFactory<AzkarHomeCubit>(
+    () => AzkarHomeCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerFactory<AzkarReaderCubit>(
+    () => AzkarReaderCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerFactory<AzkarAudioCubit>(
+    () => AzkarAudioCubit(getIt(), getIt(), getIt(), getIt(), getIt(), getIt()),
   );
 }
 

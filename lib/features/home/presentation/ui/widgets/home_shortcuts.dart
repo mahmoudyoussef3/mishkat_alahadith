@@ -6,7 +6,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/home_prayer_strip.dart';
 
-/// Four quick ways into the app's companion tools.
+/// Quick ways into the app's companion tools.
 class HomeShortcuts extends StatelessWidget {
   const HomeShortcuts({super.key});
 
@@ -21,6 +21,13 @@ class HomeShortcuts extends StatelessWidget {
           foreground: ColorsManager.primaryGold,
           background: ColorsManager.goldSoft,
           onTap: () => context.pushNamed(Routes.quranScreen),
+        ),
+        _Shortcut(
+          icon: Icons.volunteer_activism_rounded,
+          label: 'الأذكار',
+          foreground: ColorsManager.purpleText,
+          background: ColorsManager.primarySoft,
+          onTap: () => context.pushNamed(Routes.azkarScreen),
         ),
         _Shortcut(
           icon: Icons.explore_rounded,

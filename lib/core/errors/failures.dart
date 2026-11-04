@@ -58,4 +58,6 @@ abstract final class FailureMessages {
       'نص الحديث أطول من أن يُحفظ في ملف صوتي واحد';
   static const String notificationsDenied =
       'يرجى السماح بإشعارات التطبيق أولاً';
+  static const String audio = 'تعذر تشغيل التلاوة، حاول مرة أخرى';
+  static const String audioUnavailable = 'هذه التلاوة غير متوفرة حالياً';
 }

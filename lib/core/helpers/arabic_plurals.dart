@@ -86,6 +86,22 @@ class ArabicNoun {
     accusative: 'موضعاً',
   );
 
+  /// A remembrance of Allah ("٢٤ ذكراً").
+  static const zikr = ArabicNoun(
+    singular: 'ذكر',
+    dual: 'ذكران',
+    plural: 'أذكار',
+    accusative: 'ذكراً',
+  );
+
+  /// How often something is repeated ("٣ مرات", "١٠٠ مرة").
+  static const time = ArabicNoun(
+    singular: 'مرة',
+    dual: 'مرتان',
+    plural: 'مرات',
+    accusative: 'مرة',
+  );
+
   /// Genitive dual, for use after a preposition ("بعد دقيقتين").
   static const minute = ArabicNoun(
     singular: 'دقيقة',

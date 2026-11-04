@@ -10,6 +10,12 @@ import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/sc
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/category_style.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/screens/categories_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/presentation/logic/signup_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_home/azkar_home_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_reader/azkar_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/ui/models/azkar_reader_args.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/ui/screens/azkar_home_screen.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/ui/screens/azkar_reader_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/screens/signup_screen.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
@@ -471,6 +477,37 @@ class AppRouter {
       case Routes.tajweedGuide:
         _logScreenView('TajweedGuideScreen');
         return MaterialPageRoute(builder: (_) => const TajweedGuideScreen());
+      case Routes.azkarScreen:
+        _logScreenView('AzkarScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<AzkarHomeCubit>()..load(),
+                child: const AzkarHomeScreen(),
+              ),
+        );
+      case Routes.azkarReader:
+        _logScreenView('AzkarReaderScreen');
+        final azkar = switch (settings.arguments) {
+          final AzkarReaderArgs args => args,
+          _ => null,
+        };
+        if (azkar == null) return null;
+        return MaterialPageRoute(
+          builder:
+              (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create:
+                        (context) =>
+                            getIt<AzkarReaderCubit>()
+                              ..load(azkar.categoryId, zikrId: azkar.zikrId),
+                  ),
+                  BlocProvider(create: (context) => getIt<AzkarAudioCubit>()),
+                ],
+                child: AzkarReaderScreen(args: azkar),
+              ),
+        );
       case Routes.categoriesScreen:
         _logScreenView('CategoriesScreen');
         return MaterialPageRoute(

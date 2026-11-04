@@ -127,6 +127,15 @@ class _MishkatDrawerState extends State<MishkatDrawer> {
                 ),
                 _buildDrawerItem(
                   context,
+                  icon: Icons.volunteer_activism_rounded,
+                  title: 'الأذكار',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.pushNamed(Routes.azkarScreen);
+                  },
+                ),
+                _buildDrawerItem(
+                  context,
                   icon: Icons.access_time_rounded,
                   title: 'مواقيت الصلاة',
                   onTap: () {

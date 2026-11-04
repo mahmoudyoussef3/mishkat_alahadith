@@ -37,4 +37,7 @@ class Routes {
   static const String quranSearch = '/quran/search';
   static const String tajweedGuide = '/quran/tajweedGuide';
 
+  static const String azkarScreen = '/azkar';
+  static const String azkarReader = '/azkar/reader';
+
 }
