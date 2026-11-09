@@ -18,6 +18,7 @@ class PlayRecitationUseCase {
     bool paused = false,
   }) => _repo.play(
     playlist.tracks,
+    reciterName: settings.reciterName,
     startIndex: startIndex.clamp(0, playlist.tracks.length - 1),
     repeat: settings.repeat,
     speed: settings.speed,
@@ -39,6 +40,16 @@ class ResumeRecitationUseCase {
   ResumeRecitationUseCase(this._repo);
 
   Future<ApiResult<void>> call() => _repo.resume();
+}
+
+/// Silences the player while the next playlist is fetched, keeping its
+/// controls outside the app up.
+class StandByRecitationUseCase {
+  final QuranRecitationPlayerRepo _repo;
+
+  StandByRecitationUseCase(this._repo);
+
+  Future<ApiResult<void>> call() => _repo.standBy();
 }
 
 class StopRecitationUseCase {
@@ -72,4 +83,14 @@ class WatchRecitationUseCase {
   WatchRecitationUseCase(this._repo);
 
   Stream<RecitationPlayback> call() => _repo.watch();
+}
+
+/// The controls used outside the app: the notification, the lock screen,
+/// headphones, a watch or a car.
+class WatchRecitationCommandsUseCase {
+  final QuranRecitationPlayerRepo _repo;
+
+  WatchRecitationCommandsUseCase(this._repo);
+
+  Stream<RecitationCommand> call() => _repo.commands();
 }

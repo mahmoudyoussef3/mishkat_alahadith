@@ -1,3 +1,5 @@
+import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
+
 import 'quran_metrics.dart';
 
 /// The divisions of the mushaf the service can recite in one request.
@@ -119,6 +121,11 @@ class RecitationTrack {
     required this.url,
   });
 
+  /// «سورة البقرة · الآية ٢٥٥»: the ayah as the player names it, in the app
+  /// and on the system's controls outside it.
+  String get title =>
+      'سورة $surahName · الآية ${toArabicDigits('$ayahNumber')}';
+
   @override
   bool operator ==(Object other) =>
       other is RecitationTrack && other.ayahId == ayahId && other.url == url;
@@ -147,6 +154,10 @@ class RecitationPlaylist {
 
 /// What the player is doing.
 enum RecitationStatus { idle, loading, playing, paused, completed }
+
+/// A control the listener used outside the app: on the notification, the
+/// lock screen, headphones, a watch or a car.
+enum RecitationCommand { play, pause, next, previous, stop }
 
 /// The player's status and the track it is on.
 class RecitationPlayback {

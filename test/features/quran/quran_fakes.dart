@@ -504,14 +504,18 @@ class FakeQuranCloudRepo implements QuranCloudRepo {
 }
 
 /// The recitation player, recording what it was asked to do. Playback is
-/// reported by calling [report].
+/// reported by calling [report], and controls used outside the app by
+/// calling [command].
 class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
   final StreamController<RecitationPlayback> _playback =
+      StreamController.broadcast();
+  final StreamController<RecitationCommand> _commands =
       StreamController.broadcast();
 
   final List<
     ({
       List<RecitationTrack> tracks,
+      String reciterName,
       int startIndex,
       AyahRepeat repeat,
       RecitationSpeed speed,
@@ -523,6 +527,7 @@ class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
   final List<RecitationSpeed> speeds = [];
   int pauses = 0;
   int resumes = 0;
+  int standBys = 0;
   int stops = 0;
   bool failPlay = false;
 
@@ -535,9 +540,12 @@ class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
   void reportError() =>
       _playback.addError(const UnexpectedFailure(FailureMessages.audio));
 
+  void command(RecitationCommand command) => _commands.add(command);
+
   @override
   Future<ApiResult<void>> play(
     List<RecitationTrack> tracks, {
+    required String reciterName,
     required int startIndex,
     required AyahRepeat repeat,
     required RecitationSpeed speed,
@@ -545,6 +553,7 @@ class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
   }) async {
     plays.add((
       tracks: tracks,
+      reciterName: reciterName,
       startIndex: startIndex,
       repeat: repeat,
       speed: speed,
@@ -569,6 +578,12 @@ class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
   }
 
   @override
+  Future<ApiResult<void>> standBy() async {
+    standBys++;
+    return const ApiResult.success(null);
+  }
+
+  @override
   Future<ApiResult<void>> stop() async {
     stops++;
     return const ApiResult.success(null);
@@ -588,6 +603,9 @@ class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
 
   @override
   Stream<RecitationPlayback> watch() => _playback.stream;
+
+  @override
+  Stream<RecitationCommand> commands() => _commands.stream;
 }
 
 /// A recitation cubit over fakes.
@@ -613,6 +631,8 @@ QuranRecitationCubit recitationCubit({
     SkipToRecitationTrackUseCase(playerRepo),
     SetRecitationSpeedUseCase(playerRepo),
     WatchRecitationUseCase(playerRepo),
+    StandByRecitationUseCase(playerRepo),
+    WatchRecitationCommandsUseCase(playerRepo),
   );
 }
 

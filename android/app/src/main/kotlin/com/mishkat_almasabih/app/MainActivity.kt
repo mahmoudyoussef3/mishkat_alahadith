@@ -2,11 +2,21 @@ package com.mishkat_almasabih.app
 
 import android.content.Intent
 import android.os.Bundle
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.lang.ref.WeakReference
 
-class MainActivity : FlutterActivity() {
+// AudioServiceActivity shares its engine with the service that plays the
+// Quran recitation, so Dart keeps running it with the activity gone.
+class MainActivity : AudioServiceActivity() {
+    companion object {
+        // That engine outlives the activity while a recitation plays, and
+        // its Dart asks for the tap that launched the app only once: an
+        // activity started on it again sends a tap straight away.
+        private var engineThatTookLaunch: WeakReference<FlutterEngine>? = null
+    }
+
     private val CHANNEL = "com.mishkat_almasabih.app/widget"
     private val PRAYER_CHANNEL = "com.mishkat_almasabih.app/prayer_notifications"
     private var methodChannel: MethodChannel? = null
@@ -15,6 +25,15 @@ class MainActivity : FlutterActivity() {
     // when a message sent to it would be dropped, so it waits here for Dart
     // to collect it.
     private var launchDailyAyahPayload: String? = null
+
+    // Recreated by the system rather than started; set before the engine is
+    // configured, which happens within onCreate.
+    private var restored = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        restored = savedInstanceState != null
+        super.onCreate(savedInstanceState)
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -27,6 +46,7 @@ class MainActivity : FlutterActivity() {
             setMethodCallHandler { call, result ->
                 when (call.method) {
                     "takeLaunchDailyAyah" -> {
+                        engineThatTookLaunch = WeakReference(flutterEngine)
                         result.success(launchDailyAyahPayload)
                         launchDailyAyahPayload = null
                     }
@@ -132,8 +152,11 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
-        // Handle the initial intent when app is launched from widget
-        handleIntent(intent, isLaunch = true)
+        // Handle the initial intent when app is launched from widget. An
+        // activity the system recreated over an engine that kept running
+        // carries the intent that engine already handled: not handled again.
+        val dartRunning = engineThatTookLaunch?.get() === flutterEngine
+        if (!(restored && dartRunning)) handleIntent(intent, isLaunch = !dartRunning)
     }
 
     override fun onNewIntent(intent: Intent) {

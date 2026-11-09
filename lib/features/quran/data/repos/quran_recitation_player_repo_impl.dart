@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
@@ -28,6 +29,7 @@ class QuranRecitationPlayerRepoImpl implements QuranRecitationPlayerRepo {
   @override
   Future<ApiResult<void>> play(
     List<RecitationTrack> tracks, {
+    required String reciterName,
     required int startIndex,
     required AyahRepeat repeat,
     required RecitationSpeed speed,
@@ -40,11 +42,12 @@ class QuranRecitationPlayerRepoImpl implements QuranRecitationPlayerRepo {
     }
     // Endless repetition loops the one entry instead.
     final times = repeat.times ?? 1;
-    final urls = <String>[];
+    final queue = <MediaItem>[];
     final entries = <int>[];
     for (var track = 0; track < tracks.length; track++) {
+      final item = mediaItemOf(tracks[track], reciterName);
       for (var i = 0; i < times; i++) {
-        urls.add(tracks[track].url);
+        queue.add(item);
         entries.add(track);
       }
     }
@@ -52,7 +55,7 @@ class QuranRecitationPlayerRepoImpl implements QuranRecitationPlayerRepo {
     _currentEntry = null;
     return _guard(
       () => _player.playQueue(
-        urls,
+        queue,
         initialIndex: startIndex * times,
         loopEach: repeat.times == null,
         speed: speed.factor,
@@ -66,6 +69,9 @@ class QuranRecitationPlayerRepoImpl implements QuranRecitationPlayerRepo {
 
   @override
   Future<ApiResult<void>> resume() => _guard(_player.resume);
+
+  @override
+  Future<ApiResult<void>> standBy() => _guard(_player.standBy);
 
   @override
   Future<ApiResult<void>> stop() => _guard(_player.stop);
@@ -135,6 +141,19 @@ class QuranRecitationPlayerRepoImpl implements QuranRecitationPlayerRepo {
     );
     return controller.stream;
   }
+
+  @override
+  Stream<RecitationCommand> commands() => _player.commands;
+
+  /// [track] as the system shows it outside the app, streamed from its
+  /// [MediaItem.id].
+  static MediaItem mediaItemOf(RecitationTrack track, String reciterName) =>
+      MediaItem(
+        id: track.url,
+        title: track.title,
+        artist: reciterName,
+        album: 'القرآن الكريم',
+      );
 
   static RecitationStatus statusOf(PlayerState state) => switch (state
       .processingState) {

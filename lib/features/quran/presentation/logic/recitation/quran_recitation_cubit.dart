@@ -28,7 +28,8 @@ enum _Apply {
   reload,
 }
 
-/// Recites the mushaf while it is open, and silences it when it closes.
+/// Recites the mushaf while it is open — on in the background, with its
+/// controls outside the app — and silences it when it closes.
 class QuranRecitationCubit extends Cubit<QuranRecitationState> {
   final GetRecitationSettingsUseCase _getSettings;
   final SaveRecitationSettingsUseCase _saveSettings;
@@ -40,8 +41,11 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
   final SkipToRecitationTrackUseCase _skipTo;
   final SetRecitationSpeedUseCase _setSpeed;
   final WatchRecitationUseCase _watch;
+  final StandByRecitationUseCase _standBy;
+  final WatchRecitationCommandsUseCase _watchCommands;
 
   StreamSubscription<RecitationPlayback>? _playback;
+  StreamSubscription<RecitationCommand>? _commands;
   Future<void>? _settingsLoad;
 
   /// Bumped by every request, so a playlist that arrives after the reader
@@ -60,6 +64,10 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
   /// The part already fetched ahead of time, so it is not fetched twice.
   RecitationScope? _prefetched;
 
+  /// The request a pause from outside the app reached while it was being
+  /// fetched: it starts paused, rather than the pause being lost.
+  int? _pausedWhilePreparing;
+
   QuranRecitationCubit(
     this._getSettings,
     this._saveSettings,
@@ -71,6 +79,8 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
     this._skipTo,
     this._setSpeed,
     this._watch,
+    this._standBy,
+    this._watchCommands,
   ) : super(const RecitationIdle(RecitationSettings.defaults));
 
   /// Reads the saved settings, then starts [autoplay] if given.
@@ -90,8 +100,9 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
     _starting = true;
     _held = null;
     _playback ??= _watch().listen(_onPlayback, onError: _onPlayerError);
+    _commands ??= _watchCommands().listen(_onCommand);
     emit(RecitationPreparing(state.settings, request: request));
-    await _stop();
+    await _standBy();
     if (isClosed || request_ != _request) return;
 
     final loaded = await _load(request, state.settings);
@@ -100,7 +111,12 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
       case ApiFailure(:final failure):
         _fail(failure.message, request);
       case ApiSuccess(data: (:final playlist, :final startIndex)):
-        await _begin(playlist, startIndex, request_, paused: paused);
+        await _begin(
+          playlist,
+          startIndex,
+          request_,
+          paused: paused || _pausedWhilePreparing == request_,
+        );
     }
   }
 
@@ -284,8 +300,18 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
       // Stopped, closed or replaced while the player was being set up — so
       // what it was told may have started after it was told to stop. Unless
       // a newer playlist has reached the player since, silence it, so
-      // nothing plays that no one can stop.
-      if (isClosed || state is! RecitationActive) unawaited(_stop());
+      // nothing plays that no one can stop: standing by for one still on
+      // its way, else for good.
+      switch (state) {
+        case _ when isClosed:
+          unawaited(_stop());
+        case RecitationPreparing():
+          unawaited(_standBy());
+        case RecitationIdle() || RecitationFailure():
+          unawaited(_stop());
+        case RecitationActive():
+          break;
+      }
       return;
     }
     if (played case ApiFailure(:final failure)) {
@@ -377,6 +403,42 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
     unawaited(_load(RecitationOfScope(following), current.settings));
   }
 
+  /// A control used outside the app — on the notification, the lock screen,
+  /// headphones, a watch or a car — does what its button in the app does.
+  void _onCommand(RecitationCommand command) {
+    if (isClosed) return;
+    final current = state;
+    switch (command) {
+      case RecitationCommand.play:
+        switch (current) {
+          case RecitationActive(status: RecitationStatus.paused):
+            unawaited(resume());
+          case RecitationFailure(:final request):
+            unawaited(start(request));
+          case RecitationPreparing():
+            _pausedWhilePreparing = null;
+          case RecitationActive() || RecitationIdle():
+            break;
+        }
+      case RecitationCommand.pause:
+        switch (current) {
+          case RecitationActive():
+            unawaited(pause());
+          // Between one part and the next: the next one comes paused.
+          case RecitationPreparing():
+            _pausedWhilePreparing = _request;
+          case RecitationIdle() || RecitationFailure():
+            break;
+        }
+      case RecitationCommand.next:
+        unawaited(next());
+      case RecitationCommand.previous:
+        unawaited(previous());
+      case RecitationCommand.stop:
+        unawaited(stop());
+    }
+  }
+
   void _onPlayerError(Object error) {
     final current = state;
     // While starting, the call to play reports the failure itself.
@@ -405,6 +467,7 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
   Future<void> close() async {
     _request++;
     await _playback?.cancel();
+    await _commands?.cancel();
     await _stop();
     return super.close();
   }

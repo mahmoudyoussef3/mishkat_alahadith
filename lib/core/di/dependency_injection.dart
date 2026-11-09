@@ -1110,6 +1110,9 @@ void _registerQuranCloud() {
   getIt.registerLazySingleton<ResumeRecitationUseCase>(
     () => ResumeRecitationUseCase(getIt()),
   );
+  getIt.registerLazySingleton<StandByRecitationUseCase>(
+    () => StandByRecitationUseCase(getIt()),
+  );
   getIt.registerLazySingleton<StopRecitationUseCase>(
     () => StopRecitationUseCase(getIt()),
   );
@@ -1121,6 +1124,9 @@ void _registerQuranCloud() {
   );
   getIt.registerLazySingleton<WatchRecitationUseCase>(
     () => WatchRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchRecitationCommandsUseCase>(
+    () => WatchRecitationCommandsUseCase(getIt()),
   );
   getIt.registerLazySingleton<GetAyahCommentaryUseCase>(
     () => GetAyahCommentaryUseCase(getIt()),
@@ -1140,6 +1146,8 @@ void _registerQuranCloud() {
 
   getIt.registerFactory<QuranRecitationCubit>(
     () => QuranRecitationCubit(
+      getIt(),
+      getIt(),
       getIt(),
       getIt(),
       getIt(),

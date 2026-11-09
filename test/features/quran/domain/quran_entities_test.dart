@@ -5,11 +5,27 @@ import 'package:mishkat_almasabih/features/quran/domain/entities/quran_ayah.dart
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_juz.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_metrics.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_surah.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/recitation.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/tajweed_info.dart';
 
 import '../quran_fakes.dart';
 
 void main() {
+  group('RecitationTrack.title', () {
+    test('names the surah and the ayah in Arabic-Indic digits', () {
+      const track = RecitationTrack(
+        ayahId: 262,
+        surahNumber: 2,
+        surahName: 'البقرة',
+        ayahNumber: 255,
+        page: 42,
+        url: 'https://cdn.example/262.mp3',
+      );
+
+      expect(track.title, 'سورة البقرة · الآية ٢٥٥');
+    });
+  });
+
   group('QuranSurah.openingAt', () {
     test('names the surah a page belongs to', () {
       expect(QuranSurah.openingAt(sampleSurahs, 30), baqarah);

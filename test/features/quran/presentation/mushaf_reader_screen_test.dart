@@ -166,9 +166,7 @@ void main() {
       await cubit.close();
     });
 
-    testWidgets('is still for a surah on a single page', (
-      tester,
-    ) async {
+    testWidgets('is still for a surah on a single page', (tester) async {
       final cubit = await _pumpReader(tester);
 
       expect(tester.takeException(), isNull);

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
@@ -16,9 +17,17 @@ class _FakePlayer extends QuranRecitationPlayerDataSource {
   final StreamController<int?> indexes = StreamController.broadcast();
   final StreamController<PlayerException> playerErrors =
       StreamController.broadcast();
+  final StreamController<RecitationCommand> controls =
+      StreamController.broadcast();
 
   final List<
-    ({List<String> urls, int initialIndex, bool loopEach, double speed})
+    ({
+      List<MediaItem> entries,
+      List<String> urls,
+      int initialIndex,
+      bool loopEach,
+      double speed,
+    })
   >
   queues = [];
   final List<bool> autoplays = [];
@@ -26,6 +35,7 @@ class _FakePlayer extends QuranRecitationPlayerDataSource {
   final List<double> speeds = [];
   int pauses = 0;
   int resumes = 0;
+  int standBys = 0;
   int stops = 0;
   Object? playError;
 
@@ -39,8 +49,11 @@ class _FakePlayer extends QuranRecitationPlayerDataSource {
   Stream<PlayerException> get errors => playerErrors.stream;
 
   @override
+  Stream<RecitationCommand> get commands => controls.stream;
+
+  @override
   Future<void> playQueue(
-    List<String> urls, {
+    List<MediaItem> entries, {
     required int initialIndex,
     required bool loopEach,
     required double speed,
@@ -48,7 +61,8 @@ class _FakePlayer extends QuranRecitationPlayerDataSource {
   }) async {
     autoplays.add(autoplay);
     queues.add((
-      urls: urls,
+      entries: entries,
+      urls: [for (final entry in entries) entry.id],
       initialIndex: initialIndex,
       loopEach: loopEach,
       speed: speed,
@@ -62,6 +76,9 @@ class _FakePlayer extends QuranRecitationPlayerDataSource {
 
   @override
   Future<void> resume() async => resumes++;
+
+  @override
+  Future<void> standBy() async => standBys++;
 
   @override
   Future<void> stop() async => stops++;
@@ -86,6 +103,8 @@ final List<RecitationTrack> _tracks = [
   for (var id = 6222; id <= 6225; id++) _track(id),
 ];
 
+const _reciter = 'مشاري العفاسي';
+
 PlayerState _ready({bool playing = true}) =>
     PlayerState(playing, ProcessingState.ready);
 
@@ -105,6 +124,7 @@ void main() {
     test('queues each ayah three times back to back for thrice', () async {
       await repo.play(
         _tracks.take(2).toList(),
+        reciterName: _reciter,
         startIndex: 1,
         repeat: AyahRepeat.thrice,
         speed: RecitationSpeed.normal,
@@ -121,6 +141,7 @@ void main() {
     test('queues each ayah once and loops it for always', () async {
       await repo.play(
         _tracks,
+        reciterName: _reciter,
         startIndex: 2,
         repeat: AyahRepeat.always,
         speed: RecitationSpeed.normal,
@@ -132,9 +153,27 @@ void main() {
       expect(queue.loopEach, isTrue);
     });
 
+    test('names each ayah and its reciter for outside the app', () async {
+      await repo.play(
+        _tracks.take(2).toList(),
+        reciterName: _reciter,
+        startIndex: 0,
+        repeat: AyahRepeat.once,
+        speed: RecitationSpeed.normal,
+      );
+
+      final entries = player.queues.single.entries;
+      expect(entries.map((e) => e.title), [
+        'سورة الإخلاص · الآية ١',
+        'سورة الإخلاص · الآية ٢',
+      ]);
+      expect(entries.map((e) => e.artist), everyElement(_reciter));
+    });
+
     test('plays at the speed asked for', () async {
       await repo.play(
         _tracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.once,
         speed: RecitationSpeed.faster,
@@ -146,12 +185,14 @@ void main() {
     test('starts playing unless asked to stay paused', () async {
       await repo.play(
         _tracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.once,
         speed: RecitationSpeed.normal,
       );
       await repo.play(
         _tracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.twice,
         speed: RecitationSpeed.normal,
@@ -164,6 +205,7 @@ void main() {
     test('fails without touching the player for no tracks', () async {
       final result = await repo.play(
         const [],
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.once,
         speed: RecitationSpeed.normal,
@@ -178,6 +220,7 @@ void main() {
       () async {
         final result = await repo.play(
           _tracks,
+          reciterName: _reciter,
           startIndex: _tracks.length,
           repeat: AyahRepeat.once,
           speed: RecitationSpeed.normal,
@@ -193,6 +236,7 @@ void main() {
 
       final result = await repo.play(
         _tracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.once,
         speed: RecitationSpeed.normal,
@@ -213,6 +257,7 @@ void main() {
     test('seeks to the first entry of the track', () async {
       await repo.play(
         _tracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.thrice,
         speed: RecitationSpeed.normal,
@@ -226,6 +271,7 @@ void main() {
     test('fails for a track that is not queued', () async {
       await repo.play(
         _tracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.once,
         speed: RecitationSpeed.normal,
@@ -251,6 +297,25 @@ void main() {
       expect((player.pauses, player.resumes, player.stops), (1, 1, 1));
     });
 
+    test('standing by reaches the player without stopping it', () async {
+      await repo.standBy();
+
+      expect((player.standBys, player.stops), (1, 0));
+    });
+
+    test('controls used outside the app arrive as they were used', () async {
+      final heard = <RecitationCommand>[];
+      final subscription = repo.commands().listen(heard.add);
+      addTearDown(subscription.cancel);
+
+      player.controls
+        ..add(RecitationCommand.next)
+        ..add(RecitationCommand.pause);
+      await settle();
+
+      expect(heard, [RecitationCommand.next, RecitationCommand.pause]);
+    });
+
     test('speed reaches the player as its factor', () async {
       await repo.setSpeed(RecitationSpeed.slower);
 
@@ -262,6 +327,7 @@ void main() {
     test('maps a queue entry back to the track it plays', () async {
       await repo.play(
         _tracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.thrice,
         speed: RecitationSpeed.normal,
@@ -297,6 +363,7 @@ void main() {
     test('repeats of the same ayah report it once', () async {
       await repo.play(
         _tracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.thrice,
         speed: RecitationSpeed.normal,
@@ -319,6 +386,7 @@ void main() {
       final twoTracks = _tracks.take(2).toList();
       await repo.play(
         twoTracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.once,
         speed: RecitationSpeed.normal,
@@ -333,6 +401,7 @@ void main() {
 
       await repo.play(
         twoTracks,
+        reciterName: _reciter,
         startIndex: 0,
         repeat: AyahRepeat.thrice,
         speed: RecitationSpeed.normal,

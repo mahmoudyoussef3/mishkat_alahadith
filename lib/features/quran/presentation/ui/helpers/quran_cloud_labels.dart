@@ -39,10 +39,6 @@ String recitationScopeTitle(RecitationScope scope, {String? surahName}) =>
       RecitationScopeKind.hizbQuarter => hizbQuarterTitle(scope.number),
     };
 
-/// «سورة البقرة · الآية ٢٥٥».
-String recitationTrackTitle(RecitationTrack track) =>
-    'سورة ${track.surahName} · الآية ${toArabicNumerals(track.ayahNumber)}';
-
 String ayahRepeatLabel(AyahRepeat repeat) => switch (repeat) {
   AyahRepeat.always => '∞',
   _ => toArabicNumerals(repeat.times!),

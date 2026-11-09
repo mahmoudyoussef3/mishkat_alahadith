@@ -67,7 +67,7 @@ class _Bar extends StatelessWidget {
 
     final (String title, String subtitle) = switch (state) {
       RecitationActive(:final settings, :final playlist) => (
-        recitationTrackTitle(state.currentTrack),
+        state.currentTrack.title,
         state.isLoading
             ? 'جارٍ التحميل…'
             : '${settings.reciterName} · ${recitationScopeTitle(playlist.scope, surahName: playlist.tracks.first.surahName)}',

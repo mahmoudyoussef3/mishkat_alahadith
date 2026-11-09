@@ -4,13 +4,17 @@ import '../entities/recitation.dart';
 import '../entities/recitation_settings.dart';
 
 /// The player the recitations are streamed on. There is one for all of
-/// them, so two recitations can never play over each other.
+/// them, so two recitations can never play over each other. It plays on
+/// with the app in the background, shown with its controls outside the
+/// app: on the notification, the lock screen, a watch or a car.
 abstract class QuranRecitationPlayerRepo {
   /// Replaces whatever was playing with [tracks] from [startIndex], each
   /// recited as often as [repeat] says, at [speed] — ready but held when
-  /// [paused].
+  /// [paused]. Outside the app, each track is shown by its title and
+  /// [reciterName].
   Future<ApiResult<void>> play(
     List<RecitationTrack> tracks, {
+    required String reciterName,
     required int startIndex,
     required AyahRepeat repeat,
     required RecitationSpeed speed,
@@ -21,6 +25,13 @@ abstract class QuranRecitationPlayerRepo {
 
   Future<ApiResult<void>> resume();
 
+  /// Silences the player while what it plays next is on its way. Unlike
+  /// [stop], the controls outside the app stay up, showing it loading: a
+  /// recitation that carries on with the app in the background would not
+  /// get them back, as Android does not let them return from there.
+  Future<ApiResult<void>> standBy();
+
+  /// Silences the player and takes its controls outside the app down.
   Future<ApiResult<void>> stop();
 
   /// Moves to the start of track [index] of the playlist being played.
@@ -32,4 +43,9 @@ abstract class QuranRecitationPlayerRepo {
   /// tracks given to [play]. Failures while playing arrive as errors
   /// carrying a `Failure`.
   Stream<RecitationPlayback> watch();
+
+  /// The controls used outside the app, for whoever plays the recitation to
+  /// act on as on its own; while no one listens, the player obeys them
+  /// itself.
+  Stream<RecitationCommand> commands();
 }

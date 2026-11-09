@@ -64,10 +64,34 @@ void main() {
     expect(player.plays.single.startIndex, 1);
   });
 
-  test('silences whatever was playing before fetching', () async {
+  test('silences whatever was playing before fetching, standing by', () async {
     await cubit.start(const RecitationFromAyah(1));
 
-    expect(player.stops, 1);
+    // Not stopped: what the system shows outside the app stays up.
+    expect((player.standBys, player.stops), (1, 0));
+  });
+
+  test('stands by when carrying on into the next surah', () async {
+    await playing(2, trackIndex: 1);
+    final standBysBefore = player.standBys;
+    final stopsBefore = player.stops;
+
+    player.report(RecitationStatus.completed, 1);
+    await pumpEventQueue();
+
+    expect(player.standBys, standBysBefore + 1);
+    expect(player.stops, stopsBefore);
+  });
+
+  test('names its reciter to the player', () async {
+    reading.recitationSettings = const RecitationSettings(
+      reciterId: 'ar.husary',
+      reciterName: 'محمود خليل الحصري',
+    );
+
+    await cubit.start(const RecitationFromAyah(1));
+
+    expect(player.plays.single.reciterName, 'محمود خليل الحصري');
   });
 
   test('follows the player from ayah to ayah', () async {
@@ -375,6 +399,157 @@ void main() {
       expect(active().playlist.scope, const RecitationScope.surah(2));
     },
   );
+
+  test(
+    'replaced while being set up by one still fetching, it stands by',
+    () async {
+      final gate = Completer<void>();
+      player.playGate = gate;
+      final first = cubit.start(const RecitationFromAyah(1));
+      await pumpEventQueue();
+
+      cloud.recitationGates[const RecitationScope.surah(2)] = Completer();
+      final second = cubit.start(const RecitationFromAyah(8));
+      await pumpEventQueue();
+      final standBysBefore = player.standBys;
+      final stopsBefore = player.stops;
+      gate.complete();
+      await first;
+
+      // Silenced for the one on its way, without taking the controls down.
+      expect(player.standBys, standBysBefore + 1);
+      expect(player.stops, stopsBefore);
+
+      player.playGate = null;
+      cloud.recitationGates[const RecitationScope.surah(2)]!.complete();
+      await second;
+    },
+  );
+
+  group('controls outside the app', () {
+    test('pause and play as the buttons in the app do', () async {
+      await playing(1);
+
+      player.command(RecitationCommand.pause);
+      await pumpEventQueue();
+      expect(active().status, RecitationStatus.paused);
+      expect(player.pauses, 1);
+
+      player.command(RecitationCommand.play);
+      await pumpEventQueue();
+      expect(active().isPlaying, isTrue);
+      expect(player.resumes, 1);
+    });
+
+    test('move to the next and the previous ayah', () async {
+      await playing(1);
+
+      player.command(RecitationCommand.next);
+      await pumpEventQueue();
+      expect(active().currentTrack.ayahId, 2);
+
+      player.command(RecitationCommand.previous);
+      await pumpEventQueue();
+      expect(active().currentTrack.ayahId, 1);
+      expect(player.skips, [1, 0]);
+    });
+
+    test('next on the last ayah carries on into the next surah', () async {
+      await playing(2, trackIndex: 1);
+
+      player.command(RecitationCommand.next);
+      await pumpEventQueue();
+
+      expect(active().playlist.scope, const RecitationScope.surah(2));
+    });
+
+    test('stop ends the recitation', () async {
+      await playing(1);
+      final stopsBefore = player.stops;
+
+      player.command(RecitationCommand.stop);
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<RecitationIdle>());
+      expect(player.stops, stopsBefore + 1);
+    });
+
+    test('play tries again after a failure', () async {
+      cloud.failure = const NetworkFailure();
+      await cubit.start(const RecitationFromAyah(2));
+      cloud.failure = null;
+
+      player.command(RecitationCommand.play);
+      await pumpEventQueue();
+
+      expect(active().currentTrack.ayahId, 2);
+    });
+
+    test('a pause between one surah and the next brings it paused', () async {
+      await playing(2, trackIndex: 1);
+      cloud.recitationGates[const RecitationScope.surah(2)] = Completer();
+      player.report(RecitationStatus.completed, 1);
+      await pumpEventQueue();
+      expect(cubit.state, isA<RecitationPreparing>());
+
+      player.command(RecitationCommand.pause);
+      await pumpEventQueue();
+      cloud.recitationGates[const RecitationScope.surah(2)]!.complete();
+      await pumpEventQueue();
+
+      expect(active().playlist.scope, const RecitationScope.surah(2));
+      expect(active().status, RecitationStatus.paused);
+      expect(player.plays.last.paused, isTrue);
+      // Fetched ahead and as it ended, but not again for the pause.
+      expect(
+        cloud.recitationRequests.where(
+          (r) => r.scope == const RecitationScope.surah(2),
+        ),
+        hasLength(2),
+      );
+    });
+
+    test(
+      'play after such a pause, before the surah arrives, plays it',
+      () async {
+        await playing(2, trackIndex: 1);
+        cloud.recitationGates[const RecitationScope.surah(2)] = Completer();
+        player.report(RecitationStatus.completed, 1);
+        await pumpEventQueue();
+
+        player
+          ..command(RecitationCommand.pause)
+          ..command(RecitationCommand.play);
+        await pumpEventQueue();
+        cloud.recitationGates[const RecitationScope.surah(2)]!.complete();
+        await pumpEventQueue();
+
+        expect(active().playlist.scope, const RecitationScope.surah(2));
+        expect(player.plays.last.paused, isFalse);
+      },
+    );
+
+    test('play while idle does nothing', () async {
+      await playing(1);
+      await cubit.stop();
+
+      player.command(RecitationCommand.play);
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<RecitationIdle>());
+    });
+
+    test('are no longer heard once the mushaf closes', () async {
+      await playing(1);
+      await cubit.close();
+      final pausesBefore = player.pauses;
+
+      player.command(RecitationCommand.pause);
+      await pumpEventQueue();
+
+      expect(player.pauses, pausesBefore);
+    });
+  });
 
   test('a new speed reaches the recitation as it plays', () async {
     await playing(1);
