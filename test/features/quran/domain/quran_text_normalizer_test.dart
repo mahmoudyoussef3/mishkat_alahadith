@@ -81,6 +81,28 @@ void main() {
       expect(source.substring(range.start, range.end), 'ٱلرَّحۡمَٰنِ');
     });
 
+    test('covers an alef ending a word, with no mark after it', () {
+      const source = 'ٱلۡحَيَوٰةُ ٱلدُّنۡيَا وَزِينَتُهَا';
+      final normalized = QuranTextNormalizer.normalizeWithMap(source);
+      final needle = QuranTextNormalizer.normalize('الدنيا');
+      final at = normalized.value.indexOf(needle);
+
+      final range = normalized.sourceRange(at, at + needle.length);
+
+      expect(source.substring(range.start, range.end), 'ٱلدُّنۡيَا');
+    });
+
+    test('covers an alef ending the text', () {
+      const source = 'حرم الربا';
+      final normalized = QuranTextNormalizer.normalizeWithMap(source);
+      final needle = QuranTextNormalizer.normalize('الربا');
+      final at = normalized.value.indexOf(needle);
+
+      final range = normalized.sourceRange(at, at + needle.length);
+
+      expect(source.substring(range.start, range.end), 'الربا');
+    });
+
     test('starts a mid-word match at its letter, not the one before', () {
       const source = 'ٱلرَّحۡمَٰنِ';
       final normalized = QuranTextNormalizer.normalizeWithMap(source);

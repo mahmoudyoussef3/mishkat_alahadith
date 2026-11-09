@@ -11,6 +11,7 @@ import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/tajweed_info.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_ayah_commentary_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_ayah_details_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_flowing_page_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_mushaf_settings_use_case.dart';
@@ -19,8 +20,10 @@ import 'package:mishkat_almasabih/features/quran/domain/usecases/get_page_tajwee
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_quran_bookmarks_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_surahs_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/save_last_read_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/quran_study_settings_use_cases.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/save_mushaf_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/toggle_quran_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_commentary/ayah_commentary_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/flowing_page/flowing_page_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
@@ -59,6 +62,8 @@ Future<MushafReaderCubit> _pumpReader(
     SaveLastReadUseCase(reading),
   );
   await cubit.init(initialPage: page, surahNumber: surahNumber);
+  final recitation = recitationCubit(quran: quran, reading: reading);
+  addTearDown(recitation.close);
 
   await tester.pumpWidget(
     ScreenUtilInit(
@@ -67,8 +72,11 @@ Future<MushafReaderCubit> _pumpReader(
           (_, __) => MaterialApp(
             theme: AppTheme.lightTheme,
             home: AppPaletteScope(
-              child: BlocProvider.value(
-                value: cubit,
+              child: MultiBlocProvider(
+                providers: [
+                  BlocProvider.value(value: cubit),
+                  BlocProvider.value(value: recitation),
+                ],
                 child: MushafReaderScreen(
                   initialPage: page,
                   surahNumber: surahNumber,
@@ -345,7 +353,15 @@ void main() {
         )
         ..registerFactory<AyahDetailsCubit>(
           () => AyahDetailsCubit(GetAyahDetailsUseCase(quran)),
-        );
+        )
+        ..registerFactory<AyahCommentaryCubit>(() {
+          final reading = FakeQuranReadingRepo();
+          return AyahCommentaryCubit(
+            GetCommentarySettingsUseCase(reading),
+            SaveCommentarySettingsUseCase(reading),
+            GetAyahCommentaryUseCase(FakeQuranCloudRepo()),
+          );
+        });
     });
     tearDown(() => getIt.reset());
 

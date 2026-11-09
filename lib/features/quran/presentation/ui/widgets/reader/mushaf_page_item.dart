@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/flowing_page_item.dart';
 import 'package:mushaf_text/mushaf_text.dart';
@@ -107,23 +108,35 @@ class _PrintedPage extends StatelessWidget {
       builder: (context, view) {
         final focusKey = view.focusRuleKey;
         final selected = view.selectedAyahId;
-        return Semantics(
-          label: 'صفحة ${toArabicNumerals(page)} من المصحف',
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-            child: MushafPage(
-              page: page,
-              colors: colors,
-              tajweed: view.tajweed,
-              tajweedNaturalMadd: view.naturalMadd,
-              maxFontSize: _maxFontSize,
-              focusRule: focusKey == null ? null : tajweedRuleOf(focusKey),
-              focusIndex: view.focusIndex,
-              highlightedAyahs: selected == null ? const <int>{} : {selected},
-              onAyahTap: onAyahTap,
-              onTajweedTap: onTajweedTap,
-            ),
-          ),
+        // The ayah being recited is washed like a selected one.
+        return BlocSelector<QuranRecitationCubit, QuranRecitationState, int?>(
+          selector: (state) => state.recitingAyahOn(page),
+          builder:
+              (context, reciting) => Semantics(
+                label: 'صفحة ${toArabicNumerals(page)} من المصحف',
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 8.h,
+                  ),
+                  child: MushafPage(
+                    page: page,
+                    colors: colors,
+                    tajweed: view.tajweed,
+                    tajweedNaturalMadd: view.naturalMadd,
+                    maxFontSize: _maxFontSize,
+                    focusRule:
+                        focusKey == null ? null : tajweedRuleOf(focusKey),
+                    focusIndex: view.focusIndex,
+                    highlightedAyahs: {
+                      if (selected != null) selected,
+                      if (reciting != null) reciting,
+                    },
+                    onAyahTap: onAyahTap,
+                    onTajweedTap: onTajweedTap,
+                  ),
+                ),
+              ),
         );
       },
     );

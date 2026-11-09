@@ -1,25 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/app_theme.dart';
 import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
 import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/ayah_details.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_metrics.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/recitation.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/models/surah_tafsir_args.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/surah_tafsir_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/go_to_page_dialog.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_page_item.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_reader_bottom_bar.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_reader_header.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/recitation_bar.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/tajweed_focus_bar.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/ayah_actions_sheet.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/page_rules_sheet.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/reader_index_sheet.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/reader_settings_sheet.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/recitation_sheet.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/tajweed_rule_sheet.dart';
 import 'package:mushaf_text/mushaf_text.dart';
 import 'package:share_plus/share_plus.dart';
@@ -122,50 +130,68 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
   @override
   Widget build(BuildContext context) {
     final colors = MushafPalette.of(AppPaletteOverride.of(context));
-    return Scaffold(
-      backgroundColor: colors.paper,
-      bottomNavigationBar: MushafReaderBottomBar(
-        onJumpToPage: _jumpToPage,
-        onOpenIndex: _openIndex,
-        onGoToPage: _goToPage,
-        onOpenPageRules: _openPageRules,
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
+    return BlocListener<QuranRecitationCubit, QuranRecitationState>(
+      listenWhen:
+          (previous, current) =>
+              current.currentTrack != null &&
+              current.currentTrack?.ayahId != previous.currentTrack?.ayahId,
+      listener: (context, state) => _follow(state.currentTrack!),
+      child: Scaffold(
+        backgroundColor: colors.paper,
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            MushafReaderHeader(
-              onTogglePageBookmark: _togglePageBookmark,
-              onOpenSettings: _openSettings,
-            ),
-            Expanded(
-              child: Stack(
-                children: [
-                  PageView.builder(
-                    controller: _pageController,
-                    // Keeps the neighbouring pages laid out, so a swipe never
-                    // reveals a blank page.
-                    allowImplicitScrolling: true,
-                    itemCount: QuranMetrics.pageCount,
-                    onPageChanged: (index) => _cubit.onPageChanged(index + 1),
-                    itemBuilder:
-                        (context, index) => MushafPageItem(
-                          page: index + 1,
-                          colors: colors,
-                          onAyahTap: _onAyahTap,
-                          onTajweedTap: _onTajweedTap,
-                        ),
-                  ),
-                  const Align(
-                    alignment: Alignment.bottomCenter,
-                    child: TajweedFocusBar(),
-                  ),
-                  const _FocusBackHandler(),
-                ],
-              ),
+            RecitationBar(onOpenSheet: _openRecitation),
+            MushafReaderBottomBar(
+              onJumpToPage: _jumpToPage,
+              onOpenIndex: _openIndex,
+              onGoToPage: _goToPage,
+              onOpenPageRules: _openPageRules,
             ),
           ],
         ),
+        body: _buildBody(colors),
+      ),
+    );
+  }
+
+  Widget _buildBody(MushafColors colors) {
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          MushafReaderHeader(
+            onTogglePageBookmark: _togglePageBookmark,
+            onOpenSettings: _openSettings,
+            onOpenRecitation: _openRecitation,
+          ),
+          Expanded(
+            child: Stack(
+              children: [
+                PageView.builder(
+                  controller: _pageController,
+                  // Keeps the neighbouring pages laid out, so a swipe never
+                  // reveals a blank page.
+                  allowImplicitScrolling: true,
+                  itemCount: QuranMetrics.pageCount,
+                  onPageChanged: (index) => _cubit.onPageChanged(index + 1),
+                  itemBuilder:
+                      (context, index) => MushafPageItem(
+                        page: index + 1,
+                        colors: colors,
+                        onAyahTap: _onAyahTap,
+                        onTajweedTap: _onTajweedTap,
+                      ),
+                ),
+                const Align(
+                  alignment: Alignment.bottomCenter,
+                  child: TajweedFocusBar(),
+                ),
+                const _FocusBackHandler(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -178,6 +204,51 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
   void _jumpToPage(int page) {
     if (!_pageController.hasClients) return;
     _pageController.jumpToPage(QuranMetrics.clampPage(page) - 1);
+  }
+
+  // ── recitation ──────────────────────────────────────────────────────────
+
+  /// Turns to the page of the ayah being recited, and reads its surah.
+  Future<void> _follow(RecitationTrack track) async {
+    final cubit = _cubit;
+    if (_currentPage != track.page && _pageController.hasClients) {
+      final target = QuranMetrics.clampPage(track.page) - 1;
+      // The next page slides in, as if turned by hand; a page further away
+      // is jumped to.
+      if ((_currentPage - track.page).abs() == 1) {
+        await _pageController.animateToPage(
+          target,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _pageController.jumpToPage(target);
+      }
+    }
+    if (mounted) cubit.readSurah(track.surahNumber);
+  }
+
+  Future<void> _openRecitation() => showRecitationSheet(
+    context,
+    readerCubit: _cubit,
+    recitationCubit: context.read<QuranRecitationCubit>(),
+  );
+
+  /// The tafsir opens over the mushaf, and comes back to it at the ayah the
+  /// reader chose there, if any.
+  Future<void> _openSurahTafsir(AyahDetails details) async {
+    final cubit = _cubit;
+    final target = await Navigator.of(context).pushNamed<TafsirReaderTarget>(
+      Routes.surahTafsir,
+      arguments: SurahTafsirArgs(
+        surahNumber: details.surah.number,
+        startAyah: details.ayah.number,
+      ),
+    );
+    if (target == null || !mounted) return;
+    _jumpToPage(target.page);
+    cubit.readSurah(target.surahNumber);
+    cubit.selectAyah(target.ayahId);
   }
 
   // ── page taps ───────────────────────────────────────────────────────────
@@ -213,6 +284,10 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
         if (mounted) _showBookmarkResult(result, ayah: true);
       case FollowRuleIntent(:final ruleKey):
         await _followRule(ruleKey);
+      case ListenFromAyahIntent(:final details):
+        await context.read<QuranRecitationCubit>().playAyah(details.ayah.id);
+      case ReadSurahTafsirIntent(:final details):
+        await _openSurahTafsir(details);
     }
   }
 
@@ -264,6 +339,7 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
 
   Future<void> _openIndex() async {
     final cubit = _cubit;
+    final recitation = context.read<QuranRecitationCubit>();
     final target = await showReaderIndexSheet(
       context,
       currentPage: _currentPage,
@@ -278,6 +354,9 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
     }
     final ayahId = target.ayahId;
     if (ayahId != null) cubit.selectAyah(ayahId);
+    if (target.recitation case final request?) {
+      await recitation.start(request);
+    }
   }
 
   Future<void> _goToPage() async {
@@ -319,8 +398,7 @@ class _ReaderLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          MushafPalette.of(AppPaletteOverride.of(context)).paper,
+      backgroundColor: MushafPalette.of(AppPaletteOverride.of(context)).paper,
       body: const Center(child: CircularProgressIndicator()),
     );
   }
@@ -340,8 +418,7 @@ class _ReaderFailure extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          MushafPalette.of(AppPaletteOverride.of(context)).paper,
+      backgroundColor: MushafPalette.of(AppPaletteOverride.of(context)).paper,
       body: SafeArea(
         child: Column(
           children: [

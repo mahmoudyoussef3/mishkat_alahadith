@@ -12,6 +12,9 @@ class JuzTile extends StatelessWidget {
   final bool isLast;
   final VoidCallback onTap;
 
+  /// Recites the juz; no listen button without it.
+  final VoidCallback? onListen;
+
   const JuzTile({
     super.key,
     required this.juz,
@@ -19,6 +22,7 @@ class JuzTile extends StatelessWidget {
     required this.isFirst,
     required this.isLast,
     this.isCurrent = false,
+    this.onListen,
   });
 
   @override
@@ -37,7 +41,11 @@ class JuzTile extends StatelessWidget {
         'الآية ${toArabicNumerals(juz.startAyahNumber)}',
         if (isCurrent) 'تقرأ الآن',
       ].join(' · '),
-      trailing: QuranPageLabel('ص ${toArabicNumerals(juz.startPage)}'),
+      trailing: QuranRowTrailing(
+        pageLabel: 'ص ${toArabicNumerals(juz.startPage)}',
+        onListen: onListen,
+        listenLabel: 'الاستماع إلى ${juzTitle(juz.number)}',
+      ),
     );
   }
 }

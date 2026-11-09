@@ -280,6 +280,30 @@ import 'package:mishkat_almasabih/features/quran/presentation/logic/flowing_page
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_cloud_cache_local_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_cloud_remote_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_player_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/repos/quran_cloud_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran/data/repos/quran_recitation_player_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran/domain/repos/quran_cloud_repo.dart';
+import 'package:mishkat_almasabih/features/quran/domain/repos/quran_recitation_player_repo.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/filter_quran_editions_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_ayah_commentary_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_hizb_index_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_quran_editions_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_reflection_ayah_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_surah_commentary_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/load_recitation_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/quran_study_settings_use_cases.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/recitation_player_use_cases.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/search_quran_edition_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_commentary/ayah_commentary_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/hizb_index/quran_hizb_index_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_editions/quran_editions_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/reflection/quran_reflection_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/surah_tafsir/surah_tafsir_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/tafsir_search/quran_tafsir_search_cubit.dart';
 import 'package:mishkat_almasabih/features/quran_wird/data/datasources/quran_wird_reminder_datasource.dart';
 import 'package:mishkat_almasabih/features/quran_wird/data/repos/quran_wird_repo_impl.dart';
 import 'package:mishkat_almasabih/features/quran_wird/domain/repos/quran_wird_repo.dart';
@@ -961,7 +985,9 @@ void _registerQuran() {
     () => QuranReadingRepoImpl(getIt()),
   );
 
-  getIt.registerLazySingleton<GetSurahsUseCase>(() => GetSurahsUseCase(getIt()));
+  getIt.registerLazySingleton<GetSurahsUseCase>(
+    () => GetSurahsUseCase(getIt()),
+  );
   getIt.registerLazySingleton<FilterSurahsUseCase>(() => FilterSurahsUseCase());
   getIt.registerLazySingleton<GetJuzIndexUseCase>(
     () => GetJuzIndexUseCase(getIt()),
@@ -1030,6 +1056,123 @@ void _registerQuran() {
   getIt.registerFactory<AyahDetailsCubit>(() => AyahDetailsCubit(getIt()));
   getIt.registerFactory<FlowingPageCubit>(() => FlowingPageCubit(getIt()));
   getIt.registerFactory<QuranSearchCubit>(() => QuranSearchCubit(getIt()));
+
+  _registerQuranCloud();
+}
+
+/// Recitations, tafsir and translations from AlQuran Cloud.
+void _registerQuranCloud() {
+  // A client of its own: the service is a third party, which must never
+  // see the app's headers or session token. One player for every Quran
+  // recitation, so two can never overlap.
+  getIt.registerLazySingleton<QuranCloudRepo>(
+    () => QuranCloudRepoImpl(
+      QuranCloudRemoteDataSource(
+        Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 45),
+            headers: const {'Accept': 'application/json'},
+          ),
+        ),
+      ),
+      QuranCloudCacheLocalDataSource(),
+    ),
+  );
+  getIt.registerLazySingleton<QuranRecitationPlayerRepo>(
+    () => QuranRecitationPlayerRepoImpl(QuranRecitationPlayerDataSource()),
+  );
+
+  getIt.registerLazySingleton<GetQuranEditionsUseCase>(
+    () => GetQuranEditionsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<LoadRecitationUseCase>(
+    () => LoadRecitationUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetRecitationSettingsUseCase>(
+    () => GetRecitationSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveRecitationSettingsUseCase>(
+    () => SaveRecitationSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetCommentarySettingsUseCase>(
+    () => GetCommentarySettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveCommentarySettingsUseCase>(
+    () => SaveCommentarySettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PlayRecitationUseCase>(
+    () => PlayRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PauseRecitationUseCase>(
+    () => PauseRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ResumeRecitationUseCase>(
+    () => ResumeRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<StopRecitationUseCase>(
+    () => StopRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SkipToRecitationTrackUseCase>(
+    () => SkipToRecitationTrackUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetRecitationSpeedUseCase>(
+    () => SetRecitationSpeedUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchRecitationUseCase>(
+    () => WatchRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetAyahCommentaryUseCase>(
+    () => GetAyahCommentaryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetSurahCommentaryUseCase>(
+    () => GetSurahCommentaryUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<SearchQuranEditionUseCase>(
+    () => SearchQuranEditionUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetReflectionAyahUseCase>(
+    () => GetReflectionAyahUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetHizbIndexUseCase>(
+    () => GetHizbIndexUseCase(getIt(), getIt()),
+  );
+
+  getIt.registerFactory<QuranRecitationCubit>(
+    () => QuranRecitationCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerLazySingleton<FilterQuranEditionsUseCase>(
+    FilterQuranEditionsUseCase.new,
+  );
+  getIt.registerFactory<QuranEditionsCubit>(
+    () => QuranEditionsCubit(getIt(), getIt()),
+  );
+  getIt.registerFactory<AyahCommentaryCubit>(
+    () => AyahCommentaryCubit(getIt(), getIt(), getIt()),
+  );
+  getIt.registerFactory<SurahTafsirCubit>(
+    () => SurahTafsirCubit(getIt(), getIt(), getIt()),
+  );
+  getIt.registerFactory<QuranTafsirSearchCubit>(
+    () => QuranTafsirSearchCubit(getIt(), getIt(), getIt()),
+  );
+  getIt.registerFactory<QuranHizbIndexCubit>(
+    () => QuranHizbIndexCubit(getIt()),
+  );
+  getIt.registerFactory<QuranReflectionCubit>(
+    () => QuranReflectionCubit(getIt(), getIt()),
+  );
 }
 
 void _registerDailyAyah() {

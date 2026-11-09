@@ -6,10 +6,12 @@ import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/core/widgets/screen_title_header.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/recitation.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/models/mushaf_reader_args.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/index/continue_reading_card.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/index/quran_index_view.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/index/quran_reflection_card.dart';
 
 /// The Quran's front door: resume reading, browse surahs and ajzāʾ, revisit
 /// bookmarks, search, or study the tajweed rules.
@@ -31,6 +33,14 @@ class QuranHomeScreen extends StatelessWidget {
                   page,
                   ayahId: ayahId,
                   surahNumber: surahNumber,
+                ),
+            // The mushaf opens on the part and recites it, following along.
+            onListen:
+                (request, {required page, surahNumber}) => _openReader(
+                  context,
+                  page,
+                  surahNumber: surahNumber,
+                  recitation: request,
                 ),
             leadingSlivers: [
               SliverToBoxAdapter(
@@ -64,6 +74,20 @@ class QuranHomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 4.h),
+                sliver: SliverToBoxAdapter(
+                  child: QuranReflectionCard(
+                    onOpenAyah:
+                        (ayah) => _openReader(
+                          context,
+                          ayah.page,
+                          ayahId: ayah.id,
+                          surahNumber: ayah.surahNumber,
+                        ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -76,6 +100,7 @@ class QuranHomeScreen extends StatelessWidget {
     int page, {
     int? ayahId,
     int? surahNumber,
+    RecitationRequest? recitation,
   }) => _openAndRefresh(
     context,
     Routes.mushafReader,
@@ -83,6 +108,7 @@ class QuranHomeScreen extends StatelessWidget {
       initialPage: page,
       highlightAyahId: ayahId,
       surahNumber: surahNumber,
+      recitation: recitation,
     ),
   );
 

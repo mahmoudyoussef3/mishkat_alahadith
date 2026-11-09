@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// "السور" with how many are listed, above a [QuranIndexCard].
@@ -207,6 +208,43 @@ class QuranIndexWell extends StatelessWidget {
                   ),
                 ),
               ),
+    );
+  }
+}
+
+/// A row's page label, with a button to listen from there when offered.
+class QuranRowTrailing extends StatelessWidget {
+  const QuranRowTrailing({
+    super.key,
+    required this.pageLabel,
+    this.onListen,
+    this.listenLabel = 'استماع',
+  });
+
+  final String pageLabel;
+  final VoidCallback? onListen;
+
+  /// Read by screen readers, naming what would be recited.
+  final String listenLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final onListen = this.onListen;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (onListen != null) ...[
+          AppIconButton(
+            tooltip: listenLabel,
+            icon: Icons.headphones_rounded,
+            variant: AppIconButtonVariant.ghost,
+            size: 36.r,
+            onPressed: onListen,
+          ),
+          SizedBox(width: 2.w),
+        ],
+        QuranPageLabel(pageLabel),
+      ],
     );
   }
 }

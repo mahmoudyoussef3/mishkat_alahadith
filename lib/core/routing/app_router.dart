@@ -42,13 +42,20 @@ import 'package:mishkat_almasabih/features/profile/presentation/ui/profile_scree
 import 'package:mishkat_almasabih/features/qiblah_finder/presentation/logic/qiblah_cubit.dart'
     show QiblahCubit;
 import 'package:mishkat_almasabih/features/qiblah_finder/presentation/ui/qiblah_finder_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/hizb_index/quran_hizb_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/reflection/quran_reflection_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/surah_tafsir/surah_tafsir_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/tafsir_search/quran_tafsir_search_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/models/mushaf_reader_args.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/models/surah_tafsir_args.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_reader_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_home_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_search_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/surah_tafsir_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/tajweed_guide_screen.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/presentation/logic/cubit/remaining_questions_cubit.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/logic/enhanced_search_cubit.dart';
@@ -438,8 +445,19 @@ class AppRouter {
         _logScreenView('QuranScreen');
         return MaterialPageRoute(
           builder:
-              (_) => BlocProvider(
-                create: (context) => getIt<QuranIndexCubit>()..load(),
+              (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (context) => getIt<QuranIndexCubit>()..load(),
+                  ),
+                  // Loaded only once the reader opens the ahzāb.
+                  BlocProvider(
+                    create: (context) => getIt<QuranHizbIndexCubit>(),
+                  ),
+                  BlocProvider(
+                    create: (context) => getIt<QuranReflectionCubit>()..load(),
+                  ),
+                ],
                 child: const QuranHomeScreen(),
               ),
         );
@@ -451,14 +469,24 @@ class AppRouter {
         };
         return MaterialPageRoute(
           builder:
-              (_) => BlocProvider(
-                create:
-                    (context) =>
-                        getIt<MushafReaderCubit>()..init(
-                          initialPage: args.initialPage,
-                          highlightAyahId: args.highlightAyahId,
-                          surahNumber: args.surahNumber,
-                        ),
+              (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create:
+                        (context) =>
+                            getIt<MushafReaderCubit>()..init(
+                              initialPage: args.initialPage,
+                              highlightAyahId: args.highlightAyahId,
+                              surahNumber: args.surahNumber,
+                            ),
+                  ),
+                  BlocProvider(
+                    create:
+                        (context) =>
+                            getIt<QuranRecitationCubit>()
+                              ..init(autoplay: args.recitation),
+                  ),
+                ],
                 child: MushafReaderScreen(
                   initialPage: args.initialPage,
                   surahNumber: args.surahNumber,
@@ -469,14 +497,36 @@ class AppRouter {
         _logScreenView('QuranSearchScreen');
         return MaterialPageRoute(
           builder:
-              (_) => BlocProvider(
-                create: (context) => getIt<QuranSearchCubit>(),
+              (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (context) => getIt<QuranSearchCubit>()),
+                  BlocProvider(
+                    create:
+                        (context) => getIt<QuranTafsirSearchCubit>()..init(),
+                  ),
+                ],
                 child: const QuranSearchScreen(),
               ),
         );
       case Routes.tajweedGuide:
         _logScreenView('TajweedGuideScreen');
         return MaterialPageRoute(builder: (_) => const TajweedGuideScreen());
+      case Routes.surahTafsir:
+        _logScreenView('SurahTafsirScreen');
+        final args = switch (settings.arguments) {
+          final SurahTafsirArgs args => args,
+          _ => const SurahTafsirArgs(surahNumber: 1),
+        };
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<SurahTafsirCubit>()
+                          ..load(args.surahNumber, startAyah: args.startAyah),
+                child: const SurahTafsirScreen(),
+              ),
+        );
       case Routes.azkarScreen:
         _logScreenView('AzkarScreen');
         return MaterialPageRoute(

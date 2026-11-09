@@ -2,21 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette_scope.dart';
 import 'package:mishkat_almasabih/core/theming/app_theme.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_last_read.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/filter_surahs_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_hizb_index_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_juz_index_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_last_read_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_page_info_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_quran_bookmarks_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_reflection_ayah_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/quran_study_settings_use_cases.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_surahs_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/remove_quran_bookmark_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/search_quran_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/hizb_index/quran_hizb_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/reflection/quran_reflection_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_home_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_search_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/tajweed_guide_screen.dart';
@@ -60,11 +66,29 @@ Future<QuranIndexCubit> _pumpHome(
   Brightness brightness = Brightness.light,
 }) async {
   _usePhoneScreen(tester);
-  final cubit = _cubit(FakeQuranRepo(), reading ?? FakeQuranReadingRepo());
+  final quran = FakeQuranRepo();
+  final readingRepo = reading ?? FakeQuranReadingRepo();
+  final cubit = _cubit(quran, readingRepo);
   await cubit.load();
+  // Offline: the home must still lay out without the online parts.
+  final cloud = FakeQuranCloudRepo(failure: const NetworkFailure());
+  final hizbs = QuranHizbIndexCubit(GetHizbIndexUseCase(cloud, quran));
+  final reflection = QuranReflectionCubit(
+    GetCommentarySettingsUseCase(readingRepo),
+    GetReflectionAyahUseCase(cloud, quran),
+  );
+  addTearDown(hizbs.close);
+  addTearDown(reflection.close);
   await tester.pumpWidget(
     _app(
-      BlocProvider.value(value: cubit, child: const QuranHomeScreen()),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: cubit),
+          BlocProvider.value(value: hizbs),
+          BlocProvider.value(value: reflection..load()),
+        ],
+        child: const QuranHomeScreen(),
+      ),
       brightness: brightness,
     ),
   );

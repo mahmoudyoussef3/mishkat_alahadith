@@ -5,6 +5,7 @@ import '../../domain/entities/mushaf_reader_settings.dart';
 import '../../domain/entities/quran_bookmark.dart';
 import '../../domain/entities/quran_last_read.dart';
 import '../../domain/entities/quran_metrics.dart';
+import '../../domain/entities/recitation_settings.dart';
 import '../../domain/repos/quran_reading_repo.dart';
 import '../datasources/quran_reading_local_datasource.dart';
 import '../mappers/quran_mappers.dart';
@@ -102,6 +103,99 @@ class QuranReadingRepoImpl implements QuranReadingRepo {
               defaults.fontScale,
         ),
       );
+    } catch (_) {
+      return const ApiResult.failure(CacheFailure());
+    }
+  }
+
+  @override
+  Future<ApiResult<RecitationSettings>> getRecitationSettings() async {
+    try {
+      final stored = await _local.getRecitationSettings();
+      const defaults = RecitationSettings.defaults;
+      final reciter = stored.reciter;
+      final reciterName = stored.reciterName;
+      final validReciter =
+          reciter != null && RecitationSettings.isValidEditionId(reciter);
+      return ApiResult.success(
+        RecitationSettings(
+          reciterId: validReciter ? reciter : defaults.reciterId,
+          // A name only ever goes with the reciter it was saved with.
+          reciterName:
+              validReciter && reciterName != null && reciterName.isNotEmpty
+                  ? reciterName
+                  : validReciter
+                  ? reciter
+                  : defaults.reciterName,
+          repeat:
+              AyahRepeat.values.asNameMap()[stored.repeat] ?? defaults.repeat,
+          speed:
+              RecitationSpeed.values.asNameMap()[stored.speed] ??
+              defaults.speed,
+          quality:
+              RecitationQuality.values.asNameMap()[stored.quality] ??
+              defaults.quality,
+          continuous: stored.continuous ?? defaults.continuous,
+        ),
+      );
+    } catch (_) {
+      return const ApiResult.failure(CacheFailure());
+    }
+  }
+
+  @override
+  Future<ApiResult<void>> saveRecitationSettings(
+    RecitationSettings settings,
+  ) async {
+    try {
+      await _local.saveRecitationSettings(
+        reciter: settings.reciterId,
+        reciterName: settings.reciterName,
+        repeat: settings.repeat.name,
+        speed: settings.speed.name,
+        quality: settings.quality.name,
+        continuous: settings.continuous,
+      );
+      return const ApiResult.success(null);
+    } catch (_) {
+      return const ApiResult.failure(CacheFailure());
+    }
+  }
+
+  @override
+  Future<ApiResult<CommentarySettings>> getCommentarySettings() async {
+    try {
+      final stored = await _local.getCommentarySettings();
+      final tafsir = stored.tafsir;
+      final translation = stored.translation;
+      return ApiResult.success(
+        CommentarySettings(
+          tafsirId:
+              tafsir != null && RecitationSettings.isValidEditionId(tafsir)
+                  ? tafsir
+                  : CommentarySettings.defaults.tafsirId,
+          translationId:
+              translation != null &&
+                      RecitationSettings.isValidEditionId(translation)
+                  ? translation
+                  : null,
+        ),
+      );
+    } catch (_) {
+      return const ApiResult.failure(CacheFailure());
+    }
+  }
+
+  @override
+  Future<ApiResult<void>> saveCommentarySettings(
+    CommentarySettings settings,
+  ) async {
+    try {
+      await _local.saveCommentarySettings(
+        tafsir: settings.tafsirId,
+        translation: settings.translationId,
+      );
+      return const ApiResult.success(null);
     } catch (_) {
       return const ApiResult.failure(CacheFailure());
     }

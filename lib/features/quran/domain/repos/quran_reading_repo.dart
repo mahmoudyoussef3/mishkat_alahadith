@@ -3,9 +3,10 @@ import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import '../entities/mushaf_reader_settings.dart';
 import '../entities/quran_bookmark.dart';
 import '../entities/quran_last_read.dart';
+import '../entities/recitation_settings.dart';
 
 /// What the reader keeps on the device: where they stopped, what they
-/// bookmarked, and how they like the page.
+/// bookmarked, how they like the page, and how they listen and study.
 abstract class QuranReadingRepo {
   Future<ApiResult<QuranLastRead?>> getLastRead();
 
@@ -24,4 +25,12 @@ abstract class QuranReadingRepo {
   Future<ApiResult<MushafReaderSettings>> getSettings();
 
   Future<ApiResult<void>> saveSettings(MushafReaderSettings settings);
+
+  Future<ApiResult<RecitationSettings>> getRecitationSettings();
+
+  Future<ApiResult<void>> saveRecitationSettings(RecitationSettings settings);
+
+  Future<ApiResult<CommentarySettings>> getCommentarySettings();
+
+  Future<ApiResult<void>> saveCommentarySettings(CommentarySettings settings);
 }

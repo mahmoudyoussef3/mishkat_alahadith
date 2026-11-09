@@ -10,6 +10,7 @@ import 'package:mishkat_almasabih/features/quran/domain/entities/quran_flowing_p
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_surah.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/flowing_page/flowing_page_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/flowing_text.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mushaf_text/mushaf_text.dart';
@@ -192,15 +193,25 @@ class _FlowingPageText extends StatelessWidget {
                       textScaler: TextScaler.noScaling,
                       style: style,
                     ),
-                  _FlowingSectionText(
-                    ayahs: section.ayahs,
-                    style: style,
-                    colors: colors,
-                    tajweed: view.tajweed,
-                    selectedAyahId: view.selectedAyahId,
-                    focus: focus,
-                    onAyahTap: onAyahTap,
-                    onTajweedTap: onTajweedTap,
+                  // The ayah being recited is washed — and scrolled to —
+                  // like a selected one, unless the reader selected another.
+                  BlocSelector<
+                    QuranRecitationCubit,
+                    QuranRecitationState,
+                    int?
+                  >(
+                    selector: (state) => state.recitingAyahOn(page.page),
+                    builder:
+                        (context, reciting) => _FlowingSectionText(
+                          ayahs: section.ayahs,
+                          style: style,
+                          colors: colors,
+                          tajweed: view.tajweed,
+                          selectedAyahId: view.selectedAyahId ?? reciting,
+                          focus: focus,
+                          onAyahTap: onAyahTap,
+                          onTajweedTap: onTajweedTap,
+                        ),
                   ),
                 ],
               ],

@@ -23,6 +23,19 @@ class QuranAyah {
 
   bool get isSajdah => text.contains(sajdahMark);
 
+  /// The ayah numbered [id] in [ayahs]: found at once when they are the
+  /// whole mushaf in order, as the bundled text is, else by a search.
+  static QuranAyah? withId(List<QuranAyah> ayahs, int id) {
+    final index = id - 1;
+    if (index >= 0 && index < ayahs.length && ayahs[index].id == id) {
+      return ayahs[index];
+    }
+    for (final ayah in ayahs) {
+      if (ayah.id == id) return ayah;
+    }
+    return null;
+  }
+
   @override
   bool operator ==(Object other) => other is QuranAyah && other.id == id;
 

@@ -12,6 +12,7 @@ import 'package:mishkat_almasabih/core/widgets/dashed_divider.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/ayah_details.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_commentary/ayah_commentary_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
@@ -19,6 +20,7 @@ import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/rule_swatch.dart';
 import 'package:mushaf_text/mushaf_text.dart';
 
+import 'ayah_commentary_section.dart';
 import 'tajweed_rule_sheet.dart';
 
 /// What the reader chose to do with the ayah; the screen carries it out.
@@ -50,6 +52,20 @@ final class FollowRuleIntent extends AyahSheetIntent {
   const FollowRuleIntent(this.ruleKey);
 }
 
+/// Recite from this ayah on.
+final class ListenFromAyahIntent extends AyahSheetIntent {
+  final AyahDetails details;
+
+  const ListenFromAyahIntent(this.details);
+}
+
+/// Read the tafsir of the ayah's surah straight through, from this ayah.
+final class ReadSurahTafsirIntent extends AyahSheetIntent {
+  final AyahDetails details;
+
+  const ReadSurahTafsirIntent(this.details);
+}
+
 Future<AyahSheetIntent?> showAyahActionsSheet(
   BuildContext context, {
   required MushafReaderCubit readerCubit,
@@ -66,7 +82,8 @@ Future<AyahSheetIntent?> showAyahActionsSheet(
 
   return showQuranSheet<AyahSheetIntent>(
     context: context,
-    initialChildSize: 0.62,
+    initialChildSize: 0.66,
+    maxChildSize: 0.95,
     builder:
         (context, controller) => MultiBlocProvider(
           providers: [
@@ -75,6 +92,11 @@ Future<AyahSheetIntent?> showAyahActionsSheet(
                   (_) =>
                       getIt<AyahDetailsCubit>()
                         ..load(ayahId, includeNaturalMadd: naturalMadd),
+            ),
+            // The commentary comes from the network: loaded beside the ayah,
+            // which is on the device, so it never holds the ayah back.
+            BlocProvider(
+              create: (_) => getIt<AyahCommentaryCubit>()..load(ayahId),
             ),
             BlocProvider.value(value: readerCubit),
           ],
@@ -177,6 +199,18 @@ class _AyahDetailsBody extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _SheetAction(
+                      icon: Icons.headphones_rounded,
+                      label: 'استماع',
+                      semanticLabel: 'الاستماع من هذه الآية',
+                      onTap:
+                          () => Navigator.of(
+                            context,
+                          ).pop(ListenFromAyahIntent(details)),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: _SheetAction(
                       icon: Icons.content_copy_rounded,
                       label: 'نسخ',
                       onTap:
@@ -202,6 +236,11 @@ class _AyahDetailsBody extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        SizedBox(height: 22.h),
+        AyahCommentarySection(
+          onReadSurahTafsir:
+              () => Navigator.of(context).pop(ReadSurahTafsirIntent(details)),
         ),
         if (rules.isNotEmpty) ...[
           SizedBox(height: 22.h),

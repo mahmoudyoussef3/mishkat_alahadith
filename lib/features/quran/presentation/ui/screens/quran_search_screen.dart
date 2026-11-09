@@ -9,17 +9,33 @@ import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
 import 'package:mishkat_almasabih/core/widgets/filter_pill.dart';
 import 'package:mishkat_almasabih/core/widgets/search_bar_widget.dart';
+import 'package:mishkat_almasabih/core/widgets/segmented_tabs.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_metrics.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_search_results.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/tafsir_search/quran_tafsir_search_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/models/mushaf_reader_args.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/search/quran_search_hit_tile.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/search/search_common.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/search/tafsir_search_view.dart';
 import 'package:mushaf_text/mushaf_text.dart' show toArabicNumerals;
-import 'package:shimmer/shimmer.dart';
 
-/// Full-text search over every ayah. Harakat and Uthmanic spelling are
-/// optional: «الرحمن» finds «ٱلرَّحۡمَٰنِ».
+/// Where the search looks.
+enum _SearchMode {
+  /// The words of the ayahs, on the device.
+  text('في نص الآيات'),
+
+  /// The words of a tafsir, online — finds ayahs by what they are about.
+  tafsir('في التفسير');
+
+  const _SearchMode(this.label);
+
+  final String label;
+}
+
+/// Full-text search over every ayah — harakat and Uthmanic spelling are
+/// optional: «الرحمن» finds «ٱلرَّحۡمَٰنِ» — or over a tafsir, online.
 class QuranSearchScreen extends StatefulWidget {
   const QuranSearchScreen({super.key});
 
@@ -29,6 +45,7 @@ class QuranSearchScreen extends StatefulWidget {
 
 class _QuranSearchScreenState extends State<QuranSearchScreen> {
   late final TextEditingController _controller;
+  _SearchMode _mode = _SearchMode.text;
 
   @override
   void initState() {
@@ -47,12 +64,57 @@ class _QuranSearchScreenState extends State<QuranSearchScreen> {
       text: query,
       selection: TextSelection.collapsed(offset: query.length),
     );
-    context.read<QuranSearchCubit>().search(query);
+    _search(query);
+  }
+
+  // Only the cubit of the mode shown is read: the tafsir search is opened
+  // on demand.
+
+  void _onQueryChanged(String query) => switch (_mode) {
+    _SearchMode.text =>
+      query.isEmpty
+          ? context.read<QuranSearchCubit>().clear()
+          : context.read<QuranSearchCubit>().onQueryChanged(query),
+    _SearchMode.tafsir =>
+      query.isEmpty
+          ? context.read<QuranTafsirSearchCubit>().clear()
+          : context.read<QuranTafsirSearchCubit>().onQueryChanged(query),
+  };
+
+  Future<void> _search(String query) => switch (_mode) {
+    _SearchMode.text => context.read<QuranSearchCubit>().search(query),
+    _SearchMode.tafsir => context.read<QuranTafsirSearchCubit>().search(query),
+  };
+
+  /// Shows the other kind of search, for the words already typed.
+  void _setMode(_SearchMode mode) {
+    if (mode == _mode) return;
+    // The search left behind would otherwise still run once its typing
+    // pause ran out — for the tafsir, a request no one would see.
+    switch (_mode) {
+      case _SearchMode.text:
+        context.read<QuranSearchCubit>().clear();
+      case _SearchMode.tafsir:
+        context.read<QuranTafsirSearchCubit>().clear();
+    }
+    setState(() => _mode = mode);
+    _search(_controller.text);
+  }
+
+  void _openAyah({required int page, required int ayahId, required int surah}) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    context.pushNamed(
+      Routes.mushafReader,
+      arguments: MushafReaderArgs(
+        initialPage: page,
+        highlightAyahId: ayahId,
+        surahNumber: surah,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<QuranSearchCubit>();
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -63,51 +125,50 @@ class _QuranSearchScreenState extends State<QuranSearchScreen> {
             children: [
               DetailHeader(
                 title: 'البحث في القرآن',
-                subtitle:
+                subtitle: switch (_mode) {
+                  _SearchMode.text =>
                     'في ${arabicCount(QuranMetrics.ayahCount, ArabicNoun.ayah)}'
-                    '، بالتشكيل وبدونه',
-                bottom: SearchBarWidget(
-                  controller: _controller,
-                  autofocus: true,
-                  hintText: 'اكتب كلمة أو جزءًا من آية…',
-                  // Clearing the field returns to the suggestions at once.
-                  onChanged:
-                      (query) =>
-                          query.isEmpty
-                              ? cubit.clear()
-                              : cubit.onQueryChanged(query),
-                  onSearch: cubit.search,
+                        '، بالتشكيل وبدونه',
+                  _SearchMode.tafsir => 'في معاني الآيات من كتب التفسير',
+                },
+                bottom: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SearchBarWidget(
+                      controller: _controller,
+                      autofocus: true,
+                      hintText: switch (_mode) {
+                        _SearchMode.text => 'اكتب كلمة أو جزءًا من آية…',
+                        _SearchMode.tafsir => 'اكتب موضوعًا أو كلمة…',
+                      },
+                      // Clearing the field returns to the suggestions at once.
+                      onChanged: _onQueryChanged,
+                      onSearch: _search,
+                    ),
+                    SizedBox(height: 10.h),
+                    SegmentedTabs(
+                      labels: [
+                        for (final mode in _SearchMode.values) mode.label,
+                      ],
+                      selectedIndex: _mode.index,
+                      onChanged: (i) => _setMode(_SearchMode.values[i]),
+                    ),
+                  ],
                 ),
               ),
               Expanded(
-                child: BlocBuilder<QuranSearchCubit, QuranSearchState>(
-                  builder:
-                      (context, state) => switch (state) {
-                        QuranSearchIdle() => _SearchSuggestions(
-                          onPick: _searchFor,
+                child: switch (_mode) {
+                  _SearchMode.text => _textResults(),
+                  _SearchMode.tafsir => TafsirSearchView(
+                    onPick: _searchFor,
+                    onOpenHit:
+                        (hit) => _openAyah(
+                          page: hit.ayah.page,
+                          ayahId: hit.ayah.id,
+                          surah: hit.ayah.surahNumber,
                         ),
-                        QuranSearchLoading() => const _ResultsShimmer(),
-                        QuranSearchEmpty(:final query) => _Centered(
-                          child: StateMessage(
-                            icon: Icons.search_off_rounded,
-                            title: 'لا توجد نتائج',
-                            subtitle:
-                                'لا توجد آيات تحتوي على «$query».\n'
-                                'جرّب كلمة أقصر أو بصيغة أخرى.',
-                          ),
-                        ),
-                        QuranSearchFailure(:final query, :final message) =>
-                          _Centered(
-                            child: StateMessage.error(
-                              message: message,
-                              onRetry: () => cubit.search(query),
-                            ),
-                          ),
-                        QuranSearchSuccess(:final results) => _SearchResults(
-                          results: results,
-                        ),
-                      },
-                ),
+                  ),
+                },
               ),
             ],
           ),
@@ -115,20 +176,35 @@ class _QuranSearchScreenState extends State<QuranSearchScreen> {
       ),
     );
   }
-}
 
-/// A state message that stays reachable above the keyboard.
-class _Centered extends StatelessWidget {
-  final Widget child;
-
-  const _Centered({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.only(top: 24.h),
-      children: [child],
+  Widget _textResults() {
+    final cubit = context.read<QuranSearchCubit>();
+    return BlocBuilder<QuranSearchCubit, QuranSearchState>(
+      builder:
+          (context, state) => switch (state) {
+            QuranSearchIdle() => _SearchSuggestions(onPick: _searchFor),
+            QuranSearchLoading() => const QuranSearchResultsShimmer(),
+            QuranSearchEmpty(:final query) => QuranSearchCentered(
+              child: StateMessage(
+                icon: Icons.search_off_rounded,
+                title: 'لا توجد نتائج',
+                subtitle:
+                    'لا توجد آيات تحتوي على «$query».\n'
+                    'جرّب كلمة أقصر أو بصيغة أخرى.',
+              ),
+            ),
+            QuranSearchFailure(:final query, :final message) =>
+              QuranSearchCentered(
+                child: StateMessage.error(
+                  message: message,
+                  onRetry: () => cubit.search(query),
+                ),
+              ),
+            QuranSearchSuccess(:final results) => _SearchResults(
+              results: results,
+              onOpenAyah: _openAyah,
+            ),
+          },
     );
   }
 }
@@ -189,8 +265,14 @@ class _SearchSuggestions extends StatelessWidget {
 
 class _SearchResults extends StatelessWidget {
   final QuranSearchResults results;
+  final void Function({
+    required int page,
+    required int ayahId,
+    required int surah,
+  })
+  onOpenAyah;
 
-  const _SearchResults({required this.results});
+  const _SearchResults({required this.results, required this.onOpenAyah});
 
   @override
   Widget build(BuildContext context) {
@@ -233,47 +315,14 @@ class _SearchResults extends StatelessWidget {
         final hit = hits[i - 1];
         return QuranSearchHitTile(
           hit: hit,
-          onTap: () {
-            FocusManager.instance.primaryFocus?.unfocus();
-            context.pushNamed(
-              Routes.mushafReader,
-              arguments: MushafReaderArgs(
-                initialPage: hit.ayah.page,
-                highlightAyahId: hit.ayah.id,
-                surahNumber: hit.ayah.surahNumber,
+          onTap:
+              () => onOpenAyah(
+                page: hit.ayah.page,
+                ayahId: hit.ayah.id,
+                surah: hit.ayah.surahNumber,
               ),
-            );
-          },
         );
       },
-    );
-  }
-}
-
-/// Placeholder cards while the mushaf is searched.
-class _ResultsShimmer extends StatelessWidget {
-  const _ResultsShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    final block = ColorsManager.shimmerBase;
-    return Shimmer.fromColors(
-      baseColor: ColorsManager.shimmerBase,
-      highlightColor: ColorsManager.shimmerHighlight,
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
-        itemCount: 4,
-        separatorBuilder: (_, __) => SizedBox(height: 10.h),
-        itemBuilder:
-            (context, index) => Container(
-              height: 128.h,
-              decoration: BoxDecoration(
-                color: block,
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-            ),
-      ),
     );
   }
 }

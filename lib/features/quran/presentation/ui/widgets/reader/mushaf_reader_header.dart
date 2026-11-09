@@ -3,18 +3,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 import 'package:mushaf_text/mushaf_text.dart' show toArabicNumerals;
 
-/// The surah and juz of the page, with the page bookmark and the reading
-/// settings.
+/// The surah and juz of the page, with the recitation, the page bookmark
+/// and the reading settings.
 class MushafReaderHeader extends StatelessWidget {
   final VoidCallback onTogglePageBookmark;
   final VoidCallback onOpenSettings;
+  final VoidCallback onOpenRecitation;
 
   const MushafReaderHeader({
     super.key,
     required this.onTogglePageBookmark,
     required this.onOpenSettings,
+    required this.onOpenRecitation,
   });
 
   @override
@@ -41,6 +44,7 @@ class MushafReaderHeader extends StatelessWidget {
             title: header.title.isEmpty ? 'المصحف الشريف' : header.title,
             subtitle: header.subtitle,
             actions: [
+              _RecitationButton(onPressed: onOpenRecitation),
               _PageBookmarkToggle(onPressed: onTogglePageBookmark),
               AppIconButton(
                 tooltip: 'إعدادات القراءة',
@@ -78,6 +82,30 @@ class _PageBookmarkToggle extends StatelessWidget {
                       : AppIconButtonVariant.outlined,
               onPressed: onPressed,
             ),
+          ),
+    );
+  }
+}
+
+/// Opens the recitation sheet; filled while a recitation is on.
+class _RecitationButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _RecitationButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<QuranRecitationCubit, QuranRecitationState, bool>(
+      selector: (state) => state is! RecitationIdle,
+      builder:
+          (context, active) => AppIconButton(
+            tooltip: 'الاستماع إلى التلاوة',
+            icon: active ? Icons.graphic_eq_rounded : Icons.headphones_rounded,
+            variant:
+                active
+                    ? AppIconButtonVariant.tonal
+                    : AppIconButtonVariant.outlined,
+            onPressed: onPressed,
           ),
     );
   }

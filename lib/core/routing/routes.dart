@@ -19,7 +19,6 @@ class Routes {
   static const String libraryScreen = '/libraryScreen';
   static const String hadithDetail = '/hadith';
 
-
   static const String homeScreen = '/homeScreen';
   static const String usersSuggestions = '/usersSuggestions';
 
@@ -36,8 +35,8 @@ class Routes {
   static const String mushafReader = '/quran/reader';
   static const String quranSearch = '/quran/search';
   static const String tajweedGuide = '/quran/tajweedGuide';
+  static const String surahTafsir = '/quran/tafsir';
 
   static const String azkarScreen = '/azkar';
   static const String azkarReader = '/azkar/reader';
-
 }

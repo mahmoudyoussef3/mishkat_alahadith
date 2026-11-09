@@ -13,6 +13,14 @@ class QuranReadingLocalDataSource {
   static const String _themeModeKey = 'quran_theme_mode';
   static const String _layoutModeKey = 'quran_layout_mode';
   static const String _fontScaleKey = 'quran_font_scale';
+  static const String _reciterKey = 'quran_reciter';
+  static const String _reciterNameKey = 'quran_reciter_name';
+  static const String _ayahRepeatKey = 'quran_ayah_repeat';
+  static const String _recitationSpeedKey = 'quran_recitation_speed';
+  static const String _recitationQualityKey = 'quran_recitation_quality';
+  static const String _continuousKey = 'quran_recitation_continuous';
+  static const String _tafsirKey = 'quran_tafsir';
+  static const String _translationKey = 'quran_translation';
 
   Future<({int page, int savedAtMillis})?> getLastRead() async {
     final prefs = await SharedPreferences.getInstance();
@@ -86,5 +94,67 @@ class QuranReadingLocalDataSource {
     await prefs.setString(_themeModeKey, themeMode);
     await prefs.setString(_layoutModeKey, layoutMode);
     await prefs.setString(_fontScaleKey, fontScale);
+  }
+
+  Future<
+    ({
+      String? reciter,
+      String? reciterName,
+      String? repeat,
+      String? speed,
+      String? quality,
+      bool? continuous,
+    })
+  >
+  getRecitationSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (
+      reciter: prefs.getString(_reciterKey),
+      reciterName: prefs.getString(_reciterNameKey),
+      repeat: prefs.getString(_ayahRepeatKey),
+      speed: prefs.getString(_recitationSpeedKey),
+      quality: prefs.getString(_recitationQualityKey),
+      continuous: prefs.getBool(_continuousKey),
+    );
+  }
+
+  Future<void> saveRecitationSettings({
+    required String reciter,
+    required String reciterName,
+    required String repeat,
+    required String speed,
+    required String quality,
+    required bool continuous,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_reciterKey, reciter);
+    await prefs.setString(_reciterNameKey, reciterName);
+    await prefs.setString(_ayahRepeatKey, repeat);
+    await prefs.setString(_recitationSpeedKey, speed);
+    await prefs.setString(_recitationQualityKey, quality);
+    await prefs.setBool(_continuousKey, continuous);
+  }
+
+  Future<({String? tafsir, String? translation})>
+  getCommentarySettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (
+      tafsir: prefs.getString(_tafsirKey),
+      translation: prefs.getString(_translationKey),
+    );
+  }
+
+  /// A null [translation] switches the translation off.
+  Future<void> saveCommentarySettings({
+    required String tafsir,
+    required String? translation,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tafsirKey, tafsir);
+    if (translation == null) {
+      await prefs.remove(_translationKey);
+    } else {
+      await prefs.setString(_translationKey, translation);
+    }
   }
 }

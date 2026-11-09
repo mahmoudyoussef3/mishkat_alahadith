@@ -13,6 +13,9 @@ class SurahTile extends StatelessWidget {
   final bool isLast;
   final VoidCallback onTap;
 
+  /// Recites the surah; no listen button without it.
+  final VoidCallback? onListen;
+
   const SurahTile({
     super.key,
     required this.surah,
@@ -20,6 +23,7 @@ class SurahTile extends StatelessWidget {
     required this.isFirst,
     required this.isLast,
     this.isCurrent = false,
+    this.onListen,
   });
 
   @override
@@ -38,7 +42,11 @@ class SurahTile extends StatelessWidget {
         arabicCount(surah.ayahCount, ArabicNoun.ayah),
         if (isCurrent) 'تقرأ الآن',
       ].join(' · '),
-      trailing: QuranPageLabel('ص ${toArabicNumerals(surah.startPage)}'),
+      trailing: QuranRowTrailing(
+        pageLabel: 'ص ${toArabicNumerals(surah.startPage)}',
+        onListen: onListen,
+        listenLabel: 'الاستماع إلى سورة ${surah.nameArabic}',
+      ),
     );
   }
 }

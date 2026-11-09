@@ -72,6 +72,9 @@ dependencies:
   mushaf_text: ^1.4.0
   flutter_tts: ^4.2.5
   just_audio: ^0.10.6
+  # Already resolved through just_audio; used directly to set the session
+  # category, so recitations play through the silent switch and screen lock.
+  audio_session: ^0.2.4
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0

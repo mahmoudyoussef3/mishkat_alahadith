@@ -5,10 +5,14 @@ import 'package:mishkat_almasabih/core/widgets/segmented_tabs.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_bookmark.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/quran_hizb_quarter.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_juz.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/recitation.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/hizb_index/quran_hizb_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mushaf_text/mushaf_text.dart' show toArabicNumerals;
 
+import 'hizb_quarter_tile.dart';
 import 'juz_tile.dart';
 import 'quran_bookmark_tile.dart';
 import 'quran_index_row.dart';
@@ -18,6 +22,7 @@ import 'surah_tile.dart';
 enum QuranIndexTab {
   surahs('السور'),
   juz('الأجزاء'),
+  hizbs('الأحزاب'),
   bookmarks('العلامات');
 
   const QuranIndexTab(this.label);
@@ -28,13 +33,25 @@ enum QuranIndexTab {
 typedef OpenQuranPage =
     void Function(int page, {int? ayahId, int? surahNumber});
 
-/// The surah index, the juz index and the bookmarks behind one switch.
+/// Recites [request], turning to [page] to follow it.
+typedef ListenToQuran =
+    void Function(
+      RecitationRequest request, {
+      required int page,
+      int? surahNumber,
+    });
+
+/// The surah, juz and hizb indexes and the bookmarks behind one switch.
 ///
 /// Used full-screen on the Quran home and inside a sheet over the mushaf, so
 /// it takes an optional scroll controller and any slivers to show above the
 /// switch. Its colours come from the palette around it.
 class QuranIndexView extends StatefulWidget {
   final OpenQuranPage onOpenPage;
+
+  /// Offers to listen to each surah, juz and quarter; no listen buttons
+  /// without it.
+  final ListenToQuran? onListen;
   final ScrollController? controller;
   final List<Widget> leadingSlivers;
 
@@ -44,6 +61,7 @@ class QuranIndexView extends StatefulWidget {
   const QuranIndexView({
     super.key,
     required this.onOpenPage,
+    this.onListen,
     this.controller,
     this.leadingSlivers = const [],
     this.currentPage,
@@ -69,9 +87,7 @@ class _QuranIndexViewState extends State<QuranIndexView> {
             child: SegmentedTabs(
               labels: [for (final tab in QuranIndexTab.values) tab.label],
               selectedIndex: _tab.index,
-              onChanged:
-                  (index) =>
-                      setState(() => _tab = QuranIndexTab.values[index]),
+              onChanged: _selectTab,
             ),
           ),
         ),
@@ -97,11 +113,18 @@ class _QuranIndexViewState extends State<QuranIndexView> {
                       state: state,
                       currentPage: widget.currentPage,
                       onOpenPage: widget.onOpenPage,
+                      onListen: widget.onListen,
                     ),
                     QuranIndexTab.juz => _JuzList(
                       juzList: state.juzList,
                       currentPage: widget.currentPage,
                       onOpenPage: widget.onOpenPage,
+                      onListen: widget.onListen,
+                    ),
+                    QuranIndexTab.hizbs => _HizbList(
+                      currentPage: widget.currentPage,
+                      onOpenPage: widget.onOpenPage,
+                      onListen: widget.onListen,
                     ),
                     QuranIndexTab.bookmarks => _BookmarkList(
                       bookmarks: state.bookmarks,
@@ -118,17 +141,29 @@ class _QuranIndexViewState extends State<QuranIndexView> {
       ],
     );
   }
+
+  /// The hizb index comes from the network the first time, so it is only
+  /// fetched once asked for.
+  void _selectTab(int index) {
+    final tab = QuranIndexTab.values[index];
+    setState(() => _tab = tab);
+    if (tab == QuranIndexTab.hizbs) {
+      context.read<QuranHizbIndexCubit>().loadIfNeeded();
+    }
+  }
 }
 
 class _SurahList extends StatelessWidget {
   final QuranIndexLoaded state;
   final int? currentPage;
   final OpenQuranPage onOpenPage;
+  final ListenToQuran? onListen;
 
   const _SurahList({
     required this.state,
     required this.currentPage,
     required this.onOpenPage,
+    required this.onListen,
   });
 
   @override
@@ -164,10 +199,17 @@ class _SurahList extends StatelessWidget {
                 isLast: i == surahs.length - 1,
                 isCurrent: page != null && surah.containsPage(page),
                 onTap:
-                    () => onOpenPage(
-                      surah.startPage,
+                    () =>
+                        onOpenPage(surah.startPage, surahNumber: surah.number),
+                onListen: switch (onListen) {
+                  final listen? =>
+                    () => listen(
+                      RecitationOfScope(RecitationScope.surah(surah.number)),
+                      page: surah.startPage,
                       surahNumber: surah.number,
                     ),
+                  null => null,
+                },
               );
             },
           ),
@@ -181,11 +223,13 @@ class _JuzList extends StatelessWidget {
   final List<QuranJuz> juzList;
   final int? currentPage;
   final OpenQuranPage onOpenPage;
+  final ListenToQuran? onListen;
 
   const _JuzList({
     required this.juzList,
     required this.currentPage,
     required this.onOpenPage,
+    required this.onListen,
   });
 
   @override
@@ -210,6 +254,97 @@ class _JuzList extends StatelessWidget {
                 isLast: i == juzList.length - 1,
                 isCurrent: juz.number == current?.number,
                 onTap: () => onOpenPage(juz.startPage),
+                onListen: switch (onListen) {
+                  final listen? =>
+                    () => listen(
+                      RecitationOfScope(RecitationScope.juz(juz.number)),
+                      page: juz.startPage,
+                      surahNumber: juz.startSurahNumber,
+                    ),
+                  null => null,
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HizbList extends StatelessWidget {
+  final int? currentPage;
+  final OpenQuranPage onOpenPage;
+  final ListenToQuran? onListen;
+
+  const _HizbList({
+    required this.currentPage,
+    required this.onOpenPage,
+    required this.onListen,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<QuranHizbIndexCubit, QuranHizbIndexState>(
+      builder:
+          (context, state) => switch (state) {
+            QuranHizbIndexIdle() ||
+            QuranHizbIndexLoading() => const QuranIndexShimmer(),
+            QuranHizbIndexFailure(:final message) => SliverToBoxAdapter(
+              child: StateMessage.error(
+                message: message,
+                onRetry: context.read<QuranHizbIndexCubit>().load,
+              ),
+            ),
+            QuranHizbIndexLoaded(:final quarters) => _quarters(quarters),
+          },
+    );
+  }
+
+  Widget _quarters(List<QuranHizbQuarter> quarters) {
+    final page = currentPage;
+    // The last quarter to begin by the current page is the one being read.
+    final current =
+        page == null
+            ? null
+            : quarters.where((q) => q.page <= page).lastOrNull?.number;
+    final total = toArabicNumerals(quarters.length);
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(
+          child: QuranIndexHeader(
+            title: 'أرباع الأحزاب',
+            shown: total,
+            total: total,
+          ),
+        ),
+        QuranIndexCard(
+          sliver: SliverList.builder(
+            itemCount: quarters.length,
+            itemBuilder: (context, i) {
+              final quarter = quarters[i];
+              return HizbQuarterTile(
+                quarter: quarter,
+                isFirst: i == 0,
+                isLast: i == quarters.length - 1,
+                isCurrent: quarter.number == current,
+                onTap:
+                    () => onOpenPage(
+                      quarter.page,
+                      ayahId: quarter.startAyahId,
+                      surahNumber: quarter.surahNumber,
+                    ),
+                onListen: switch (onListen) {
+                  final listen? =>
+                    () => listen(
+                      RecitationOfScope(
+                        RecitationScope.hizbQuarter(quarter.number),
+                      ),
+                      page: quarter.page,
+                      surahNumber: quarter.surahNumber,
+                    ),
+                  null => null,
+                },
               );
             },
           ),

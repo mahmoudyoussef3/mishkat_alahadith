@@ -65,6 +65,12 @@ abstract final class QuranTextNormalizer {
             wordLength == 1 &&
             pendingStart != null &&
             (lastLetter == 0x064A || lastLetter == 0x0647);
+        // Letters dropped at a word's end have no letter after them to
+        // belong to, so they go with the one before: «الدنيا» is marked
+        // whole, its final alef included.
+        if (pendingStart != null && !previousWasSpace && ends.isNotEmpty) {
+          ends[ends.length - 1] = i;
+        }
         pendingStart = null;
         // Collapse runs of spaces, and keep a vocative on the next word.
         if (previousWasSpace || isVocative) continue;
@@ -96,6 +102,11 @@ abstract final class QuranTextNormalizer {
       previousWasSpace = false;
       wordLength++;
       lastLetter = folded;
+    }
+
+    // The same for letters dropped at the end of the text.
+    if (pendingStart != null && !previousWasSpace && ends.isNotEmpty) {
+      ends[ends.length - 1] = input.length;
     }
 
     var value = buffer.toString();
