@@ -8,6 +8,7 @@ class PrayerTimesTextStyles {
       .copyWith(color: ColorsManager.primaryText, fontWeight: FontWeight.bold);
 
   static TextStyle get nextPrayerSectionLabel => BaseStyles.TextStyles.bodyMedium
+  
       .copyWith(
         color: ColorsManager.secondaryText,
         fontWeight: FontWeight.w600,
