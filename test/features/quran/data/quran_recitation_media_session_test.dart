@@ -8,12 +8,19 @@ PlaybackState _state({
   bool playing = true,
   ProcessingState processing = ProcessingState.ready,
   double speed = 1.0,
+  Duration position = Duration.zero,
+  Duration offset = Duration.zero,
 }) => QuranRecitationMediaSession.stateOf(
   PlayerEvent(
     playing: playing,
-    playbackEvent: PlaybackEvent(processingState: processing),
+    playbackEvent: PlaybackEvent(
+      processingState: processing,
+      updatePosition: position,
+      bufferedPosition: position,
+    ),
   ),
   speed: speed,
+  offset: offset,
 );
 
 MediaItem _item(int ayah, {Duration? duration}) => MediaItem(
@@ -60,7 +67,7 @@ void main() {
       expect(_state().androidCompactActionIndices, [0, 1, 2]);
     });
 
-    test('lets the ayah be seeked through', () {
+    test('lets the surah be seeked through', () {
       expect(_state().systemActions, {MediaAction.seek});
     });
 
@@ -77,6 +84,16 @@ void main() {
 
     test('carries the speed, so the progress moves at it', () {
       expect(_state(speed: 1.25).speed, 1.25);
+    });
+
+    test('places the ayah where it starts on the bar of its surah', () {
+      final state = _state(
+        position: const Duration(seconds: 3),
+        offset: const Duration(seconds: 40),
+      );
+
+      expect(state.updatePosition, const Duration(seconds: 43));
+      expect(state.bufferedPosition, const Duration(seconds: 43));
     });
   });
 

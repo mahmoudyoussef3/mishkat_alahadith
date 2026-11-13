@@ -4,22 +4,43 @@ import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:dio/dio.dart' show CancelToken;
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities/recitation.dart';
+import 'quran_recitation_lengths_datasource.dart';
 import 'quran_recitation_media_session.dart';
+import 'quran_recitation_timeline.dart';
 
 /// The player the Quran recitations stream on, one for all of them, so two
 /// recitations of the Quran can never play over each other. It plays on
 /// with the app in the background, shown with its controls on the
-/// notification, the lock screen, a watch or a car.
+/// notification, the lock screen, a watch or a car — each surah as one
+/// recitation, its progress bar spanning its ayahs in the queue.
 class QuranRecitationPlayerDataSource {
+  final QuranRecitationLengthsDataSource _lengths;
+
   AudioPlayer? _player;
   QuranRecitationMediaSession? _session;
   Future<void>? _sessionSetUp;
   Future<void>? _systemSetUp;
+
+  /// The progress bars of [_timelineSequence], the queue the player holds.
+  QuranRecitationTimeline? _timeline;
+  List<IndexedAudioSource>? _timelineSequence;
+
+  /// The lengths being read for a bar, one read at a time, and what calls
+  /// it off.
+  Future<void>? _lengthsRead;
+  CancelToken? _lengthsCancel;
+
+  /// The bar and entry the last read was for: one that failed is tried
+  /// again only once the player is on another entry.
+  (QuranRecitationTimeline, int)? _lengthsReadFor;
+
+  QuranRecitationPlayerDataSource(this._lengths);
 
   /// The app's icon, as the recitation's artwork; null until copied to a
   /// file, the only place the system reads artwork from.
@@ -37,8 +58,7 @@ class QuranRecitationPlayerDataSource {
       _session ??= QuranRecitationMediaSession(
         pausePlayer: pause,
         stopPlayer: stop,
-        // Nothing to do before anything has played.
-        seekPlayer: (position) async => await _player?.seek(position),
+        seekPlayer: _seekOnBar,
       );
 
   Stream<PlayerState> get playerStates => _instance.playerStateStream;
@@ -68,6 +88,7 @@ class QuranRecitationPlayerDataSource {
     bool autoplay = true,
   }) async {
     final queue = ++_queue;
+    _lengthsCancel?.cancel();
     try {
       await (_setUpSession(), _setUpSystem()).wait;
       final player = _instance;
@@ -97,6 +118,7 @@ class QuranRecitationPlayerDataSource {
   /// until the next [playQueue].
   Future<void> standBy() async {
     _queue++;
+    _lengthsCancel?.cancel();
     _session?.hold();
     await _player?.stop();
   }
@@ -105,6 +127,7 @@ class QuranRecitationPlayerDataSource {
   /// do before anything has played.
   Future<void> stop() async {
     _queue++;
+    _lengthsCancel?.cancel();
     await _player?.stop();
     _session?.end();
   }
@@ -120,25 +143,108 @@ class QuranRecitationPlayerDataSource {
     void showState(Object? _) => _mediaSession.showPlayer(_stateOf(player));
     void showItem(Object? _) {
       if (_itemOf(player) case final item?) _mediaSession.showItem(item);
+      _readLengths(player);
     }
 
     player.playerEventStream.listen(showState, onError: _logReportError);
     player.sequenceStateStream.listen(showItem, onError: _logReportError);
-    player.durationStream.listen(showItem, onError: _logReportError);
     return player;
   }
 
-  PlaybackState _stateOf(AudioPlayer player) =>
-      QuranRecitationMediaSession.stateOf(
-        player.playerEvent,
-        speed: player.speed,
-      );
+  /// What the player is doing, its position placed on the bar of the part
+  /// it is on once that bar is known.
+  PlaybackState _stateOf(AudioPlayer player) {
+    final event = player.playerEvent;
+    final entry = event.playbackEvent.currentIndex;
+    final timeline = _timelineOf(player);
+    return QuranRecitationMediaSession.stateOf(
+      event,
+      speed: player.speed,
+      offset:
+          (entry == null ? null : timeline?.startOf(entry)) ?? Duration.zero,
+    );
+  }
 
-  /// The entry the player is on, with what is only known once it plays.
+  /// The entry the player is on, as long as the bar of its part; without a
+  /// bar until that is known.
   MediaItem? _itemOf(AudioPlayer player) {
-    final entry = player.sequenceState.currentSource?.tag;
+    final sequence = player.sequenceState;
+    final entry = sequence.currentSource?.tag;
     if (entry is! MediaItem) return null;
-    return entry.copyWith(duration: player.duration, artUri: _artUri);
+    final index = sequence.currentIndex;
+    return entry.copyWith(
+      duration: index == null ? null : _timelineOf(player)?.lengthOfPart(index),
+      artUri: _artUri,
+    );
+  }
+
+  /// The progress bars of the queue the player holds, so they always match
+  /// the entry it says it is on; built once for each queue.
+  QuranRecitationTimeline? _timelineOf(AudioPlayer player) {
+    final sequence = player.sequenceState.sequence;
+    if (!identical(sequence, _timelineSequence)) {
+      _timelineSequence = sequence;
+      final entries = [
+        for (final source in sequence)
+          if (source.tag case final MediaItem entry) entry,
+      ];
+      _timeline =
+          entries.length == sequence.length
+              ? QuranRecitationTimeline(entries, _lengths.lengthOf)
+              : null;
+    }
+    return _timeline;
+  }
+
+  /// Reads the lengths the bar of the part the player is on needs, then
+  /// shows the bar — once the entry it plays is ready, so the reads never
+  /// hold its own audio up. A read that fails is tried again at the next
+  /// entry.
+  void _readLengths(AudioPlayer player) {
+    if (_lengthsRead != null ||
+        player.processingState != ProcessingState.ready) {
+      return;
+    }
+    final entry = player.sequenceState.currentIndex;
+    final timeline = _timelineOf(player);
+    if (entry == null ||
+        timeline == null ||
+        timeline.lengthOfPart(entry) != null ||
+        _lengthsReadFor == (timeline, entry)) {
+      return;
+    }
+    _lengthsReadFor = (timeline, entry);
+    final cancel = _lengthsCancel = CancelToken();
+    _lengthsRead = _lengths
+        .read(timeline.urlsOfPart(entry), cancel: cancel)
+        .whenComplete(() {
+          _lengthsRead = null;
+          if (cancel.isCancelled) {
+            // Stopped or replaced while it was read: the bar of the new
+            // queue, if any, instead.
+            _readLengths(player);
+            return;
+          }
+          _lengthsCancel = null;
+          _mediaSession.showPlayer(_stateOf(player));
+          if (_itemOf(player) case final item?) _mediaSession.showItem(item);
+          // The player may have moved on to the next surah meanwhile.
+          _readLengths(player);
+        });
+  }
+
+  /// Moves to [position] on the bar of the part the player is on, into
+  /// whichever of its ayahs it falls in; within the ayah while that bar is
+  /// unknown. Nothing to do before anything has played.
+  Future<void> _seekOnBar(Duration position) async {
+    final player = _player;
+    if (player == null) return;
+    final entry = player.sequenceState.currentIndex;
+    final target =
+        entry == null ? null : _timelineOf(player)?.locate(entry, position);
+    if (target == null) return player.seek(position);
+    final (index, into) = target;
+    await player.seek(into, index: index);
   }
 
   /// Tells the system a recitation is listened to like music: without it,

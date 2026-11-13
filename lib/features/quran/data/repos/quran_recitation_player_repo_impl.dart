@@ -146,11 +146,12 @@ class QuranRecitationPlayerRepoImpl implements QuranRecitationPlayerRepo {
   Stream<RecitationCommand> commands() => _player.commands;
 
   /// [track] as the system shows it outside the app, streamed from its
-  /// [MediaItem.id].
+  /// [MediaItem.id]: by its surah, the ayahs of which share one title and
+  /// so one progress bar.
   static MediaItem mediaItemOf(RecitationTrack track, String reciterName) =>
       MediaItem(
         id: track.url,
-        title: track.title,
+        title: track.surahTitle,
         artist: reciterName,
         album: 'القرآن الكريم',
       );

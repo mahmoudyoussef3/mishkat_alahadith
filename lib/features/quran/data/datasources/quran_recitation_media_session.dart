@@ -122,7 +122,7 @@ class QuranRecitationMediaSession extends BaseAudioHandler {
   @override
   Future<void> stop() => _command(RecitationCommand.stop);
 
-  /// Within the ayah: moving to another is [skipToNext] or [skipToPrevious].
+  /// Anywhere on the bar of the surah shown, into whichever ayah it is at.
   @override
   Future<void> seek(Duration position) => _seekPlayer(position);
 
@@ -162,8 +162,13 @@ class QuranRecitationMediaSession extends BaseAudioHandler {
 
   // ── what the player reports ────────────────────────────────────────────
 
-  /// [event] as the system shows it, played at [speed].
-  static PlaybackState stateOf(PlayerEvent event, {required double speed}) {
+  /// [event] as the system shows it, played at [speed]: the entry played
+  /// starting at [offset] on the progress bar, which spans the surah.
+  static PlaybackState stateOf(
+    PlayerEvent event, {
+    required double speed,
+    Duration offset = Duration.zero,
+  }) {
     final playback = event.playbackEvent;
     return PlaybackState(
       controls: [_previous, if (event.playing) _pause else _play, _next, _stop],
@@ -178,9 +183,9 @@ class QuranRecitationMediaSession extends BaseAudioHandler {
         ProcessingState.completed => AudioProcessingState.completed,
       },
       playing: event.playing,
-      updatePosition: playback.updatePosition,
+      updatePosition: offset + playback.updatePosition,
       updateTime: playback.updateTime,
-      bufferedPosition: playback.bufferedPosition,
+      bufferedPosition: offset + playback.bufferedPosition,
       speed: speed,
     );
   }

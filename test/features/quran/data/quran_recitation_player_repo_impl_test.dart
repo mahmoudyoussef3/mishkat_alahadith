@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_lengths_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_player_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/repos/quran_recitation_player_repo_impl.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/recitation.dart';
@@ -13,6 +15,8 @@ import 'package:mishkat_almasabih/features/quran/domain/entities/recitation_sett
 /// The player, recording what it is asked and reporting what the test says;
 /// just_audio's own player is never created.
 class _FakePlayer extends QuranRecitationPlayerDataSource {
+  _FakePlayer() : super(QuranRecitationLengthsDataSource(Dio()));
+
   final StreamController<PlayerState> states = StreamController.broadcast();
   final StreamController<int?> indexes = StreamController.broadcast();
   final StreamController<PlayerException> playerErrors =
@@ -153,22 +157,22 @@ void main() {
       expect(queue.loopEach, isTrue);
     });
 
-    test('names each ayah and its reciter for outside the app', () async {
-      await repo.play(
-        _tracks.take(2).toList(),
-        reciterName: _reciter,
-        startIndex: 0,
-        repeat: AyahRepeat.once,
-        speed: RecitationSpeed.normal,
-      );
+    test(
+      'names each ayah by its surah and reciter for outside the app',
+      () async {
+        await repo.play(
+          _tracks.take(2).toList(),
+          reciterName: _reciter,
+          startIndex: 0,
+          repeat: AyahRepeat.once,
+          speed: RecitationSpeed.normal,
+        );
 
-      final entries = player.queues.single.entries;
-      expect(entries.map((e) => e.title), [
-        'سورة الإخلاص · الآية ١',
-        'سورة الإخلاص · الآية ٢',
-      ]);
-      expect(entries.map((e) => e.artist), everyElement(_reciter));
-    });
+        final entries = player.queues.single.entries;
+        expect(entries.map((e) => e.title), ['سورة الإخلاص', 'سورة الإخلاص']);
+        expect(entries.map((e) => e.artist), everyElement(_reciter));
+      },
+    );
 
     test('plays at the speed asked for', () async {
       await repo.play(

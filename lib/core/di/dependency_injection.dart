@@ -282,6 +282,7 @@ import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_cloud_cache_local_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_cloud_remote_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_lengths_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_player_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/repos/quran_cloud_repo_impl.dart';
 import 'package:mishkat_almasabih/features/quran/data/repos/quran_recitation_player_repo_impl.dart';
@@ -1080,7 +1081,18 @@ void _registerQuranCloud() {
     ),
   );
   getIt.registerLazySingleton<QuranRecitationPlayerRepo>(
-    () => QuranRecitationPlayerRepoImpl(QuranRecitationPlayerDataSource()),
+    () => QuranRecitationPlayerRepoImpl(
+      QuranRecitationPlayerDataSource(
+        QuranRecitationLengthsDataSource(
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 20),
+              receiveTimeout: const Duration(seconds: 20),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 
   getIt.registerLazySingleton<GetQuranEditionsUseCase>(

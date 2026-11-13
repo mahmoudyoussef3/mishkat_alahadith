@@ -10,8 +10,8 @@ import '../entities/recitation_settings.dart';
 abstract class QuranRecitationPlayerRepo {
   /// Replaces whatever was playing with [tracks] from [startIndex], each
   /// recited as often as [repeat] says, at [speed] — ready but held when
-  /// [paused]. Outside the app, each track is shown by its title and
-  /// [reciterName].
+  /// [paused]. Outside the app, each track is shown by its surah and
+  /// [reciterName], with one progress bar across the surah.
   Future<ApiResult<void>> play(
     List<RecitationTrack> tracks, {
     required String reciterName,

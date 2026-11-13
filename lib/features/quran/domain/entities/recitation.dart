@@ -121,10 +121,12 @@ class RecitationTrack {
     required this.url,
   });
 
-  /// «سورة البقرة · الآية ٢٥٥»: the ayah as the player names it, in the app
-  /// and on the system's controls outside it.
-  String get title =>
-      'سورة $surahName · الآية ${toArabicDigits('$ayahNumber')}';
+  /// «سورة البقرة»: the surah as the system's controls outside the app name
+  /// what plays, its ayahs shown as one.
+  String get surahTitle => 'سورة $surahName';
+
+  /// «سورة البقرة · الآية ٢٥٥»: the ayah as the player in the app names it.
+  String get title => '$surahTitle · الآية ${toArabicDigits('$ayahNumber')}';
 
   @override
   bool operator ==(Object other) =>

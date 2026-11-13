@@ -26,6 +26,21 @@ void main() {
     });
   });
 
+  group('RecitationTrack.surahTitle', () {
+    test('names the surah alone', () {
+      const track = RecitationTrack(
+        ayahId: 262,
+        surahNumber: 2,
+        surahName: 'البقرة',
+        ayahNumber: 255,
+        page: 42,
+        url: 'https://cdn.example/262.mp3',
+      );
+
+      expect(track.surahTitle, 'سورة البقرة');
+    });
+  });
+
   group('QuranSurah.openingAt', () {
     test('names the surah a page belongs to', () {
       expect(QuranSurah.openingAt(sampleSurahs, 30), baqarah);
