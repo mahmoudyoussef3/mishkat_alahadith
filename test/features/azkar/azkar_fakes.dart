@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:mishkat_almasabih/core/domain/entities/media_command.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/entities/azkar_audio.dart';
@@ -14,11 +15,22 @@ import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_azkar_setti
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_favorite_azkar_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_suggested_azkar_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_today_azkar_progress_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/last_azkar_audio_use_cases.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/pause_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/play_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/prepare_azkar_audio_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/reset_azkar_category_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/resume_azkar_audio_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/save_azkar_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/search_azkar_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/set_zikr_count_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/stand_by_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/stop_azkar_audio_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/toggle_favorite_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_audio_commands_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_audio_taken_over_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_playback_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_home/azkar_home_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_reader/azkar_reader_cubit.dart';
 
@@ -169,20 +181,30 @@ class FakeAzkarRepo implements AzkarRepo {
   }
 }
 
-/// A player driven by the test: statuses are pushed in by hand, and
-/// downloads can be held until the test answers them.
+/// A player driven by the test: statuses, controls used outside the app and
+/// takeovers by the Quran are pushed in by hand, and downloads can be held
+/// until the test answers them.
 class FakeAzkarAudioRepo implements AzkarAudioRepo {
   final StreamController<AzkarPlaybackStatus> statuses =
       StreamController.broadcast();
+  final StreamController<MediaCommand> controls = StreamController.broadcast();
+  final StreamController<void> takeovers = StreamController.broadcast();
 
   bool holdDownloads = false;
   final Map<String, Completer<ApiResult<String>>> pendingDownloads = {};
   Failure? downloadFailure;
 
   final List<String> played = [];
+  final List<AzkarAudioTrack> playedTracks = [];
   int pauses = 0;
   int resumes = 0;
+  int standBys = 0;
   int stops = 0;
+
+  /// The recitation kept for after the app is closed, and every one kept
+  /// since — null for each time it was forgotten.
+  AzkarAudioTrack? lastTrack;
+  final List<AzkarAudioTrack?> savedTracks = [];
 
   void finishDownload(String audioFile) => pendingDownloads
       .remove(audioFile)!
@@ -202,8 +224,32 @@ class FakeAzkarAudioRepo implements AzkarAudioRepo {
   }
 
   @override
-  Future<ApiResult<void>> play(String localPath) async {
+  Future<ApiResult<void>> play(String localPath, AzkarAudioTrack track) async {
     played.add(localPath);
+    playedTracks.add(track);
+    return const ApiResult.success(null);
+  }
+
+  @override
+  Future<ApiResult<void>> standBy() async {
+    standBys++;
+    return const ApiResult.success(null);
+  }
+
+  @override
+  Stream<MediaCommand> commands() => controls.stream;
+
+  @override
+  Stream<void> takenOver() => takeovers.stream;
+
+  @override
+  Future<ApiResult<AzkarAudioTrack?>> getLastTrack() async =>
+      ApiResult.success(lastTrack);
+
+  @override
+  Future<ApiResult<void>> saveLastTrack(AzkarAudioTrack? track) async {
+    lastTrack = track;
+    savedTracks.add(track);
     return const ApiResult.success(null);
   }
 
@@ -254,4 +300,19 @@ AzkarHomeCubit homeCubitFor(
   GetFavoriteAzkarUseCase(repo),
   ToggleFavoriteAzkarUseCase(repo),
   GetAzkarSettingsUseCase(repo),
+);
+
+/// An audio cubit over [player].
+AzkarAudioCubit audioCubitFor(FakeAzkarAudioRepo player) => AzkarAudioCubit(
+  PrepareAzkarAudioUseCase(player),
+  PlayAzkarAudioUseCase(player),
+  PauseAzkarAudioUseCase(player),
+  ResumeAzkarAudioUseCase(player),
+  StopAzkarAudioUseCase(player),
+  WatchAzkarPlaybackUseCase(player),
+  StandByAzkarAudioUseCase(player),
+  WatchAzkarAudioCommandsUseCase(player),
+  WatchAzkarAudioTakenOverUseCase(player),
+  GetLastAzkarAudioUseCase(player),
+  SaveLastAzkarAudioUseCase(player),
 );

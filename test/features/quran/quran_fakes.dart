@@ -21,6 +21,7 @@ import 'package:mishkat_almasabih/features/quran/domain/repos/quran_repo.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/load_recitation_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/quran_study_settings_use_cases.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/recitation_player_use_cases.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/recitation_resume_use_cases.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 
 const fatihah = QuranSurah(
@@ -289,6 +290,27 @@ class FakeQuranReadingRepo implements QuranReadingRepo {
     return const ApiResult.success(null);
   }
 
+  /// Where the last recitation was left off, and every one kept since —
+  /// null for each time it was forgotten.
+  RecitationResumePoint? resumePoint;
+  final List<RecitationResumePoint?> savedResumePoints = [];
+
+  @override
+  Future<ApiResult<RecitationResumePoint?>> getRecitationResumePoint() async =>
+      failReads
+          ? const ApiResult.failure(CacheFailure())
+          : ApiResult.success(resumePoint);
+
+  @override
+  Future<ApiResult<void>> saveRecitationResumePoint(
+    RecitationResumePoint? point,
+  ) async {
+    if (failWrites) return const ApiResult.failure(CacheFailure());
+    resumePoint = point;
+    savedResumePoints.add(point);
+    return const ApiResult.success(null);
+  }
+
   @override
   Future<ApiResult<CommentarySettings>> getCommentarySettings() async =>
       failReads
@@ -511,6 +533,7 @@ class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
       StreamController.broadcast();
   final StreamController<RecitationCommand> _commands =
       StreamController.broadcast();
+  final StreamController<void> _takeovers = StreamController.broadcast();
 
   final List<
     ({
@@ -541,6 +564,9 @@ class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
       _playback.addError(const UnexpectedFailure(FailureMessages.audio));
 
   void command(RecitationCommand command) => _commands.add(command);
+
+  /// A recitation of the azkar takes the player.
+  void takeOver() => _takeovers.add(null);
 
   @override
   Future<ApiResult<void>> play(
@@ -606,6 +632,9 @@ class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
 
   @override
   Stream<RecitationCommand> commands() => _commands.stream;
+
+  @override
+  Stream<void> takenOver() => _takeovers.stream;
 }
 
 /// A recitation cubit over fakes.
@@ -633,6 +662,9 @@ QuranRecitationCubit recitationCubit({
     WatchRecitationUseCase(playerRepo),
     StandByRecitationUseCase(playerRepo),
     WatchRecitationCommandsUseCase(playerRepo),
+    WatchRecitationTakenOverUseCase(playerRepo),
+    GetRecitationResumePointUseCase(readingRepo),
+    SaveRecitationResumePointUseCase(readingRepo),
   );
 }
 

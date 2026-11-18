@@ -145,6 +145,9 @@ class QuranRecitationPlayerRepoImpl implements QuranRecitationPlayerRepo {
   @override
   Stream<RecitationCommand> commands() => _player.commands;
 
+  @override
+  Stream<void> takenOver() => _player.takeovers;
+
   /// [track] as the system shows it outside the app, streamed from its
   /// [MediaItem.id]: by its surah, the ayahs of which share one title and
   /// so one progress bar.

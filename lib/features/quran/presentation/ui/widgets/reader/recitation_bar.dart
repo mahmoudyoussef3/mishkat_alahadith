@@ -9,13 +9,22 @@ import 'package:mishkat_almasabih/features/quran/domain/entities/recitation.dart
 import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_cloud_labels.dart';
 
-/// A small player docked over the reader's bottom bar while a recitation is
-/// on: what is being recited, by whom, and the controls.
+/// A small player shown while a recitation is on — docked over the mushaf's
+/// bottom bar, or as the mini player over any other screen: what is being
+/// recited, by whom, and the controls.
 class RecitationBar extends StatelessWidget {
-  /// Opens the recitation sheet, for the reciter and the options.
-  final VoidCallback onOpenSheet;
+  /// What tapping the bar does: in the mushaf, the recitation sheet, for
+  /// the reciter and the options; elsewhere, the mushaf at the ayah.
+  final VoidCallback onTap;
 
-  const RecitationBar({super.key, required this.onOpenSheet});
+  /// What [onTap] does, for screen readers.
+  final String tapHint;
+
+  const RecitationBar({
+    super.key,
+    required this.onTap,
+    this.tapHint = 'خيارات التلاوة',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +37,7 @@ class RecitationBar extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: switch (state) {
               RecitationIdle() => const SizedBox(width: double.infinity),
-              _ => _Bar(state: state, onOpenSheet: onOpenSheet),
+              _ => _Bar(state: state, onTap: onTap, tapHint: tapHint),
             },
           ),
     );
@@ -45,14 +54,19 @@ class RecitationBar extends StatelessWidget {
       settings.reciterName,
     ),
     RecitationFailure(:final message) => ('failure', message),
+    RecitationSuspended(:final settings, :final point) => (
+      point,
+      settings.reciterName,
+    ),
   };
 }
 
 class _Bar extends StatelessWidget {
   final QuranRecitationState state;
-  final VoidCallback onOpenSheet;
+  final VoidCallback onTap;
+  final String tapHint;
 
-  const _Bar({required this.state, required this.onOpenSheet});
+  const _Bar({required this.state, required this.onTap, required this.tapHint});
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +91,10 @@ class _Bar extends StatelessWidget {
         'جارٍ تجهيز التلاوة…',
         settings.reciterName,
       ),
+      RecitationSuspended(:final settings, :final point) => (
+        point.track.title,
+        '${settings.reciterName} · ${recitationScopeTitle(point.scope, surahName: point.track.surahName)}',
+      ),
       RecitationIdle() => ('', ''),
     };
 
@@ -93,10 +111,10 @@ class _Bar extends StatelessWidget {
               Expanded(
                 child: Semantics(
                   button: true,
-                  label: '$title، $subtitle، خيارات التلاوة',
+                  label: '$title، $subtitle، $tapHint',
                   excludeSemantics: true,
                   child: InkWell(
-                    onTap: onOpenSheet,
+                    onTap: onTap,
                     borderRadius: BorderRadius.circular(14.r),
                     child: Row(
                       children: [
@@ -166,6 +184,16 @@ class _Bar extends StatelessWidget {
                   AppIconButton(
                     tooltip: 'إعادة المحاولة',
                     icon: Icons.refresh_rounded,
+                    variant: AppIconButtonVariant.glass,
+                    size: buttonSize,
+                    onPressed: cubit.togglePlayPause,
+                  ),
+                ],
+                // Picked up from the ayah it was left at.
+                RecitationSuspended() => [
+                  AppIconButton(
+                    tooltip: 'متابعة التلاوة',
+                    icon: Icons.play_arrow_rounded,
                     variant: AppIconButtonVariant.glass,
                     size: buttonSize,
                     onPressed: cubit.togglePlayPause,

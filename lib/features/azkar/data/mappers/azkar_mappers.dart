@@ -1,6 +1,8 @@
+import '../../domain/entities/azkar_audio.dart';
 import '../../domain/entities/azkar_category.dart';
 import '../../domain/entities/azkar_day_progress.dart';
 import '../../domain/entities/zikr.dart';
+import '../models/azkar_audio_track_model.dart';
 import '../models/azkar_category_model.dart';
 import '../models/azkar_progress_model.dart';
 
@@ -77,5 +79,25 @@ extension AzkarDayProgressMapper on AzkarDayProgress {
         '${day.month.toString().padLeft(2, '0')}-'
         '${day.day.toString().padLeft(2, '0')}',
     counts: counts,
+  );
+}
+
+extension AzkarAudioTrackModelMapper on AzkarAudioTrackModel {
+  AzkarAudioTrack toEntity() => AzkarAudioTrack(
+    audioFile: audioFile,
+    categoryId: categoryId,
+    zikrId: zikrId,
+    categoryTitle: categoryTitle,
+    zikrNumber: zikrNumber,
+  );
+}
+
+extension AzkarAudioTrackMapper on AzkarAudioTrack {
+  AzkarAudioTrackModel toModel() => AzkarAudioTrackModel(
+    audioFile: audioFile,
+    categoryId: categoryId,
+    zikrId: zikrId,
+    categoryTitle: categoryTitle,
+    zikrNumber: zikrNumber,
   );
 }

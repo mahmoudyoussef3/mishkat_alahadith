@@ -5,6 +5,7 @@ import '../../domain/entities/mushaf_reader_settings.dart';
 import '../../domain/entities/quran_bookmark.dart';
 import '../../domain/entities/quran_last_read.dart';
 import '../../domain/entities/quran_metrics.dart';
+import '../../domain/entities/recitation.dart';
 import '../../domain/entities/recitation_settings.dart';
 import '../../domain/repos/quran_reading_repo.dart';
 import '../datasources/quran_reading_local_datasource.dart';
@@ -156,6 +157,28 @@ class QuranReadingRepoImpl implements QuranReadingRepo {
         quality: settings.quality.name,
         continuous: settings.continuous,
       );
+      return const ApiResult.success(null);
+    } catch (_) {
+      return const ApiResult.failure(CacheFailure());
+    }
+  }
+
+  @override
+  Future<ApiResult<RecitationResumePoint?>> getRecitationResumePoint() async {
+    try {
+      final stored = await _local.getRecitationResume();
+      return ApiResult.success(stored?.toEntity());
+    } catch (_) {
+      return const ApiResult.failure(CacheFailure());
+    }
+  }
+
+  @override
+  Future<ApiResult<void>> saveRecitationResumePoint(
+    RecitationResumePoint? point,
+  ) async {
+    try {
+      await _local.saveRecitationResume(point?.toModel());
       return const ApiResult.success(null);
     } catch (_) {
       return const ApiResult.failure(CacheFailure());

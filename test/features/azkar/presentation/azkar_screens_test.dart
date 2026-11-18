@@ -8,12 +8,6 @@ import 'package:mishkat_almasabih/core/theming/app_theme.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/entities/azkar_day_progress.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/entities/azkar_settings.dart';
-import 'package:mishkat_almasabih/features/azkar/domain/usecases/pause_azkar_audio_use_case.dart';
-import 'package:mishkat_almasabih/features/azkar/domain/usecases/play_azkar_audio_use_case.dart';
-import 'package:mishkat_almasabih/features/azkar/domain/usecases/prepare_azkar_audio_use_case.dart';
-import 'package:mishkat_almasabih/features/azkar/domain/usecases/resume_azkar_audio_use_case.dart';
-import 'package:mishkat_almasabih/features/azkar/domain/usecases/stop_azkar_audio_use_case.dart';
-import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_playback_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_reader/azkar_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/ui/models/azkar_reader_args.dart';
@@ -42,17 +36,7 @@ void _useSmallPhone(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-AzkarAudioCubit _audioCubit() {
-  final player = FakeAzkarAudioRepo();
-  return AzkarAudioCubit(
-    PrepareAzkarAudioUseCase(player),
-    PlayAzkarAudioUseCase(player),
-    PauseAzkarAudioUseCase(player),
-    ResumeAzkarAudioUseCase(player),
-    StopAzkarAudioUseCase(player),
-    WatchAzkarPlaybackUseCase(player),
-  );
-}
+AzkarAudioCubit _audioCubit() => audioCubitFor(FakeAzkarAudioRepo());
 
 Future<AzkarReaderCubit> _pumpReader(
   WidgetTester tester,

@@ -4,9 +4,10 @@ import 'package:audio_service/audio_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:mishkat_almasabih/core/audio/app_audio_player.dart';
+import 'package:mishkat_almasabih/core/audio/audio_lengths_datasource.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
-import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_lengths_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_player_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/repos/quran_recitation_player_repo_impl.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/recitation.dart';
@@ -15,7 +16,7 @@ import 'package:mishkat_almasabih/features/quran/domain/entities/recitation_sett
 /// The player, recording what it is asked and reporting what the test says;
 /// just_audio's own player is never created.
 class _FakePlayer extends QuranRecitationPlayerDataSource {
-  _FakePlayer() : super(QuranRecitationLengthsDataSource(Dio()));
+  _FakePlayer() : super(AppAudioPlayer(AudioLengthsDataSource(Dio())));
 
   final StreamController<PlayerState> states = StreamController.broadcast();
   final StreamController<int?> indexes = StreamController.broadcast();
@@ -23,6 +24,7 @@ class _FakePlayer extends QuranRecitationPlayerDataSource {
       StreamController.broadcast();
   final StreamController<RecitationCommand> controls =
       StreamController.broadcast();
+  final StreamController<void> takenOver = StreamController.broadcast();
 
   final List<
     ({
@@ -54,6 +56,9 @@ class _FakePlayer extends QuranRecitationPlayerDataSource {
 
   @override
   Stream<RecitationCommand> get commands => controls.stream;
+
+  @override
+  Stream<void> get takeovers => takenOver.stream;
 
   @override
   Future<void> playQueue(
@@ -318,6 +323,17 @@ void main() {
       await settle();
 
       expect(heard, [RecitationCommand.next, RecitationCommand.pause]);
+    });
+
+    test('the azkar taking the player is passed on', () async {
+      var takeovers = 0;
+      final subscription = repo.takenOver().listen((_) => takeovers++);
+      addTearDown(subscription.cancel);
+
+      player.takenOver.add(null);
+      await settle();
+
+      expect(takeovers, 1);
     });
 
     test('speed reaches the player as its factor', () async {

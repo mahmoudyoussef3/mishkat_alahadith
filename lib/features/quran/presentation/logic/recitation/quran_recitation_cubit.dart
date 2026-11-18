@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
+import 'package:mishkat_almasabih/core/helpers/change_only_writer.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_edition.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/recitation.dart';
@@ -10,6 +11,7 @@ import 'package:mishkat_almasabih/features/quran/domain/entities/recitation_sett
 import 'package:mishkat_almasabih/features/quran/domain/usecases/load_recitation_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/quran_study_settings_use_cases.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/recitation_player_use_cases.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/recitation_resume_use_cases.dart';
 
 part 'quran_recitation_state.dart';
 
@@ -28,8 +30,11 @@ enum _Apply {
   reload,
 }
 
-/// Recites the mushaf while it is open — on in the background, with its
-/// controls outside the app — and silences it when it closes.
+/// Recites the mushaf for the whole app: it plays on with the mushaf closed,
+/// the app in the background or swiped away, with its controls outside the
+/// app and on the mini player over every screen. A recitation of the azkar
+/// started meanwhile replaces it. Where it was is kept, so a recitation the
+/// app was closed on is offered again, held, the next time it opens.
 class QuranRecitationCubit extends Cubit<QuranRecitationState> {
   final GetRecitationSettingsUseCase _getSettings;
   final SaveRecitationSettingsUseCase _saveSettings;
@@ -43,9 +48,15 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
   final WatchRecitationUseCase _watch;
   final StandByRecitationUseCase _standBy;
   final WatchRecitationCommandsUseCase _watchCommands;
+  final GetRecitationResumePointUseCase _getResumePoint;
+
+  /// Where the recitation is, kept as it moves on — once per ayah, not
+  /// again as the player's status changes.
+  final ChangeOnlyWriter<RecitationResumePoint> _resumePoint;
 
   StreamSubscription<RecitationPlayback>? _playback;
   StreamSubscription<RecitationCommand>? _commands;
+  late final StreamSubscription<void> _takeovers;
   Future<void>? _settingsLoad;
 
   /// Bumped by every request, so a playlist that arrives after the reader
@@ -81,12 +92,32 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
     this._watch,
     this._standBy,
     this._watchCommands,
-  ) : super(const RecitationIdle(RecitationSettings.defaults));
+    WatchRecitationTakenOverUseCase watchTakenOver,
+    this._getResumePoint,
+    SaveRecitationResumePointUseCase saveResumePoint,
+  ) : _resumePoint = ChangeOnlyWriter(saveResumePoint.call),
+      super(const RecitationIdle(RecitationSettings.defaults)) {
+    _takeovers = watchTakenOver().listen((_) => _onTakenOver());
+  }
 
   /// Reads the saved settings, then starts [autoplay] if given.
   Future<void> init({RecitationRequest? autoplay}) async {
     await _ensureSettings();
     if (autoplay != null && !isClosed) await start(autoplay);
+  }
+
+  /// Offers again, held, the recitation the app was last closed on —
+  /// unless something has been asked for since.
+  Future<void> restore() async {
+    await _ensureSettings();
+    if (isClosed || state is! RecitationIdle) return;
+    final request_ = _request;
+    final kept = await _getResumePoint();
+    if (isClosed || request_ != _request || state is! RecitationIdle) return;
+    if (kept case ApiSuccess(data: final point?)) {
+      _resumePoint.read(point);
+      emit(RecitationSuspended(state.settings, point: point));
+    }
   }
 
   // ── playback ────────────────────────────────────────────────────────────
@@ -137,7 +168,8 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
     await start(RecitationFromAyah(ayahId));
   }
 
-  /// Pauses or resumes, or tries again after a failure.
+  /// Pauses or resumes, tries again after a failure, or picks up the
+  /// recitation the app was closed on.
   Future<void> togglePlayPause() async {
     switch (state) {
       case RecitationActive(status: RecitationStatus.playing):
@@ -146,6 +178,8 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
         await resume();
       case RecitationFailure(:final request):
         await start(request);
+      case RecitationSuspended(:final point):
+        await start(point.request);
       case RecitationActive() || RecitationIdle() || RecitationPreparing():
         return;
     }
@@ -256,7 +290,10 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
       // quality: ask again. Repeat and speed are read once it arrives.
       case RecitationPreparing(:final request) when apply == _Apply.reload:
         unawaited(start(request));
-      case RecitationPreparing() || RecitationIdle() || RecitationFailure():
+      case RecitationPreparing() ||
+          RecitationIdle() ||
+          RecitationFailure() ||
+          RecitationSuspended():
         break;
     }
     final saved = await _saveSettings(updated);
@@ -307,7 +344,7 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
           unawaited(_stop());
         case RecitationPreparing():
           unawaited(_standBy());
-        case RecitationIdle() || RecitationFailure():
+        case RecitationIdle() || RecitationFailure() || RecitationSuspended():
           unawaited(_stop());
         case RecitationActive():
           break;
@@ -415,6 +452,8 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
             unawaited(resume());
           case RecitationFailure(:final request):
             unawaited(start(request));
+          case RecitationSuspended(:final point):
+            unawaited(start(point.request));
           case RecitationPreparing():
             _pausedWhilePreparing = null;
           case RecitationActive() || RecitationIdle():
@@ -427,7 +466,7 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
           // Between one part and the next: the next one comes paused.
           case RecitationPreparing():
             _pausedWhilePreparing = _request;
-          case RecitationIdle() || RecitationFailure():
+          case RecitationIdle() || RecitationFailure() || RecitationSuspended():
             break;
         }
       case RecitationCommand.next:
@@ -437,6 +476,18 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
       case RecitationCommand.stop:
         unawaited(stop());
     }
+  }
+
+  /// A recitation of the azkar took the player: whatever was recited, or
+  /// offered to pick up again, is gone. The player is not this cubit's to
+  /// stop any more.
+  void _onTakenOver() {
+    if (isClosed || state is RecitationIdle) return;
+    _request++;
+    _starting = false;
+    _held = null;
+    _pausedWhilePreparing = null;
+    emit(RecitationIdle(state.settings));
   }
 
   void _onPlayerError(Object error) {
@@ -463,11 +514,33 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
         startAyahId: current.currentTrack.ayahId,
       );
 
+  /// Keeps where the recitation is as it moves on, and forgets it once the
+  /// recitation is ended: stopped, finished, or replaced by the azkar. A
+  /// failed one is kept, to be tried again.
+  @override
+  void onChange(Change<QuranRecitationState> change) {
+    super.onChange(change);
+    switch (change.nextState) {
+      case RecitationActive(:final playlist, :final currentTrack):
+        _resumePoint.write(
+          RecitationResumePoint(scope: playlist.scope, track: currentTrack),
+        );
+      case RecitationIdle() when change.currentState is! RecitationIdle:
+        _resumePoint.write(null);
+      case RecitationIdle() ||
+          RecitationPreparing() ||
+          RecitationFailure() ||
+          RecitationSuspended():
+        break;
+    }
+  }
+
   @override
   Future<void> close() async {
     _request++;
     await _playback?.cancel();
     await _commands?.cancel();
+    await _takeovers.cancel();
     await _stop();
     return super.close();
   }

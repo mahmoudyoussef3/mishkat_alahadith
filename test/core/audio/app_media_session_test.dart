@@ -1,8 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_media_session.dart';
-import 'package:mishkat_almasabih/features/quran/domain/entities/recitation.dart';
+import 'package:mishkat_almasabih/core/audio/app_media_session.dart';
+import 'package:mishkat_almasabih/core/domain/entities/media_command.dart';
 
 PlaybackState _state({
   bool playing = true,
@@ -10,7 +10,8 @@ PlaybackState _state({
   double speed = 1.0,
   Duration position = Duration.zero,
   Duration offset = Duration.zero,
-}) => QuranRecitationMediaSession.stateOf(
+  bool skippable = true,
+}) => AppMediaSession.stateOf(
   PlayerEvent(
     playing: playing,
     playbackEvent: PlaybackEvent(
@@ -21,6 +22,7 @@ PlaybackState _state({
   ),
   speed: speed,
   offset: offset,
+  skippable: skippable,
 );
 
 MediaItem _item(int ayah, {Duration? duration}) => MediaItem(
@@ -32,18 +34,22 @@ MediaItem _item(int ayah, {Duration? duration}) => MediaItem(
 
 void main() {
   /// What the player itself was told to do.
-  late List<RecitationCommand> obeyed;
+  late List<MediaCommand> obeyed;
   late List<Duration> seeks;
-  late QuranRecitationMediaSession session;
+  late AppMediaSession session;
+
+  /// Who the player plays for in these tests, and someone else.
+  final quran = Object();
+  final azkar = Object();
 
   setUp(() {
     obeyed = [];
     seeks = [];
-    session = QuranRecitationMediaSession(
-      pausePlayer: () async => obeyed.add(RecitationCommand.pause),
-      stopPlayer: () async => obeyed.add(RecitationCommand.stop),
+    session = AppMediaSession(
+      pausePlayer: () async => obeyed.add(MediaCommand.pause),
+      stopPlayer: () async => obeyed.add(MediaCommand.stop),
       seekPlayer: (position) async => seeks.add(position),
-    );
+    )..holder = quran;
   });
 
   /// Lets the stream events sent so far reach their listeners.
@@ -65,6 +71,16 @@ void main() {
 
     test('keeps previous, play or pause and next when collapsed', () {
       expect(_state().androidCompactActionIndices, [0, 1, 2]);
+    });
+
+    test('offers only play or pause and stop with nothing to skip to', () {
+      final state = _state(skippable: false);
+
+      expect(state.controls.map((c) => c.action), [
+        MediaAction.pause,
+        MediaAction.stop,
+      ]);
+      expect(state.androidCompactActionIndices, [0, 1]);
     });
 
     test('lets the surah be seeked through', () {
@@ -221,24 +237,19 @@ void main() {
   });
 
   group('controls', () {
-    final controls = <
-      (
-        String,
-        Future<void> Function(QuranRecitationMediaSession),
-        RecitationCommand,
-      )
-    >[
-      ('play', (s) => s.play(), RecitationCommand.play),
-      ('pause', (s) => s.pause(), RecitationCommand.pause),
-      ('next', (s) => s.skipToNext(), RecitationCommand.next),
-      ('previous', (s) => s.skipToPrevious(), RecitationCommand.previous),
-      ('stop', (s) => s.stop(), RecitationCommand.stop),
-    ];
+    final controls =
+        <(String, Future<void> Function(AppMediaSession), MediaCommand)>[
+          ('play', (s) => s.play(), MediaCommand.play),
+          ('pause', (s) => s.pause(), MediaCommand.pause),
+          ('next', (s) => s.skipToNext(), MediaCommand.next),
+          ('previous', (s) => s.skipToPrevious(), MediaCommand.previous),
+          ('stop', (s) => s.stop(), MediaCommand.stop),
+        ];
 
     for (final (name, use, command) in controls) {
       test('$name goes to whoever listens, not the player', () async {
-        final heard = <RecitationCommand>[];
-        final subscription = session.commands.listen(heard.add);
+        final heard = <MediaCommand>[];
+        final subscription = session.commandsOf(quran).listen(heard.add);
         addTearDown(subscription.cancel);
 
         await use(session);
@@ -252,21 +263,53 @@ void main() {
     test(
       'only the newest listener hears them, the older once it is gone',
       () async {
-        final older = <RecitationCommand>[];
-        final newer = <RecitationCommand>[];
-        final olderSubscription = session.commands.listen(older.add);
+        final older = <MediaCommand>[];
+        final newer = <MediaCommand>[];
+        final olderSubscription = session.commandsOf(quran).listen(older.add);
         addTearDown(olderSubscription.cancel);
-        final newerSubscription = session.commands.listen(newer.add);
+        final newerSubscription = session.commandsOf(quran).listen(newer.add);
 
         await session.skipToNext();
         await settle();
         expect(older, isEmpty);
-        expect(newer, [RecitationCommand.next]);
+        expect(newer, [MediaCommand.next]);
 
         await newerSubscription.cancel();
         await session.skipToNext();
         await settle();
-        expect(older, [RecitationCommand.next]);
+        expect(older, [MediaCommand.next]);
+      },
+    );
+
+    test('go to whoever the player plays for, not another', () async {
+      final forQuran = <MediaCommand>[];
+      final forAzkar = <MediaCommand>[];
+      final quranSubscription = session.commandsOf(quran).listen(forQuran.add);
+      addTearDown(quranSubscription.cancel);
+      final azkarSubscription = session.commandsOf(azkar).listen(forAzkar.add);
+      addTearDown(azkarSubscription.cancel);
+
+      await session.pause();
+      session.holder = azkar;
+      await session.play();
+      await settle();
+
+      expect(forQuran, [MediaCommand.pause]);
+      expect(forAzkar, [MediaCommand.play]);
+    });
+
+    test(
+      'while the one played for does not listen, the player obeys itself',
+      () async {
+        final other = <MediaCommand>[];
+        final subscription = session.commandsOf(azkar).listen(other.add);
+        addTearDown(subscription.cancel);
+
+        await session.pause();
+        await settle();
+
+        expect(other, isEmpty);
+        expect(obeyed, [MediaCommand.pause]);
       },
     );
 
@@ -274,7 +317,7 @@ void main() {
       await session.pause();
       await session.stop();
 
-      expect(obeyed, [RecitationCommand.pause, RecitationCommand.stop]);
+      expect(obeyed, [MediaCommand.pause, MediaCommand.stop]);
     });
 
     test('with no one listening, nothing starts the player again', () async {
@@ -288,7 +331,7 @@ void main() {
     test('the notification swiped away stops the recitation', () async {
       await session.onNotificationDeleted();
 
-      expect(obeyed, [RecitationCommand.stop]);
+      expect(obeyed, [MediaCommand.stop]);
     });
 
     test('a click on headphones pauses what plays', () async {
@@ -296,7 +339,7 @@ void main() {
 
       await session.click();
 
-      expect(obeyed, [RecitationCommand.pause]);
+      expect(obeyed, [MediaCommand.pause]);
     });
 
     test('seeking reaches the player', () async {
@@ -306,7 +349,7 @@ void main() {
     });
 
     test('a failing player does not throw back at the system', () async {
-      final failing = QuranRecitationMediaSession(
+      final failing = AppMediaSession(
         pausePlayer: () async => throw StateError('no player'),
         stopPlayer: () async => throw StateError('no player'),
         seekPlayer: (_) async {},
@@ -330,7 +373,7 @@ void main() {
 
       await session.onTaskRemoved();
 
-      expect(obeyed, [RecitationCommand.stop]);
+      expect(obeyed, [MediaCommand.stop]);
     });
   });
 }

@@ -31,6 +31,7 @@ import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_u
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_reader_screen.dart';
 import 'package:mushaf_text/mushaf_text.dart';
 
+import '../../azkar/azkar_fakes.dart' show FakeAzkarAudioRepo, audioCubitFor;
 import '../quran_fakes.dart';
 
 /// The reader on [page], in a light app, with [settings] saved.
@@ -64,6 +65,9 @@ Future<MushafReaderCubit> _pumpReader(
   await cubit.init(initialPage: page, surahNumber: surahNumber);
   final recitation = recitationCubit(quran: quran, reading: reading);
   addTearDown(recitation.close);
+  // The mini player docked in the reader's bottom bar shows the azkar too.
+  final azkarAudio = audioCubitFor(FakeAzkarAudioRepo());
+  addTearDown(azkarAudio.close);
 
   await tester.pumpWidget(
     ScreenUtilInit(
@@ -76,6 +80,7 @@ Future<MushafReaderCubit> _pumpReader(
                 providers: [
                   BlocProvider.value(value: cubit),
                   BlocProvider.value(value: recitation),
+                  BlocProvider.value(value: azkarAudio),
                 ],
                 child: MushafReaderScreen(
                   initialPage: page,

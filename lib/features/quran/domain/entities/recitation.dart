@@ -154,6 +154,28 @@ class RecitationPlaylist {
   int indexOfAyah(int ayahId) => tracks.indexWhere((t) => t.ayahId == ayahId);
 }
 
+/// Where a recitation was left off — the part it recited and the ayah it
+/// was on — kept so it can be picked up again after the app was closed.
+class RecitationResumePoint {
+  final RecitationScope scope;
+  final RecitationTrack track;
+
+  const RecitationResumePoint({required this.scope, required this.track});
+
+  /// The recitation again, from the ayah it was on.
+  RecitationRequest get request =>
+      RecitationOfScope(scope, startAyahId: track.ayahId);
+
+  @override
+  bool operator ==(Object other) =>
+      other is RecitationResumePoint &&
+      other.scope == scope &&
+      other.track == track;
+
+  @override
+  int get hashCode => Object.hash(scope, track);
+}
+
 /// What the player is doing.
 enum RecitationStatus { idle, loading, playing, paused, completed }
 

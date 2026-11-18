@@ -8,6 +8,7 @@ import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
 import 'package:mishkat_almasabih/core/widgets/detail_header.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/ui/docked_mini_player.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/ayah_details.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_metrics.dart';
@@ -21,7 +22,6 @@ import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_page_item.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_reader_bottom_bar.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/mushaf_reader_header.dart';
-import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/recitation_bar.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/tajweed_focus_bar.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/ayah_actions_sheet.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/sheets/page_rules_sheet.dart';
@@ -36,20 +36,38 @@ import 'package:share_plus/share_plus.dart';
 ///
 /// The whole reader — page, bars, sheets and dialogs — is drawn in the
 /// palette of the paper the reader chose, which may differ from the app's.
-class MushafReaderScreen extends StatelessWidget {
+/// The recitation is the app's: it plays on once the mushaf is closed.
+class MushafReaderScreen extends StatefulWidget {
   final int initialPage;
 
   /// The surah opened, if any, kept when the reader retries a failed load.
   final int? surahNumber;
 
+  /// Started as soon as the mushaf opens.
+  final RecitationRequest? recitation;
+
   const MushafReaderScreen({
     super.key,
     required this.initialPage,
     this.surahNumber,
+    this.recitation,
   });
 
   @override
+  State<MushafReaderScreen> createState() => _MushafReaderScreenState();
+}
+
+class _MushafReaderScreenState extends State<MushafReaderScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<QuranRecitationCubit>().init(autoplay: widget.recitation);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final initialPage = widget.initialPage;
+    final surahNumber = widget.surahNumber;
     // Read here, outside the override below, so it is the app's brightness.
     final appBrightness = Theme.of(context).brightness;
     return Directionality(
@@ -141,7 +159,8 @@ class _MushafReaderViewState extends State<_MushafReaderView> {
         bottomNavigationBar: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RecitationBar(onOpenSheet: _openRecitation),
+            // The recitation's options open from it here, not the mushaf.
+            DockedMiniPlayer(onOpenQuran: _openRecitation),
             MushafReaderBottomBar(
               onJumpToPage: _jumpToPage,
               onOpenIndex: _openIndex,

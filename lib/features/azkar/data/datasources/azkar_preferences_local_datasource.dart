@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/azkar_audio_track_model.dart';
 import '../models/azkar_progress_model.dart';
 
 class AzkarPreferencesLocalDataSource {
@@ -11,6 +12,7 @@ class AzkarPreferencesLocalDataSource {
   static const String _fontScaleKey = 'azkar_font_scale';
   static const String _hapticsKey = 'azkar_haptics';
   static const String _autoAdvanceKey = 'azkar_auto_advance';
+  static const String _lastAudioKey = 'azkar_last_audio';
 
   Future<List<int>> getFavoriteIds() async {
     final prefs = await SharedPreferences.getInstance();
@@ -68,5 +70,24 @@ class AzkarPreferencesLocalDataSource {
     await prefs.setString(_fontScaleKey, fontScale);
     await prefs.setBool(_hapticsKey, hapticFeedback);
     await prefs.setBool(_autoAdvanceKey, autoAdvance);
+  }
+
+  /// Null when nothing was left playing, or the stored entry is damaged.
+  /// Throws [FormatException] when the stored value is not JSON.
+  Future<AzkarAudioTrackModel?> getLastAudio() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_lastAudioKey);
+    if (raw == null || raw.isEmpty) return null;
+    return AzkarAudioTrackModel.tryFromJson(jsonDecode(raw));
+  }
+
+  /// A null [track] forgets the one kept.
+  Future<void> saveLastAudio(AzkarAudioTrackModel? track) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (track == null) {
+      await prefs.remove(_lastAudioKey);
+    } else {
+      await prefs.setString(_lastAudioKey, jsonEncode(track.toJson()));
+    }
   }
 }

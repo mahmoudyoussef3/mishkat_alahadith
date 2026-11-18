@@ -5,7 +5,7 @@ import 'package:audio_service/audio_service.dart';
 /// a surah are — spanning all of the part's entries, so a surah played ayah
 /// by ayah is shown as one recitation. An ayah repeated takes its place on
 /// the bar as many times as it is queued.
-class QuranRecitationTimeline {
+class AudioTimeline {
   /// The file each entry streams.
   final List<String> _urls;
 
@@ -14,7 +14,7 @@ class QuranRecitationTimeline {
 
   final Duration? Function(String url) _lengthOf;
 
-  QuranRecitationTimeline(
+  AudioTimeline(
     List<MediaItem> entries,
     Duration? Function(String url) lengthOf,
   ) : _urls = [for (final entry in entries) entry.id],

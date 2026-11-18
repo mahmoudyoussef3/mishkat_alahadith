@@ -18,6 +18,7 @@ import 'package:mishkat_almasabih/features/library/presentation/logic/library_bo
 import 'package:mishkat_almasabih/features/library/presentation/ui/screens/library_books_screen.dart';
 import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
 import 'package:mishkat_almasabih/features/main_navigation/presentation/ui/widgets/main_navigation_bar.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/ui/docked_mini_player.dart';
 import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/prayer_times_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/presentation/logic/profile/profile_cubit.dart';
 import 'package:mishkat_almasabih/features/profile/presentation/logic/user_stats/user_stats_cubit.dart';
@@ -141,12 +142,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       ],
                     ),
               ),
-              bottomNavigationBar: BlocBuilder<MainNavigationCubit, MainTab>(
-                builder:
-                    (context, current) => MainNavigationBar(
-                      selected: current,
-                      onSelected: context.read<MainNavigationCubit>().select,
-                    ),
+              bottomNavigationBar: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Above the tabs, rather than floating under them.
+                  const DockedMiniPlayer(),
+                  BlocBuilder<MainNavigationCubit, MainTab>(
+                    builder:
+                        (context, current) => MainNavigationBar(
+                          selected: current,
+                          onSelected:
+                              context.read<MainNavigationCubit>().select,
+                        ),
+                  ),
+                ],
               ),
             ),
           ),

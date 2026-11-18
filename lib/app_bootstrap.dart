@@ -20,8 +20,10 @@ import 'package:mishkat_almasabih/core/services/hive_service.dart';
 import 'package:mishkat_almasabih/core/services/prayer_times_home_widget_sync.dart';
 import 'package:mishkat_almasabih/core/services/prayer_times_widget_background_worker.dart';
 import 'package:mishkat_almasabih/core/services/widget_navigation_service.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
 import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/sync_daily_ayah_use_case.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/sync_daily_hadith_notification_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 import 'package:mishkat_almasabih/features/quran_wird/domain/usecases/sync_quran_wird_reminder_use_case.dart';
 import 'package:mishkat_almasabih/features/onboarding/domain/usecases/is_first_launch_use_case.dart';
 import 'package:mishkat_almasabih/features/ramadan_tasks/domain/usecases/initialize_ramadan_config_use_case.dart';
@@ -74,7 +76,16 @@ Future<void> bootstrapApp() async {
     ),
   );
 
+  unawaited(_restorePlayer());
   unawaited(_initializeBackgroundServices());
+}
+
+/// Offers again, held on the mini player, the recitation the app was last
+/// closed on while it played — of the Quran or of the azkar — to pick up
+/// where it was left.
+Future<void> _restorePlayer() async {
+  await getIt<QuranRecitationCubit>().restore();
+  await getIt<AzkarAudioCubit>().restore();
 }
 
 // A DSN is public by design: it only allows sending events, not reading them.

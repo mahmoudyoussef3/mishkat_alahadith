@@ -23,6 +23,7 @@ import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reade
 import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_reader_screen.dart';
 
+import '../../azkar/azkar_fakes.dart' show FakeAzkarAudioRepo, audioCubitFor;
 import '../quran_fakes.dart';
 
 /// The reader on page 1 with a recitation player over [cloud].
@@ -54,8 +55,11 @@ _pumpReader(WidgetTester tester, FakeQuranCloudRepo cloud) async {
     reading: reading,
     player: player,
   );
+  // The mini player docked in the reader's bottom bar shows the azkar too.
+  final azkarAudio = audioCubitFor(FakeAzkarAudioRepo());
   addTearDown(reader.close);
   addTearDown(recitation.close);
+  addTearDown(azkarAudio.close);
   await reader.init(initialPage: 1);
 
   await tester.pumpWidget(
@@ -69,6 +73,7 @@ _pumpReader(WidgetTester tester, FakeQuranCloudRepo cloud) async {
                 providers: [
                   BlocProvider.value(value: reader),
                   BlocProvider.value(value: recitation),
+                  BlocProvider.value(value: azkarAudio),
                 ],
                 child: const MushafReaderScreen(initialPage: 1),
               ),

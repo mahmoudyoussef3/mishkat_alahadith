@@ -1,6 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_timeline.dart';
+import 'package:mishkat_almasabih/core/audio/audio_timeline.dart';
 
 MediaItem _entry(String surah, int ayah) =>
     MediaItem(id: 'https://cdn.example/$surah/$ayah.mp3', title: 'سورة $surah');
@@ -24,8 +24,8 @@ void main() {
     entries[4].id: _s(6),
   };
 
-  QuranRecitationTimeline timeline(Map<String, Duration> known) =>
-      QuranRecitationTimeline(entries, (url) => known[url]);
+  AudioTimeline timeline(Map<String, Duration> known) =>
+      AudioTimeline(entries, (url) => known[url]);
 
   group('parts', () {
     test('a part is the entries of one surah', () {
@@ -71,7 +71,7 @@ void main() {
     });
 
     test('counts an ayah once each time it is repeated', () {
-      final repeated = QuranRecitationTimeline([
+      final repeated = AudioTimeline([
         entries[0],
         entries[0],
         entries[1],

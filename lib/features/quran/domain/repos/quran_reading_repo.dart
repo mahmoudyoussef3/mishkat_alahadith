@@ -3,6 +3,7 @@ import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import '../entities/mushaf_reader_settings.dart';
 import '../entities/quran_bookmark.dart';
 import '../entities/quran_last_read.dart';
+import '../entities/recitation.dart';
 import '../entities/recitation_settings.dart';
 
 /// What the reader keeps on the device: where they stopped, what they
@@ -29,6 +30,14 @@ abstract class QuranReadingRepo {
   Future<ApiResult<RecitationSettings>> getRecitationSettings();
 
   Future<ApiResult<void>> saveRecitationSettings(RecitationSettings settings);
+
+  /// Where the last recitation was left off, or null when it was ended.
+  Future<ApiResult<RecitationResumePoint?>> getRecitationResumePoint();
+
+  /// Keeps [point] for after the app is closed; null forgets the one kept.
+  Future<ApiResult<void>> saveRecitationResumePoint(
+    RecitationResumePoint? point,
+  );
 
   Future<ApiResult<CommentarySettings>> getCommentarySettings();
 

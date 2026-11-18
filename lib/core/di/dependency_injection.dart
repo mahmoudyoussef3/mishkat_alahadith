@@ -26,6 +26,7 @@ import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_azkar_setti
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_favorite_azkar_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_suggested_azkar_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_today_azkar_progress_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/last_azkar_audio_use_cases.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/pause_azkar_audio_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/play_azkar_audio_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/prepare_azkar_audio_use_case.dart';
@@ -34,8 +35,11 @@ import 'package:mishkat_almasabih/features/azkar/domain/usecases/resume_azkar_au
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/save_azkar_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/search_azkar_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/set_zikr_count_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/stand_by_azkar_audio_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/stop_azkar_audio_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/toggle_favorite_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_audio_commands_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_audio_taken_over_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_playback_use_case.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_home/azkar_home_cubit.dart';
@@ -282,7 +286,6 @@ import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_cloud_cache_local_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_cloud_remote_datasource.dart';
-import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_lengths_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_player_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/repos/quran_cloud_repo_impl.dart';
 import 'package:mishkat_almasabih/features/quran/data/repos/quran_recitation_player_repo_impl.dart';
@@ -297,6 +300,7 @@ import 'package:mishkat_almasabih/features/quran/domain/usecases/get_surah_comme
 import 'package:mishkat_almasabih/features/quran/domain/usecases/load_recitation_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/quran_study_settings_use_cases.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/recitation_player_use_cases.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/recitation_resume_use_cases.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/search_quran_edition_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_commentary/ayah_commentary_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/hizb_index/quran_hizb_index_cubit.dart';
@@ -325,6 +329,10 @@ import 'package:mishkat_almasabih/features/serag/domain/usecases/save_chat_histo
 import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_cubit.dart';
 import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/logic/mini_player_placement_cubit.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/ui/mini_player_navigator_observer.dart';
+import 'package:mishkat_almasabih/core/audio/app_audio_player.dart';
+import 'package:mishkat_almasabih/core/audio/audio_lengths_datasource.dart';
 import 'package:mishkat_almasabih/features/library/domain/usecases/get_library_books_use_case.dart';
 import 'package:mishkat_almasabih/features/library/presentation/logic/library_books/library_books_cubit.dart';
 
@@ -359,6 +367,7 @@ Future<void> setUpGetIt() async {
   _registerQuranWird();
   _registerAzkar();
   _registerMainNavigation();
+  _registerMiniPlayer();
 }
 
 /// What background tasks need, for the isolates they run in: those never
@@ -390,6 +399,22 @@ void _registerCore() {
   );
   getIt.registerLazySingleton<FirebaseRemoteConfig>(
     () => FirebaseRemoteConfig.instance,
+  );
+  // The app's one player, which the Quran and the azkar recite on, so two
+  // recitations can never overlap. Its file lengths are read with a client
+  // of its own: the recitations come from third parties, which must never
+  // see the app's headers or session token.
+  getIt.registerLazySingleton<AppAudioPlayer>(
+    () => AppAudioPlayer(
+      AudioLengthsDataSource(
+        Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 20),
+          ),
+        ),
+      ),
+    ),
   );
 }
 
@@ -1064,8 +1089,9 @@ void _registerQuran() {
 /// Recitations, tafsir and translations from AlQuran Cloud.
 void _registerQuranCloud() {
   // A client of its own: the service is a third party, which must never
-  // see the app's headers or session token. One player for every Quran
-  // recitation, so two can never overlap.
+  // see the app's headers or session token. The Quran recites on the app's
+  // one player, shared with the azkar, so two recitations can never
+  // overlap.
   getIt.registerLazySingleton<QuranCloudRepo>(
     () => QuranCloudRepoImpl(
       QuranCloudRemoteDataSource(
@@ -1081,18 +1107,8 @@ void _registerQuranCloud() {
     ),
   );
   getIt.registerLazySingleton<QuranRecitationPlayerRepo>(
-    () => QuranRecitationPlayerRepoImpl(
-      QuranRecitationPlayerDataSource(
-        QuranRecitationLengthsDataSource(
-          Dio(
-            BaseOptions(
-              connectTimeout: const Duration(seconds: 20),
-              receiveTimeout: const Duration(seconds: 20),
-            ),
-          ),
-        ),
-      ),
-    ),
+    () =>
+        QuranRecitationPlayerRepoImpl(QuranRecitationPlayerDataSource(getIt())),
   );
 
   getIt.registerLazySingleton<GetQuranEditionsUseCase>(
@@ -1140,6 +1156,15 @@ void _registerQuranCloud() {
   getIt.registerLazySingleton<WatchRecitationCommandsUseCase>(
     () => WatchRecitationCommandsUseCase(getIt()),
   );
+  getIt.registerLazySingleton<WatchRecitationTakenOverUseCase>(
+    () => WatchRecitationTakenOverUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetRecitationResumePointUseCase>(
+    () => GetRecitationResumePointUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveRecitationResumePointUseCase>(
+    () => SaveRecitationResumePointUseCase(getIt()),
+  );
   getIt.registerLazySingleton<GetAyahCommentaryUseCase>(
     () => GetAyahCommentaryUseCase(getIt()),
   );
@@ -1156,8 +1181,13 @@ void _registerQuranCloud() {
     () => GetHizbIndexUseCase(getIt(), getIt()),
   );
 
-  getIt.registerFactory<QuranRecitationCubit>(
+  // App-wide: a recitation plays on from screen to screen, on the mini
+  // player, until it is stopped or the azkar replace it.
+  getIt.registerLazySingleton<QuranRecitationCubit>(
     () => QuranRecitationCubit(
+      getIt(),
+      getIt(),
+      getIt(),
       getIt(),
       getIt(),
       getIt(),
@@ -1251,8 +1281,9 @@ void _registerAzkar() {
     ),
   );
   // A client of its own: the recitations come from a public CDN, which must
-  // never see the app's headers or session token. One player for the whole
-  // app, so two recitations can never overlap.
+  // never see the app's headers or session token. They play on the app's
+  // one player, shared with the Quran, so two recitations can never
+  // overlap.
   getIt.registerLazySingleton<AzkarAudioRepo>(
     () => AzkarAudioRepoImpl(
       AzkarAudioCacheDataSource(
@@ -1263,7 +1294,8 @@ void _registerAzkar() {
           ),
         ),
       ),
-      AzkarAudioPlayerDataSource(),
+      AzkarAudioPlayerDataSource(getIt()),
+      AzkarPreferencesLocalDataSource(),
     ),
   );
 
@@ -1314,6 +1346,21 @@ void _registerAzkar() {
   getIt.registerLazySingleton<WatchAzkarPlaybackUseCase>(
     () => WatchAzkarPlaybackUseCase(getIt()),
   );
+  getIt.registerLazySingleton<StandByAzkarAudioUseCase>(
+    () => StandByAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchAzkarAudioCommandsUseCase>(
+    () => WatchAzkarAudioCommandsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchAzkarAudioTakenOverUseCase>(
+    () => WatchAzkarAudioTakenOverUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetLastAzkarAudioUseCase>(
+    () => GetLastAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveLastAzkarAudioUseCase>(
+    () => SaveLastAzkarAudioUseCase(getIt()),
+  );
 
   getIt.registerFactory<AzkarHomeCubit>(
     () => AzkarHomeCubit(
@@ -1338,8 +1385,22 @@ void _registerAzkar() {
       getIt(),
     ),
   );
-  getIt.registerFactory<AzkarAudioCubit>(
-    () => AzkarAudioCubit(getIt(), getIt(), getIt(), getIt(), getIt(), getIt()),
+  // App-wide: a recitation plays on from screen to screen, on the mini
+  // player, until it is stopped or the Quran replaces it.
+  getIt.registerLazySingleton<AzkarAudioCubit>(
+    () => AzkarAudioCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
   );
 }
 
@@ -1357,4 +1418,15 @@ void _registerSuggestions() {
 
 void _registerMainNavigation() {
   getIt.registerFactory<MainNavigationCubit>(MainNavigationCubit.new);
+}
+
+/// The mini player over every screen: where it goes follows the app's
+/// navigator.
+void _registerMiniPlayer() {
+  getIt.registerLazySingleton<MiniPlayerPlacementCubit>(
+    MiniPlayerPlacementCubit.new,
+  );
+  getIt.registerLazySingleton<MiniPlayerNavigatorObserver>(
+    () => MiniPlayerNavigatorObserver(getIt()),
+  );
 }

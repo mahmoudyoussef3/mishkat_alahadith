@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:dio/dio.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:mishkat_almasabih/core/domain/entities/media_command.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
@@ -11,12 +13,15 @@ import '../../domain/entities/azkar_audio.dart';
 import '../../domain/repos/azkar_audio_repo.dart';
 import '../datasources/azkar_audio_cache_datasource.dart';
 import '../datasources/azkar_audio_player_datasource.dart';
+import '../datasources/azkar_preferences_local_datasource.dart';
+import '../mappers/azkar_mappers.dart';
 
 class AzkarAudioRepoImpl implements AzkarAudioRepo {
   final AzkarAudioCacheDataSource _cache;
   final AzkarAudioPlayerDataSource _player;
+  final AzkarPreferencesLocalDataSource _preferences;
 
-  AzkarAudioRepoImpl(this._cache, this._player);
+  AzkarAudioRepoImpl(this._cache, this._player, this._preferences);
 
   /// Abandons any other download under way: one player plays one
   /// recitation, so only the newest request is worth the data.
@@ -44,14 +49,17 @@ class AzkarAudioRepoImpl implements AzkarAudioRepo {
   }
 
   @override
-  Future<ApiResult<void>> play(String localPath) =>
-      _guard(() => _player.playFile(localPath));
+  Future<ApiResult<void>> play(String localPath, AzkarAudioTrack track) =>
+      _guard(() => _player.playFile(mediaItemOf(localPath, track)));
 
   @override
   Future<ApiResult<void>> pause() => _guard(_player.pause);
 
   @override
   Future<ApiResult<void>> resume() => _guard(_player.resume);
+
+  @override
+  Future<ApiResult<void>> standBy() => _guard(_player.standBy);
 
   /// Abandons any download under way too.
   @override
@@ -88,6 +96,42 @@ class AzkarAudioRepoImpl implements AzkarAudioRepo {
     );
     return controller.stream;
   }
+
+  @override
+  Stream<MediaCommand> commands() => _player.commands;
+
+  @override
+  Stream<void> takenOver() => _player.takeovers;
+
+  @override
+  Future<ApiResult<AzkarAudioTrack?>> getLastTrack() async {
+    try {
+      final stored = await _preferences.getLastAudio();
+      return ApiResult.success(stored?.toEntity());
+    } catch (_) {
+      return const ApiResult.failure(CacheFailure());
+    }
+  }
+
+  @override
+  Future<ApiResult<void>> saveLastTrack(AzkarAudioTrack? track) async {
+    try {
+      await _preferences.saveLastAudio(track?.toModel());
+      return const ApiResult.success(null);
+    } catch (_) {
+      return const ApiResult.failure(CacheFailure());
+    }
+  }
+
+  /// The file at [localPath] as the system shows it outside the app: by
+  /// [track]'s name, read by its reciter, from Hisn Al-Muslim.
+  static MediaItem mediaItemOf(String localPath, AzkarAudioTrack track) =>
+      MediaItem(
+        id: Uri.file(localPath).toString(),
+        title: track.title,
+        artist: 'حمد الدريهم',
+        album: 'حصن المسلم',
+      );
 
   static AzkarPlaybackStatus _statusOf(PlayerState state) => switch (state
       .processingState) {

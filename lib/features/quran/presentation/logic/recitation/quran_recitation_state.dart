@@ -85,6 +85,25 @@ final class RecitationActive extends QuranRecitationState {
       );
 }
 
+/// The recitation the app was last closed on, offered to pick up again
+/// from the ayah it was on. Nothing is on the player until it is.
+final class RecitationSuspended extends QuranRecitationState {
+  final RecitationResumePoint point;
+
+  const RecitationSuspended(super.settings, {required this.point});
+
+  @override
+  RecitationTrack get currentTrack => point.track;
+
+  /// Nothing is recited until it is picked up.
+  @override
+  int? recitingAyahOn(int page) => null;
+
+  @override
+  RecitationSuspended withSettings(RecitationSettings settings) =>
+      RecitationSuspended(settings, point: point);
+}
+
 final class RecitationFailure extends QuranRecitationState {
   final String message;
 

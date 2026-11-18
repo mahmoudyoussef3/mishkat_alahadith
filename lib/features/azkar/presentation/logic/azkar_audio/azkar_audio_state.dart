@@ -27,6 +27,15 @@ final class AzkarAudioActive extends AzkarAudioState {
   bool get isPlaying => status == AzkarPlaybackStatus.playing;
 }
 
+/// The recitation the app was last closed on, offered to play again.
+/// Nothing is on the player until it does.
+final class AzkarAudioSuspended extends AzkarAudioState {
+  @override
+  final AzkarAudioTrack track;
+
+  const AzkarAudioSuspended({required this.track});
+}
+
 final class AzkarAudioFailure extends AzkarAudioState {
   @override
   final AzkarAudioTrack track;

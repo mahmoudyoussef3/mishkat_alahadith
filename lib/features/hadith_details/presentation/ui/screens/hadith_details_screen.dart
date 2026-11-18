@@ -19,6 +19,7 @@ import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widget
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/hadith_source_card.dart';
 // import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/widgets/siraj_prompt_card.dart';
 import 'package:mishkat_almasabih/features/read_aloud/domain/entities/hadith_speech_request.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/ui/docked_mini_player.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_cubit.dart';
 // import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_button.dart';
 import 'package:mishkat_almasabih/features/read_aloud/presentation/ui/read_aloud_host.dart';
@@ -142,7 +143,14 @@ class _HadithDetailView extends StatelessWidget {
       // bottomNavigationBar: ReadAloudBottomBar(
       //   below: withNavigation ? const HadithReaderBar() : null,
       // ),
-      bottomNavigationBar: withNavigation ? const HadithReaderBar() : null,
+      // The mini player above the reader's bar, rather than under it.
+      bottomNavigationBar:
+          withNavigation
+              ? const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [DockedMiniPlayer(), HadithReaderBar()],
+              )
+              : null,
       body: SafeArea(
         bottom: !withNavigation,
         child: BlocBuilder<HadithReaderCubit, HadithReaderState>(

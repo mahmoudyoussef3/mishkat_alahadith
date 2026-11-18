@@ -3,30 +3,35 @@ import 'dart:developer';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:mishkat_almasabih/core/domain/entities/media_command.dart';
 
-import '../../domain/entities/recitation.dart';
-
-/// The recitation as the system shows it outside the app — on the
-/// notification, the lock screen, a watch or a car — and the controls the
-/// listener uses there, headphones' buttons included.
+/// What the app's one player plays — a recitation of the Quran or of the
+/// azkar — as the system shows it outside the app: on the notification, the
+/// lock screen, a watch or a car; and the controls the listener uses there,
+/// headphones' buttons included.
 ///
 /// It shows what the player reports as it comes, except while [hold] keeps
 /// it up, loading, between one playlist and the next. The controls are
-/// passed to [commands], for the app to act on as on its own buttons.
-class QuranRecitationMediaSession extends BaseAudioHandler {
-  // The player itself, for a control used while nothing in the app listens
-  // to [commands].
+/// passed to [commandsOf] the [holder], for it to act on as on its own
+/// buttons.
+class AppMediaSession extends BaseAudioHandler {
+  // The player itself, for a control used while its holder does not
+  // listen to [commandsOf].
   final Future<void> Function() _pausePlayer;
   final Future<void> Function() _stopPlayer;
   final Future<void> Function(Duration position) _seekPlayer;
 
-  /// Those listening to [commands], oldest first.
-  final List<StreamController<RecitationCommand>> _listeners = [];
+  /// Those listening to [commandsOf], by whom they listen for, oldest
+  /// first.
+  final Map<Object, List<StreamController<MediaCommand>>> _listeners = {};
+
+  /// Who the player plays for now; the controls are theirs.
+  Object? holder;
 
   MediaItem? _item;
   var _holding = false;
 
-  QuranRecitationMediaSession({
+  AppMediaSession({
     required Future<void> Function() pausePlayer,
     required Future<void> Function() stopPlayer,
     required Future<void> Function(Duration position) seekPlayer,
@@ -34,14 +39,18 @@ class QuranRecitationMediaSession extends BaseAudioHandler {
        _stopPlayer = stopPlayer,
        _seekPlayer = seekPlayer;
 
-  /// Each control goes to the newest listener only: the mushaf opened last,
-  /// the one on screen, as one opened under it must not act on the
-  /// recitation that replaced its own.
-  Stream<RecitationCommand> get commands {
-    late final StreamController<RecitationCommand> listener;
+  /// The controls used while the player plays for [owner]. Each goes to the
+  /// newest of its listeners only, as one that came before must not act on
+  /// the recitation that replaced its own.
+  Stream<MediaCommand> commandsOf(Object owner) {
+    late final StreamController<MediaCommand> listener;
     listener = StreamController(
-      onListen: () => _listeners.add(listener),
-      onCancel: () => _listeners.remove(listener),
+      onListen: () => _listeners.putIfAbsent(owner, () => []).add(listener),
+      onCancel: () {
+        final listeners = _listeners[owner];
+        listeners?.remove(listener);
+        if (listeners != null && listeners.isEmpty) _listeners.remove(owner);
+      },
     );
     return listener.stream;
   }
@@ -107,22 +116,22 @@ class QuranRecitationMediaSession extends BaseAudioHandler {
   // ── the system's controls ──────────────────────────────────────────────
 
   @override
-  Future<void> play() => _command(RecitationCommand.play);
+  Future<void> play() => _command(MediaCommand.play);
 
   @override
-  Future<void> pause() => _command(RecitationCommand.pause);
+  Future<void> pause() => _command(MediaCommand.pause);
 
   @override
-  Future<void> skipToNext() => _command(RecitationCommand.next);
+  Future<void> skipToNext() => _command(MediaCommand.next);
 
   @override
-  Future<void> skipToPrevious() => _command(RecitationCommand.previous);
+  Future<void> skipToPrevious() => _command(MediaCommand.previous);
 
   /// Also the notification swiped away, which it is only while paused.
   @override
-  Future<void> stop() => _command(RecitationCommand.stop);
+  Future<void> stop() => _command(MediaCommand.stop);
 
-  /// Anywhere on the bar of the surah shown, into whichever ayah it is at.
+  /// Anywhere on the bar of the part shown, into whichever entry it is at.
   @override
   Future<void> seek(Duration position) => _seekPlayer(position);
 
@@ -133,27 +142,25 @@ class QuranRecitationMediaSession extends BaseAudioHandler {
     if (!playbackState.value.playing) await stop();
   }
 
-  Future<void> _command(RecitationCommand command) async {
-    if (_listeners.lastOrNull case final listener?) {
+  Future<void> _command(MediaCommand command) async {
+    if (_listeners[holder]?.lastOrNull case final listener?) {
       listener.add(command);
       return;
     }
-    // Nothing in the app plays the recitation, which never happens while
-    // the mushaf that recites it is open. The player is only silenced then,
-    // so one let go of never starts again from a headset or a car.
+    // No one in the app plays for the holder, which never happens while the
+    // app is running. The player is only silenced then, so one let go of
+    // never starts again from a headset or a car.
     final silence = switch (command) {
-      RecitationCommand.pause => _pausePlayer,
-      RecitationCommand.stop => _stopPlayer,
-      RecitationCommand.play ||
-      RecitationCommand.next ||
-      RecitationCommand.previous => null,
+      MediaCommand.pause => _pausePlayer,
+      MediaCommand.stop => _stopPlayer,
+      MediaCommand.play || MediaCommand.next || MediaCommand.previous => null,
     };
     if (silence == null) return;
     try {
       await silence();
     } catch (error, stackTrace) {
       log(
-        'Quran media control ${command.name} failed',
+        'Media control ${command.name} failed',
         error: error,
         stackTrace: stackTrace,
       );
@@ -163,17 +170,24 @@ class QuranRecitationMediaSession extends BaseAudioHandler {
   // ── what the player reports ────────────────────────────────────────────
 
   /// [event] as the system shows it, played at [speed]: the entry played
-  /// starting at [offset] on the progress bar, which spans the surah.
+  /// starting at [offset] on the progress bar, which spans its part. Only a
+  /// [skippable] recitation — one with an entry before or after, as the
+  /// ayahs of a surah are — offers previous and next.
   static PlaybackState stateOf(
     PlayerEvent event, {
     required double speed,
     Duration offset = Duration.zero,
+    bool skippable = true,
   }) {
     final playback = event.playbackEvent;
+    final playOrPause = event.playing ? _pause : _play;
     return PlaybackState(
-      controls: [_previous, if (event.playing) _pause else _play, _next, _stop],
+      controls:
+          skippable
+              ? [_previous, playOrPause, _next, _stop]
+              : [playOrPause, _stop],
       // Previous, play or pause, next: all a collapsed notification shows.
-      androidCompactActionIndices: const [0, 1, 2],
+      androidCompactActionIndices: skippable ? const [0, 1, 2] : const [0, 1],
       systemActions: const {MediaAction.seek},
       processingState: switch (playback.processingState) {
         ProcessingState.idle => AudioProcessingState.idle,

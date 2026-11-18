@@ -629,4 +629,185 @@ void main() {
       expect(cubit.state.recitingAyahOn(1), isNull);
     });
   });
+
+  group('the azkar taking the player', () {
+    test('ends the recitation, leaving the player to them', () async {
+      await playing(1);
+      final stopsBefore = player.stops;
+
+      player.takeOver();
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<RecitationIdle>());
+      expect(player.stops, stopsBefore);
+    });
+
+    test('a playlist arriving after it is never played', () async {
+      cloud.recitationGates[const RecitationScope.surah(1)] = Completer();
+      final starting = cubit.start(const RecitationFromAyah(1));
+      await pumpEventQueue();
+
+      player.takeOver();
+      await pumpEventQueue();
+      cloud.recitationGates[const RecitationScope.surah(1)]!.complete();
+      await starting;
+
+      expect(player.plays, isEmpty);
+      expect(cubit.state, isA<RecitationIdle>());
+    });
+
+    test('is nothing to a cubit with nothing on', () async {
+      await cubit.init();
+
+      player.takeOver();
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<RecitationIdle>());
+      expect(reading.savedResumePoints, isEmpty);
+    });
+  });
+
+  group('picking up after the app was closed', () {
+    const leftOff = RecitationResumePoint(
+      scope: RecitationScope.surah(1),
+      track: RecitationTrack(
+        ayahId: 2,
+        surahNumber: 1,
+        surahName: 'الفاتحة',
+        ayahNumber: 2,
+        page: 1,
+        url: 'https://cdn.example/2.mp3',
+      ),
+    );
+
+    test('keeps where the recitation is as it moves on', () async {
+      await playing(1);
+      player.report(RecitationStatus.playing, 1);
+      await pumpEventQueue();
+
+      final kept = reading.resumePoint!;
+      expect(kept.scope, const RecitationScope.surah(1));
+      expect(kept.track.ayahId, 2);
+    });
+
+    test('writes each ayah once, whatever its status', () async {
+      await playing(1);
+      final writes = reading.savedResumePoints.length;
+
+      player.report(RecitationStatus.paused, 0);
+      await pumpEventQueue();
+      player.report(RecitationStatus.playing, 0);
+      await pumpEventQueue();
+
+      expect(reading.savedResumePoints, hasLength(writes));
+    });
+
+    test('forgets it once stopped', () async {
+      await playing(1);
+
+      await cubit.stop();
+
+      expect(reading.savedResumePoints.last, isNull);
+      expect(reading.resumePoint, isNull);
+    });
+
+    test('forgets it once the azkar take the player', () async {
+      await playing(1);
+
+      player.takeOver();
+      await pumpEventQueue();
+
+      expect(reading.resumePoint, isNull);
+    });
+
+    test('keeps a failed recitation, to be tried again', () async {
+      await playing(1);
+
+      player.reportError();
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<RecitationFailure>());
+      expect(reading.resumePoint?.track.ayahId, 1);
+    });
+
+    test('offers the recitation left off, held', () async {
+      reading.resumePoint = leftOff;
+
+      await cubit.restore();
+
+      final state = cubit.state as RecitationSuspended;
+      expect(state.point, leftOff);
+      expect(state.currentTrack.ayahId, 2);
+      expect(player.plays, isEmpty);
+      expect(player.standBys, 0);
+    });
+
+    test('the ayah offered is not shown as being recited', () async {
+      reading.resumePoint = leftOff;
+
+      await cubit.restore();
+
+      expect(cubit.state.recitingAyahOn(1), isNull);
+    });
+
+    test('offers nothing when the last recitation was ended', () async {
+      await cubit.restore();
+
+      expect(cubit.state, isA<RecitationIdle>());
+    });
+
+    test('offers nothing once something else was asked for', () async {
+      reading.resumePoint = leftOff;
+      await playing(1);
+
+      await cubit.restore();
+
+      expect(cubit.state, isA<RecitationActive>());
+    });
+
+    test('playing picks it up at the ayah it was on', () async {
+      reading.resumePoint = leftOff;
+      await cubit.restore();
+
+      await cubit.togglePlayPause();
+
+      expect(player.plays.single.startIndex, 1);
+      expect(cubit.state, isA<RecitationActive>());
+    });
+
+    test('play outside the app picks it up too', () async {
+      reading.resumePoint = leftOff;
+      await cubit.restore();
+      await cubit.start(const RecitationFromAyah(1));
+      await cubit.stop();
+      reading.resumePoint = leftOff;
+      await cubit.restore();
+
+      player.command(RecitationCommand.play);
+      await pumpEventQueue();
+
+      expect(player.plays.last.startIndex, 1);
+    });
+
+    test('closing it forgets it', () async {
+      reading.resumePoint = leftOff;
+      await cubit.restore();
+
+      await cubit.stop();
+
+      expect(cubit.state, isA<RecitationIdle>());
+      expect(reading.resumePoint, isNull);
+    });
+
+    test('the azkar taking the player drop it', () async {
+      reading.resumePoint = leftOff;
+      await cubit.restore();
+
+      player.takeOver();
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<RecitationIdle>());
+      expect(reading.resumePoint, isNull);
+    });
+  });
 }

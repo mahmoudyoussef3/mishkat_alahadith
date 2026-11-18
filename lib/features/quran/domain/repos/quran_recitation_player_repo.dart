@@ -3,10 +3,10 @@ import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import '../entities/recitation.dart';
 import '../entities/recitation_settings.dart';
 
-/// The player the recitations are streamed on. There is one for all of
-/// them, so two recitations can never play over each other. It plays on
-/// with the app in the background, shown with its controls outside the
-/// app: on the notification, the lock screen, a watch or a car.
+/// The player the recitations are streamed on: the app's one player, shared
+/// with the azkar, so two recitations can never play over each other. It
+/// plays on with the app in the background, shown with its controls outside
+/// the app: on the notification, the lock screen, a watch or a car.
 abstract class QuranRecitationPlayerRepo {
   /// Replaces whatever was playing with [tracks] from [startIndex], each
   /// recited as often as [repeat] says, at [speed] — ready but held when
@@ -48,4 +48,9 @@ abstract class QuranRecitationPlayerRepo {
   /// act on as on its own; while no one listens, the player obeys them
   /// itself.
   Stream<RecitationCommand> commands();
+
+  /// Each time something else — a recitation of the azkar — takes the
+  /// player: the recitation is gone from it, and calls made since do
+  /// nothing until the next [play] or [standBy].
+  Stream<void> takenOver();
 }

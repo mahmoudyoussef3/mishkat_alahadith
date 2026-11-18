@@ -4,16 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/widgets/snackbars.dart';
 import 'package:mishkat_almasabih/core/widgets/state_message.dart';
-import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_reader/azkar_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/ui/models/azkar_reader_args.dart';
-import 'package:mishkat_almasabih/features/azkar/presentation/ui/widgets/reader/azkar_audio_bar.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/ui/widgets/reader/azkar_chapter_intro.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/ui/widgets/reader/azkar_reader_toolbar.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/ui/widgets/reader/zikr_card.dart';
 
 /// One chapter of Hisn Al-Muslim, read and counted zikr by zikr, with its
-/// recitations.
+/// recitations — played on the app's mini player, which stays on with the
+/// chapter closed.
 class AzkarReaderScreen extends StatefulWidget {
   const AzkarReaderScreen({super.key, required this.args});
 
@@ -97,25 +96,11 @@ class _AzkarReaderScreenState extends State<AzkarReaderScreen> {
                     'تعذر الحفظ على جهازك، سيبقى التغيير ظاهراً حتى تغلق الصفحة',
                   ),
             ),
-            BlocListener<AzkarAudioCubit, AzkarAudioState>(
-              listenWhen: (_, current) => current is AzkarAudioFailure,
-              listener: (context, state) {
-                showErrorSnackbar(
-                  context,
-                  (state as AzkarAudioFailure).message,
-                );
-                context.read<AzkarAudioCubit>().dismissFailure();
-              },
-            ),
           ],
           child: SafeArea(
             bottom: false,
             child: Column(
-              children: [
-                const AzkarReaderToolbar(),
-                Expanded(child: _body()),
-                const AzkarAudioBar(),
-              ],
+              children: [const AzkarReaderToolbar(), Expanded(child: _body())],
             ),
           ),
         ),

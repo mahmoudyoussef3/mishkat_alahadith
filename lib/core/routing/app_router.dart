@@ -10,7 +10,6 @@ import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/sc
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/category_style.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/screens/categories_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/presentation/logic/signup_cubit.dart';
-import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_home/azkar_home_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_reader/azkar_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/ui/models/azkar_reader_args.dart';
@@ -46,7 +45,6 @@ import 'package:mishkat_almasabih/features/quran/presentation/logic/hizb_index/q
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
-import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/reflection/quran_reflection_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/surah_tafsir/surah_tafsir_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/tafsir_search/quran_tafsir_search_cubit.dart';
@@ -467,29 +465,22 @@ class AppRouter {
           final MushafReaderArgs args => args,
           _ => const MushafReaderArgs(),
         };
+        // The recitation is the app's, not the mushaf's: it plays on once
+        // the mushaf is closed.
         return MaterialPageRoute(
           builder:
-              (_) => MultiBlocProvider(
-                providers: [
-                  BlocProvider(
-                    create:
-                        (context) =>
-                            getIt<MushafReaderCubit>()..init(
-                              initialPage: args.initialPage,
-                              highlightAyahId: args.highlightAyahId,
-                              surahNumber: args.surahNumber,
-                            ),
-                  ),
-                  BlocProvider(
-                    create:
-                        (context) =>
-                            getIt<QuranRecitationCubit>()
-                              ..init(autoplay: args.recitation),
-                  ),
-                ],
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<MushafReaderCubit>()..init(
+                          initialPage: args.initialPage,
+                          highlightAyahId: args.highlightAyahId,
+                          surahNumber: args.surahNumber,
+                        ),
                 child: MushafReaderScreen(
                   initialPage: args.initialPage,
                   surahNumber: args.surahNumber,
+                  recitation: args.recitation,
                 ),
               ),
         );
@@ -543,18 +534,15 @@ class AppRouter {
           _ => null,
         };
         if (azkar == null) return null;
+        // The recitations are the app's, not the chapter's: one plays on
+        // once the chapter is closed.
         return MaterialPageRoute(
           builder:
-              (_) => MultiBlocProvider(
-                providers: [
-                  BlocProvider(
-                    create:
-                        (context) =>
-                            getIt<AzkarReaderCubit>()
-                              ..load(azkar.categoryId, zikrId: azkar.zikrId),
-                  ),
-                  BlocProvider(create: (context) => getIt<AzkarAudioCubit>()),
-                ],
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<AzkarReaderCubit>()
+                          ..load(azkar.categoryId, zikrId: azkar.zikrId),
                 child: AzkarReaderScreen(args: azkar),
               ),
         );

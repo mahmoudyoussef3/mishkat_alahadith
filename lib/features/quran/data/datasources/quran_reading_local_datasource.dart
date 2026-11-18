@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/quran_bookmark_model.dart';
+import '../models/recitation_resume_model.dart';
 
 class QuranReadingLocalDataSource {
   static const String _lastReadPageKey = 'quran_last_read_page';
@@ -21,6 +22,7 @@ class QuranReadingLocalDataSource {
   static const String _continuousKey = 'quran_recitation_continuous';
   static const String _tafsirKey = 'quran_tafsir';
   static const String _translationKey = 'quran_translation';
+  static const String _recitationResumeKey = 'quran_recitation_resume';
 
   Future<({int page, int savedAtMillis})?> getLastRead() async {
     final prefs = await SharedPreferences.getInstance();
@@ -155,6 +157,25 @@ class QuranReadingLocalDataSource {
       await prefs.remove(_translationKey);
     } else {
       await prefs.setString(_translationKey, translation);
+    }
+  }
+
+  /// Null when nothing was left off, or the stored entry is damaged.
+  /// Throws [FormatException] when the stored value is not JSON.
+  Future<RecitationResumeModel?> getRecitationResume() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_recitationResumeKey);
+    if (raw == null || raw.isEmpty) return null;
+    return RecitationResumeModel.tryFromJson(jsonDecode(raw));
+  }
+
+  /// A null [resume] forgets the one kept.
+  Future<void> saveRecitationResume(RecitationResumeModel? resume) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (resume == null) {
+      await prefs.remove(_recitationResumeKey);
+    } else {
+      await prefs.setString(_recitationResumeKey, jsonEncode(resume.toJson()));
     }
   }
 }

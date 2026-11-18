@@ -5,15 +5,16 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
-/// How long each ayah's recitation lasts, which the service does not say.
-/// Read from the head of its file, a few kilobytes of it, so the system's
-/// progress bar can span a whole surah though it is played ayah by ayah.
-/// What is read is kept for as long as the app runs.
-class QuranRecitationLengthsDataSource {
+/// How long each streamed file lasts — an ayah's recitation, say — which
+/// the service does not say. Read from the head of the file, a few
+/// kilobytes of it, so the system's progress bar can span a whole surah
+/// though it is played ayah by ayah. What is read is kept for as long as
+/// the app runs.
+class AudioLengthsDataSource {
   final Dio _dio;
   final Map<String, Duration> _known = {};
 
-  QuranRecitationLengthsDataSource(this._dio);
+  AudioLengthsDataSource(this._dio);
 
   /// The length of the recitation at [url], once read.
   Duration? lengthOf(String url) => _known[url];
@@ -37,7 +38,7 @@ class QuranRecitationLengthsDataSource {
           final length = await _readLength(url, cancel);
           if (length == null) {
             failed = true;
-            log('Quran recitation length unreadable: $url');
+            log('Recitation length unreadable: $url');
           } else {
             _known[url] = length;
           }
@@ -45,7 +46,7 @@ class QuranRecitationLengthsDataSource {
           if (!failed &&
               !(error is DioException && CancelToken.isCancel(error))) {
             log(
-              'Quran recitation length unavailable',
+              'Recitation length unavailable',
               error: error,
               stackTrace: stackTrace,
             );

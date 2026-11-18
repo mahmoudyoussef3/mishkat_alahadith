@@ -2,15 +2,21 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:mishkat_almasabih/core/audio/app_audio_player.dart';
+import 'package:mishkat_almasabih/core/audio/audio_lengths_datasource.dart';
+import 'package:mishkat_almasabih/core/domain/entities/media_command.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_audio_cache_datasource.dart';
 import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_audio_player_datasource.dart';
+import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_preferences_local_datasource.dart';
 import 'package:mishkat_almasabih/features/azkar/data/repos/azkar_audio_repo_impl.dart';
 import 'package:mishkat_almasabih/features/azkar/domain/entities/azkar_audio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Answers every request itself instead of going to the network.
 class _FakeAdapter implements HttpClientAdapter {
@@ -42,9 +48,15 @@ class _FakeAdapter implements HttpClientAdapter {
 
 /// A player driven by the test, with no platform behind it.
 class _FakePlayer extends AzkarAudioPlayerDataSource {
+  _FakePlayer() : super(AppAudioPlayer(AudioLengthsDataSource(Dio())));
+
   final StreamController<PlayerState> states = StreamController.broadcast();
   final StreamController<PlayerException> failures =
       StreamController.broadcast();
+  final StreamController<MediaCommand> controls = StreamController.broadcast();
+  final StreamController<void> takenOver = StreamController.broadcast();
+  final List<MediaItem> played = [];
+  int standBys = 0;
 
   @override
   Stream<PlayerState> get playerStates => states.stream;
@@ -53,8 +65,28 @@ class _FakePlayer extends AzkarAudioPlayerDataSource {
   Stream<PlayerException> get errors => failures.stream;
 
   @override
+  Stream<MediaCommand> get commands => controls.stream;
+
+  @override
+  Stream<void> get takeovers => takenOver.stream;
+
+  @override
+  Future<void> playFile(MediaItem item) async => played.add(item);
+
+  @override
+  Future<void> standBy() async => standBys++;
+
+  @override
   Future<void> stop() async {}
 }
+
+const _morningZikr = AzkarAudioTrack(
+  audioFile: '75.mp3',
+  categoryId: 27,
+  zikrId: 3,
+  categoryTitle: 'أذكار الصباح والمساء',
+  zikrNumber: 3,
+);
 
 void main() {
   late Directory root;
@@ -152,7 +184,11 @@ void main() {
 
     setUp(() {
       player = _FakePlayer();
-      repo = AzkarAudioRepoImpl(cache, player);
+      repo = AzkarAudioRepoImpl(
+        cache,
+        player,
+        AzkarPreferencesLocalDataSource(),
+      );
     });
 
     test('reads the player\'s states as playback statuses', () async {
@@ -190,7 +226,14 @@ void main() {
   group('AzkarAudioRepoImpl.prepare', () {
     late AzkarAudioRepoImpl repo;
 
-    setUp(() => repo = AzkarAudioRepoImpl(cache, AzkarAudioPlayerDataSource()));
+    setUp(
+      () =>
+          repo = AzkarAudioRepoImpl(
+            cache,
+            _FakePlayer(),
+            AzkarPreferencesLocalDataSource(),
+          ),
+    );
 
     test('succeeds with where the file is kept', () async {
       final path = dataOf(await repo.prepare('75.mp3'));
@@ -226,6 +269,74 @@ void main() {
       final result = await repo.prepare('75.mp3');
 
       expect((result as ApiFailure).failure, isA<NetworkFailure>());
+    });
+  });
+
+  group('AzkarAudioRepoImpl on the app\'s player', () {
+    late _FakePlayer player;
+    late AzkarAudioRepoImpl repo;
+
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+      player = _FakePlayer();
+      repo = AzkarAudioRepoImpl(
+        cache,
+        player,
+        AzkarPreferencesLocalDataSource(),
+      );
+    });
+
+    test('plays the file on the device, named as the zikr is', () async {
+      await repo.play('/cache/azkar_audio/75.mp3', _morningZikr);
+
+      final item = player.played.single;
+      expect(item.id, Uri.file('/cache/azkar_audio/75.mp3').toString());
+      expect(item.title, 'الذكر ٣ · أذكار الصباح والمساء');
+      expect(item.album, 'حصن المسلم');
+    });
+
+    test('standing by reaches the player', () async {
+      await repo.standBy();
+
+      expect(player.standBys, 1);
+    });
+
+    test('controls used outside the app and takeovers are passed on', () async {
+      final heard = <MediaCommand>[];
+      var takeovers = 0;
+      final commands = repo.commands().listen(heard.add);
+      final taken = repo.takenOver().listen((_) => takeovers++);
+
+      player.controls.add(MediaCommand.pause);
+      player.takenOver.add(null);
+      await pumpEventQueue();
+
+      expect(heard, [MediaCommand.pause]);
+      expect(takeovers, 1);
+      await commands.cancel();
+      await taken.cancel();
+    });
+
+    test('keeps the recitation for after the app is closed', () async {
+      await repo.saveLastTrack(_morningZikr);
+
+      final kept = dataOf(await repo.getLastTrack())!;
+      expect(kept, _morningZikr);
+      expect(kept.title, _morningZikr.title);
+    });
+
+    test('forgets it once ended', () async {
+      await repo.saveLastTrack(_morningZikr);
+
+      await repo.saveLastTrack(null);
+
+      expect(dataOf(await repo.getLastTrack()), isNull);
+    });
+
+    test('a damaged entry is nothing to offer again', () async {
+      SharedPreferences.setMockInitialValues({'azkar_last_audio': '{"x":1}'});
+
+      expect(dataOf(await repo.getLastTrack()), isNull);
     });
   });
 }

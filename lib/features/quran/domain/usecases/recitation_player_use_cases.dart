@@ -94,3 +94,13 @@ class WatchRecitationCommandsUseCase {
 
   Stream<RecitationCommand> call() => _repo.commands();
 }
+
+/// Each time a recitation of the azkar takes the app's one player from the
+/// Quran.
+class WatchRecitationTakenOverUseCase {
+  final QuranRecitationPlayerRepo _repo;
+
+  WatchRecitationTakenOverUseCase(this._repo);
+
+  Stream<void> call() => _repo.takenOver();
+}

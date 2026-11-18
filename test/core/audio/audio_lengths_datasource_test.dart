@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_lengths_datasource.dart';
+import 'package:mishkat_almasabih/core/audio/audio_lengths_datasource.dart';
 
 /// An ID3v2 tag of [size] bytes after its header, as a file's head.
 List<int> _id3(int size, {bool footer = false}) => [
@@ -170,8 +170,8 @@ void main() {
   group('read', () {
     const url = 'https://cdn.example/1.mp3';
 
-    QuranRecitationLengthsDataSource over(_FakeCdn cdn) =>
-        QuranRecitationLengthsDataSource(Dio()..httpClientAdapter = cdn);
+    AudioLengthsDataSource over(_FakeCdn cdn) =>
+        AudioLengthsDataSource(Dio()..httpClientAdapter = cdn);
 
     test('reads a length from the head of the file alone', () async {
       final cdn = _FakeCdn({url: _file(_mpeg1Frame(), 160000)});
