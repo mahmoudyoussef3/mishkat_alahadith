@@ -14,7 +14,7 @@ final class RandomAhadithSuccess extends RandomAhadithState {
   final bool refreshing;
 
   /// Why the last refresh failed, when it did. [hadiths] are then the ones
-  /// that were already on screen.
+  /// that were already on screen, or the last selection kept on the device.
   final String? refreshFailure;
 
   RandomAhadithSuccess(

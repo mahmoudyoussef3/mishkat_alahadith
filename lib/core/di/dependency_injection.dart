@@ -224,6 +224,7 @@ import 'package:mishkat_almasabih/features/random_ahadith/data/datasources/custo
 import 'package:mishkat_almasabih/features/random_ahadith/data/repos/random_ahadith_repo_impl.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/domain/repos/random_ahadith_repo.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/domain/usecases/get_random_ahadith_use_case.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/domain/usecases/get_cached_random_ahadith_use_case.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/data/repos/remaining_questions_repo_impl.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/domain/repos/remaining_questions_repo.dart';
@@ -684,7 +685,7 @@ void _registerSearch() {
   );
 
   getIt.registerLazySingleton<SearchHistoryRepo>(
-    () => SearchHistoryRepoImpl(getIt(), getIt()),
+    () => SearchHistoryRepoImpl(getIt(), getIt(), getIt()),
   );
   getIt.registerLazySingleton<GetSearchHistoryUseCase>(
     () => GetSearchHistoryUseCase(getIt()),
@@ -705,17 +706,22 @@ void _registerSearch() {
 
 void _registerRandomAhadith() {
   getIt.registerLazySingleton<RandomAhadithRepo>(
-    () => RandomAhadithRepoImpl(getIt(), getIt()),
+    () => RandomAhadithRepoImpl(getIt(), getIt(), getIt()),
   );
   getIt.registerLazySingleton<GetRandomAhadithUseCase>(
     () => GetRandomAhadithUseCase(getIt()),
   );
-  getIt.registerFactory<RandomAhadithCubit>(() => RandomAhadithCubit(getIt()));
+  getIt.registerLazySingleton<GetCachedRandomAhadithUseCase>(
+    () => GetCachedRandomAhadithUseCase(getIt()),
+  );
+  getIt.registerFactory<RandomAhadithCubit>(
+    () => RandomAhadithCubit(getIt(), getIt()),
+  );
 }
 
 void _registerHadithAnalysis() {
   getIt.registerLazySingleton<HadithAnalysisRepo>(
-    () => HadithAnalysisRepoImpl(getIt(), getIt()),
+    () => HadithAnalysisRepoImpl(getIt(), getIt(), getIt()),
   );
   getIt.registerLazySingleton<AnalyzeHadithUseCase>(
     () => AnalyzeHadithUseCase(getIt()),

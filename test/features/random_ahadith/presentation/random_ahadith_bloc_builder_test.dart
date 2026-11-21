@@ -8,6 +8,7 @@ import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/domain/repos/random_ahadith_repo.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/domain/usecases/get_cached_random_ahadith_use_case.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/domain/usecases/get_random_ahadith_use_case.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/ui/widgets/compact_hadith_tile.dart';
@@ -35,6 +36,9 @@ const _hadiths = [
 ];
 
 class _FakeRandomAhadithRepo extends Fake implements RandomAhadithRepo {
+  @override
+  Future<List<ExplainedHadith>?> getCachedRandomAhadith() async => null;
+
   _FakeRandomAhadithRepo(this.result);
 
   final ApiResult<List<ExplainedHadith>> result;
@@ -46,6 +50,9 @@ class _FakeRandomAhadithRepo extends Fake implements RandomAhadithRepo {
 /// Answers the first request with [_hadiths] and holds every later one
 /// until [refresh] completes.
 class _HeldRefreshRepo extends Fake implements RandomAhadithRepo {
+  @override
+  Future<List<ExplainedHadith>?> getCachedRandomAhadith() async => null;
+
   final refresh = Completer<ApiResult<List<ExplainedHadith>>>();
   var _requests = 0;
 
@@ -61,8 +68,10 @@ const _firstPreview = '«القط لي حصى» فلقطت له سبع حصيا�
 Future<RandomAhadithCubit> _loadedCubit(
   ApiResult<List<ExplainedHadith>> result,
 ) async {
+  final repo = _FakeRandomAhadithRepo(result);
   final cubit = RandomAhadithCubit(
-    GetRandomAhadithUseCase(_FakeRandomAhadithRepo(result)),
+    GetRandomAhadithUseCase(repo),
+    GetCachedRandomAhadithUseCase(repo),
   );
   await cubit.emitRandomStats();
   return cubit;
@@ -183,7 +192,10 @@ void main() {
       WidgetTester tester,
     ) async {
       final repo = _HeldRefreshRepo();
-      final cubit = RandomAhadithCubit(GetRandomAhadithUseCase(repo));
+      final cubit = RandomAhadithCubit(
+        GetRandomAhadithUseCase(repo),
+        GetCachedRandomAhadithUseCase(repo),
+      );
       await cubit.emitRandomStats();
       await _pumpSection(tester, cubit);
       await tester.tap(find.text('تحديث'));

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
@@ -46,6 +47,11 @@ class _FakeNetworkInfo implements NetworkInfo {
   @override
   Future<bool> get isConnected async => connected;
 }
+
+DioException _offline() => DioException(
+  requestOptions: RequestOptions(path: '/offline'),
+  type: DioExceptionType.connectionError,
+);
 
 void main() {
   final cache = GenericCacheService.instance;
@@ -99,5 +105,38 @@ void main() {
 
     expect((result as ApiFailure).failure, isA<NetworkFailure>());
     expect(hadeethEnc.calls, 0);
+  });
+
+  test('offline, getHadithDetails returns the hadith fetched before, however old', () async {
+    await cache.saveData<NewDailyHadithModel>(
+      key: CacheKeys.hadithDetails('7'),
+      data: NewDailyHadithModel(id: '7', explanation: 'شرح قديم'),
+      toJson: (d) => d.toJson(),
+      cacheExpirationHours: 0,
+    );
+    network.connected = false;
+
+    final result = await repo.getHadithDetails('7');
+
+    expect((result as ApiSuccess<ExplainedHadith>).data.explanation, 'شرح قديم');
+    expect(hadeethEnc.calls, 0);
+  });
+
+  test('offline, getCategories returns the expired list rather than failing', () async {
+    await cache.saveData<Map<String, dynamic>>(
+      key: CacheKeys.hadithCategories,
+      data: {
+        'categories': [
+          {'id': '2', 'title': 'الفقه', 'hadeeths_count': '3'},
+        ],
+      },
+      toJson: (d) => d,
+      cacheExpirationHours: 0,
+    );
+    datasource.error = _offline();
+
+    final result = await repo.getCategories();
+
+    expect((result as ApiSuccess<List<CategoryEntity>>).data.single.title, 'الفقه');
   });
 }

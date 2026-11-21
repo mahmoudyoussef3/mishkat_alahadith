@@ -1,6 +1,6 @@
-import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/cache_fallback.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 import 'package:mishkat_almasabih/core/networking/network_info.dart';
 import 'package:mishkat_almasabih/core/domain/entities/chapter_hadith.dart';
@@ -42,28 +42,24 @@ class SearchWithFiltersRepoImpl implements SearchWithFiltersRepo {
   }
 
   @override
-  Future<ApiResult<List<ChapterHadith>>> search(
-    HadithSearchFilters filters,
-  ) async {
-    try {
-      await _networkInfo.ensureConnected();
-      final response = await _apiService.searchWithFilters(
-        filters.query,
-        filters.bookSlug,
-        filters.narrator,
-        filters.grade,
-        filters.chapter,
-        filters.category,
-      );
-      await _cacheService.saveData<SearchWithFiltersModel>(
-        key: _cacheKey(filters),
-        data: response,
-        toJson: (d) => d.toJson(),
-        cacheExpirationHours: 6,
-      );
-      return ApiResult.success(response.toEntities());
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
+  Future<ApiResult<List<ChapterHadith>>> search(HadithSearchFilters filters) =>
+      _cacheService
+          .fetchWithStaleFallback<SearchWithFiltersModel, List<ChapterHadith>>(
+            key: _cacheKey(filters),
+            fetch: () async {
+              await _networkInfo.ensureConnected();
+              return _apiService.searchWithFilters(
+                filters.query,
+                filters.bookSlug,
+                filters.narrator,
+                filters.grade,
+                filters.chapter,
+                filters.category,
+              );
+            },
+            toJson: (d) => d.toJson(),
+            fromJson: SearchWithFiltersModel.fromJson,
+            toEntity: (d) => d.toEntities(),
+            cacheExpirationHours: 6,
+          );
 }

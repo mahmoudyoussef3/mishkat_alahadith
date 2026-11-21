@@ -61,4 +61,15 @@ void main() {
     expect((result as ApiFailure).failure, isA<NetworkFailure>());
     expect(api.body, isNull);
   });
+
+  test('offline, search returns the results kept for the same term', () async {
+    await repo.search('الصبر');
+    network.connected = false;
+    api.body = null;
+
+    final result = await repo.search('الصبر');
+
+    expect((result as ApiSuccess<List<ExplainedHadith>>).data.single.id, '3');
+    expect(api.body, isNull);
+  });
 }

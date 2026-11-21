@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/cache_fallback.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 
 import '../../domain/entities/chapter_ahadith_page.dart';
@@ -12,6 +13,7 @@ import '../../domain/repos/ahadith_repo.dart';
 import '../mappers/ahadith_mapper.dart';
 import '../models/ahadiths_model.dart';
 import '../models/cached_ahadith_data.dart';
+import '../models/local_books_model.dart';
 
 class AhadithRepoImpl implements AhadithRepo {
   final ApiService _apiService;
@@ -24,15 +26,20 @@ class AhadithRepoImpl implements AhadithRepo {
     required String bookSlug,
     required int chapterId,
   }) async {
+    final key = CacheKeys.paginatedAhadith(bookSlug, chapterId);
+    // However old: offline this list is the only copy of the pages read so
+    // far. An expired one is marked, so a refresh replaces it.
     final cached = await _cacheService.getData<CachedAhadithData>(
-      key: CacheKeys.paginatedAhadith(bookSlug, chapterId),
+      key: key,
       fromJson: CachedAhadithData.fromJson,
+      allowStale: true,
     );
     if (cached == null) return null;
     return CachedChapterAhadith(
       ahadith: cached.ahadith.map((h) => h.toEntity()).toList(),
       lastLoadedPage: cached.lastPage,
       totalCount: cached.totalCount,
+      isStale: !await _cacheService.isCacheValid(key),
     );
   }
 
@@ -91,33 +98,29 @@ class AhadithRepoImpl implements AhadithRepo {
   Future<ApiResult<List<LocalBookHadith>>> getLocalAhadith({
     required String bookSlug,
     required int chapterId,
-  }) async {
-    try {
-      final response = await _apiService.getLocalChapterAhadiths(
-        bookSlug,
-        chapterId,
+  }) => _cacheService
+      .fetchWithStaleFallback<LocalHadithResponse, List<LocalBookHadith>>(
+        key: CacheKeys.localAhadith(bookSlug, chapterId),
+        fetch: () => _apiService.getLocalChapterAhadiths(bookSlug, chapterId),
+        toJson: (d) => d.toJson(),
+        fromJson: LocalHadithResponse.fromJson,
+        toEntity: (d) => d.toEntities(),
       );
-      return ApiResult.success(response.toEntities());
-    } catch (error) {
-      log(error.toString());
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 
   @override
   Future<ApiResult<List<LocalBookHadith>>> getArbainAhadith({
     required String bookSlug,
     required int chapterId,
-  }) async {
-    try {
-      final response = await _apiService.getThreeBooksLocalChapterAhadiths(
-        bookSlug,
-        chapterId,
+  }) => _cacheService
+      .fetchWithStaleFallback<LocalHadithResponse, List<LocalBookHadith>>(
+        key: CacheKeys.arbainAhadith(bookSlug, chapterId),
+        fetch:
+            () => _apiService.getThreeBooksLocalChapterAhadiths(
+              bookSlug,
+              chapterId,
+            ),
+        toJson: (d) => d.toJson(),
+        fromJson: LocalHadithResponse.fromJson,
+        toEntity: (d) => d.toEntities(),
       );
-      return ApiResult.success(response.toEntities());
-    } catch (error) {
-      log(error.toString());
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 }

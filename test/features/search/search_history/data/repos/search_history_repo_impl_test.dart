@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 import 'package:mishkat_almasabih/features/search/search_history/data/models/search_history_models.dart';
 import 'package:mishkat_almasabih/features/search/search_history/data/repos/search_history_repo_impl.dart';
@@ -11,10 +13,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _FakeApiService extends Fake implements ApiService {
   AddSearchRequest? added;
   Map<String, dynamic>? clearBody;
+  Object? error;
 
   @override
   Future<GetSearchHistoryResponse> getSearchHistory(String token) async =>
-      GetSearchHistoryResponse(
+      error != null ? throw error! : GetSearchHistoryResponse(
         success: true,
         data: [
           SearchHistoryItem(
@@ -45,13 +48,41 @@ class _FakeApiService extends Fake implements ApiService {
 }
 
 void main() {
+  final cache = GenericCacheService.instance;
   late _FakeApiService api;
   late SearchHistoryRepoImpl repo;
 
   setUp(() {
     SharedPreferences.setMockInitialValues({'token': 't1'});
     api = _FakeApiService();
-    repo = SearchHistoryRepoImpl(api, TokenStorage());
+    repo = SearchHistoryRepoImpl(api, TokenStorage(), cache);
+  });
+
+  tearDown(() => cache.clearCache(CacheKeys.searchHistory));
+
+  DioException offline() => DioException(
+    requestOptions: RequestOptions(path: '/history'),
+    type: DioExceptionType.connectionError,
+  );
+
+  test('offline, getHistory returns the last history fetched', () async {
+    await repo.getHistory();
+    api.error = offline();
+
+    final result = await repo.getHistory();
+
+    final entry = (result as ApiSuccess<List<SearchHistoryEntry>>).data.single;
+    expect(entry.title, 'الصلاة');
+  });
+
+  test('clearHistory forgets the kept history so it is not shown offline', () async {
+    await repo.getHistory();
+    await repo.clearHistory();
+    api.error = offline();
+
+    final result = await repo.getHistory();
+
+    expect((result as ApiFailure).failure, isA<NetworkFailure>());
   });
 
   test('getHistory maps server items to entries', () async {

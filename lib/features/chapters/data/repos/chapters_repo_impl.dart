@@ -1,9 +1,7 @@
-import 'dart:developer';
-
 import 'package:mishkat_almasabih/core/errors/failures.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/cache_fallback.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 
 import '../../domain/entities/book_chapter.dart';
@@ -30,21 +28,14 @@ class ChaptersRepoImpl implements ChaptersRepo {
   }
 
   @override
-  Future<ApiResult<List<BookChapter>>> getChapters(String bookSlug) async {
-    try {
-      final response = await _apiService.getBookChapters(bookSlug);
-      await _cacheService.saveData<ChaptersModel>(
+  Future<ApiResult<List<BookChapter>>> getChapters(String bookSlug) =>
+      _cacheService.fetchWithStaleFallback<ChaptersModel, List<BookChapter>>(
         key: CacheKeys.chapters(bookSlug),
-        data: response,
+        fetch: () => _apiService.getBookChapters(bookSlug),
         toJson: (d) => d.toJson(),
-        cacheExpirationHours: 24,
+        fromJson: ChaptersModel.fromJson,
+        toEntity: (d) => d.toEntities(),
       );
-      return ApiResult.success(response.toEntities());
-    } catch (error) {
-      log(error.toString());
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 
   @override
   Future<ApiResult<LastReadChapter?>> getLastReadChapter(

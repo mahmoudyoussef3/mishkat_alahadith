@@ -1,8 +1,6 @@
-import 'dart:developer';
-
-import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/cache_fallback.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 
 import '../../domain/entities/category_books.dart';
@@ -28,22 +26,14 @@ class LibraryRepoImpl implements LibraryRepo {
   }
 
   @override
-  Future<ApiResult<CategoryBooks>> getCategoryBooks(String categoryId) async {
-    try {
-      final response = await _apiService.getBookData(categoryId);
-      await _cacheService.saveData<CategoryResponse>(
+  Future<ApiResult<CategoryBooks>> getCategoryBooks(String categoryId) =>
+      _cacheService.fetchWithStaleFallback<CategoryResponse, CategoryBooks>(
         key: CacheKeys.bookData(categoryId),
-        data: response,
+        fetch: () => _apiService.getBookData(categoryId),
         toJson: (d) => d.toJson(),
-        cacheExpirationHours: 24,
+        fromJson: CategoryResponse.fromJson,
+        toEntity: (d) => d.toEntity(),
       );
-      log('🌍 Loaded BookData from API and cached it for $categoryId');
-      return ApiResult.success(response.toEntity());
-    } catch (error) {
-      log(error.toString());
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 
   @override
   Future<LibraryStatistics?> getCachedStatistics() async {
@@ -55,18 +45,12 @@ class LibraryRepoImpl implements LibraryRepo {
   }
 
   @override
-  Future<ApiResult<LibraryStatistics>> getStatistics() async {
-    try {
-      final response = await _apiService.getLibraryStatisctics();
-      await _cacheService.saveData<StatisticsResponse>(
+  Future<ApiResult<LibraryStatistics>> getStatistics() => _cacheService
+      .fetchWithStaleFallback<StatisticsResponse, LibraryStatistics>(
         key: CacheKeys.libraryStatistics,
-        data: response,
+        fetch: _apiService.getLibraryStatisctics,
         toJson: (d) => d.toJson(),
-        cacheExpirationHours: 24,
+        fromJson: StatisticsResponse.fromJson,
+        toEntity: (d) => d.toEntity(),
       );
-      return ApiResult.success(response.toEntity());
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 }

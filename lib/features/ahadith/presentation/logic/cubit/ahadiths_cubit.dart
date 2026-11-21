@@ -117,7 +117,7 @@ class AhadithsCubit extends Cubit<AhadithsState> {
         bookSlug: bookSlug,
         chapterId: chapterId,
         paginate: paginate,
-        cachedAhadith: cached.ahadith,
+        cachedAhadith: cached.isStale ? const [] : cached.ahadith,
       );
     } else {
       log('❌ [AhadithsCubit] CACHE MISS - Fetching from API');

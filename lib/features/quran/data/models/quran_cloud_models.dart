@@ -100,6 +100,15 @@ class CloudAyahModel {
     );
   }
 
+  /// What [tryFromJson] reads back, so an answer can be kept on the device.
+  Map<String, dynamic> toJson() => {
+    'number': number,
+    'text': text,
+    if (audio != null) 'audio': audio,
+    'audioSecondary': audioSecondary,
+    if (edition != null) 'edition': edition!.toJson(),
+  };
+
   /// The ayahs of a list, skipping any that cannot be read.
   static List<CloudAyahModel> listFromJson(Object? json) => [
     if (json is List)
@@ -123,6 +132,11 @@ class CloudAyahGroupModel {
       edition: QuranEditionModel.tryFromJson(json['edition']),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'ayahs': [for (final ayah in ayahs) ayah.toJson()],
+    if (edition != null) 'edition': edition!.toJson(),
+  };
 }
 
 class CloudSearchModel {
@@ -150,4 +164,9 @@ class CloudSearchModel {
       },
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'matches': [for (final match in matches) match.toJson()],
+    'total': total,
+  };
 }

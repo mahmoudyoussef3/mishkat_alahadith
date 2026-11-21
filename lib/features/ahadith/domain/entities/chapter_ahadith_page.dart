@@ -17,9 +17,14 @@ class CachedChapterAhadith {
   final int lastLoadedPage;
   final int totalCount;
 
+  /// Saved too long ago to be merged into: once the chapter loads again it
+  /// replaces these pages, and until then they stand in, offline included.
+  final bool isStale;
+
   const CachedChapterAhadith({
     required this.ahadith,
     required this.lastLoadedPage,
     required this.totalCount,
+    this.isStale = false,
   });
 }

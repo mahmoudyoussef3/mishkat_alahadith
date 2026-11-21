@@ -169,29 +169,52 @@ class QuranCloudRepoImpl implements QuranCloudRepo {
     final key = '$ayahId|${editionIds.join(',')}';
     final cached = _ayahTexts[key];
     if (cached != null) return ApiResult.success(cached);
+    final storeKey = 'ayah|$key';
 
     try {
       final models = await _remote.getAyahEditions(ayahId, editionIds);
-      final byEdition = <String, EditionText>{};
-      for (final model in models) {
-        final entry = model.toEditionText();
-        // An unknown edition comes back as the default text instead.
-        if (entry == null || entry.ayahId != ayahId) continue;
-        final id = entry.text.edition.identifier;
-        if (editionIds.contains(id)) {
-          byEdition.putIfAbsent(id, () => entry.text);
-        }
-      }
-      final texts = List<EditionText>.unmodifiable([
-        for (final id in editionIds)
-          if (byEdition[id] case final text?) text,
-      ]);
+      final texts = _ayahTextsOf(models, ayahId, editionIds);
       _ayahTexts[key] = texts;
+      await _keep(storeKey, [for (final model in models) model.toJson()]);
       return ApiResult.success(texts);
     } catch (error, stackTrace) {
       log('Quran ayah texts failed', error: error, stackTrace: stackTrace);
+      final stored = await _stored(
+        storeKey,
+        (json) =>
+            json is List
+                ? _ayahTextsOf(
+                  CloudAyahModel.listFromJson(json),
+                  ayahId,
+                  editionIds,
+                )
+                : null,
+      );
+      if (stored != null) return ApiResult.success(stored);
       return ApiResult.failure(_failureOf(error));
     }
+  }
+
+  /// The passages of [ayahId] in [editionIds], in the order asked.
+  static List<EditionText> _ayahTextsOf(
+    List<CloudAyahModel> models,
+    int ayahId,
+    List<String> editionIds,
+  ) {
+    final byEdition = <String, EditionText>{};
+    for (final model in models) {
+      final entry = model.toEditionText();
+      // An unknown edition comes back as the default text instead.
+      if (entry == null || entry.ayahId != ayahId) continue;
+      final id = entry.text.edition.identifier;
+      if (editionIds.contains(id)) {
+        byEdition.putIfAbsent(id, () => entry.text);
+      }
+    }
+    return List<EditionText>.unmodifiable([
+      for (final id in editionIds)
+        if (byEdition[id] case final text?) text,
+    ]);
   }
 
   @override
@@ -208,6 +231,8 @@ class QuranCloudRepoImpl implements QuranCloudRepo {
         limit < 1) {
       return const ApiResult.failure(UnexpectedFailure());
     }
+    final storeKey =
+        'surah|$surahNumber|${editionIds.join(',')}|$offset|$limit';
     try {
       final groups = await _remote.getSurahEditions(
         surahNumber,
@@ -215,18 +240,40 @@ class QuranCloudRepoImpl implements QuranCloudRepo {
         offset: offset,
         limit: limit,
       );
-      return ApiResult.success([
-        for (final group in groups)
-          if (group.edition case final edition?
-              when editionIds.contains(edition.identifier))
-            for (final ayah in group.ayahs)
-              if (ayah.toEditionText(parent: edition) case final text?) text,
-      ]);
+      final texts = _surahTextsOf(groups, editionIds);
+      await _keep(storeKey, [for (final group in groups) group.toJson()]);
+      return ApiResult.success(texts);
     } catch (error, stackTrace) {
       log('Quran surah texts failed', error: error, stackTrace: stackTrace);
+      final stored = await _stored(
+        storeKey,
+        (json) =>
+            json is List
+                ? _surahTextsOf([
+                  for (final entry in json)
+                    if (CloudAyahGroupModel.tryFromJson(entry)
+                        case final group?)
+                      group,
+                ], editionIds)
+                : null,
+      );
+      if (stored != null) return ApiResult.success(stored);
       return ApiResult.failure(_failureOf(error));
     }
   }
+
+  /// The ayahs of the groups in [editionIds]; the default text swapped in
+  /// for an unknown edition is dropped.
+  static List<AyahEditionText> _surahTextsOf(
+    List<CloudAyahGroupModel> groups,
+    List<String> editionIds,
+  ) => [
+    for (final group in groups)
+      if (group.edition case final edition?
+          when editionIds.contains(edition.identifier))
+        for (final ayah in group.ayahs)
+          if (ayah.toEditionText(parent: edition) case final text?) text,
+  ];
 
   @override
   Future<ApiResult<EditionSearchMatches>> searchEdition(
@@ -239,6 +286,7 @@ class QuranCloudRepoImpl implements QuranCloudRepo {
     if (trimmed.isEmpty || offset < 0 || limit < 1) {
       return const ApiResult.failure(UnexpectedFailure());
     }
+    final storeKey = 'search|$editionId|$trimmed|$offset|$limit';
     try {
       final result = await _remote.search(
         trimmed,
@@ -246,45 +294,84 @@ class QuranCloudRepoImpl implements QuranCloudRepo {
         offset: offset,
         limit: limit,
       );
-      final matches = [
-        for (final match in result.matches)
-          if (QuranMetrics.isValidAyahId(match.number) &&
-              match.text.trim().isNotEmpty &&
-              (match.edition == null || match.edition!.identifier == editionId))
-            AyahEditionMatch(
-              ayahId: match.number,
-              text: match.text,
-              edition: match.edition?.toEntity(),
-            ),
-      ];
-      return ApiResult.success(
-        EditionSearchMatches(
-          matches: List.unmodifiable(matches),
-          total:
-              result.total < offset + result.matches.length
-                  ? offset + result.matches.length
-                  : result.total,
-        ),
-      );
+      final found = _searchMatchesOf(result, editionId, offset);
+      await _keep(storeKey, result.toJson());
+      return ApiResult.success(found);
     } catch (error, stackTrace) {
       log('Quran edition search failed', error: error, stackTrace: stackTrace);
+      final stored = await _stored(
+        storeKey,
+        (json) => switch (CloudSearchModel.tryFromJson(json)) {
+          final result? => _searchMatchesOf(result, editionId, offset),
+          null => null,
+        },
+      );
+      if (stored != null) return ApiResult.success(stored);
       return ApiResult.failure(_failureOf(error));
     }
   }
 
+  /// The usable matches of [result] in [editionId], never reporting fewer
+  /// in all than have been shown up to this page.
+  static EditionSearchMatches _searchMatchesOf(
+    CloudSearchModel result,
+    String editionId,
+    int offset,
+  ) {
+    final matches = [
+      for (final match in result.matches)
+        if (QuranMetrics.isValidAyahId(match.number) &&
+            match.text.trim().isNotEmpty &&
+            (match.edition == null || match.edition!.identifier == editionId))
+          AyahEditionMatch(
+            ayahId: match.number,
+            text: match.text,
+            edition: match.edition?.toEntity(),
+          ),
+    ];
+    return EditionSearchMatches(
+      matches: List.unmodifiable(matches),
+      total:
+          result.total < offset + result.matches.length
+              ? offset + result.matches.length
+              : result.total,
+    );
+  }
+
   @override
   Future<ApiResult<AyahEditionText>> getRandomAyahText(String editionId) async {
+    final storeKey = 'random|$editionId';
     try {
       final model = await _remote.getRandomAyah(editionId);
-      final entry = model.toEditionText();
-      if (entry == null || entry.text.edition.identifier != editionId) {
-        return const ApiResult.failure(ServerFailure());
-      }
+      final entry = _randomTextOf(model, editionId);
+      if (entry == null) return const ApiResult.failure(ServerFailure());
+      await _keep(storeKey, model.toJson());
       return ApiResult.success(entry);
     } catch (error, stackTrace) {
       log('Quran random ayah failed', error: error, stackTrace: stackTrace);
+      // Offline, the last ayah drawn stands in for a new one.
+      final stored = await _stored(
+        storeKey,
+        (json) => switch (CloudAyahModel.tryFromJson(json)) {
+          final model? => _randomTextOf(model, editionId),
+          null => null,
+        },
+      );
+      if (stored != null) return ApiResult.success(stored);
       return ApiResult.failure(_failureOf(error));
     }
+  }
+
+  /// Null when the passage is of another edition than [editionId].
+  static AyahEditionText? _randomTextOf(
+    CloudAyahModel model,
+    String editionId,
+  ) {
+    final entry = model.toEditionText();
+    if (entry == null || entry.text.edition.identifier != editionId) {
+      return null;
+    }
+    return entry;
   }
 
   // ── hizb index ──────────────────────────────────────────────────────────
@@ -330,6 +417,28 @@ class QuranCloudRepoImpl implements QuranCloudRepo {
       return ServerFailure(message);
     }
     return const UnexpectedFailure();
+  }
+
+  /// Keeps the answer to a text request on the device, so it reads again
+  /// when the service cannot be reached.
+  Future<void> _keep(String key, Object json) =>
+      _guardCache(() => _cache.saveResponse(key, json));
+
+  /// The answer kept under [key], as [read] makes of it; null when none was
+  /// kept or it cannot be read.
+  Future<T?> _stored<T>(String key, T? Function(Object json) read) async {
+    final json = await _guardCache(() => _cache.getResponse(key));
+    if (json == null) return null;
+    try {
+      return read(json);
+    } catch (error, stackTrace) {
+      log(
+        'Quran cloud kept answer unreadable',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
   }
 
   /// The device cache only ever speeds things up, so a failure to read or

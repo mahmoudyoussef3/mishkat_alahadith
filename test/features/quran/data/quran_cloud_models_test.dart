@@ -220,6 +220,56 @@ void main() {
     });
   });
 
+  group('toJson', () {
+    test('an ayah reads back the same through tryFromJson', () {
+      final ayah = CloudAyahModel.tryFromJson(_alafasyAyah)!;
+
+      final back = CloudAyahModel.tryFromJson(ayah.toJson())!;
+
+      expect(back.number, 262);
+      expect(back.text, ayah.text);
+      expect(back.audio, ayah.audio);
+      expect(back.audioSecondary, ayah.audioSecondary);
+      expect(back.edition?.toJson(), _alafasyEdition);
+    });
+
+    test('an ayah without an edition reads back without one', () {
+      final ayah = CloudAyahModel.tryFromJson({'number': 8, 'text': 'الٓمٓ'})!;
+
+      final back = CloudAyahModel.tryFromJson(ayah.toJson())!;
+
+      expect(back.edition, isNull);
+      expect(back.audio, isNull);
+    });
+
+    test('a group reads back its ayahs and edition', () {
+      final group =
+          CloudAyahGroupModel.tryFromJson({
+            'ayahs': [_alafasyAyah],
+            'edition': _muyassarEdition,
+          })!;
+
+      final back = CloudAyahGroupModel.tryFromJson(group.toJson())!;
+
+      expect(back.ayahs.single.number, 262);
+      expect(back.edition?.identifier, 'ar.muyassar');
+    });
+
+    test('a search reads back its matches and total', () {
+      final search =
+          CloudSearchModel.tryFromJson({
+            'count': 1,
+            'total': 144,
+            'matches': [_alafasyAyah],
+          })!;
+
+      final back = CloudSearchModel.tryFromJson(search.toJson())!;
+
+      expect(back.total, 144);
+      expect(back.matches.single.number, 262);
+    });
+  });
+
   group('edition mapper', () {
     QuranEdition? entityOf(Map<String, dynamic> json) =>
         QuranEditionModel.tryFromJson(json)!.toEntity();

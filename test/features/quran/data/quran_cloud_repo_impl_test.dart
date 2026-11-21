@@ -31,6 +31,14 @@ void main() {
 
   void answer(FakeReply reply) => adapter.reply = (_) => reply;
 
+  void goOffline() =>
+      adapter.reply =
+          (options) =>
+              throw DioException.connectionError(
+                requestOptions: options,
+                reason: 'offline',
+              );
+
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     adapter = FakeQuranCloudAdapter((_) => ok(null));
@@ -441,9 +449,29 @@ void main() {
 
       expect(_failureOf(result), isA<NetworkFailure>());
     });
+
+    test('an ayah read once reads again offline after a restart', () async {
+      answer(ok([passageOf('ar.muyassar')]));
+      await newRepo().getAyahTexts(255, ['ar.muyassar']);
+      goOffline();
+
+      final texts = dataOf(await newRepo().getAyahTexts(255, ['ar.muyassar']));
+
+      expect(texts.single.text, 'نص ar.muyassar');
+    });
   });
 
   group('getSurahTexts', () {
+    FakeReply surahPage() => ok([
+      {
+        'number': 2,
+        'ayahs': [
+          {'number': 8, 'text': 'تفسير الآية الأولى'},
+        ],
+        'edition': edition('ar.muyassar'),
+      },
+    ]);
+
     test('keeps only the editions asked for, from the surah', () async {
       answer(
         ok([
@@ -490,6 +518,33 @@ void main() {
 
       expect(_failureOf(result), isA<UnexpectedFailure>());
       expect(adapter.requests, isEmpty);
+    });
+
+    test('a page read once reads again offline', () async {
+      answer(surahPage());
+      await newRepo().getSurahTexts(2, ['ar.muyassar'], offset: 0, limit: 10);
+      goOffline();
+
+      final texts = dataOf(
+        await newRepo().getSurahTexts(2, ['ar.muyassar'], offset: 0, limit: 10),
+      );
+
+      expect(texts.single.text.text, 'تفسير الآية الأولى');
+    });
+
+    test('offline, a page never read still fails', () async {
+      answer(surahPage());
+      await newRepo().getSurahTexts(2, ['ar.muyassar'], offset: 0, limit: 10);
+      goOffline();
+
+      final result = await newRepo().getSurahTexts(
+        2,
+        ['ar.muyassar'],
+        offset: 10,
+        limit: 10,
+      );
+
+      expect(_failureOf(result), isA<NetworkFailure>());
     });
   });
 
@@ -581,6 +636,37 @@ void main() {
       expect(_failureOf(result), isA<ServerFailure>());
       expect(adapter.requests, isEmpty);
     });
+
+    test('a search made once finds the same matches offline', () async {
+      answer(
+        ok({
+          'count': 1,
+          'total': 1,
+          'matches': [
+            {'number': 7, 'text': 'الصلاة', 'edition': edition('ar.muyassar')},
+          ],
+        }),
+      );
+      await newRepo().searchEdition(
+        'الصلاة',
+        'ar.muyassar',
+        offset: 0,
+        limit: 20,
+      );
+      goOffline();
+
+      final found = dataOf(
+        await newRepo().searchEdition(
+          'الصلاة',
+          'ar.muyassar',
+          offset: 0,
+          limit: 20,
+        ),
+      );
+
+      expect(found.matches.map((m) => m.ayahId), [7]);
+      expect(found.total, 1);
+    });
   });
 
   group('getRandomAyahText', () {
@@ -603,6 +689,26 @@ void main() {
       final result = await newRepo().getRandomAyahText('ar.muyassar');
 
       expect(_failureOf(result), isA<ServerFailure>());
+    });
+
+    test('offline, the last ayah drawn stands in for a new one', () async {
+      answer(
+        ok({'number': 936, 'text': 'تفسير', 'edition': edition('ar.muyassar')}),
+      );
+      await newRepo().getRandomAyahText('ar.muyassar');
+      goOffline();
+
+      final entry = dataOf(await newRepo().getRandomAyahText('ar.muyassar'));
+
+      expect(entry.ayahId, 936);
+    });
+
+    test('fails offline with nothing kept on the device', () async {
+      goOffline();
+
+      final result = await newRepo().getRandomAyahText('ar.muyassar');
+
+      expect(_failureOf(result), isA<NetworkFailure>());
     });
   });
 

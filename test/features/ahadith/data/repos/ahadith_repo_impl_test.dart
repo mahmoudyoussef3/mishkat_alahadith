@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
@@ -11,6 +12,8 @@ import 'package:mishkat_almasabih/features/ahadith/domain/entities/local_book_ha
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeApiService extends Fake implements ApiService {
+  Object? error;
+
   @override
   Future<HadithResponse> getChapterAhadiths(
     String bookSlug,
@@ -35,7 +38,7 @@ class _FakeApiService extends Fake implements ApiService {
   Future<LocalHadithResponse> getThreeBooksLocalChapterAhadiths(
     String bookSlug,
     int chapterId,
-  ) async => LocalHadithResponse(
+  ) async => error != null ? throw error! : LocalHadithResponse(
     hadiths: LocalHadithsWrapper(
       data: [
         LocalHadith(
@@ -48,13 +51,26 @@ class _FakeApiService extends Fake implements ApiService {
   );
 }
 
+DioException _offline() => DioException(
+  requestOptions: RequestOptions(path: '/offline'),
+  type: DioExceptionType.connectionError,
+);
+
 void main() {
   final cache = GenericCacheService.instance;
   late AhadithRepoImpl repo;
 
   setUpAll(() => SharedPreferences.setMockInitialValues({}));
-  setUp(() => repo = AhadithRepoImpl(_FakeApiService(), cache));
-  tearDown(() => cache.clearCache(CacheKeys.paginatedAhadith('bukhari', 1)));
+  late _FakeApiService api;
+
+  setUp(() {
+    api = _FakeApiService();
+    repo = AhadithRepoImpl(api, cache);
+  });
+  tearDown(() async {
+    await cache.clearCache(CacheKeys.paginatedAhadith('bukhari', 1));
+    await cache.clearCache(CacheKeys.arbainAhadith('nawawi40', 1));
+  });
 
   test('getAhadithPage maps the page and its pagination totals', () async {
     final result = await repo.getAhadithPage(
@@ -101,5 +117,34 @@ void main() {
     expect(hadith.arabic, 'إنما الأعمال');
     expect(hadith.englishNarrator, 'Umar');
     expect(hadith.englishText, 'Actions');
+  });
+
+  test('getCachedAhadith still returns the pages read once they expire', () async {
+    await cache.saveData<Map<String, dynamic>>(
+      key: CacheKeys.paginatedAhadith('bukhari', 1),
+      data: {
+        'ahadith': [
+          {'id': 7, 'hadithNumber': '12'},
+        ],
+        'lastPage': 1,
+        'totalCount': 40,
+        'cachedAt': 0,
+      },
+      toJson: (d) => d,
+      cacheExpirationHours: 0,
+    );
+
+    final cached = await repo.getCachedAhadith(bookSlug: 'bukhari', chapterId: 1);
+
+    expect(cached?.ahadith.single.id, 7);
+  });
+
+  test('offline, getArbainAhadith returns the chapter fetched before', () async {
+    await repo.getArbainAhadith(bookSlug: 'nawawi40', chapterId: 1);
+    api.error = _offline();
+
+    final result = await repo.getArbainAhadith(bookSlug: 'nawawi40', chapterId: 1);
+
+    expect((result as ApiSuccess<List<LocalBookHadith>>).data.single.arabic, 'إنما الأعمال');
   });
 }

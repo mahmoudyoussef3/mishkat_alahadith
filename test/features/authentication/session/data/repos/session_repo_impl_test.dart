@@ -59,6 +59,7 @@ void main() {
         CacheKeys.userStats,
         CacheKeys.bookmarks,
         CacheKeys.bookmarkCollections,
+        CacheKeys.searchHistory,
       ]) {
         await seedCache(key);
       }
@@ -70,6 +71,7 @@ void main() {
       expect(await readCache(CacheKeys.userStats), isNull);
       expect(await readCache(CacheKeys.bookmarks), isNull);
       expect(await readCache(CacheKeys.bookmarkCollections), isNull);
+      expect(await readCache(CacheKeys.searchHistory), isNull);
       // Shared, non-personal data stays cached.
       expect(await readCache(CacheKeys.libraryStatistics), isNotNull);
     },
