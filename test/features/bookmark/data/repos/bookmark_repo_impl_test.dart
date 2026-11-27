@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
@@ -15,16 +16,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _FakeApiService extends Fake implements ApiService {
   Bookmark? addedBody;
   int? deletedId;
+  Object? error;
 
   @override
   Future<BookmarksResponse> getUserBookmarks(String token) async =>
-      BookmarksResponse(
+      error != null ? throw error! : BookmarksResponse(
         bookmarks: [Bookmark(id: 1, hadithText: 'إنما الأعمال بالنيات')],
       );
 
   @override
   Future<CollectionsResponse> getBookmarkCollection(String token) async =>
-      CollectionsResponse(
+      error != null ? throw error! : CollectionsResponse(
         collections: [CollectionItem(collection: 'المفضلة', count: 3)],
       );
 
@@ -40,6 +42,11 @@ class _FakeApiService extends Fake implements ApiService {
     return AddBookmarkResponse(message: 'تم الحذف');
   }
 }
+
+DioException _offline() => DioException(
+  requestOptions: RequestOptions(path: '/offline'),
+  type: DioExceptionType.connectionError,
+);
 
 void main() {
   final cache = GenericCacheService.instance;
@@ -78,6 +85,27 @@ void main() {
     expect(await repo.getCachedBookmarks(), isNull);
   });
 
+  test('addBookmark also drops the cached collection counts and stats', () async {
+    await repo.getCollections();
+    await cache.saveData<Map<String, dynamic>>(
+      key: CacheKeys.userStats,
+      data: {'bookmarksCount': 1},
+      toJson: (d) => d,
+    );
+
+    await repo.addBookmark(const UserBookmark(type: 'hadith', hadithId: '5'));
+
+    expect(await repo.getCachedCollections(), isNull);
+    expect(
+      await cache.getData<Map<String, dynamic>>(
+        key: CacheKeys.userStats,
+        fromJson: (j) => j,
+        allowStale: true,
+      ),
+      isNull,
+    );
+  });
+
   test('deleteBookmark drops the cached list', () async {
     await repo.getBookmarks();
 
@@ -105,5 +133,31 @@ void main() {
 
     expect((result as ApiFailure).failure, isA<UnauthorizedFailure>());
     expect(api.deletedId, isNull);
+  });
+
+  test('offline, getBookmarks returns the list fetched before, however old', () async {
+    await cache.saveData<BookmarksResponse>(
+      key: CacheKeys.bookmarks,
+      data: BookmarksResponse(bookmarks: [Bookmark(id: 5, hadithText: 'قديم')]),
+      toJson: (d) => d.toJson(),
+      cacheExpirationHours: 0,
+    );
+    api.error = _offline();
+
+    final result = await repo.getBookmarks();
+
+    expect((result as ApiSuccess<List<UserBookmark>>).data.single.id, 5);
+  });
+
+  test('offline, getCollections returns the collections fetched before', () async {
+    await repo.getCollections();
+    api.error = _offline();
+
+    final result = await repo.getCollections();
+
+    expect(
+      (result as ApiSuccess<List<BookmarkCollection>>).data.single.collection,
+      'المفضلة',
+    );
   });
 }

@@ -13,11 +13,19 @@ class PrayerNotificationsState {
   final bool isBusy;
   final PrayerNotificationsNotice? notice;
 
+  /// When notifications were last scheduled, or null if never.
+  final DateTime? lastSyncedAt;
+
+  /// City the prayer times are calculated for, once loaded.
+  final String? locationName;
+
   const PrayerNotificationsState({
     this.enabled = false,
     this.batteryOptimizationIgnored = true,
     this.isBusy = false,
     this.notice,
+    this.lastSyncedAt,
+    this.locationName,
   });
 
   bool get showBatteryReliabilityAction =>
@@ -28,6 +36,8 @@ class PrayerNotificationsState {
     bool? batteryOptimizationIgnored,
     bool? isBusy,
     PrayerNotificationsNotice? notice,
+    DateTime? lastSyncedAt,
+    String? locationName,
   }) {
     return PrayerNotificationsState(
       enabled: enabled ?? this.enabled,
@@ -35,6 +45,8 @@ class PrayerNotificationsState {
           batteryOptimizationIgnored ?? this.batteryOptimizationIgnored,
       isBusy: isBusy ?? this.isBusy,
       notice: notice,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      locationName: locationName ?? this.locationName,
     );
   }
 }

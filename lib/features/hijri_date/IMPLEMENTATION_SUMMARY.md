@@ -271,7 +271,7 @@ A complete, production-ready centralized Hijri date offset system using Firebase
 ✅ data/logic/ui structure
 ✅ GetIt for dependency injection
 ✅ RTL support with EdgeInsetsDirectional
-✅ Cairo/Amiri fonts compatibility
+✅ Cairo/Almarai fonts compatibility
 ✅ No breaking changes to existing code
 ✅ Production-ready error handling
 ✅ Null-safety throughout

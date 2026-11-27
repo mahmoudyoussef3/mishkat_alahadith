@@ -2,12 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/core/errors/failures.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/entities/daily_prayer_times.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/entities/device_location.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/entities/prayer_location.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_notifications_repo.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_times_repo.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/calculate_prayer_times_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_device_position_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_next_prayer_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_previous_prayer_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_saved_prayer_location_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/refresh_prayer_home_widget_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/request_location_access_use_case.dart';
@@ -35,11 +37,40 @@ class _FailingCalculationRepo extends Fake implements PrayerTimesRepo {
   Future<void> refreshHomeWidget() async {}
 }
 
+/// A repo that gives every day the same clock times on that date.
+class _WorkingRepo extends _FailingCalculationRepo {
+  @override
+  ApiResult<DailyPrayerTimes> calculatePrayerTimes(
+    PrayerLocation location,
+    DateTime date,
+  ) {
+    DateTime at(int hour, int minute) =>
+        DateTime(date.year, date.month, date.day, hour, minute);
+    return ApiResult.success(
+      DailyPrayerTimes(
+        fajr: at(4, 24),
+        sunrise: at(5, 49),
+        dhuhr: at(11, 43),
+        asr: at(15, 7),
+        maghrib: at(17, 37),
+        isha: at(18, 54),
+      ),
+    );
+  }
+}
+
+/// A working repo on a device whose location permission is refused.
+class _DeniedLocationRepo extends _WorkingRepo {
+  @override
+  Future<ApiResult<LocationAccess>> requestLocationAccess() async =>
+      const ApiResult.success(LocationAccess.denied);
+}
+
 class _UnusedNotificationsRepo extends Fake
     implements PrayerNotificationsRepo {}
 
-PrayerTimesCubit _cubit() {
-  final repo = _FailingCalculationRepo();
+PrayerTimesCubit _cubit([PrayerTimesRepo? calculating]) {
+  final repo = calculating ?? _FailingCalculationRepo();
   return PrayerTimesCubit(
     GetSavedPrayerLocationUseCase(repo),
     SavePrayerLocationUseCase(repo),
@@ -49,6 +80,7 @@ PrayerTimesCubit _cubit() {
     GetDevicePositionUseCase(repo),
     RefreshPrayerHomeWidgetUseCase(repo),
     ReschedulePrayerNotificationsUseCase(_UnusedNotificationsRepo()),
+    GetPreviousPrayerUseCase(),
   );
 }
 
@@ -71,6 +103,58 @@ void main() {
     await cubit.updateLocation(PrayerLocation.defaultLocation);
 
     expect(cubit.state, isA<PrayerTimesError>());
+    await cubit.close();
+  });
+
+  group('browsing days', () {
+    late PrayerTimesCubit cubit;
+
+    setUp(() async {
+      cubit = _cubit(_WorkingRepo());
+      await cubit.init();
+    });
+
+    tearDown(() => cubit.close());
+
+    PrayerTimesLoaded loaded() => cubit.state as PrayerTimesLoaded;
+
+    test('starts on today', () {
+      expect(loaded().isShowingToday, isTrue);
+      expect(loaded().previousPrayerLabel, isNotNull);
+    });
+
+    test('the next day lists that day\'s times and keeps today\'s countdown', () {
+      final today = loaded().date;
+
+      cubit.showAdjacentDay(1);
+
+      expect(loaded().isShowingToday, isFalse);
+      expect(loaded().selectedDate, DateTime(today.year, today.month, today.day + 1));
+      expect(loaded().selectedTimes.fajr.day, loaded().selectedDate.day);
+      expect(loaded().date, today);
+    });
+
+    test('showToday returns from another day', () {
+      cubit.showAdjacentDay(-3);
+
+      cubit.showToday();
+
+      expect(loaded().isShowingToday, isTrue);
+    });
+  });
+
+  test('a refused location reports it and keeps the times shown', () async {
+    final cubit = _cubit(_DeniedLocationRepo());
+    await cubit.init();
+    final emitted = <PrayerTimesState>[];
+    final subscription = cubit.stream.listen(emitted.add);
+
+    await cubit.useCurrentLocation();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(emitted.first, isA<PrayerTimesError>());
+    expect(cubit.state, isA<PrayerTimesLoaded>());
+    await subscription.cancel();
     await cubit.close();
   });
 }

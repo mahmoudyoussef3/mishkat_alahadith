@@ -1,16 +1,11 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mishkat_almasabih/core/deep_links/hadith_link.dart';
 import 'package:mishkat_almasabih/core/notification/firebase_service/notification_handler.dart';
 import 'package:mishkat_almasabih/core/routing/routes.dart';
 
 class DeepLinkRouter {
-  static const String _apiHost = 'api.hadith-shareef.com';
-  static const Set<String> _reservedSegments = {'api', 'hadith'};
-
-  static String? extractHadithId(Uri uri) =>
-      _extractHadithIdFromPathOrQuery(uri);
-
   static Future<void> handle(Uri uri) async {
     final action = _parse(uri);
 
@@ -33,56 +28,8 @@ class DeepLinkRouter {
   }
 
   static _DeepLinkAction? _parse(Uri uri) {
-    if (uri.scheme == 'https' && uri.host == _apiHost) {
-      final id = _sanitizeId(extractHadithId(uri));
-      if (_isValidId(id)) return _OpenHadithById(id!);
-    }
-
-    if (uri.scheme == 'mishkat') {
-      if (uri.host == 'hadith' || uri.host == _apiHost) {
-        final id = _sanitizeId(extractHadithId(uri));
-        if (_isValidId(id)) return _OpenHadithById(id!);
-      }
-    }
-
-    return null;
-  }
-
-  static String? _extractHadithIdFromPathOrQuery(Uri uri) {
-    final fromQuery = uri.queryParameters['id'];
-    if (_isValidId(fromQuery)) return fromQuery;
-
-    final segments = uri.pathSegments
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
-
-    if (segments.isEmpty) return null;
-
-    final hadithIndex = segments.indexOf('hadith');
-    if (hadithIndex != -1 && hadithIndex + 1 < segments.length) {
-      final next = segments[hadithIndex + 1];
-      if (_isValidId(next)) return next;
-    }
-
-    for (final seg in segments.reversed) {
-      if (_reservedSegments.contains(seg)) continue;
-      if (_isValidId(seg)) return seg;
-    }
-
-    return null;
-  }
-
-  static bool _isValidId(String? value) {
-    if (value == null) return false;
-    final v = value.replaceAll('%C2%A0', '').replaceAll('\u00A0', '').trim();
-    return v.isNotEmpty && !_reservedSegments.contains(v);
-  }
-
-  static String? _sanitizeId(String? value) {
-    if (value == null) return null;
-    final v = value.replaceAll('%C2%A0', '').replaceAll('\u00A0', '').trim();
-    return v;
+    final id = HadithLink.parseId(uri);
+    return id == null ? null : _OpenHadithById(id);
   }
 
   static Future<void> _waitForNavigator() async {

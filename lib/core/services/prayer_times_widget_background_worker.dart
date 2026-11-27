@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/sync_daily_ayah_use_case.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../notification/prayer_time_notification_scheduler.dart';
@@ -14,6 +17,11 @@ class PrayerTimesWidgetBackgroundWorker {
   static const String _uniqueNotificationResyncTask =
       'prayer_notifications_resync_periodic';
   static const Duration _notificationResyncFrequency = Duration(hours: 6);
+
+  /// Keeps the daily ayah's widget data and notifications a month ahead
+  /// while the app stays closed.
+  static const String _dailyAyahSyncTask = 'daily_ayah_sync';
+  static const String _uniqueDailyAyahSyncTask = 'daily_ayah_sync_daily';
 
   static Future<void> initialize() async {
     await Workmanager().initialize(prayerTimesWidgetCallbackDispatcher);
@@ -42,6 +50,18 @@ class PrayerTimesWidgetBackgroundWorker {
         frequency: _notificationResyncFrequency,
       );
     }
+
+    if (!await Workmanager().isScheduledByUniqueName(
+      _uniqueDailyAyahSyncTask,
+    )) {
+      await Workmanager().registerPeriodicTask(
+        _uniqueDailyAyahSyncTask,
+        _dailyAyahSyncTask,
+        frequency: const Duration(hours: 24),
+        // The app has just synced on start; a first run now would repeat it.
+        initialDelay: _delayUntilNextMidnight(),
+      );
+    }
   }
 
   static Duration _delayUntilNextMidnight() {
@@ -61,6 +81,10 @@ void prayerTimesWidgetCallbackDispatcher() {
       case PrayerTimesWidgetBackgroundWorker._notificationResyncTask:
         final result = await PrayerNotificationScheduler.refreshSchedule();
         return result.success;
+      case PrayerTimesWidgetBackgroundWorker._dailyAyahSyncTask:
+        setUpBackgroundGetIt();
+        final result = await getIt<SyncDailyAyahUseCase>()();
+        return result is ApiSuccess;
     }
 
     return true;

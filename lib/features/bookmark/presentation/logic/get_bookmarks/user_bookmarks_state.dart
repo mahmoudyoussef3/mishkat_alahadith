@@ -18,6 +18,17 @@ final class UserBookmarksSuccess extends GetBookmarksState {
     this.isFromCache = false,
   });
 
+  int get hadithCount => bookmarks.where((b) => b.type == 'hadith').length;
+
+  int get chapterCount => bookmarks.where((b) => b.type == 'chapter').length;
+
+  /// Distinct collections the bookmarks are filed in.
+  int get collectionCount =>
+      {
+        for (final b in bookmarks)
+          if ((b.collection ?? '').trim().isNotEmpty) b.collection!.trim(),
+      }.length;
+
   UserBookmarksSuccess copyWith({
     List<UserBookmark>? bookmarks,
     bool? isRefreshing,

@@ -1,13 +1,12 @@
-import 'dart:developer';
-
-import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/cache_fallback.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 
 import '../../domain/entities/hadith_navigation.dart';
 import '../../domain/repos/navigation_repo.dart';
 import '../mappers/navigation_mapper.dart';
+import '../models/local_hadith_navigation_model.dart';
 import '../models/navigation_hadith_model.dart';
 
 class NavigationRepoImpl implements NavigationRepo {
@@ -44,40 +43,30 @@ class NavigationRepoImpl implements NavigationRepo {
     required String hadithNumber,
     required String bookSlug,
     required String chapterNumber,
-  }) async {
-    try {
-      final response = await _apiService.navigationHadith(
-        hadithNumber,
-        bookSlug,
-        chapterNumber,
-      );
-      await _cacheService.saveData<NavigationHadithResponse>(
+  }) => _cacheService
+      .fetchWithStaleFallback<NavigationHadithResponse, HadithNavigation>(
         key: _cacheKey(bookSlug, chapterNumber, hadithNumber),
-        data: response,
+        fetch:
+            () => _apiService.navigationHadith(
+              hadithNumber,
+              bookSlug,
+              chapterNumber,
+            ),
         toJson: (d) => d.toJson(),
-        cacheExpirationHours: 24,
+        fromJson: NavigationHadithResponse.fromJson,
+        toEntity: (d) => d.toEntity(),
       );
-      return ApiResult.success(response.toEntity());
-    } catch (error) {
-      log(error.toString());
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 
   @override
   Future<ApiResult<HadithNavigation>> getLocalNavigation({
     required String hadithNumber,
     required String bookSlug,
-  }) async {
-    try {
-      final response = await _apiService.localNavigationHadith(
-        hadithNumber,
-        bookSlug,
+  }) => _cacheService
+      .fetchWithStaleFallback<LocalNavigationHadithResponse, HadithNavigation>(
+        key: CacheKeys.localNavigation(bookSlug, hadithNumber),
+        fetch: () => _apiService.localNavigationHadith(hadithNumber, bookSlug),
+        toJson: (d) => d.toJson(),
+        fromJson: LocalNavigationHadithResponse.fromJson,
+        toEntity: (d) => d.toEntity(),
       );
-      return ApiResult.success(response.toEntity());
-    } catch (error) {
-      log(error.toString());
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 }

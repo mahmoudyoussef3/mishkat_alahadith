@@ -6,8 +6,6 @@ import 'package:mishkat_almasabih/core/widgets/empty_search_state.dart';
 import 'package:mishkat_almasabih/core/widgets/error_dialg.dart';
 import 'package:mishkat_almasabih/core/widgets/hadith_card_shimer.dart';
 import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/chapter_ahadith_card.dart';
-import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/emoty_chapter_ahadith.dart';
-import 'package:mishkat_almasabih/features/ahadith/presentation/ui/widgets/separator.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/screens/hadith_details_screen.dart';
 import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
 import 'package:mishkat_almasabih/features/search_with_filters/presentation/logic/search_with_filters_cubit.dart';
@@ -47,7 +45,7 @@ class FilterSerchResultScreen extends StatelessWidget {
       
                   return SliverList.separated(
                     itemCount: hadiths.length,
-                    separatorBuilder: (_, __) => IslamicSeparator(),
+                    separatorBuilder: (_, __) => const SizedBox.shrink(),
                     itemBuilder: (context, index) {
                       final hadith = hadiths[index];
                       return GestureDetector(
@@ -82,10 +80,7 @@ class FilterSerchResultScreen extends StatelessWidget {
                           number: hadith.hadithNumber ?? '',
                           text: hadith.hadithArabic ?? '',
                           narrator: hadith.book?.writerName ?? '',
-                          grade:
-                              hadith.status != null
-                                  ? gradeStringArabic(hadith.status ?? '')
-                                  : '${index + 1}',
+                          grade: hadith.status ?? '${index + 1}',
                           reference: hadith.chapter?.chapterArabic ?? '',
                         ),
                       );
@@ -119,22 +114,6 @@ class FilterSerchResultScreen extends StatelessWidget {
         return ColorsManager.hadithWeak;
       default:
         return ColorsManager.hadithAuthentic;
-    }
-  }
-
-  String gradeStringArabic(String grade) {
-    switch (grade.toLowerCase()) {
-      case "sahih":
-      case "صحيح":
-        return 'صحيح';
-      case "hasan":
-      case "حسن":
-        return "حسن";
-      case "daif":
-      case "ضعيف":
-        return "ضعيف";
-      default:
-        return '';
     }
   }
 }

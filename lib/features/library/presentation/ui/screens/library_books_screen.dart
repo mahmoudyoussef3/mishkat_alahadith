@@ -1,355 +1,340 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_plurals.dart';
+import 'package:mishkat_almasabih/core/helpers/extensions.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
+import 'package:mishkat_almasabih/core/theming/colors.dart';
+import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
+import 'package:mishkat_almasabih/core/widgets/filter_pill.dart';
+import 'package:mishkat_almasabih/core/widgets/screen_title_header.dart';
+import 'package:mishkat_almasabih/core/widgets/state_message.dart';
+import 'package:mishkat_almasabih/features/library/domain/entities/library_book.dart';
+import 'package:mishkat_almasabih/features/library/domain/entities/library_statistics.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/library_books/library_books_cubit.dart';
 import 'package:mishkat_almasabih/features/library/presentation/logic/library_statistics/get_library_statistics_cubit.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_book_data_state_card.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_header_app_bar.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/build_main_category_card.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/widgets/home_screen_shimmer.dart';
-import 'package:mishkat_almasabih/features/library/presentation/ui/screens/library_screen.dart';
+import 'package:mishkat_almasabih/features/library/presentation/ui/widgets/book_cover_tile.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
+import 'package:shimmer/shimmer.dart';
 
-import '../../../../../../../core/theming/library_decorations.dart';
-import '../../../../../../../core/theming/library_styles.dart';
-import '../../../../../../../core/helpers/spacing.dart';
-
+/// The library: every book as a cover grid, filterable by category.
+///
+/// Reads [GetLibraryStatisticsCubit] (for the categories and totals) and
+/// [LibraryBooksCubit] (for the books) from above.
 class LibraryBooksScreen extends StatefulWidget {
   const LibraryBooksScreen({super.key});
 
   @override
-  State<LibraryBooksScreen> createState() => _HomeScreenState();
+  State<LibraryBooksScreen> createState() => _LibraryBooksScreenState();
 }
 
-class _HomeScreenState extends State<LibraryBooksScreen> {
+class _LibraryBooksScreenState extends State<LibraryBooksScreen> {
+  /// Search is a tab in the app shell; outside it, open the search screen.
+  void _openSearch(BuildContext context) {
+    final navigation = context.read<MainNavigationCubit?>();
+    if (navigation != null) {
+      navigation.select(MainTab.search);
+    } else {
+      context.pushNamed(Routes.searchScreen);
+    }
+  }
+
+  /// Selected category id; null shows every category.
+  String? _category;
+
   @override
   void initState() {
     super.initState();
-    _initializeScreen();
+    final statistics = context.read<GetLibraryStatisticsCubit>();
+    switch (statistics.state) {
+      case GetLivraryStatisticsSuccess(:final statistics):
+        _loadBooks(statistics);
+      case GetLibraryStatisticsInitial():
+        statistics.emitGetStatisticsCubit();
+      default:
+        break;
+    }
   }
 
-  Future<void> _initializeScreen() async {
-    await context.read<GetLibraryStatisticsCubit>().emitGetStatisticsCubit();
+  List<String> _categoryIds(LibraryStatistics statistics) {
+    final category = _category;
+    return category == null
+        ? statistics.booksByCategory.keys.toList()
+        : [category];
+  }
+
+  Future<void> _loadBooks(LibraryStatistics statistics) =>
+      context.read<LibraryBooksCubit>().load(_categoryIds(statistics));
+
+  void _select(String? category, LibraryStatistics statistics) {
+    if (category == _category) return;
+    setState(() => _category = category);
+    _loadBooks(statistics);
+  }
+
+  Future<void> _refresh(LibraryStatistics statistics) async {
+    await Future.wait([
+      context.read<GetLibraryStatisticsCubit>().emitGetStatisticsCubit(),
+      _loadBooks(statistics),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: SafeArea(
-        top: false,
-        child: Scaffold(
-          backgroundColor: LibraryDecorations.scaffoldBackground,
-          body: _buildBody(),
+      child: Scaffold(
+        backgroundColor: ColorsManager.secondaryBackground,
+        body: SafeArea(
+          bottom: false,
+          child: BlocConsumer<
+            GetLibraryStatisticsCubit,
+            GetLibraryStatisticsState
+          >(
+            listenWhen:
+                (previous, current) =>
+                    current is GetLivraryStatisticsSuccess &&
+                    previous is! GetLivraryStatisticsSuccess,
+            listener:
+                (context, state) => _loadBooks(
+                  (state as GetLivraryStatisticsSuccess).statistics,
+                ),
+            builder:
+                (context, state) => switch (state) {
+                  GetLivraryStatisticsSuccess(:final statistics) =>
+                    RefreshIndicator(
+                      onRefresh: () => _refresh(statistics),
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: ScreenTitleHeader(
+                              title: 'المكتبة',
+                              subtitle:
+                                  '${arabicCount(statistics.totalBooks, ArabicNoun.book)}'
+                                  ' · ${approximateHadithCount(statistics.totalHadiths)}',
+                              trailing: AppIconButton(
+                                tooltip: 'البحث في الأحاديث',
+                                icon: Icons.search_rounded,
+                                onPressed: () => _openSearch(context),
+                              ),
+                            ),
+                          ),
+                          SliverToBoxAdapter(
+                            child: _CategoryFilter(
+                              categories: statistics.booksByCategory,
+                              selected: _category,
+                              onSelected:
+                                  (category) => _select(category, statistics),
+                            ),
+                          ),
+                          _BooksGrid(onRetry: () => _loadBooks(statistics)),
+                        ],
+                      ),
+                    ),
+                  GetLivraryStatisticsError(:final errorMessage) => Column(
+                    children: [
+                      const ScreenTitleHeader(title: 'المكتبة'),
+                      Expanded(
+                        child: Center(
+                          child: StateMessage.error(
+                            message: errorMessage,
+                            onRetry:
+                                () =>
+                                    context
+                                        .read<GetLibraryStatisticsCubit>()
+                                        .emitGetStatisticsCubit(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  _ => const CustomScrollView(
+                    physics: NeverScrollableScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: ScreenTitleHeader(title: 'المكتبة'),
+                      ),
+                      _GridShimmer(),
+                    ],
+                  ),
+                },
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildBody() {
-    return BlocBuilder<GetLibraryStatisticsCubit, GetLibraryStatisticsState>(
-      builder: (context, state) {
-        if (state is GetLivraryStatisticsLoading) {
-          return _buildLoadingState();
-        } else if (state is GetLivraryStatisticsSuccess) {
-          return _buildSuccessState(state);
-        }
-        return _buildEmptyState();
+class _CategoryFilter extends StatelessWidget {
+  const _CategoryFilter({
+    required this.categories,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final Map<String, CategoryStatistics> categories;
+  final String? selected;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = categories.entries.toList();
+    return SizedBox(
+      height: 56.h,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 4.h),
+        itemCount: entries.length + 1,
+        separatorBuilder: (_, __) => SizedBox(width: 8.w),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return FilterPill(
+              label: 'الكل',
+              selected: selected == null,
+              onTap: () => onSelected(null),
+            );
+          }
+          final entry = entries[index - 1];
+          return FilterPill(
+            label: entry.value.name,
+            selected: selected == entry.key,
+            onTap: () => onSelected(entry.key),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Lays out book tiles in as many columns as fit, never fewer than two.
+class _BookGridLayout {
+  _BookGridLayout(BuildContext context, double width)
+    : columns = (width / 200).floor().clamp(2, 5),
+      _textHeight = MediaQuery.textScalerOf(context).scale(68.sp),
+      _width = width;
+
+  final int columns;
+  final double _textHeight;
+  final double _width;
+
+  static double get padding => 20.w;
+  static double get columnGap => 14.w;
+  static double get rowGap => 18.h;
+
+  double get _tileWidth =>
+      (_width - padding * 2 - columnGap * (columns - 1)) / columns;
+
+  double get coverHeight => _tileWidth * 1.25;
+
+  SliverGridDelegate get delegate => SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: columns,
+    crossAxisSpacing: columnGap,
+    mainAxisSpacing: rowGap,
+    mainAxisExtent: coverHeight + 8.h + _textHeight,
+  );
+
+  EdgeInsets get insets => EdgeInsets.fromLTRB(padding, 16.h, padding, 24.h);
+}
+
+class _BooksGrid extends StatelessWidget {
+  const _BooksGrid({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LibraryBooksCubit, LibraryBooksState>(
+      builder:
+          (context, state) => switch (state) {
+            LibraryBooksLoaded(:final books) when books.isEmpty =>
+              const SliverToBoxAdapter(
+                child: StateMessage(
+                  icon: Icons.local_library_outlined,
+                  title: 'لا توجد كتب في هذا التصنيف',
+                ),
+              ),
+            LibraryBooksLoaded(:final books) => _Grid(books: books),
+            LibraryBooksError(:final message) => SliverToBoxAdapter(
+              child: StateMessage.error(message: message, onRetry: onRetry),
+            ),
+            _ => const _GridShimmer(),
+          },
+    );
+  }
+}
+
+class _Grid extends StatelessWidget {
+  const _Grid({required this.books});
+
+  final List<LibraryBook> books;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final layout = _BookGridLayout(context, constraints.crossAxisExtent);
+        return SliverPadding(
+          padding: layout.insets,
+          sliver: SliverGrid.builder(
+            gridDelegate: layout.delegate,
+            itemCount: books.length,
+            itemBuilder:
+                (context, index) => BookCoverTile(
+                  book: books[index],
+                  coverHeight: layout.coverHeight,
+                ),
+          ),
+        );
       },
     );
   }
+}
 
-  Widget _buildLoadingState() {
-    return const Directionality(
-      textDirection: TextDirection.rtl,
-      child: HomeScreenShimmer(),
-    );
-  }
+class _GridShimmer extends StatelessWidget {
+  const _GridShimmer();
 
-  Widget _buildSuccessState(GetLivraryStatisticsSuccess state) {
-    return CustomScrollView(
-      slivers: [
-        _buildHeaderSection(),
-        SliverToBoxAdapter(child: SizedBox(height: 8.h)),
-        _buildStatisticsSection(state),
-        _buildDividerSection(),
-        _buildCategoriesSection(state),
-        SliverToBoxAdapter(child: SizedBox(height: 32.h)),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildHeaderSection() {
-    return BuildHeaderAppBar(
-      home: false,
-      bottomNav: true,
-
-      title: 'مشكاة الأحاديث',
-      description: 'مصادر الأحاديث النبوية الشريفة',
-    );
-  }
-
-  Widget _buildStatisticsSection(GetLivraryStatisticsSuccess state) {
-    return SliverToBoxAdapter(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 20.w),
-        child: Column(
-          children: [
-            _buildStatisticsHeader(),
-            SizedBox(height: 16.h),
-            _buildStatisticsCards(state),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDividerSection() {
-    return SliverToBoxAdapter(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
-        child: _buildIslamicSeparator(),
-      ),
-    );
-  }
-
-  Widget _buildCategoriesSection(GetLivraryStatisticsSuccess state) {
-    return SliverToBoxAdapter(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCategoriesHeader(),
-            SizedBox(height: 24.h),
-            _buildCategoryCards(state),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatisticsHeader() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      decoration: LibraryDecorations.sectionHeaderContainer(),
-      child: Row(
-        children: [
-          _buildStatisticsHeaderIcon(),
-          SizedBox(width: 16.w),
-          _buildStatisticsHeaderText(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatisticsHeaderIcon() {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: LibraryDecorations.sectionHeaderIconContainer(
-        LibraryDecorations.booksColor.withOpacity(0.1),
-      ),
-      child: Icon(
-        Icons.analytics,
-        color: LibraryDecorations.booksColor,
-        size: 24.sp,
-      ),
-    );
-  }
-
-  Widget _buildStatisticsHeaderText() {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('إحصائيات المكتبة', style: LibraryTextStyles.headerTitleStyle),
-          SizedBox(height: 4.h),
-          Text(
-            'نظرة عامة على محتويات المكتبة الإسلامية',
-            style: LibraryTextStyles.headerDescriptionStyle,
+  @override
+  Widget build(BuildContext context) {
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final layout = _BookGridLayout(context, constraints.crossAxisExtent);
+        return SliverPadding(
+          padding: layout.insets,
+          sliver: SliverGrid.builder(
+            gridDelegate: layout.delegate,
+            itemCount: layout.columns * 2,
+            itemBuilder:
+                (_, __) => Shimmer.fromColors(
+                  baseColor: ColorsManager.shimmerBase,
+                  highlightColor: ColorsManager.shimmerHighlight,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: layout.coverHeight,
+                        decoration: BoxDecoration(
+                          color: ColorsManager.shimmerBase,
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      Container(
+                        width: 110.w,
+                        height: 12.h,
+                        color: ColorsManager.shimmerBase,
+                      ),
+                      SizedBox(height: 6.h),
+                      Container(
+                        width: 80.w,
+                        height: 10.h,
+                        color: ColorsManager.shimmerBase,
+                      ),
+                    ],
+                  ),
+                ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatisticsCards(GetLivraryStatisticsSuccess state) {
-    return Row(
-      children: [
-        _buildStatisticsCard(
-          icon: Icons.book,
-          title: 'إجمالي الكتب',
-          value: state.statistics.totalBooks.toString(),
-          color: LibraryDecorations.booksColor,
-        ),
-        SizedBox(width: Spacing.md),
-        _buildStatisticsCard(
-          icon: Icons.folder,
-          title: 'الأبواب',
-          value: state.statistics.totalChapters.toString(),
-          color: LibraryDecorations.chaptersColor,
-        ),
-        SizedBox(width: Spacing.md),
-        _buildStatisticsCard(
-          icon: Icons.auto_stories,
-          title: 'الأحاديث',
-          value: state.statistics.totalHadiths.toString(),
-          color: LibraryDecorations.hadithsColor,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatisticsCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: BuildBookDataStateCard(
-        icon: icon,
-        title: title,
-        value: value,
-        color: color,
-      ),
-    );
-  }
-
-  Widget _buildCategoriesHeader() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      decoration: LibraryDecorations.sectionHeaderContainer(),
-      child: Row(
-        children: [
-          _buildCategoriesHeaderIcon(),
-          SizedBox(width: 16.w),
-          _buildCategoriesHeaderText(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoriesHeaderIcon() {
-    return Container(
-      padding: EdgeInsets.all(8.w),
-      decoration: LibraryDecorations.sectionHeaderIconContainer(
-        LibraryDecorations.hadithsColor.withOpacity(0.1),
-      ),
-      child: Icon(
-        Icons.library_books,
-        color: LibraryDecorations.hadithsColor,
-        size: 24.sp,
-      ),
-    );
-  }
-
-  Widget _buildCategoriesHeaderText() {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('الكتب الرئيسية', style: LibraryTextStyles.headerTitleStyle),
-          SizedBox(height: 4.h),
-          Text(
-            'مصادر الأحاديث النبوية الشريفة',
-            style: LibraryTextStyles.headerDescriptionStyle,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryCards(GetLivraryStatisticsSuccess state) {
-    return Column(
-      children: [
-        _buildCategoryCard(
-          state: state,
-          categoryKey: 'kutub_tisaa',
-          subtitle: '11 كتاب',
-          description: 'المجاميع الكبيرة للأحاديث الصحيحة',
-          icon: Icons.library_books,
-          gradient: _buildKutubTisaaGradient(),
-          screenName: "كتب الأحاديث الكبيرة",
-          screenId: 'kutub_tisaa',
-        ),
-        SizedBox(height: 20.h),
-        _buildCategoryCard(
-          state: state,
-          categoryKey: 'arbaain',
-          subtitle: '3 كتب',
-          description: 'مجموعات الأربعين حديثاً',
-          icon: Icons.format_list_numbered,
-          gradient: _buildArbaainGradient(),
-          screenName: 'كتب الأربعينات',
-          screenId: 'arbaain',
-        ),
-        SizedBox(height: 20.h),
-        _buildCategoryCard(
-          state: state,
-          categoryKey: 'adab',
-          subtitle: '3 كتب',
-          description: 'كتب الآداب والأخلاق الإسلامية',
-          icon: Icons.psychology,
-          gradient: _buildAdabGradient(),
-          screenName: 'كتب الأدب و الآداب',
-          screenId: 'adab',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategoryCard({
-    required GetLivraryStatisticsSuccess state,
-    required String categoryKey,
-    required String subtitle,
-    required String description,
-    required IconData icon,
-    required Gradient gradient,
-    required String screenName,
-    required String screenId,
-  }) {
-    final category =
-        state.statistics.booksByCategory[categoryKey]!;
-
-    return BuildMainCategoryCard(
-      title: category.name,
-      subtitle: subtitle,
-      description: description,
-      icon: icon,
-      bookCount: category.count,
-      gradient: gradient,
-      onTap: () => _navigateToLibrary(screenName, screenId),
-    );
-  }
-
-  LinearGradient _buildKutubTisaaGradient() {
-    return LibraryDecorations.kutubTisaaGradient();
-  }
-
-  LinearGradient _buildArbaainGradient() {
-    return LibraryDecorations.arbaainGradient();
-  }
-
-  LinearGradient _buildAdabGradient() {
-    return LibraryDecorations.adabGradient();
-  }
-
-  Widget _buildIslamicSeparator() {
-    return Container(
-      height: 2.h,
-      decoration: LibraryDecorations.islamicSeparator(),
-    );
-  }
-
-  void _navigateToLibrary(String screenName, String screenId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LibraryScreen(name: screenName, id: screenId),
-      ),
+        );
+      },
     );
   }
 }

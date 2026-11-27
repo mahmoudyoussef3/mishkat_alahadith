@@ -249,7 +249,7 @@ primaryGold      = #FFB300   // Islamic gold accents
 secondaryPurple  = #9D7BF0   // Supporting purple tones
 ```
 
-- **Typography** — Amiri for Arabic hadith text, Cairo and YaModernPro for UI text
+- **Typography** — Almarai for Arabic hadith text, Cairo and YaModernPro for UI text
 - **Responsive sizing** — `flutter_screenutil` for adaptive layouts across devices
 - **Consistent components** — card-based layouts, soft gradients, and subtle Islamic geometric motifs
 

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +11,15 @@ import 'package:mishkat_almasabih/core/notification/firebase_service/notificatio
 import 'package:mishkat_almasabih/core/theming/app_palette_scope.dart';
 import 'package:mishkat_almasabih/core/theming/app_theme.dart';
 import 'package:mishkat_almasabih/features/authentication/session/presentation/logic/session_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/logic/mini_player_placement_cubit.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/ui/mini_player_host.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/ui/mini_player_navigator_observer.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
 import 'package:mishkat_almasabih/features/theme/domain/entities/app_theme_mode.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/logic/hadith_font_scale_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_settings_cubit.dart';
 import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
 import 'core/routing/app_router.dart';
 import 'core/routing/routes.dart';
@@ -48,12 +55,10 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
     log("Start screen: $_startScreen");
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(
-        _deepLinkHandler.init((uri) async {
-          if (kDebugMode) debugPrint('Received deep link: $uri');
-          await DeepLinkRouter.handle(uri);
-        }),
-      );
+      _deepLinkHandler.init((uri) async {
+        if (kDebugMode) debugPrint('Received deep link: $uri');
+        await DeepLinkRouter.handle(uri);
+      });
     });
   }
 
@@ -69,6 +74,16 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
       providers: [
         BlocProvider(create: (_) => getIt<SessionCubit>()..checkSession()),
         BlocProvider.value(value: getIt<ThemeCubit>()),
+        BlocProvider.value(value: getIt<HadithFontScaleCubit>()),
+        // App-wide: the device has one speech engine, and the settings
+        // sheet opens above any screen.
+        BlocProvider.value(value: getIt<ReadAloudCubit>()),
+        BlocProvider.value(value: getIt<ReadAloudSettingsCubit>()),
+        // App-wide: the app has one player, which plays on from screen to
+        // screen, shown on the mini player over them.
+        BlocProvider.value(value: getIt<QuranRecitationCubit>()),
+        BlocProvider.value(value: getIt<AzkarAudioCubit>()),
+        BlocProvider.value(value: getIt<MiniPlayerPlacementCubit>()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
@@ -78,7 +93,10 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
           return BlocBuilder<ThemeCubit, AppThemeMode>(
             builder: (context, themeMode) {
               return MaterialApp(
-                navigatorObservers: [widget.analytics],
+                navigatorObservers: [
+                  widget.analytics,
+                  getIt<MiniPlayerNavigatorObserver>(),
+                ],
                 navigatorKey: navigatorKey,
                 debugShowCheckedModeBanner: false,
                 theme: AppTheme.lightTheme,
@@ -88,6 +106,8 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
                 // bar areas outside a screen's SafeArea are never black, and
                 // gives the system bars icons that contrast with it. App bars
                 // drawn under the status bar override this with their own.
+                // The mini player is stacked over every route, so what plays
+                // goes with the listener from screen to screen.
                 builder:
                     (context, child) => AppPaletteScope(
                       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -96,7 +116,10 @@ class _MishkatAlmasabihState extends State<MishkatAlmasabih> {
                         ),
                         child: ColoredBox(
                           color: Theme.of(context).scaffoldBackgroundColor,
-                          child: child!,
+                          child: MiniPlayerHost(
+                            navigatorKey: navigatorKey,
+                            child: child!,
+                          ),
                         ),
                       ),
                     ),

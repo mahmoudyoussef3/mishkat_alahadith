@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mishkat_almasabih/core/theming/quran_decorations.dart';
-import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
+import 'package:mishkat_almasabih/core/theming/mushaf_palette.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/app_icon_button.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/common/rule_swatch.dart';
@@ -14,9 +16,7 @@ import 'package:mushaf_text/mushaf_text.dart';
 /// It floats over the page instead of taking a row of its own, because the
 /// page sizes its text to the height it is given.
 class TajweedFocusBar extends StatelessWidget {
-  final MushafColors colors;
-
-  const TajweedFocusBar({super.key, required this.colors});
+  const TajweedFocusBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,6 @@ class TajweedFocusBar extends StatelessWidget {
                   ? const SizedBox.shrink()
                   : _FocusBarContent(
                     key: ValueKey(rule),
-                    colors: colors,
                     rule: rule,
                     position: focus.position,
                     total: focus.total,
@@ -62,14 +61,12 @@ class TajweedFocusBar extends StatelessWidget {
 }
 
 class _FocusBarContent extends StatelessWidget {
-  final MushafColors colors;
   final TajweedRule rule;
   final int position;
   final int total;
 
   const _FocusBarContent({
     super.key,
-    required this.colors,
     required this.rule,
     required this.position,
     required this.total,
@@ -78,36 +75,58 @@ class _FocusBarContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<MushafReaderCubit>();
-    final ruleColor = colors.tajweedColor(rule);
+    final palette = AppPaletteOverride.of(context);
+    final ruleColor = MushafPalette.of(palette).tajweedColor(rule);
+
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
-      decoration: QuranDecorations.focusBar(colors, ruleColor),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      padding: EdgeInsets.all(6.r),
+      decoration: BoxDecoration(
+        color: palette.elevatedSurface,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: ruleColor.withValues(alpha: 0.45)),
+        boxShadow: [
+          BoxShadow(
+            color: palette.shadow,
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _RoundButton(
+          AppIconButton(
+            tooltip: 'إنهاء التتبع',
             icon: Icons.close_rounded,
-            color: colors.accent,
-            label: 'إنهاء التتبع',
-            onTap: cubit.clearFocus,
+            onPressed: cubit.clearFocus,
           ),
-          RuleSwatch(color: ruleColor, size: 11),
+          SizedBox(width: 10.w),
+          RuleSwatch(color: ruleColor, size: 12),
           SizedBox(width: 6.w),
           Flexible(
             child: Text(
               rule.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: QuranTextStyles.focusRule(ruleColor),
+              style: TextStyles.titleSmall.copyWith(
+                fontWeight: FontWeight.w800,
+                color: palette.primaryText,
+              ),
             ),
           ),
           SizedBox(width: 8.w),
-          Text(
-            '${toArabicNumerals(position)} من ${toArabicNumerals(total)}',
-            style: QuranTextStyles.focusCounter(colors),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              '${toArabicNumerals(position)} من ${toArabicNumerals(total)}',
+              style: TextStyles.caption.copyWith(
+                fontWeight: FontWeight.w600,
+                color: palette.secondaryText,
+              ),
+            ),
           ),
-          SizedBox(width: 4.w),
+          SizedBox(width: 10.w),
           // The eye moves right to left along the line, so "previous" points
           // right and "next" points left. Pinned LTR so neither icon mirrors.
           Directionality(
@@ -115,53 +134,23 @@ class _FocusBarContent extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _RoundButton(
+                AppIconButton(
+                  tooltip: 'الموضع التالي',
                   icon: Icons.chevron_left_rounded,
-                  color: ruleColor,
-                  label: 'الموضع التالي',
-                  onTap: cubit.focusNext,
+                  variant: AppIconButtonVariant.tonal,
+                  onPressed: cubit.focusNext,
                 ),
-                _RoundButton(
+                SizedBox(width: 6.w),
+                AppIconButton(
+                  tooltip: 'الموضع السابق',
                   icon: Icons.chevron_right_rounded,
-                  color: ruleColor,
-                  label: 'الموضع السابق',
-                  onTap: cubit.focusPrevious,
+                  variant: AppIconButtonVariant.tonal,
+                  onPressed: cubit.focusPrevious,
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _RoundButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String label;
-  final VoidCallback onTap;
-
-  const _RoundButton({
-    required this.icon,
-    required this.color,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: InkResponse(
-        onTap: onTap,
-        radius: 22.r,
-        child: SizedBox(
-          width: 38.r,
-          height: 38.r,
-          child: Icon(icon, color: color, size: 24.sp),
-        ),
       ),
     );
   }

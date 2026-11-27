@@ -3,179 +3,215 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-import '../../theming/app_palette.dart';
+import '../../helpers/hadith_text.dart';
 import '../../theming/colors.dart';
 import '../../theming/styles.dart';
+import '../../widgets/hero_surface.dart';
+import '../../widgets/segmented_tabs.dart';
+import 'share/share_card.dart';
+import 'share/share_card_style.dart';
 
-const _kBgPresets = <Color>[
-  Colors.white,
-  Color(0xFFFFF8E1), 
-  Color(0xFFF3E5F5), 
-  Color(0xFFE8F5E9), 
-  Color(0xFF263238), 
-  Color(0xFF1A1A2E), 
-  Color(0xFF0D1B2A), 
-  Colors.black,
-];
-
-const _kTextPresets = <Color>[
-  Color(0xFF212121),
-  Colors.white,
-  Color(0xFFFFB300),
-  Color(0xFF7440E9),
-  Color(0xFF4CAF50),
-  Color(0xFFE53935),
-  Color(0xFF2196F3),
-  Color(0xFF795548),
-];
-
+/// Turns a hadith into an image to share: pick a template, background and
+/// type, preview it live, then share the picture or just the text.
 class ShareImageEditorBottomSheet extends StatefulWidget {
-  final String text;
-  final String appName;
-  final String appIconAsset;
-  final List<String> assetBackgrounds;
-  final bool allowShareTextOnly;
-  final double initialFontSize;
-  final String initialFontFamily;
-
-  final String? deepLink;
-
   const ShareImageEditorBottomSheet({
     super.key,
     required this.text,
     this.deepLink,
-    this.appName = 'مشكاة الأحاديث',
-    this.appIconAsset = 'assets/images/app_logo.png',
-    this.assetBackgrounds = const [
-      'assets/images/moon-light-shine-through-window-into-islamic-mosque-interior.jpg',
-      'assets/images/first_onboardin.jpeg',
-      'assets/images/search_logo.jpg',
-    ],
-    this.allowShareTextOnly = true,
-    this.initialFontSize = 28,
-    this.initialFontFamily = 'Amiri',
+    this.source,
   });
+
+  final String text;
+
+  /// Link back into the app, added to the shared caption.
+  final String? deepLink;
+
+  /// Where the hadith is recorded, printed at the foot of the card.
+  final String? source;
 
   @override
   State<ShareImageEditorBottomSheet> createState() =>
       _ShareImageEditorBottomSheetState();
 }
 
+enum _Tab { templates, background, text }
+
 class _ShareImageEditorBottomSheetState
-    extends State<ShareImageEditorBottomSheet>
-    with SingleTickerProviderStateMixin {
-  final GlobalKey _exportKey = GlobalKey();
+    extends State<ShareImageEditorBottomSheet> {
+  final _exportKey = GlobalKey();
+  late final HadithTextParts _parts = HadithTextParts.split(widget.text);
 
-  Color _backgroundColor = Colors.white;
-  String? _backgroundAssetPath;
-  File? _backgroundFile;
+  ShareCardStyle _style = const ShareCardStyle();
+  _Tab _tab = _Tab.templates;
+  bool _exporting = false;
 
-  double _fontSize = 28;
-  String _fontFamily = 'Amiri';
-  FontWeight _fontWeight = FontWeight.w500;
-  double _lineHeight = 1.7;
-  Color _textColor = _kTextPresets.first;
-  TextAlign _textAlign = TextAlign.justify;
+  void _update(ShareCardStyle style) => setState(() => _style = style);
 
-  int _selectedTab = 0;
-  bool _isExporting = false;
+  String get _caption {
+    final link = widget.deepLink;
+    return [
+      'من تطبيق مشكاة الأحاديث',
+      if (link != null && link.isNotEmpty) link,
+    ].join('\n');
+  }
 
-  late final AnimationController _tabFadeCtrl;
-  late final Animation<double> _tabFadeAnim;
+  Future<void> _pickPhoto() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 2000,
+        imageQuality: 90,
+      );
+      if (picked == null || !mounted) return;
+      _update(_style.withPhoto(File(picked.path)));
+    } catch (_) {
+      if (mounted) _notify('تعذر فتح معرض الصور');
+    }
+  }
 
-  @override
-  void initState() {
-    super.initState();
-    _fontSize = widget.initialFontSize;
-    _fontFamily = widget.initialFontFamily;
-    _tabFadeCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 250),
-      value: 1.0,
+  Future<void> _shareImage() async {
+    if (_exporting) return;
+    setState(() => _exporting = true);
+    try {
+      final boundary =
+          _exportKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return;
+      // Export about 1080 pixels wide whatever the preview size.
+      final image = await boundary.toImage(
+        pixelRatio: 1080 / boundary.size.width,
+      );
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      if (bytes == null) throw StateError('No image data');
+
+      final dir = await getTemporaryDirectory();
+      final file = File(
+        '${dir.path}/mishkat_${DateTime.now().millisecondsSinceEpoch}.png',
+      );
+      await file.writeAsBytes(bytes.buffer.asUint8List());
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], text: _caption),
+      );
+    } catch (_) {
+      if (mounted) _notify('تعذر إنشاء الصورة، حاول مرة أخرى');
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
+
+  Future<void> _shareText() async {
+    final source = widget.source;
+    await SharePlus.instance.share(
+      ShareParams(
+        text: [
+          HadithTextParts.typeset(widget.text),
+          if (source != null && source.isNotEmpty) '— $source',
+          '',
+          _caption,
+        ].join('\n'),
+      ),
     );
-    _tabFadeAnim = CurvedAnimation(
-      parent: _tabFadeCtrl,
-      curve: Curves.easeInOut,
-    );
   }
 
-  @override
-  void dispose() {
-    _tabFadeCtrl.dispose();
-    super.dispose();
-  }
-
-  void _switchTab(int tab) {
-    if (tab == _selectedTab) return;
-    _tabFadeCtrl.reverse().then((_) {
-      if (!mounted) return;
-      setState(() => _selectedTab = tab);
-      _tabFadeCtrl.forward();
-    });
-  }
+  void _notify(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    final height = MediaQuery.sizeOf(context).height * 0.92;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
-        padding: EdgeInsets.only(bottom: bottom),
+        height: height,
         decoration: BoxDecoration(
           color: ColorsManager.secondaryBackground,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
         ),
-        child: SafeArea(
-          top: true,
-          child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildHandle(),
-                _buildHeader(),
-                SizedBox(height: 8.h),
-                _buildPreview(),
-                SizedBox(height: 14.h),
-                _buildTabBar(),
-                SizedBox(height: 8.h),
-                _buildTabContent(),
-                SizedBox(height: 12.h),
-                _buildActionBar(),
-              ],
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: 8.h),
+              child: Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: ColorsManager.mediumGray,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
             ),
-          ),
+            _Header(
+              source: widget.source,
+              onShareText: _shareText,
+              onClose: () => Navigator.of(context).maybePop(),
+            ),
+            Expanded(child: _Preview(exportKey: _exportKey, style: _style, parts: _parts, source: widget.source)),
+            _AspectRow(
+              style: _style,
+              hasIsnad: _parts.isnad != null,
+              onChanged: _update,
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+              child: SegmentedTabs(
+                labels: const ['القوالب', 'الخلفية', 'النص'],
+                selectedIndex: _tab.index,
+                onChanged: (index) => setState(() => _tab = _Tab.values[index]),
+              ),
+            ),
+            SizedBox(
+              height: 170.h,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 8.h),
+                child: switch (_tab) {
+                  _Tab.templates => _TemplatePicker(
+                    style: _style,
+                    onChanged: _update,
+                  ),
+                  _Tab.background => _BackgroundPicker(
+                    style: _style,
+                    onChanged: _update,
+                    onPickPhoto: _pickPhoto,
+                  ),
+                  _Tab.text => _TextControls(style: _style, onChanged: _update),
+                },
+              ),
+            ),
+            _ActionBar(
+              exporting: _exporting,
+              onReset: () => _update(const ShareCardStyle()),
+              onShare: _shareImage,
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildHandle() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10.h, bottom: 4.h),
-      child: Center(
-        child: Container(
-          width: 40.w,
-          height: 4.h,
-          decoration: BoxDecoration(
-            color: ColorsManager.mediumGray,
-            borderRadius: BorderRadius.circular(999.r),
-          ),
-        ),
-      ),
-    );
-  }
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.source,
+    required this.onShareText,
+    required this.onClose,
+  });
 
-  Widget _buildHeader() {
+  final String? source;
+  final VoidCallback onShareText;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final source = this.source;
     return Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 10.h),
       child: Row(
         children: [
           Expanded(
@@ -184,871 +220,735 @@ class _ShareImageEditorBottomSheetState
               children: [
                 Text(
                   'مشاركة كصورة',
+                  style: TextStyles.sectionTitle.copyWith(height: 1.3),
+                ),
+                Text(
+                  source == null || source.isEmpty
+                      ? 'اختر قالباً وشارك الحديث'
+                      : source,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyles.headlineMedium.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: ColorsManager.primaryText,
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  'خصّص المظهر ثم شارك الصورة',
-                  style: TextStyles.bodySmall.copyWith(
-                    color: ColorsManager.secondaryText,
-                  ),
+                  style: TextStyles.caption,
                 ),
               ],
             ),
           ),
-          if (widget.allowShareTextOnly)
-            _HeaderAction(
-              icon: Icons.text_snippet_outlined,
-              label: 'نص فقط',
-              onTap: _shareTextOnly,
+          OutlinedButton.icon(
+            onPressed: onShareText,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: ColorsManager.primaryText,
+              backgroundColor: ColorsManager.cardBackground,
+              side: BorderSide(color: ColorsManager.border),
+              minimumSize: Size(0, 38.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              textStyle: TextStyles.chipLabel,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
             ),
-          SizedBox(width: 4.w),
-          _HeaderAction(
-            icon: Icons.close_rounded,
-            onTap: () => Navigator.of(context).maybePop(),
+            icon: Icon(Icons.notes_rounded, size: 18.r),
+            label: const Text('نص فقط'),
+          ),
+          SizedBox(width: 8.w),
+          IconButton.filledTonal(
+            tooltip: 'إغلاق',
+            onPressed: onClose,
+            style: IconButton.styleFrom(
+              backgroundColor: ColorsManager.lightGray,
+              foregroundColor: ColorsManager.primaryText,
+              fixedSize: Size.square(38.r),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+            icon: Icon(Icons.close_rounded, size: 20.r),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildPreview() {
-    return Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
-            decoration: BoxDecoration(
-              color: ColorsManager.primaryPurple.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Text(
-              'معاينة',
-              style: TextStyles.labelSmall.copyWith(
-                color: ColorsManager.primaryPurple,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Container(
-            decoration: BoxDecoration(
-              color: ColorsManager.cardBackground,
-              borderRadius: BorderRadius.circular(20.r),
-              boxShadow: [
-                BoxShadow(
-                  color: ColorsManager.black.withOpacity(0.06),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(8.w),
-              child: AspectRatio(
-                aspectRatio: 4 / 5,
-                child: RepaintBoundary(
-                  key: _exportKey,
-                  child: _buildCanvas(),
-                ),
-              ),
-            ),
-          ),
-        ],
+/// The card, as large as the space and its shape allow.
+class _Preview extends StatelessWidget {
+  const _Preview({
+    required this.exportKey,
+    required this.style,
+    required this.parts,
+    required this.source,
+  });
+
+  final GlobalKey exportKey;
+  final ShareCardStyle style;
+  final HadithTextParts parts;
+  final String? source;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      padding: EdgeInsets.all(14.r),
+      decoration: BoxDecoration(
+        color: ColorsManager.lightGray,
+        borderRadius: BorderRadius.circular(22.r),
       ),
-    );
-  }
-
-  Widget _buildCanvas() {
-    ImageProvider? bgImage;
-    if (_backgroundFile != null) {
-      bgImage = FileImage(_backgroundFile!);
-    } else if (_backgroundAssetPath != null) {
-      bgImage = AssetImage(_backgroundAssetPath!);
-    }
-    final bool hasImageBg = bgImage != null;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14.r),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: hasImageBg
-                ? Image(image: bgImage, fit: BoxFit.cover)
-                : ColoredBox(color: _backgroundColor),
-          ),
-          if (hasImageBg)
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.25),
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.20),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          Padding(
-            padding: EdgeInsets.all(18.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    child: Text(
-                      widget.text,
-                      textAlign: _textAlign,
-                      style: TextStyle(
-                        fontFamily: _fontFamily,
-                        fontWeight: _fontWeight,
-                        color: _textColor,
-                        height: _lineHeight,
-                        fontSize: _fontSize.sp,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                Row(
-                  children: [
-                    Image.asset(
-                      widget.appIconAsset,
-                      width: 20.w,
-                      height: 20.w,
-                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                    ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: Text(
-                        widget.appName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyles.titleSmall.copyWith(
-                          color: hasImageBg
-                              ? Colors.white.withOpacity(0.9)
-                              : AppPalette.light.primaryPurple,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabBar() {
-    return Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
-      child: Container(
-        height: 44.h,
-        decoration: BoxDecoration(
-          color: ColorsManager.lightGray,
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        child: Row(
-          children: [
-            _TabItem(
-              label: 'الخلفية',
-              icon: Icons.wallpaper_rounded,
-              selected: _selectedTab == 0,
-              onTap: () => _switchTab(0),
-            ),
-            _TabItem(
-              label: 'النص',
-              icon: Icons.text_fields_rounded,
-              selected: _selectedTab == 1,
-              onTap: () => _switchTab(1),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabContent() {
-    return FadeTransition(
-      opacity: _tabFadeAnim,
-      child: Padding(
-        padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
-        child: AnimatedSize(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-          alignment: Alignment.topCenter,
-          child: _selectedTab == 0
-              ? _buildBackgroundControls()
-              : _buildTextControls(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBackgroundControls() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 4.h),
-        const _MiniLabel(text: 'لون الخلفية'),
-        SizedBox(height: 8.h),
-        Row(
-          children: [
-            ..._kBgPresets.map(
-              (c) => Expanded(
-                child: _ColorDot(
-                  color: c,
-                  selected: _backgroundAssetPath == null &&
-                      _backgroundFile == null &&
-                      _backgroundColor == c,
-                  onTap: () => setState(() {
-                    _backgroundColor = c;
-                    _backgroundAssetPath = null;
-                    _backgroundFile = null;
-                  }),
-                ),
-              ),
-            ),
-            SizedBox(width: 4.w),
-            _ColorDot(
-              color: _backgroundColor,
-              isCustom: true,
-              selected: false,
-              onTap: () => _openColorPicker(forText: false),
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        const _MiniLabel(text: 'صورة خلفية'),
-        SizedBox(height: 8.h),
-        SizedBox(
-          height: 80.h,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsetsDirectional.only(end: 4.w),
-            itemCount: widget.assetBackgrounds.length + 2,
-            separatorBuilder: (_, __) => SizedBox(width: 10.w),
-            itemBuilder: (_, index) {
-              if (index == 0) {
-                return _ImagePickerTile(onPick: _pickBackgroundImage);
-              }
-              if (index == widget.assetBackgrounds.length + 1) {
-                return _AssetThumb(
-                  label: 'بدون',
-                  selected:
-                      _backgroundAssetPath == null && _backgroundFile == null,
-                  onTap: () => setState(() {
-                    _backgroundAssetPath = null;
-                    _backgroundFile = null;
-                  }),
-                  child: Icon(
-                    Icons.hide_image_rounded,
-                    color: ColorsManager.secondaryText,
-                    size: 22.sp,
-                  ),
-                );
-              }
-              final path = widget.assetBackgrounds[index - 1];
-              return _AssetThumb(
-                label: 'صورة',
-                assetPath: path,
-                selected: _backgroundAssetPath == path,
-                onTap: () => setState(() {
-                  _backgroundAssetPath = path;
-                  _backgroundFile = null;
-                }),
-              );
-            },
-          ),
-        ),
-        SizedBox(height: 8.h),
-      ],
-    );
-  }
-
-  Widget _buildTextControls() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 4.h),
-        const _MiniLabel(text: 'لون النص'),
-        SizedBox(height: 8.h),
-        Row(
-          children: [
-            ..._kTextPresets.map(
-              (c) => Expanded(
-                child: _ColorDot(
-                  color: c,
-                  selected: _textColor == c,
-                  onTap: () => setState(() => _textColor = c),
-                ),
-              ),
-            ),
-            SizedBox(width: 4.w),
-            _ColorDot(
-              color: _textColor,
-              isCustom: true,
-              selected: false,
-              onTap: () => _openColorPicker(forText: true),
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        const _MiniLabel(text: 'نوع الخط'),
-        SizedBox(height: 8.h),
-        Row(
-          children: [
-            _FontChip(
-              label: 'أميري (تراثي)',
-              fontFamily: 'Amiri',
-              selected: _fontFamily == 'Amiri',
-              onTap: () => setState(() => _fontFamily = 'Amiri'),
-            ),
-            SizedBox(width: 10.w),
-            _FontChip(
-              label: 'القاهرة (عصري)',
-              fontFamily: 'Cairo',
-              selected: _fontFamily == 'Cairo',
-              onTap: () => setState(() => _fontFamily = 'Cairo'),
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _MiniLabel(text: 'السُمك'),
-                  SizedBox(height: 8.h),
-                  _ToggleRow(
-                    items: const [
-                      _ToggleItem(Icons.format_bold_rounded, 'عريض'),
-                      _ToggleItem(Icons.text_format_rounded, 'عادي'),
-                      _ToggleItem(Icons.format_italic_rounded, 'رفيع'),
-                    ],
-                    selectedIndex: _fontWeight == FontWeight.w700
-                        ? 0
-                        : _fontWeight == FontWeight.w500
-                            ? 1
-                            : 2,
-                    onChanged: (i) => setState(() {
-                      _fontWeight = [
-                        FontWeight.w700,
-                        FontWeight.w500,
-                        FontWeight.w300,
-                      ][i];
-                    }),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final ratio = style.aspect.ratio;
+          final width = [
+            constraints.maxWidth,
+            constraints.maxHeight * ratio,
+          ].reduce((a, b) => a < b ? a : b);
+          return Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOut,
+              width: width,
+              height: width / ratio,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: ColorsManager.coverShadow,
+                    blurRadius: 30,
+                    spreadRadius: -16,
+                    offset: const Offset(0, 18),
                   ),
                 ],
               ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _MiniLabel(text: 'المحاذاة'),
-                  SizedBox(height: 8.h),
-                  _ToggleRow(
-                    items: const [
-                      _ToggleItem(Icons.format_align_right_rounded, 'يمين'),
-                      _ToggleItem(Icons.format_align_center_rounded, 'وسط'),
-                      _ToggleItem(Icons.format_align_justify_rounded, 'ضبط'),
-                    ],
-                    selectedIndex: _textAlign == TextAlign.right
-                        ? 0
-                        : _textAlign == TextAlign.center
-                            ? 1
-                            : 2,
-                    onChanged: (i) => setState(() {
-                      _textAlign = [
-                        TextAlign.right,
-                        TextAlign.center,
-                        TextAlign.justify,
-                      ][i];
-                    }),
-                  ),
-                ],
+              child: RepaintBoundary(
+                key: exportKey,
+                child: ShareCard(
+                  style: style,
+                  parts: parts,
+                  width: width,
+                  source: source,
+                ),
               ),
             ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        _LabeledSlider(
-          label: 'حجم الخط',
-          valueText: _fontSize.toInt().toString(),
-          value: _fontSize,
-          min: 16,
-          max: 48,
-          onChanged: (v) => setState(() => _fontSize = v),
-        ),
-        SizedBox(height: 6.h),
-        _LabeledSlider(
-          label: 'تباعد الأسطر',
-          valueText: _lineHeight.toStringAsFixed(1),
-          value: _lineHeight,
-          min: 1.2,
-          max: 2.4,
-          onChanged: (v) => setState(() => _lineHeight = v),
-        ),
-        SizedBox(height: 8.h),
-      ],
+          );
+        },
+      ),
     );
   }
+}
 
-  Widget _buildActionBar() {
+class _AspectRow extends StatelessWidget {
+  const _AspectRow({
+    required this.style,
+    required this.hasIsnad,
+    required this.onChanged,
+  });
+
+  final ShareCardStyle style;
+  final bool hasIsnad;
+  final ValueChanged<ShareCardStyle> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(
-        start: 16.w,
-        end: 16.w,
-        bottom: 16.h,
-      ),
+      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 0),
       child: Row(
         children: [
-          SizedBox(
-            height: 48.h,
-            child: OutlinedButton.icon(
-              onPressed: _reset,
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: ColorsManager.mediumGray),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-              ),
-              icon: Icon(
-                Icons.restart_alt_rounded,
-                size: 18.sp,
-                color: ColorsManager.secondaryText,
-              ),
-              label: Text(
-                'إعادة الضبط',
-                style: TextStyles.labelLarge.copyWith(
-                  color: ColorsManager.secondaryText,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: SizedBox(
-              height: 48.h,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14.r),
-                  gradient: LinearGradient(
-                    colors: [
-                      ColorsManager.primaryPurple,
-                      ColorsManager.accentPurple,
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: ColorsManager.primaryPurple.withOpacity(0.30),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
+          _Segments<ShareAspect>(
+            values: ShareAspect.values,
+            selected: style.aspect,
+            builder:
+                (aspect, selected) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(aspect.icon, size: 16.r),
+                    SizedBox(width: 4.w),
+                    Text(aspect.label),
                   ],
                 ),
-                child: ElevatedButton.icon(
-                  onPressed: _isExporting ? null : _exportAndShare,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                  ),
-                  icon: _isExporting
-                      ? SizedBox(
-                          width: 18.r,
-                          height: 18.r,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Icon(Icons.ios_share_rounded, size: 20.sp),
-                  label: Text(
-                    _isExporting ? 'جارٍ التصدير…' : 'مشاركة الصورة',
-                    style: TextStyles.titleMedium.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
+            onSelected: (aspect) => onChanged(style.copyWith(aspect: aspect)),
+          ),
+          const Spacer(),
+          if (hasIsnad)
+            Semantics(
+              toggled: style.showIsnad,
+              button: true,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12.r),
+                onTap:
+                    () => onChanged(style.copyWith(showIsnad: !style.showIsnad)),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 6.h),
+                  child: Row(
+                    children: [
+                      Text(
+                        'السند',
+                        style: TextStyles.chipLabel.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Switch(
+                        value: style.showIsnad,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        onChanged:
+                            (value) => onChanged(style.copyWith(showIsnad: value)),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
   }
-
-  void _openColorPicker({required bool forText}) {
-    final initial = forText ? _textColor : _backgroundColor;
-    Color tempColor = initial;
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          title: Text(
-            forText ? 'اختر لون النص' : 'اختر لون الخلفية',
-            style: TextStyles.titleMedium.copyWith(fontWeight: FontWeight.w700),
-          ),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: initial,
-              onColorChanged: (c) => tempColor = c,
-              enableAlpha: false,
-              labelTypes: const [],
-              portraitOnly: true,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('إلغاء'),
-            ),
-            FilledButton(
-              onPressed: () {
-                setState(() {
-                  if (forText) {
-                    _textColor = tempColor;
-                  } else {
-                    _backgroundColor = tempColor;
-                    _backgroundAssetPath = null;
-                    _backgroundFile = null;
-                  }
-                });
-                Navigator.of(ctx).pop();
-              },
-              child: const Text('تأكيد'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _pickBackgroundImage() async {
-    try {
-      final picker = ImagePicker();
-      final XFile? file = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 92,
-      );
-      if (file == null) return;
-      setState(() {
-        _backgroundFile = File(file.path);
-        _backgroundAssetPath = null;
-      });
-    } catch (e) {
-      debugPrint('Error picking image: $e');
-    }
-  }
-
-  void _reset() {
-    HapticFeedback.lightImpact();
-    setState(() {
-      _backgroundColor = Colors.white;
-      _backgroundAssetPath = null;
-      _backgroundFile = null;
-      _fontSize = widget.initialFontSize;
-      _fontFamily = widget.initialFontFamily;
-      _fontWeight = FontWeight.w500;
-      _lineHeight = 1.7;
-      _textColor = _kTextPresets.first;
-      _textAlign = TextAlign.justify;
-    });
-  }
-
-  Future<void> _exportAndShare() async {
-    try {
-      setState(() => _isExporting = true);
-      await Future.delayed(const Duration(milliseconds: 100));
-      final boundary = _exportKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
-      if (boundary == null) return;
-
-      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return;
-      final pngBytes = byteData.buffer.asUint8List();
-
-      final dir = await getTemporaryDirectory();
-      final file = File(
-        '${dir.path}/share_image_${DateTime.now().millisecondsSinceEpoch}.png',
-      );
-      await file.writeAsBytes(pngBytes);
-
-      String shareCaption = 'شارك من تطبيق ${widget.appName}';
-      if (widget.deepLink != null && widget.deepLink!.isNotEmpty) {
-        shareCaption += '\n\n${widget.deepLink}';
-      }
-      await Share.shareXFiles([XFile(file.path)], text: shareCaption);
-    } catch (e) {
-      debugPrint('Error exporting: $e');
-    } finally {
-      if (mounted) setState(() => _isExporting = false);
-    }
-  }
-
-  Future<void> _shareTextOnly() async {
-    try {
-      String shareContent = widget.text;
-      if (widget.deepLink != null && widget.deepLink!.isNotEmpty) {
-        shareContent += '\n\n${widget.deepLink}';
-      }
-      await Share.share(shareContent);
-    } catch (e) {
-      debugPrint('Error sharing text: $e');
-    }
-  }
 }
 
-class _HeaderAction extends StatelessWidget {
-  final IconData icon;
-  final String? label;
-  final VoidCallback onTap;
-  const _HeaderAction({required this.icon, this.label, required this.onTap});
+class _TemplatePicker extends StatelessWidget {
+  const _TemplatePicker({required this.style, required this.onChanged});
+
+  final ShareCardStyle style;
+  final ValueChanged<ShareCardStyle> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: ColorsManager.lightGray,
-      borderRadius: BorderRadius.circular(12.r),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12.r),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: label != null ? 12.w : 8.w,
-            vertical: 8.h,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 18.sp, color: ColorsManager.secondaryText),
-              if (label != null) ...[
-                SizedBox(width: 6.w),
-                Text(
-                  label!,
-                  style: TextStyles.labelMedium.copyWith(
-                    color: ColorsManager.primaryPurple,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (final template in shareTemplates)
+            Padding(
+              padding: EdgeInsetsDirectional.only(end: 10.w),
+              child: _TemplateThumb(
+                template: template,
+                selected: style.templateId == template.id,
+                onTap: () => onChanged(style.withTemplate(template)),
+              ),
+            ),
+        ],
       ),
     );
   }
 }
 
-class _MiniLabel extends StatelessWidget {
-  final String text;
-  const _MiniLabel({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyles.labelMedium.copyWith(
-        color: ColorsManager.secondaryText,
-        fontWeight: FontWeight.w700,
-      ),
-    );
-  }
-}
-
-class _TabItem extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-  const _TabItem({
-    required this.label,
-    required this.icon,
+class _TemplateThumb extends StatelessWidget {
+  const _TemplateThumb({
+    required this.template,
     required this.selected,
     required this.onTap,
   });
 
+  final ShareTemplate template;
+  final bool selected;
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    Widget bar(double widthFactor, Color color, double height) =>
+        FractionallySizedBox(
+          alignment: AlignmentDirectional.centerStart,
+          widthFactor: widthFactor,
+          child: Container(
+            height: height,
+            margin: EdgeInsets.only(top: 5.h),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2.r),
+            ),
+          ),
+        );
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: 'قالب ${template.label}',
+      excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: EdgeInsets.all(3.w),
-          decoration: BoxDecoration(
-            color: selected ? ColorsManager.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(10.r),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: ColorsManager.black.withOpacity(0.06),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 16.sp,
-                color: selected
-                    ? ColorsManager.primaryPurple
-                    : ColorsManager.secondaryText,
+        child: Column(
+          children: [
+            _SelectionRing(
+              selected: selected,
+              radius: 14.r,
+              child: Container(
+                width: 76.r,
+                height: 96.r,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: template.background,
+                  borderRadius: BorderRadius.circular(14.r),
+                  image:
+                      template.mosqueImage
+                          ? DecorationImage(
+                            image: const AssetImage(kMosqueImage),
+                            fit: BoxFit.cover,
+                            colorFilter: ColorFilter.mode(
+                              ShareColors.night.withValues(alpha: 0.7),
+                              BlendMode.srcOver,
+                            ),
+                          )
+                          : null,
+                  border: Border.all(color: ColorsManager.border),
+                ),
+                padding: EdgeInsets.all(10.r),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    bar(0.4, template.accent, 4.h),
+                    bar(1, template.ink.withValues(alpha: 0.85), 5.h),
+                    bar(1, template.ink.withValues(alpha: 0.85), 5.h),
+                    bar(0.7, template.ink.withValues(alpha: 0.85), 5.h),
+                  ],
+                ),
               ),
-              SizedBox(width: 6.w),
-              Text(
-                label,
-                style: TextStyles.labelLarge.copyWith(
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-                  color: selected
-                      ? ColorsManager.primaryPurple
-                      : ColorsManager.secondaryText,
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              template.label,
+              style: TextStyles.chipLabel.copyWith(
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                color:
+                    selected
+                        ? ColorsManager.purpleText
+                        : ColorsManager.primaryText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BackgroundPicker extends StatelessWidget {
+  const _BackgroundPicker({
+    required this.style,
+    required this.onChanged,
+    required this.onPickPhoto,
+  });
+
+  final ShareCardStyle style;
+  final ValueChanged<ShareCardStyle> onChanged;
+  final VoidCallback onPickPhoto;
+
+  @override
+  Widget build(BuildContext context) {
+    final photo = style.photo;
+    final mosque = shareTemplates.firstWhere((t) => t.mosqueImage);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _ControlLabel('لون الخلفية'),
+        SizedBox(height: 8.h),
+        Wrap(
+          spacing: 10.w,
+          runSpacing: 10.h,
+          children: [
+            for (final color in ShareColors.backgrounds)
+              _ColorDot(
+                color: color,
+                size: 34.r,
+                selected: !style.hasImage && style.background == color,
+                onTap: () => onChanged(style.withBackground(color)),
+              ),
+          ],
+        ),
+        SizedBox(height: 14.h),
+        const _ControlLabel('صورة خلفية'),
+        SizedBox(height: 8.h),
+        Row(
+          children: [
+            _SelectionRing(
+              selected: photo != null,
+              radius: 14.r,
+              child: Material(
+                color: ColorsManager.cardBackground,
+                borderRadius: BorderRadius.circular(14.r),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: onPickPhoto,
+                  child: Container(
+                    width: 64.r,
+                    height: 64.r,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(color: ColorsManager.mediumGray, width: 1.5),
+                      image:
+                          photo == null
+                              ? null
+                              : DecorationImage(
+                                image: FileImage(photo),
+                                fit: BoxFit.cover,
+                              ),
+                    ),
+                    child:
+                        photo != null
+                            ? null
+                            : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  size: 22.r,
+                                  color: ColorsManager.purpleText,
+                                ),
+                                Text('المعرض', style: TextStyles.labelSmall),
+                              ],
+                            ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Semantics(
+              button: true,
+              selected: style.mosqueImage,
+              label: 'صورة المسجد',
+              child: GestureDetector(
+                onTap: () => onChanged(style.withTemplate(mosque)),
+                child: _SelectionRing(
+                  selected: style.mosqueImage,
+                  radius: 14.r,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14.r),
+                    child: Image.asset(
+                      kMosqueImage,
+                      width: 64.r,
+                      height: 64.r,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _TextControls extends StatelessWidget {
+  const _TextControls({required this.style, required this.onChanged});
+
+  final ShareCardStyle style;
+  final ValueChanged<ShareCardStyle> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 10.w,
+          children: [
+            for (final ink in ShareColors.inks)
+              _ColorDot(
+                color: ink,
+                size: 30.r,
+                selected: style.ink == ink,
+                onTap: () => onChanged(style.copyWith(ink: ink)),
+              ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: [
+            Expanded(
+              child: _Segments<ShareFont>(
+                values: ShareFont.values,
+                selected: style.font,
+                expand: true,
+                builder:
+                    (font, _) => Text(
+                      font.label,
+                      style: TextStyle(fontFamily: font.family),
+                    ),
+                onSelected: (font) => onChanged(style.copyWith(font: font)),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            _Segments<TextAlign>(
+              values: const [TextAlign.right, TextAlign.center, TextAlign.justify],
+              selected: style.align,
+              builder:
+                  (align, _) => Icon(switch (align) {
+                    TextAlign.center => Icons.format_align_center_rounded,
+                    TextAlign.justify => Icons.format_align_justify_rounded,
+                    _ => Icons.format_align_right_rounded,
+                  }, size: 19.r),
+              onSelected: (align) => onChanged(style.copyWith(align: align)),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: [
+            Expanded(
+              child: _Stepper(
+                label: 'حجم الخط',
+                value: style.fontSize.round().toString(),
+                onDecrease:
+                    style.fontSize > ShareCardStyle.minFontSize
+                        ? () => onChanged(style.copyWith(fontSize: style.fontSize - 1))
+                        : null,
+                onIncrease:
+                    style.fontSize < ShareCardStyle.maxFontSize
+                        ? () => onChanged(style.copyWith(fontSize: style.fontSize + 1))
+                        : null,
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: _Stepper(
+                label: 'تباعد الأسطر',
+                value: style.lineHeight.toStringAsFixed(1),
+                onDecrease:
+                    style.lineHeight > ShareCardStyle.minLineHeight + 0.01
+                        ? () => onChanged(
+                          style.copyWith(lineHeight: style.lineHeight - 0.1),
+                        )
+                        : null,
+                onIncrease:
+                    style.lineHeight < ShareCardStyle.maxLineHeight - 0.01
+                        ? () => onChanged(
+                          style.copyWith(lineHeight: style.lineHeight + 0.1),
+                        )
+                        : null,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({
+    required this.exporting,
+    required this.onReset,
+    required this.onShare,
+  });
+
+  final bool exporting;
+  final VoidCallback onReset;
+  final VoidCallback onShare;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ColorsManager.cardBackground,
+        border: Border(top: BorderSide(color: ColorsManager.border)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
+          child: Row(
+            children: [
+              SizedBox.square(
+                dimension: 48.r,
+                child: OutlinedButton(
+                  onPressed: onReset,
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.square(48.r),
+                    foregroundColor: ColorsManager.primaryText,
+                    side: BorderSide(color: ColorsManager.border),
+                  ),
+                  child: Tooltip(
+                    message: 'إعادة الضبط',
+                    child: Icon(Icons.restart_alt_rounded, size: 21.r),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: exporting ? null : onShare,
+                  style: FilledButton.styleFrom(minimumSize: Size.fromHeight(48.r)),
+                  icon:
+                      exporting
+                          ? SizedBox.square(
+                            dimension: 18.r,
+                            child: const CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : Icon(Icons.ios_share_rounded, size: 20.r),
+                  label: const Text('مشاركة الصورة'),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Compact segmented control for a few choices.
+class _Segments<T> extends StatelessWidget {
+  const _Segments({
+    required this.values,
+    required this.selected,
+    required this.builder,
+    required this.onSelected,
+    this.expand = false,
+  });
+
+  final List<T> values;
+  final T selected;
+  final Widget Function(T value, bool selected) builder;
+  final ValueChanged<T> onSelected;
+  final bool expand;
+
+  @override
+  Widget build(BuildContext context) {
+    final segments = [
+      for (final value in values)
+        _segment(value, value == selected),
+    ];
+    return Container(
+      padding: EdgeInsets.all(3.r),
+      decoration: BoxDecoration(
+        color: ColorsManager.lightGray,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+        children: [
+          for (final segment in segments)
+            expand ? Expanded(child: segment) : segment,
+        ],
+      ),
+    );
+  }
+
+  Widget _segment(T value, bool isSelected) {
+    final foreground =
+        isSelected ? ColorsManager.purpleText : ColorsManager.secondaryText;
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onSelected(value),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+          alignment: expand ? Alignment.center : null,
+          decoration: BoxDecoration(
+            color: isSelected ? ColorsManager.cardBackground : Colors.transparent,
+            borderRadius: BorderRadius.circular(9.r),
+          ),
+          child: IconTheme.merge(
+            data: IconThemeData(color: foreground),
+            child: DefaultTextStyle.merge(
+              style: TextStyles.chipLabel.copyWith(
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                color: foreground,
+              ),
+              child: builder(value, isSelected),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Stepper extends StatelessWidget {
+  const _Stepper({
+    required this.label,
+    required this.value,
+    required this.onDecrease,
+    required this.onIncrease,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback? onDecrease;
+  final VoidCallback? onIncrease;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget button(IconData icon, String tooltip, VoidCallback? onTap) =>
+        IconButton(
+          tooltip: tooltip,
+          onPressed: onTap,
+          style: IconButton.styleFrom(
+            backgroundColor: ColorsManager.lightGray,
+            fixedSize: Size.square(30.r),
+            minimumSize: Size.square(30.r),
+            padding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9.r),
+            ),
+          ),
+          icon: Icon(icon, size: 18.r),
+        );
+
+    return Container(
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: ColorsManager.cardBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: ColorsManager.border),
+      ),
+      child: Row(
+        children: [
+          button(Icons.remove_rounded, 'تقليل $label', onDecrease),
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  value,
+                  style: TextStyles.labelLarge.copyWith(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                ),
+                Text(label, style: TextStyles.labelSmall.copyWith(fontSize: 10.sp)),
+              ],
+            ),
+          ),
+          button(Icons.add_rounded, 'زيادة $label', onIncrease),
+        ],
       ),
     );
   }
 }
 
 class _ColorDot extends StatelessWidget {
-  final Color color;
-  final bool selected;
-  final bool isCustom;
-  final VoidCallback onTap;
   const _ColorDot({
     required this.color,
+    required this.size,
     required this.selected,
-    this.isCustom = false,
     required this.onTap,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Center(
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: selected ? 30.r : 26.r,
-          height: selected ? 30.r : 26.r,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isCustom ? null : color,
-            gradient: isCustom
-                ? const SweepGradient(
-                    colors: [
-                      Colors.red,
-                      Colors.orange,
-                      Colors.yellow,
-                      Colors.green,
-                      Colors.blue,
-                      Colors.purple,
-                      Colors.red,
-                    ],
-                  )
-                : null,
-            border: Border.all(
-              color: selected
-                  ? ColorsManager.primaryPurple
-                  : Colors.black.withOpacity(0.12),
-              width: selected ? 2.5 : 1,
-            ),
-          ),
-          child: isCustom
-              ? Center(
-                  child: Icon(
-                    Icons.colorize_rounded,
-                    size: 13.sp,
-                    color: Colors.white,
-                  ),
-                )
-              : null,
-        ),
-      ),
-    );
-  }
-}
-
-class _FontChip extends StatelessWidget {
-  final String label;
-  final String fontFamily;
+  final Color color;
+  final double size;
   final bool selected;
   final VoidCallback onTap;
-  const _FontChip({
-    required this.label,
-    required this.fontFamily,
-    required this.selected,
-    required this.onTap,
-  });
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Semantics(
+      button: true,
+      selected: selected,
       child: GestureDetector(
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: EdgeInsets.symmetric(vertical: 10.h),
-          decoration: BoxDecoration(
-            color: selected
-                ? ColorsManager.primaryPurple.withOpacity(0.08)
-                : ColorsManager.lightGray,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: selected
-                  ? ColorsManager.primaryPurple
-                  : ColorsManager.mediumGray,
-              width: selected ? 1.5 : 1,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: fontFamily,
-              fontSize: 14.sp,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected
-                  ? ColorsManager.primaryPurple
-                  : ColorsManager.primaryText,
+        child: _SelectionRing(
+          selected: selected,
+          radius: size / 2,
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(color: ShareColors.ink.withValues(alpha: 0.12)),
             ),
           ),
         ),
@@ -1057,275 +957,45 @@ class _FontChip extends StatelessWidget {
   }
 }
 
-class _ToggleItem {
-  final IconData icon;
-  final String tooltip;
-  const _ToggleItem(this.icon, this.tooltip);
-}
-
-class _ToggleRow extends StatelessWidget {
-  final List<_ToggleItem> items;
-  final int selectedIndex;
-  final ValueChanged<int> onChanged;
-  const _ToggleRow({
-    required this.items,
-    required this.selectedIndex,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 38.h,
-      decoration: BoxDecoration(
-        color: ColorsManager.lightGray,
-        borderRadius: BorderRadius.circular(10.r),
-      ),
-      child: Row(
-        children: List.generate(items.length, (i) {
-          final sel = i == selectedIndex;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onChanged(i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: EdgeInsets.all(3.w),
-                decoration: BoxDecoration(
-                  color: sel ? ColorsManager.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8.r),
-                  boxShadow: sel
-                      ? [
-                          BoxShadow(
-                            color: ColorsManager.black.withOpacity(0.06),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ]
-                      : null,
-                ),
-                alignment: Alignment.center,
-                child: Tooltip(
-                  message: items[i].tooltip,
-                  child: Icon(
-                    items[i].icon,
-                    size: 18.sp,
-                    color: sel
-                        ? ColorsManager.primaryPurple
-                        : ColorsManager.secondaryText,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _LabeledSlider extends StatelessWidget {
-  final String label;
-  final String valueText;
-  final double value;
-  final double min;
-  final double max;
-  final ValueChanged<double> onChanged;
-
-  const _LabeledSlider({
-    required this.label,
-    required this.valueText,
-    required this.value,
-    required this.min,
-    required this.max,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 80.w,
-          child: Text(
-            label,
-            style: TextStyles.bodySmall.copyWith(
-              color: ColorsManager.secondaryText,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        Expanded(
-          child: SliderTheme(
-            data: SliderThemeData(
-              trackHeight: 3,
-              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 7.r),
-              overlayShape: RoundSliderOverlayShape(overlayRadius: 16.r),
-              activeTrackColor: ColorsManager.primaryPurple,
-              inactiveTrackColor: ColorsManager.mediumGray,
-              thumbColor: ColorsManager.primaryPurple,
-              overlayColor: ColorsManager.primaryPurple.withOpacity(0.12),
-            ),
-            child: Slider(
-              min: min,
-              max: max,
-              value: value.clamp(min, max),
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-        Container(
-          width: 38.w,
-          alignment: Alignment.center,
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-          decoration: BoxDecoration(
-            color: ColorsManager.lightGray,
-            borderRadius: BorderRadius.circular(6.r),
-          ),
-          child: Text(
-            valueText,
-            textAlign: TextAlign.center,
-            style: TextStyles.labelLarge.copyWith(
-              color: ColorsManager.primaryText,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AssetThumb extends StatelessWidget {
-  final String? assetPath;
-  final bool selected;
-  final String label;
-  final VoidCallback onTap;
-  final Widget? child;
-  const _AssetThumb({
-    this.assetPath,
+/// A brand outline drawn just outside the selected swatch.
+class _SelectionRing extends StatelessWidget {
+  const _SelectionRing({
     required this.selected,
-    required this.label,
-    required this.onTap,
-    this.child,
+    required this.radius,
+    required this.child,
   });
+
+  final bool selected;
+  final double radius;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 74.w,
-        height: 74.h,
-        decoration: BoxDecoration(
-          color: ColorsManager.lightGray,
-          borderRadius: BorderRadius.circular(12.r),
-          image: assetPath != null
-              ? DecorationImage(
-                  image: AssetImage(assetPath!),
-                  fit: BoxFit.cover,
-                )
-              : null,
-          border: Border.all(
-            color: selected ? ColorsManager.primaryPurple : Colors.black12,
-            width: selected ? 2.5 : 1,
-          ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      padding: EdgeInsets.all(2.r),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius + 4.r),
+        border: Border.all(
+          color: selected ? ColorsManager.primaryPurple : Colors.transparent,
+          width: 2,
         ),
-        child: assetPath == null
-            ? Center(child: child ?? const SizedBox.shrink())
-            : Stack(
-                children: [
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 3.h),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.40),
-                        borderRadius: BorderRadius.vertical(
-                          bottom: Radius.circular(selected ? 10.r : 11.r),
-                        ),
-                      ),
-                      child: Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 10.sp,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (selected)
-                    Positioned(
-                      top: 4.h,
-                      right: 4.w,
-                      child: Container(
-                        width: 18.r,
-                        height: 18.r,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: ColorsManager.primaryPurple,
-                        ),
-                        child: Icon(
-                          Icons.check_rounded,
-                          size: 12.sp,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
       ),
+      child: child,
     );
   }
 }
 
-class _ImagePickerTile extends StatelessWidget {
-  final Future<void> Function() onPick;
-  const _ImagePickerTile({required this.onPick});
+class _ControlLabel extends StatelessWidget {
+  const _ControlLabel(this.text);
+
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPick,
-      child: Container(
-        width: 74.w,
-        height: 74.h,
-        decoration: BoxDecoration(
-          color: ColorsManager.primaryPurple.withOpacity(0.06),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: ColorsManager.primaryPurple.withOpacity(0.25),
-            width: 1.5,
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.add_photo_alternate_rounded,
-                size: 24.sp,
-                color: ColorsManager.primaryPurple,
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'المعرض',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w600,
-                  color: ColorsManager.primaryPurple,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return Text(
+      text,
+      style: TextStyles.chipLabel.copyWith(color: ColorsManager.secondaryText),
     );
   }
 }

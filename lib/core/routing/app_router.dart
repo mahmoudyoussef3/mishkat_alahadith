@@ -7,23 +7,31 @@ import 'package:mishkat_almasabih/features/about_us/presentation/ui/screens/abou
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/categories/categories_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/screens/ahadith_categories_screen.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/category_style.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/screens/categories_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/presentation/logic/signup_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_home/azkar_home_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_reader/azkar_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/ui/models/azkar_reader_args.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/ui/screens/azkar_home_screen.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/ui/screens/azkar_reader_screen.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/presentation/ui/screens/signup_screen.dart';
-import 'package:mishkat_almasabih/features/library/presentation/logic/book_data/book_data_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/add_bookmark/add_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/collections/get_collections_bookmark_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/delete_bookmark/delete_cubit_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookmarks/user_bookmarks_cubit.dart';
 import 'package:mishkat_almasabih/features/bookmark/presentation/ui/screens/bookmark_screen.dart';
 import 'package:mishkat_almasabih/features/chapters/presentation/logic/cubit/chapters_cubit.dart';
+import 'package:mishkat_almasabih/features/chapters/presentation/ui/models/book_chapters_args.dart';
 import 'package:mishkat_almasabih/features/chapters/presentation/ui/screens/chapters_screen.dart';
 import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_cubit.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/presentation/ui/screen/daily_hadith_screen.dart';
 import 'package:mishkat_almasabih/features/hadith_details/presentation/ui/screens/hadith_details_screen.dart';
 import 'package:mishkat_almasabih/features/library/presentation/logic/library_statistics/get_library_statistics_cubit.dart';
-import 'package:mishkat_almasabih/features/home/presentation/ui/home_screen.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/ui/main_navigation_screen.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/library_books/library_books_cubit.dart';
 import 'package:mishkat_almasabih/features/library/presentation/ui/screens/library_books_screen.dart';
 import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/prayer_times_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/presentation/ui/prayer_times_screen.dart';
@@ -33,15 +41,24 @@ import 'package:mishkat_almasabih/features/profile/presentation/ui/profile_scree
 import 'package:mishkat_almasabih/features/qiblah_finder/presentation/logic/qiblah_cubit.dart'
     show QiblahCubit;
 import 'package:mishkat_almasabih/features/qiblah_finder/presentation/ui/qiblah_finder_screen.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/quran_edition.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/audio/quran_audio_catalog_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/hizb_index/quran_hizb_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_editions/quran_editions_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/reflection/quran_reflection_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/surah_tafsir/surah_tafsir_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/tafsir_search/quran_tafsir_search_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/models/mushaf_reader_args.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/models/surah_tafsir_args.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_reader_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_audio_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_home_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_search_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/surah_tafsir_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/tajweed_guide_screen.dart';
-import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/presentation/logic/cubit/remaining_questions_cubit.dart';
 import 'package:mishkat_almasabih/features/search/enhanced_public_search/presentation/logic/enhanced_search_cubit.dart';
 import 'package:mishkat_almasabih/features/search/search_history/presentation/logic/search_history_cubit.dart';
@@ -53,7 +70,11 @@ import 'package:mishkat_almasabih/features/send_suggestion/presentation/logic/se
 import 'package:mishkat_almasabih/features/serag/domain/entities/serag_hadith_context.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_cubit.dart';
+import 'package:mishkat_almasabih/features/serag/presentation/ui/open_siraj.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/ui/serag_chat_screen.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/logic/cubit/hadith_analysis_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/ui/siraj_analysis_args.dart';
+import 'package:mishkat_almasabih/features/hadith_analysis/presentation/ui/siraj_analysis_screen.dart';
 import '../../features/search/enhanced_public_search/presentation/ui/screens/public_search_result.dart';
 import '../di/dependency_injection.dart';
 import 'routes.dart';
@@ -62,10 +83,6 @@ import '../../features/authentication/login/presentation/ui/screens/login_screen
 import '../../features/onboarding/presentation/ui/onboarding_screen.dart';
 import 'package:mishkat_almasabih/features/onboarding/presentation/logic/onboarding_cubit.dart';
 import '../../features/splash/presentation/ui/splash_screen.dart';
-
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/ui/screens/ramadan_tasks_screen.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/logic/ramadan_tasks_cubit.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/ui/screens/ramadan_progress_screen.dart';
 
 import 'package:mishkat_almasabih/core/deep_links/ui/shared_link_hadith_screen.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_details/hadith_by_category_details_cubit.dart';
@@ -160,31 +177,29 @@ class AppRouter {
               ),
         );
       case Routes.homeScreen:
-        _logScreenView('HomeScreen');
+      case Routes.mainNavigationScreen:
+        _logScreenView(MainTab.home.analyticsName);
         return MaterialPageRoute(
+          settings: settings,
           builder:
               (_) => MultiBlocProvider(
                 providers: [
+                  BlocProvider(create: (_) => getIt<MainNavigationCubit>()),
                   BlocProvider(
                     create:
-                        (context) =>
+                        (_) =>
                             getIt<GetLibraryStatisticsCubit>()
                               ..emitGetStatisticsCubit(),
                   ),
-
-                  BlocProvider(create: (context) => getIt<BookDataCubit>()),
-                  BlocProvider(create: (context) => getIt<DailyHadithCubit>()),
+                  // Eager, so history is ready before the first search.
                   BlocProvider(
-                    create: (context) => getIt<SearchHistoryCubit>()..init(),
-                  ),
-                  BlocProvider(
-                    create:
-                        (context) =>
-                            getIt<RandomAhadithCubit>()
-                              ..emitRandomStats(),
+                    lazy: false,
+                    create: (_) => getIt<SearchHistoryCubit>()..init(),
                   ),
                 ],
-                child: const HomeScreen(),
+                child: MainNavigationScreen(
+                  onTabChanged: (tab) => _logScreenView(tab.analyticsName),
+                ),
               ),
         );
       case Routes.searchScreen:
@@ -249,6 +264,7 @@ class AppRouter {
                   BlocProvider(
                     create: (context) => getIt<GetLibraryStatisticsCubit>(),
                   ),
+                  BlocProvider(create: (context) => getIt<LibraryBooksCubit>()),
                 ],
                 child: const LibraryBooksScreen(),
               ),
@@ -256,16 +272,15 @@ class AppRouter {
 
       case Routes.bookChaptersScreen:
         _logScreenView('BookChaptersScreen');
-        final args = settings.arguments as List<dynamic>;
-        final bookSlug = args[0];
+        final book = settings.arguments as BookChaptersArgs;
         return MaterialPageRoute(
           builder:
               (_) => BlocProvider(
                 create:
                     (context) =>
                         getIt<ChaptersCubit>()
-                          ..emitGetBookChapters(bookSlug: bookSlug),
-                child: BookChaptersScreen(args: args),
+                          ..emitGetBookChapters(bookSlug: book.bookSlug),
+                child: BookChaptersScreen(book: book),
               ),
         );
       case Routes.publicSearchSCreen:
@@ -361,7 +376,12 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const AboutUsScreen());
       case Routes.serag:
         _logScreenView('SeragScreen');
-        final query = settings.arguments as SeragHadithContext;
+        final chat = switch (settings.arguments) {
+          final SeragChatArgs args => args,
+          final SeragHadithContext hadith => SeragChatArgs(hadith: hadith),
+          _ => null,
+        };
+        if (chat == null) return null;
 
         return MaterialPageRoute(
           builder:
@@ -379,7 +399,25 @@ class AppRouter {
                     create: (context) => getIt<ChatHistoryCubit>()..clearMessages(),
                   ),
                 ],
-                child: SeragChatScreen(model: query),
+                child: SeragChatScreen(args: chat),
+              ),
+        );
+
+      case Routes.sirajAnalysis:
+        _logScreenView('SirajAnalysisScreen');
+        final analysis = settings.arguments as SirajAnalysisArgs;
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (_) =>
+                        getIt<HadithAnalysisCubit>()..analyzeHadith(
+                          hadith: analysis.hadith,
+                          attribution: analysis.attribution,
+                          grade: analysis.grade,
+                          reference: analysis.reference,
+                        ),
+                child: SirajAnalysisScreen(args: analysis),
               ),
         );
 
@@ -405,9 +443,40 @@ class AppRouter {
         _logScreenView('QuranScreen');
         return MaterialPageRoute(
           builder:
-              (_) => BlocProvider(
-                create: (context) => getIt<QuranIndexCubit>()..load(),
+              (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (context) => getIt<QuranIndexCubit>()..load(),
+                  ),
+                  // Loaded only once the reader opens the ahzāb.
+                  BlocProvider(
+                    create: (context) => getIt<QuranHizbIndexCubit>(),
+                  ),
+                  BlocProvider(
+                    create: (context) => getIt<QuranReflectionCubit>()..load(),
+                  ),
+                ],
                 child: const QuranHomeScreen(),
+              ),
+        );
+      case Routes.quranAudio:
+        _logScreenView('QuranAudioScreen');
+        return MaterialPageRoute(
+          settings: settings,
+          builder:
+              (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (_) => getIt<QuranAudioCatalogCubit>()..load(),
+                  ),
+                  BlocProvider(
+                    create:
+                        (_) =>
+                            getIt<QuranEditionsCubit>()
+                              ..load(QuranEditionType.recitation),
+                  ),
+                ],
+                child: const QuranAudioScreen(),
               ),
         );
       case Routes.mushafReader:
@@ -416,6 +485,8 @@ class AppRouter {
           final MushafReaderArgs args => args,
           _ => const MushafReaderArgs(),
         };
+        // The recitation is the app's, not the mushaf's: it plays on once
+        // the mushaf is closed.
         return MaterialPageRoute(
           builder:
               (_) => BlocProvider(
@@ -424,22 +495,77 @@ class AppRouter {
                         getIt<MushafReaderCubit>()..init(
                           initialPage: args.initialPage,
                           highlightAyahId: args.highlightAyahId,
+                          surahNumber: args.surahNumber,
                         ),
-                child: MushafReaderScreen(initialPage: args.initialPage),
+                child: MushafReaderScreen(
+                  initialPage: args.initialPage,
+                  surahNumber: args.surahNumber,
+                  recitation: args.recitation,
+                ),
               ),
         );
       case Routes.quranSearch:
         _logScreenView('QuranSearchScreen');
         return MaterialPageRoute(
           builder:
-              (_) => BlocProvider(
-                create: (context) => getIt<QuranSearchCubit>(),
+              (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (context) => getIt<QuranSearchCubit>()),
+                  BlocProvider(
+                    create:
+                        (context) => getIt<QuranTafsirSearchCubit>()..init(),
+                  ),
+                ],
                 child: const QuranSearchScreen(),
               ),
         );
       case Routes.tajweedGuide:
         _logScreenView('TajweedGuideScreen');
         return MaterialPageRoute(builder: (_) => const TajweedGuideScreen());
+      case Routes.surahTafsir:
+        _logScreenView('SurahTafsirScreen');
+        final args = switch (settings.arguments) {
+          final SurahTafsirArgs args => args,
+          _ => const SurahTafsirArgs(surahNumber: 1),
+        };
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<SurahTafsirCubit>()
+                          ..load(args.surahNumber, startAyah: args.startAyah),
+                child: const SurahTafsirScreen(),
+              ),
+        );
+      case Routes.azkarScreen:
+        _logScreenView('AzkarScreen');
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create: (context) => getIt<AzkarHomeCubit>()..load(),
+                child: const AzkarHomeScreen(),
+              ),
+        );
+      case Routes.azkarReader:
+        _logScreenView('AzkarReaderScreen');
+        final azkar = switch (settings.arguments) {
+          final AzkarReaderArgs args => args,
+          _ => null,
+        };
+        if (azkar == null) return null;
+        // The recitations are the app's, not the chapter's: one plays on
+        // once the chapter is closed.
+        return MaterialPageRoute(
+          builder:
+              (_) => BlocProvider(
+                create:
+                    (context) =>
+                        getIt<AzkarReaderCubit>()
+                          ..load(azkar.categoryId, zikrId: azkar.zikrId),
+                child: AzkarReaderScreen(args: azkar),
+              ),
+        );
       case Routes.categoriesScreen:
         _logScreenView('CategoriesScreen');
         return MaterialPageRoute(
@@ -451,20 +577,23 @@ class AppRouter {
         );
       case Routes.ahadithListScreen:
         _logScreenView('AhadithListScreen');
-        final args = settings.arguments as Map<String, dynamic>;
-        final categoryId = args['categoryId'] as String;
-        final categoryTitle = args['categoryTitle'] as String?;
+        final category = switch (settings.arguments) {
+          final CategoryHadithsArgs args => args,
+          final Map<String, dynamic> map => CategoryHadithsArgs(
+            categoryId: map['categoryId'] as String,
+            title: (map['categoryTitle'] as String?) ?? 'أحاديث التصنيف',
+          ),
+          _ => null,
+        };
+        if (category == null) return null;
         return MaterialPageRoute(
           builder:
               (_) => BlocProvider(
                 create:
                     (context) =>
                         getIt<HadithByCategoryCubit>()
-                          ..getAhadithByCategory(categoryId),
-                child: AhadithListScreen(
-                  categoryId: categoryId,
-                  categoryTitle: categoryTitle,
-                ),
+                          ..getAhadithByCategory(category.categoryId),
+                child: AhadithListScreen(args: category),
               ),
         );
       case Routes.shareHadithLink:

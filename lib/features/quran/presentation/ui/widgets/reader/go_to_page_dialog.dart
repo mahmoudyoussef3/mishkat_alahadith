@@ -2,25 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
-import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_metrics.dart';
-import 'package:mushaf_text/mushaf_text.dart';
+import 'package:mushaf_text/mushaf_text.dart' show toArabicNumerals;
 
 /// Asks for a page number; resolves to it, or null if dismissed.
 Future<int?> showGoToPageDialog(
   BuildContext context, {
-  required MushafColors colors,
+  required int currentPage,
 }) {
   return showDialog<int>(
     context: context,
-    builder: (_) => _GoToPageDialog(colors: colors),
+    builder: (_) => _GoToPageDialog(currentPage: currentPage),
   );
 }
 
 class _GoToPageDialog extends StatefulWidget {
-  final MushafColors colors;
+  final int currentPage;
 
-  const _GoToPageDialog({required this.colors});
+  const _GoToPageDialog({required this.currentPage});
 
   @override
   State<_GoToPageDialog> createState() => _GoToPageDialogState();
@@ -33,7 +34,14 @@ class _GoToPageDialogState extends State<_GoToPageDialog> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
+    // Selected, so typing replaces it and submitting it stays on the page.
+    final current = toArabicNumerals(widget.currentPage);
+    _controller = TextEditingController.fromValue(
+      TextEditingValue(
+        text: current,
+        selection: TextSelection(baseOffset: 0, extentOffset: current.length),
+      ),
+    );
   }
 
   @override
@@ -42,15 +50,14 @@ class _GoToPageDialogState extends State<_GoToPageDialog> {
     super.dispose();
   }
 
+  String get _range =>
+      'من ${toArabicNumerals(QuranMetrics.firstPage)} '
+      'إلى ${toArabicNumerals(QuranMetrics.pageCount)}';
+
   void _submit() {
     final page = int.tryParse(toWesternDigits(_controller.text.trim()));
     if (page == null || !QuranMetrics.isValidPage(page)) {
-      setState(
-        () =>
-            _error =
-                'أدخل رقمًا من ${toArabicNumerals(QuranMetrics.firstPage)} '
-                'إلى ${toArabicNumerals(QuranMetrics.pageCount)}',
-      );
+      setState(() => _error = 'أدخل رقمًا $_range');
       return;
     }
     Navigator.of(context).pop(page);
@@ -58,58 +65,69 @@ class _GoToPageDialogState extends State<_GoToPageDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = widget.colors;
+    final palette = AppPaletteOverride.of(context);
+    final fieldBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14.r),
+      borderSide: BorderSide.none,
+    );
+    OutlineInputBorder ring(Color color) => fieldBorder.copyWith(
+      borderSide: BorderSide(color: color, width: 1.5),
+    );
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: AlertDialog(
-        backgroundColor: colors.paper,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        title: Text(
-          'الانتقال إلى صفحة',
-          style: QuranTextStyles.sheetTitle(colors.ink),
-        ),
-        content: TextField(
-          controller: _controller,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.go,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp('[0-9٠-٩۰-۹]')),
-            LengthLimitingTextInputFormatter(3),
-          ],
-          style: QuranTextStyles.filterField(colors.ink),
-          cursorColor: colors.accent,
-          decoration: InputDecoration(
-            hintText:
-                'رقم الصفحة (${toArabicNumerals(QuranMetrics.firstPage)}–'
-                '${toArabicNumerals(QuranMetrics.pageCount)})',
-            errorText: _error,
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: colors.accent, width: 1.5),
+        title: const Text('الانتقال إلى صفحة'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'أدخل رقم صفحة $_range',
+              style: TextStyles.caption.copyWith(
+                fontSize: 13.sp,
+                color: palette.secondaryText,
+              ),
             ),
-          ),
-          onChanged: (_) {
-            if (_error != null) setState(() => _error = null);
-          },
-          onSubmitted: (_) => _submit(),
+            SizedBox(height: 14.h),
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.go,
+              textAlign: TextAlign.center,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp('[0-9٠-٩۰-۹]')),
+                LengthLimitingTextInputFormatter(3),
+              ],
+              style: TextStyles.headlineMedium.copyWith(
+                fontWeight: FontWeight.w800,
+                color: palette.primaryText,
+              ),
+              decoration: InputDecoration(
+                errorText: _error,
+                filled: true,
+                fillColor: palette.lightGray,
+                contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                border: fieldBorder,
+                enabledBorder: fieldBorder,
+                focusedBorder: ring(palette.primaryPurple),
+                errorBorder: ring(palette.error),
+                focusedErrorBorder: ring(palette.error),
+              ),
+              onChanged: (_) {
+                if (_error != null) setState(() => _error = null);
+              },
+              onSubmitted: (_) => _submit(),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            style: TextButton.styleFrom(foregroundColor: colors.accent),
             child: const Text('إلغاء'),
           ),
-          FilledButton(
-            onPressed: _submit,
-            style: FilledButton.styleFrom(
-              backgroundColor: colors.accent,
-              foregroundColor: colors.paper,
-            ),
-            child: const Text('انتقال'),
-          ),
+          FilledButton(onPressed: _submit, child: const Text('انتقال')),
         ],
       ),
     );

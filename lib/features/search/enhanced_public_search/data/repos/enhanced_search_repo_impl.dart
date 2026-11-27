@@ -1,7 +1,7 @@
 import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/cache_fallback.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 import 'package:mishkat_almasabih/core/networking/network_info.dart';
 
@@ -30,21 +30,17 @@ class EnhancedSearchRepoImpl implements EnhancedSearchRepo {
   }
 
   @override
-  Future<ApiResult<List<ExplainedHadith>>> search(String searchTerm) async {
-    try {
-      await _networkInfo.ensureConnected();
-      final response = await _apiService.getEnhancedSearch({
-        "searchTerm": searchTerm,
-      });
-      await _cacheService.saveData<EnhancedSearch>(
-        key: CacheKeys.enhancedSearch(searchTerm),
-        data: response,
-        toJson: (d) => d.toJson(),
-        cacheExpirationHours: 6,
-      );
-      return ApiResult.success(response.toEntities());
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
+  Future<ApiResult<List<ExplainedHadith>>> search(String searchTerm) =>
+      _cacheService
+          .fetchWithStaleFallback<EnhancedSearch, List<ExplainedHadith>>(
+            key: CacheKeys.enhancedSearch(searchTerm),
+            fetch: () async {
+              await _networkInfo.ensureConnected();
+              return _apiService.getEnhancedSearch({"searchTerm": searchTerm});
+            },
+            toJson: (d) => d.toJson(),
+            fromJson: EnhancedSearch.fromJson,
+            toEntity: (d) => d.toEntities(),
+            cacheExpirationHours: 6,
+          );
 }

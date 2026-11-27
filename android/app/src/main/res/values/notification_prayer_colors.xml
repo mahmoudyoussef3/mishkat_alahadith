@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Palette for the custom prayer notification card (collapsed + expanded).
+     The card paints its own brand surface, so the same values work on both
+     light and dark system notification shades. -->
+<resources>
+    <color name="notification_prayer_card_start">#5E35B1</color>
+    <color name="notification_prayer_card_center">#6A3FD0</color>
+    <color name="notification_prayer_card_end">#7440E9</color>
+    <color name="notification_prayer_card_glow">#2EFFFFFF</color>
+    <color name="notification_prayer_card_glow_fade">#00FFFFFF</color>
+    <color name="notification_prayer_card_stroke">#26FFFFFF</color>
+    <color name="notification_prayer_badge_fill">#26FFFFFF</color>
+    <color name="notification_prayer_badge_stroke">#4DFFFFFF</color>
+    <color name="notification_prayer_divider">#29FFFFFF</color>
+    <color name="notification_prayer_text_primary">#FFFFFFFF</color>
+    <color name="notification_prayer_text_secondary">#E8DEFA</color>
+    <color name="notification_prayer_text_muted">#D6C8FB</color>
+    <color name="notification_prayer_accent">#FFE082</color>
+    <color name="notification_prayer_accent_deep">#FFC107</color>
+    <color name="notification_prayer_on_accent">#311B6B</color>
+</resources>

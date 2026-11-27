@@ -32,15 +32,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       icon: Icons.auto_stories_outlined,
       gradient: OnboardingDecorations.primaryGradient(),
     ),
-    OnboardingPage(
-      title: 'سراج - مساعدك الذكي',
-      subtitle: 'شرح فوري مدعوم بالذكاء الاصطناعي',
-      description:
-          'اقرأ الحديث واحصل على شرح سريع ومبسط، واسأل "سراج" عن أي تفاصيل إضافية لفهم النصوص بعمق.',
-      imageUrl: 'assets/images/serag_logo.jpg',
-      icon: Icons.smart_toy_outlined,
-      gradient: OnboardingDecorations.primaryGradient(),
-    ),
+    // Siraj is disabled for now; uncomment to bring it back.
+    // OnboardingPage(
+    //   title: 'سراج - مساعدك الذكي',
+    //   subtitle: 'شرح فوري مدعوم بالذكاء الاصطناعي',
+    //   description:
+    //       'اقرأ الحديث واحصل على شرح سريع ومبسط، واسأل "سراج" عن أي تفاصيل إضافية لفهم النصوص بعمق.',
+    //   imageUrl: 'assets/images/serag_logo.jpg',
+    //   icon: Icons.smart_toy_outlined,
+    //   gradient: OnboardingDecorations.primaryGradient(),
+    // ),
     OnboardingPage(
       title: 'بحث متقدم',
       subtitle: 'العثور على أي حديث بسهولة',

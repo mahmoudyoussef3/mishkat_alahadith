@@ -1,0 +1,12 @@
+import 'package:mishkat_almasabih/core/networking/api_result.dart';
+
+import '../entities/read_aloud_settings.dart';
+import '../repos/read_aloud_repo.dart';
+
+class GetReadAloudSettingsUseCase {
+  final ReadAloudRepo _repo;
+
+  GetReadAloudSettingsUseCase(this._repo);
+
+  Future<ApiResult<ReadAloudSettings>> call() => _repo.getSettings();
+}

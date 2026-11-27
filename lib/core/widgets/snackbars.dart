@@ -26,3 +26,10 @@ void showErrorSnackbar(BuildContext context, String message) {
     ),
   );
 }
+
+/// Neutral confirmation in the theme's snackbar style.
+void showInfoSnackbar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
+}

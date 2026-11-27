@@ -25,15 +25,6 @@ class RamadanProgress extends StatelessWidget {
     required this.hijriDateString,
   });
 
-  String _toArabicNumerals(int number) {
-    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return number
-        .toString()
-        .split('')
-        .map((d) => arabicDigits[int.parse(d)])
-        .join();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -231,13 +222,4 @@ class _ProgressBar extends StatelessWidget {
       ],
     );
   }
-}
-
-String _toArabicNumerals(int number) {
-  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-  return number
-      .toString()
-      .split('')
-      .map((d) => arabicDigits[int.parse(d)])
-      .join();
 }

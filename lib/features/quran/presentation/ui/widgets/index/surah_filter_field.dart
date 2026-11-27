@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mishkat_almasabih/core/theming/quran_decorations.dart';
-import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
+import 'package:mishkat_almasabih/core/widgets/search_bar_widget.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 
 /// Narrows the surah list by name or number as the reader types.
 class SurahFilterField extends StatefulWidget {
-  final QuranSurfaceColors colors;
-
-  const SurahFilterField({super.key, required this.colors});
+  const SurahFilterField({super.key});
 
   @override
   State<SurahFilterField> createState() => _SurahFilterFieldState();
@@ -34,16 +31,9 @@ class _SurahFilterFieldState extends State<SurahFilterField> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = widget.colors;
-    return TextField(
+    return SearchBarWidget(
       controller: _controller,
-      textInputAction: TextInputAction.search,
-      style: QuranTextStyles.filterField(colors.title),
-      cursorColor: colors.accent,
-      decoration: QuranDecorations.filterField(
-        colors,
-        'ابحث باسم السورة أو رقمها',
-      ),
+      hintText: 'ابحث باسم السورة أو رقمها…',
       onChanged: context.read<QuranIndexCubit>().filterSurahs,
     );
   }

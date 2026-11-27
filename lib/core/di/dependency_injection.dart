@@ -1,15 +1,49 @@
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:get_it/get_it.dart';
 
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/features/hadith_details/presentation/logic/hadith_reader_cubit.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 import 'package:mishkat_almasabih/core/networking/categories_api_service.dart';
 import 'package:mishkat_almasabih/core/networking/dio_factory.dart';
 import 'package:mishkat_almasabih/core/data/datasources/hadeethenc_datasource.dart';
 import 'package:mishkat_almasabih/core/networking/network_info.dart';
 import 'package:mishkat_almasabih/core/storage/token_storage.dart';
+import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_audio_cache_datasource.dart';
+import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_audio_player_datasource.dart';
+import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_catalog_local_datasource.dart';
+import 'package:mishkat_almasabih/features/azkar/data/datasources/azkar_preferences_local_datasource.dart';
+import 'package:mishkat_almasabih/features/azkar/data/repos/azkar_audio_repo_impl.dart';
+import 'package:mishkat_almasabih/features/azkar/data/repos/azkar_repo_impl.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/repos/azkar_audio_repo.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/repos/azkar_repo.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_azkar_catalog_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_azkar_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_favorite_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_suggested_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/get_today_azkar_progress_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/last_azkar_audio_use_cases.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/pause_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/play_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/prepare_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/reset_azkar_category_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/resume_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/save_azkar_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/search_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/set_zikr_count_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/stand_by_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/stop_azkar_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/toggle_favorite_azkar_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_audio_commands_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_audio_taken_over_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/domain/usecases/watch_azkar_playback_use_case.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_audio/azkar_audio_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_home/azkar_home_cubit.dart';
+import 'package:mishkat_almasabih/features/azkar/presentation/logic/azkar_reader/azkar_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith/data/repos/ahadith_repo_impl.dart';
 import 'package:mishkat_almasabih/features/ahadith/domain/repos/ahadith_repo.dart';
 import 'package:mishkat_almasabih/features/ahadith/domain/usecases/cache_chapter_ahadith_use_case.dart';
@@ -58,6 +92,9 @@ import 'package:mishkat_almasabih/features/bookmark/presentation/logic/get_bookm
 import 'package:mishkat_almasabih/features/chapters/data/repos/chapters_repo_impl.dart';
 import 'package:mishkat_almasabih/features/chapters/domain/repos/chapters_repo.dart';
 import 'package:mishkat_almasabih/features/chapters/domain/usecases/get_book_chapters_use_case.dart';
+import 'package:mishkat_almasabih/features/chapters/domain/usecases/get_last_read_chapter_use_case.dart';
+import 'package:mishkat_almasabih/features/chapters/domain/usecases/save_last_read_chapter_use_case.dart';
+import 'package:mishkat_almasabih/features/chapters/data/datasources/chapters_progress_local_datasource.dart';
 import 'package:mishkat_almasabih/features/chapters/domain/usecases/get_cached_book_chapters_use_case.dart';
 import 'package:mishkat_almasabih/features/chapters/presentation/logic/cubit/chapters_cubit.dart';
 import 'package:mishkat_almasabih/features/hadith_analysis/data/repos/hadith_analysis_repo_impl.dart';
@@ -70,6 +107,13 @@ import 'package:mishkat_almasabih/features/hadith_daily/domain/repos/daily_hadit
 import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/fetch_daily_hadith_use_case.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/get_saved_daily_hadith_use_case.dart';
 import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_cubit.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/data/datasources/daily_hadith_notification_datasource.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/data/repos/daily_hadith_notification_repo_impl.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/repos/daily_hadith_notification_repo.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/get_daily_hadith_notification_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/set_daily_hadith_notification_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/domain/usecases/sync_daily_hadith_notification_use_case.dart';
+import 'package:mishkat_almasabih/features/hadith_daily/presentation/logic/daily_hadith_notification_cubit.dart';
 import 'package:mishkat_almasabih/features/library/data/repos/library_repo_impl.dart';
 import 'package:mishkat_almasabih/features/library/domain/repos/library_repo.dart';
 import 'package:mishkat_almasabih/features/library/domain/usecases/get_cached_category_books_use_case.dart';
@@ -97,6 +141,30 @@ import 'package:mishkat_almasabih/features/theme/domain/repos/theme_repo.dart';
 import 'package:mishkat_almasabih/features/theme/domain/usecases/get_theme_mode_use_case.dart';
 import 'package:mishkat_almasabih/features/theme/domain/usecases/save_theme_mode_use_case.dart';
 import 'package:mishkat_almasabih/features/theme/presentation/logic/theme_cubit.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/data/datasources/reading_preferences_local_datasource.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/data/repos/reading_preferences_repo_impl.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/domain/repos/reading_preferences_repo.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/domain/usecases/get_hadith_font_scale_use_case.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/domain/usecases/save_hadith_font_scale_use_case.dart';
+import 'package:mishkat_almasabih/features/reading_preferences/presentation/logic/hadith_font_scale_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/data/datasources/read_aloud_settings_local_datasource.dart';
+import 'package:mishkat_almasabih/features/read_aloud/data/datasources/text_to_speech_datasource.dart';
+import 'package:mishkat_almasabih/features/read_aloud/data/repos/read_aloud_repo_impl.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/repos/read_aloud_repo.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/build_hadith_speech_track_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/export_hadith_audio_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/get_read_aloud_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/inspect_speech_engine_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/pause_speech_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/prepare_speech_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/resume_speech_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/save_read_aloud_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/speak_text_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/stop_speech_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/watch_read_aloud_settings_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/domain/usecases/watch_speech_events_use_case.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_cubit.dart';
+import 'package:mishkat_almasabih/features/read_aloud/presentation/logic/read_aloud_settings_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/data/datasources/device_location_datasource.dart';
 import 'package:mishkat_almasabih/features/prayer_times/data/datasources/prayer_location_local_datasource.dart';
 import 'package:mishkat_almasabih/core/prayer/prayer_times_calculator.dart';
@@ -107,10 +175,14 @@ import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_pray
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/open_battery_optimization_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/set_prayer_notifications_enabled_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/notifications/prayer_notifications_cubit.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_prayer_pre_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/set_prayer_pre_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/presentation/logic/notifications/prayer_pre_reminder_cubit.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/repos/prayer_times_repo.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/calculate_prayer_times_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_device_position_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_next_prayer_use_case.dart';
+import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_previous_prayer_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/get_saved_prayer_location_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/refresh_prayer_home_widget_use_case.dart';
 import 'package:mishkat_almasabih/features/prayer_times/domain/usecases/request_location_access_use_case.dart';
@@ -152,6 +224,7 @@ import 'package:mishkat_almasabih/features/random_ahadith/data/datasources/custo
 import 'package:mishkat_almasabih/features/random_ahadith/data/repos/random_ahadith_repo_impl.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/domain/repos/random_ahadith_repo.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/domain/usecases/get_random_ahadith_use_case.dart';
+import 'package:mishkat_almasabih/features/random_ahadith/domain/usecases/get_cached_random_ahadith_use_case.dart';
 import 'package:mishkat_almasabih/features/random_ahadith/presentation/logic/random_ahadith_cubit.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/data/repos/remaining_questions_repo_impl.dart';
 import 'package:mishkat_almasabih/features/remaining_questions/domain/repos/remaining_questions_repo.dart';
@@ -177,6 +250,15 @@ import 'package:mishkat_almasabih/features/search_with_filters/presentation/logi
 import 'package:mishkat_almasabih/features/send_suggestion/data/datasources/suggestion_remote_datasource.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/data/repos/suggestion_repo_impl.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/domain/repos/suggestion_repo.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/data/datasources/daily_ayah_reminder_datasource.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/data/datasources/daily_ayah_widget_datasource.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/data/repos/daily_ayah_repo_impl.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/repos/daily_ayah_repo.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/get_daily_ayah_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/get_daily_ayahs_use_case.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/set_daily_ayah_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/domain/usecases/sync_daily_ayah_use_case.dart';
+import 'package:mishkat_almasabih/features/daily_ayah/presentation/logic/daily_ayah_reminder_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_reading_local_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/datasources/quran_text_local_datasource.dart';
 import 'package:mishkat_almasabih/features/quran/data/repos/quran_reading_repo_impl.dart';
@@ -185,6 +267,7 @@ import 'package:mishkat_almasabih/features/quran/domain/repos/quran_reading_repo
 import 'package:mishkat_almasabih/features/quran/domain/repos/quran_repo.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/filter_surahs_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_ayah_details_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_flowing_page_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_juz_index_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_last_read_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/get_mushaf_settings_use_case.dart';
@@ -197,10 +280,44 @@ import 'package:mishkat_almasabih/features/quran/domain/usecases/save_last_read_
 import 'package:mishkat_almasabih/features/quran/domain/usecases/save_mushaf_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/search_quran_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/toggle_quran_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/audio/quran_audio_catalog_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/flowing_page/flowing_page_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_cloud_cache_local_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_cloud_remote_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/datasources/quran_recitation_player_datasource.dart';
+import 'package:mishkat_almasabih/features/quran/data/repos/quran_cloud_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran/data/repos/quran_recitation_player_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran/domain/repos/quran_cloud_repo.dart';
+import 'package:mishkat_almasabih/features/quran/domain/repos/quran_recitation_player_repo.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/filter_quran_editions_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_ayah_commentary_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_hizb_index_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_quran_editions_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_reflection_ayah_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/get_surah_commentary_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/load_recitation_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/quran_study_settings_use_cases.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/recitation_player_use_cases.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/recitation_resume_use_cases.dart';
+import 'package:mishkat_almasabih/features/quran/domain/usecases/search_quran_edition_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_commentary/ayah_commentary_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/hizb_index/quran_hizb_index_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_editions/quran_editions_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/reflection/quran_reflection_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/surah_tafsir/surah_tafsir_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/tafsir_search/quran_tafsir_search_cubit.dart';
+import 'package:mishkat_almasabih/features/quran_wird/data/datasources/quran_wird_reminder_datasource.dart';
+import 'package:mishkat_almasabih/features/quran_wird/data/repos/quran_wird_repo_impl.dart';
+import 'package:mishkat_almasabih/features/quran_wird/domain/repos/quran_wird_repo.dart';
+import 'package:mishkat_almasabih/features/quran_wird/domain/usecases/get_quran_wird_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/quran_wird/domain/usecases/set_quran_wird_reminder_enabled_use_case.dart';
+import 'package:mishkat_almasabih/features/quran_wird/domain/usecases/sync_quran_wird_reminder_use_case.dart';
+import 'package:mishkat_almasabih/features/quran_wird/presentation/logic/quran_wird_reminder_cubit.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/domain/usecases/send_suggestion_use_case.dart';
 import 'package:mishkat_almasabih/features/send_suggestion/presentation/logic/send_suggestion_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/data/repos/chat_history_repo_impl.dart';
@@ -213,6 +330,13 @@ import 'package:mishkat_almasabih/features/serag/domain/usecases/load_chat_histo
 import 'package:mishkat_almasabih/features/serag/domain/usecases/save_chat_history_use_case.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/logic/chat_history/chat_history_cubit.dart';
 import 'package:mishkat_almasabih/features/serag/presentation/logic/serag/serag_cubit.dart';
+import 'package:mishkat_almasabih/features/main_navigation/presentation/logic/main_navigation_cubit.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/logic/mini_player_placement_cubit.dart';
+import 'package:mishkat_almasabih/features/mini_player/presentation/ui/mini_player_navigator_observer.dart';
+import 'package:mishkat_almasabih/core/audio/app_audio_player.dart';
+import 'package:mishkat_almasabih/core/audio/audio_lengths_datasource.dart';
+import 'package:mishkat_almasabih/features/library/domain/usecases/get_library_books_use_case.dart';
+import 'package:mishkat_almasabih/features/library/presentation/logic/library_books/library_books_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -238,7 +362,22 @@ Future<void> setUpGetIt() async {
   _registerOnboarding();
   _registerSuggestions();
   _registerTheme();
+  _registerReadingPreferences();
+  _registerReadAloud();
   _registerQuran();
+  _registerDailyAyah();
+  _registerQuranWird();
+  _registerAzkar();
+  _registerMainNavigation();
+  _registerMiniPlayer();
+}
+
+/// What background tasks need, for the isolates they run in: those never
+/// run [setUpGetIt], and have no use for its network and Firebase setup.
+void setUpBackgroundGetIt() {
+  if (getIt.isRegistered<SyncDailyAyahUseCase>()) return;
+  _registerQuranText();
+  _registerDailyAyah();
 }
 
 void _registerCore() {
@@ -262,6 +401,22 @@ void _registerCore() {
   );
   getIt.registerLazySingleton<FirebaseRemoteConfig>(
     () => FirebaseRemoteConfig.instance,
+  );
+  // The app's one player, which the Quran and the azkar recite on, so two
+  // recitations can never overlap. Its file lengths are read with a client
+  // of its own: the recitations come from third parties, which must never
+  // see the app's headers or session token.
+  getIt.registerLazySingleton<AppAudioPlayer>(
+    () => AppAudioPlayer(
+      AudioLengthsDataSource(
+        Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 20),
+          ),
+        ),
+      ),
+    ),
   );
 }
 
@@ -335,11 +490,15 @@ void _registerLibrary() {
     () => GetLibraryStatisticsCubit(getIt(), getIt()),
   );
   getIt.registerFactory<BookDataCubit>(() => BookDataCubit(getIt(), getIt()));
+  getIt.registerLazySingleton<GetLibraryBooksUseCase>(
+    () => GetLibraryBooksUseCase(getIt()),
+  );
+  getIt.registerFactory<LibraryBooksCubit>(() => LibraryBooksCubit(getIt()));
 }
 
 void _registerChapters() {
   getIt.registerLazySingleton<ChaptersRepo>(
-    () => ChaptersRepoImpl(getIt(), getIt()),
+    () => ChaptersRepoImpl(getIt(), getIt(), ChaptersProgressLocalDataSource()),
   );
   getIt.registerLazySingleton<GetCachedBookChaptersUseCase>(
     () => GetCachedBookChaptersUseCase(getIt()),
@@ -347,7 +506,15 @@ void _registerChapters() {
   getIt.registerLazySingleton<GetBookChaptersUseCase>(
     () => GetBookChaptersUseCase(getIt()),
   );
-  getIt.registerFactory<ChaptersCubit>(() => ChaptersCubit(getIt(), getIt()));
+  getIt.registerLazySingleton<GetLastReadChapterUseCase>(
+    () => GetLastReadChapterUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveLastReadChapterUseCase>(
+    () => SaveLastReadChapterUseCase(getIt()),
+  );
+  getIt.registerFactory<ChaptersCubit>(
+    () => ChaptersCubit(getIt(), getIt(), getIt(), getIt()),
+  );
 }
 
 void _registerAhadith() {
@@ -392,6 +559,9 @@ void _registerNavigation() {
   );
   getIt.registerFactory<LocalHadithNavigationCubit>(
     () => LocalHadithNavigationCubit(getIt()),
+  );
+  getIt.registerFactory<HadithReaderCubit>(
+    () => HadithReaderCubit(getIt(), getIt(), getIt()),
   );
 }
 
@@ -442,6 +612,21 @@ void _registerDailyHadith() {
   );
   getIt.registerFactory<DailyHadithCubit>(
     () => DailyHadithCubit(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<DailyHadithNotificationRepo>(
+    () => DailyHadithNotificationRepoImpl(DailyHadithNotificationDataSource()),
+  );
+  getIt.registerLazySingleton<GetDailyHadithNotificationEnabledUseCase>(
+    () => GetDailyHadithNotificationEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetDailyHadithNotificationEnabledUseCase>(
+    () => SetDailyHadithNotificationEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SyncDailyHadithNotificationUseCase>(
+    () => SyncDailyHadithNotificationUseCase(getIt()),
+  );
+  getIt.registerFactory<DailyHadithNotificationCubit>(
+    () => DailyHadithNotificationCubit(getIt(), getIt()),
   );
 }
 
@@ -501,7 +686,7 @@ void _registerSearch() {
   );
 
   getIt.registerLazySingleton<SearchHistoryRepo>(
-    () => SearchHistoryRepoImpl(getIt(), getIt()),
+    () => SearchHistoryRepoImpl(getIt(), getIt(), getIt()),
   );
   getIt.registerLazySingleton<GetSearchHistoryUseCase>(
     () => GetSearchHistoryUseCase(getIt()),
@@ -522,17 +707,22 @@ void _registerSearch() {
 
 void _registerRandomAhadith() {
   getIt.registerLazySingleton<RandomAhadithRepo>(
-    () => RandomAhadithRepoImpl(getIt(), getIt()),
+    () => RandomAhadithRepoImpl(getIt(), getIt(), getIt()),
   );
   getIt.registerLazySingleton<GetRandomAhadithUseCase>(
     () => GetRandomAhadithUseCase(getIt()),
   );
-  getIt.registerFactory<RandomAhadithCubit>(() => RandomAhadithCubit(getIt()));
+  getIt.registerLazySingleton<GetCachedRandomAhadithUseCase>(
+    () => GetCachedRandomAhadithUseCase(getIt()),
+  );
+  getIt.registerFactory<RandomAhadithCubit>(
+    () => RandomAhadithCubit(getIt(), getIt()),
+  );
 }
 
 void _registerHadithAnalysis() {
   getIt.registerLazySingleton<HadithAnalysisRepo>(
-    () => HadithAnalysisRepoImpl(getIt(), getIt()),
+    () => HadithAnalysisRepoImpl(getIt(), getIt(), getIt()),
   );
   getIt.registerLazySingleton<AnalyzeHadithUseCase>(
     () => AnalyzeHadithUseCase(getIt()),
@@ -592,6 +782,9 @@ void _registerPrayerTimes() {
   getIt.registerLazySingleton<GetNextPrayerUseCase>(
     () => GetNextPrayerUseCase(),
   );
+  getIt.registerLazySingleton<GetPreviousPrayerUseCase>(
+    () => GetPreviousPrayerUseCase(),
+  );
   getIt.registerLazySingleton<RequestLocationAccessUseCase>(
     () => RequestLocationAccessUseCase(getIt()),
   );
@@ -617,10 +810,20 @@ void _registerPrayerTimes() {
     () => OpenBatteryOptimizationSettingsUseCase(getIt()),
   );
   getIt.registerFactory<PrayerNotificationsCubit>(
-    () => PrayerNotificationsCubit(getIt(), getIt(), getIt(), getIt()),
+    () => PrayerNotificationsCubit(getIt(), getIt(), getIt(), getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetPrayerPreReminderEnabledUseCase>(
+    () => GetPrayerPreReminderEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetPrayerPreReminderEnabledUseCase>(
+    () => SetPrayerPreReminderEnabledUseCase(getIt()),
+  );
+  getIt.registerFactory<PrayerPreReminderCubit>(
+    () => PrayerPreReminderCubit(getIt(), getIt()),
   );
   getIt.registerFactory<PrayerTimesCubit>(
     () => PrayerTimesCubit(
+      getIt(),
       getIt(),
       getIt(),
       getIt(),
@@ -719,19 +922,105 @@ void _registerTheme() {
   getIt.registerLazySingleton<ThemeCubit>(() => ThemeCubit(getIt(), getIt()));
 }
 
-void _registerQuran() {
+void _registerReadingPreferences() {
+  getIt.registerLazySingleton<ReadingPreferencesRepo>(
+    () => ReadingPreferencesRepoImpl(ReadingPreferencesLocalDataSource()),
+  );
+  getIt.registerLazySingleton<GetHadithFontScaleUseCase>(
+    () => GetHadithFontScaleUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveHadithFontScaleUseCase>(
+    () => SaveHadithFontScaleUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<HadithFontScaleCubit>(
+    () => HadithFontScaleCubit(getIt(), getIt()),
+  );
+}
+
+void _registerReadAloud() {
+  // flutter_tts delivers callbacks to one instance only, so the engine,
+  // and the cubit that follows it, are app-wide singletons.
+  getIt.registerLazySingleton<TextToSpeechDataSource>(
+    () => TextToSpeechDataSource(),
+  );
+  getIt.registerLazySingleton<ReadAloudRepo>(
+    () => ReadAloudRepoImpl(getIt(), ReadAloudSettingsLocalDataSource()),
+  );
+  getIt.registerLazySingleton<BuildHadithSpeechTrackUseCase>(
+    () => const BuildHadithSpeechTrackUseCase(),
+  );
+  getIt.registerLazySingleton<GetReadAloudSettingsUseCase>(
+    () => GetReadAloudSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveReadAloudSettingsUseCase>(
+    () => SaveReadAloudSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchReadAloudSettingsUseCase>(
+    () => WatchReadAloudSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchSpeechEventsUseCase>(
+    () => WatchSpeechEventsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<InspectSpeechEngineUseCase>(
+    () => InspectSpeechEngineUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PrepareSpeechUseCase>(
+    () => PrepareSpeechUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<SpeakTextUseCase>(
+    () => SpeakTextUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PauseSpeechUseCase>(
+    () => PauseSpeechUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ResumeSpeechUseCase>(
+    () => ResumeSpeechUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<StopSpeechUseCase>(
+    () => StopSpeechUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ExportHadithAudioUseCase>(
+    () => ExportHadithAudioUseCase(getIt(), getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<ReadAloudCubit>(
+    () => ReadAloudCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerLazySingleton<ReadAloudSettingsCubit>(
+    () => ReadAloudSettingsCubit(getIt(), getIt(), getIt()),
+  );
+}
+
+/// The bundled mushaf text, which the daily ayah reads too.
+void _registerQuranText() {
   getIt.registerLazySingleton<QuranTextLocalDataSource>(
     () => QuranTextLocalDataSource(),
   );
+  getIt.registerLazySingleton<QuranRepo>(() => QuranRepoImpl(getIt()));
+}
+
+void _registerQuran() {
+  _registerQuranText();
   getIt.registerLazySingleton<QuranReadingLocalDataSource>(
     () => QuranReadingLocalDataSource(),
   );
-  getIt.registerLazySingleton<QuranRepo>(() => QuranRepoImpl(getIt()));
   getIt.registerLazySingleton<QuranReadingRepo>(
     () => QuranReadingRepoImpl(getIt()),
   );
 
-  getIt.registerLazySingleton<GetSurahsUseCase>(() => GetSurahsUseCase(getIt()));
+  getIt.registerLazySingleton<GetSurahsUseCase>(
+    () => GetSurahsUseCase(getIt()),
+  );
   getIt.registerLazySingleton<FilterSurahsUseCase>(() => FilterSurahsUseCase());
   getIt.registerLazySingleton<GetJuzIndexUseCase>(
     () => GetJuzIndexUseCase(getIt()),
@@ -744,6 +1033,9 @@ void _registerQuran() {
   );
   getIt.registerLazySingleton<GetPageTajweedCountsUseCase>(
     () => GetPageTajweedCountsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetFlowingPageUseCase>(
+    () => GetFlowingPageUseCase(getIt()),
   );
   // A singleton so its search index is built once per app run.
   getIt.registerLazySingleton<SearchQuranUseCase>(
@@ -795,7 +1087,335 @@ void _registerQuran() {
     ),
   );
   getIt.registerFactory<AyahDetailsCubit>(() => AyahDetailsCubit(getIt()));
+  getIt.registerFactory<FlowingPageCubit>(() => FlowingPageCubit(getIt()));
   getIt.registerFactory<QuranSearchCubit>(() => QuranSearchCubit(getIt()));
+
+  _registerQuranCloud();
+}
+
+/// Recitations, tafsir and translations from AlQuran Cloud.
+void _registerQuranCloud() {
+  // A client of its own: the service is a third party, which must never
+  // see the app's headers or session token. The Quran recites on the app's
+  // one player, shared with the azkar, so two recitations can never
+  // overlap.
+  getIt.registerLazySingleton<QuranCloudRepo>(
+    () => QuranCloudRepoImpl(
+      QuranCloudRemoteDataSource(
+        Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 45),
+            headers: const {'Accept': 'application/json'},
+          ),
+        ),
+      ),
+      QuranCloudCacheLocalDataSource(),
+    ),
+  );
+  getIt.registerLazySingleton<QuranRecitationPlayerRepo>(
+    () =>
+        QuranRecitationPlayerRepoImpl(QuranRecitationPlayerDataSource(getIt())),
+  );
+
+  getIt.registerLazySingleton<GetQuranEditionsUseCase>(
+    () => GetQuranEditionsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<LoadRecitationUseCase>(
+    () => LoadRecitationUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetRecitationSettingsUseCase>(
+    () => GetRecitationSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveRecitationSettingsUseCase>(
+    () => SaveRecitationSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetCommentarySettingsUseCase>(
+    () => GetCommentarySettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveCommentarySettingsUseCase>(
+    () => SaveCommentarySettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PlayRecitationUseCase>(
+    () => PlayRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PauseRecitationUseCase>(
+    () => PauseRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ResumeRecitationUseCase>(
+    () => ResumeRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<StandByRecitationUseCase>(
+    () => StandByRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<StopRecitationUseCase>(
+    () => StopRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SkipToRecitationTrackUseCase>(
+    () => SkipToRecitationTrackUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetRecitationSpeedUseCase>(
+    () => SetRecitationSpeedUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SeekRecitationUseCase>(
+    () => SeekRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchRecitationUseCase>(
+    () => WatchRecitationUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchRecitationCommandsUseCase>(
+    () => WatchRecitationCommandsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchRecitationTakenOverUseCase>(
+    () => WatchRecitationTakenOverUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetRecitationResumePointUseCase>(
+    () => GetRecitationResumePointUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveRecitationResumePointUseCase>(
+    () => SaveRecitationResumePointUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetAyahCommentaryUseCase>(
+    () => GetAyahCommentaryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetSurahCommentaryUseCase>(
+    () => GetSurahCommentaryUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<SearchQuranEditionUseCase>(
+    () => SearchQuranEditionUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetReflectionAyahUseCase>(
+    () => GetReflectionAyahUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<GetHizbIndexUseCase>(
+    () => GetHizbIndexUseCase(getIt(), getIt()),
+  );
+
+  // App-wide: a recitation plays on from screen to screen, on the mini
+  // player, until it is stopped or the azkar replace it.
+  getIt.registerLazySingleton<QuranRecitationCubit>(
+    () => QuranRecitationCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerLazySingleton<FilterQuranEditionsUseCase>(
+    FilterQuranEditionsUseCase.new,
+  );
+  getIt.registerFactory<QuranAudioCatalogCubit>(
+    () => QuranAudioCatalogCubit(getIt(), getIt()),
+  );
+  getIt.registerFactory<QuranEditionsCubit>(
+    () => QuranEditionsCubit(getIt(), getIt()),
+  );
+  getIt.registerFactory<AyahCommentaryCubit>(
+    () => AyahCommentaryCubit(getIt(), getIt(), getIt()),
+  );
+  getIt.registerFactory<SurahTafsirCubit>(
+    () => SurahTafsirCubit(getIt(), getIt(), getIt()),
+  );
+  getIt.registerFactory<QuranTafsirSearchCubit>(
+    () => QuranTafsirSearchCubit(getIt(), getIt(), getIt()),
+  );
+  getIt.registerFactory<QuranHizbIndexCubit>(
+    () => QuranHizbIndexCubit(getIt()),
+  );
+  getIt.registerFactory<QuranReflectionCubit>(
+    () => QuranReflectionCubit(getIt(), getIt()),
+  );
+}
+
+void _registerDailyAyah() {
+  getIt.registerLazySingleton<DailyAyahRepo>(
+    () => DailyAyahRepoImpl(
+      DailyAyahWidgetDataSource(),
+      DailyAyahReminderDataSource(),
+    ),
+  );
+  getIt.registerLazySingleton<GetDailyAyahsUseCase>(
+    () => GetDailyAyahsUseCase(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<SyncDailyAyahUseCase>(
+    () => SyncDailyAyahUseCase(
+      getIt(),
+      getIt(),
+      // iOS keeps only the 64 soonest notifications, shared with the prayer
+      // reminders, so it is given fewer days at a time.
+      daysAhead: Platform.isIOS ? 7 : SyncDailyAyahUseCase.defaultDaysAhead,
+    ),
+  );
+  getIt.registerLazySingleton<GetDailyAyahReminderEnabledUseCase>(
+    () => GetDailyAyahReminderEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetDailyAyahReminderEnabledUseCase>(
+    () => SetDailyAyahReminderEnabledUseCase(getIt(), getIt()),
+  );
+  getIt.registerFactory<DailyAyahReminderCubit>(
+    () => DailyAyahReminderCubit(getIt(), getIt()),
+  );
+}
+
+void _registerQuranWird() {
+  getIt.registerLazySingleton<QuranWirdRepo>(
+    () => QuranWirdRepoImpl(QuranWirdReminderDataSource()),
+  );
+  getIt.registerLazySingleton<SyncQuranWirdReminderUseCase>(
+    () => SyncQuranWirdReminderUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetQuranWirdReminderEnabledUseCase>(
+    () => GetQuranWirdReminderEnabledUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetQuranWirdReminderEnabledUseCase>(
+    () => SetQuranWirdReminderEnabledUseCase(getIt(), getIt()),
+  );
+  getIt.registerFactory<QuranWirdReminderCubit>(
+    () => QuranWirdReminderCubit(getIt(), getIt()),
+  );
+}
+
+void _registerAzkar() {
+  getIt.registerLazySingleton<AzkarRepo>(
+    () => AzkarRepoImpl(
+      AzkarCatalogLocalDataSource(),
+      AzkarPreferencesLocalDataSource(),
+    ),
+  );
+  // A client of its own: the recitations come from a public CDN, which must
+  // never see the app's headers or session token. They play on the app's
+  // one player, shared with the Quran, so two recitations can never
+  // overlap.
+  getIt.registerLazySingleton<AzkarAudioRepo>(
+    () => AzkarAudioRepoImpl(
+      AzkarAudioCacheDataSource(
+        Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 60),
+          ),
+        ),
+      ),
+      AzkarAudioPlayerDataSource(getIt()),
+      AzkarPreferencesLocalDataSource(),
+    ),
+  );
+
+  getIt.registerLazySingleton<GetAzkarCatalogUseCase>(
+    () => GetAzkarCatalogUseCase(getIt()),
+  );
+  // A singleton so its search index is built once per catalogue.
+  getIt.registerLazySingleton<SearchAzkarUseCase>(SearchAzkarUseCase.new);
+  getIt.registerLazySingleton<GetSuggestedAzkarUseCase>(
+    GetSuggestedAzkarUseCase.new,
+  );
+  getIt.registerLazySingleton<GetTodayAzkarProgressUseCase>(
+    () => GetTodayAzkarProgressUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SetZikrCountUseCase>(
+    () => SetZikrCountUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ResetAzkarCategoryUseCase>(
+    () => ResetAzkarCategoryUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetFavoriteAzkarUseCase>(
+    () => GetFavoriteAzkarUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ToggleFavoriteAzkarUseCase>(
+    () => ToggleFavoriteAzkarUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetAzkarSettingsUseCase>(
+    () => GetAzkarSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveAzkarSettingsUseCase>(
+    () => SaveAzkarSettingsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PrepareAzkarAudioUseCase>(
+    () => PrepareAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PlayAzkarAudioUseCase>(
+    () => PlayAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<PauseAzkarAudioUseCase>(
+    () => PauseAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<ResumeAzkarAudioUseCase>(
+    () => ResumeAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<StopAzkarAudioUseCase>(
+    () => StopAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchAzkarPlaybackUseCase>(
+    () => WatchAzkarPlaybackUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<StandByAzkarAudioUseCase>(
+    () => StandByAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchAzkarAudioCommandsUseCase>(
+    () => WatchAzkarAudioCommandsUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<WatchAzkarAudioTakenOverUseCase>(
+    () => WatchAzkarAudioTakenOverUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<GetLastAzkarAudioUseCase>(
+    () => GetLastAzkarAudioUseCase(getIt()),
+  );
+  getIt.registerLazySingleton<SaveLastAzkarAudioUseCase>(
+    () => SaveLastAzkarAudioUseCase(getIt()),
+  );
+
+  getIt.registerFactory<AzkarHomeCubit>(
+    () => AzkarHomeCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  getIt.registerFactory<AzkarReaderCubit>(
+    () => AzkarReaderCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
+  // App-wide: a recitation plays on from screen to screen, on the mini
+  // player, until it is stopped or the Quran replaces it.
+  getIt.registerLazySingleton<AzkarAudioCubit>(
+    () => AzkarAudioCubit(
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+      getIt(),
+    ),
+  );
 }
 
 void _registerSuggestions() {
@@ -807,5 +1427,20 @@ void _registerSuggestions() {
   );
   getIt.registerFactory<SendSuggestionCubit>(
     () => SendSuggestionCubit(getIt()),
+  );
+}
+
+void _registerMainNavigation() {
+  getIt.registerFactory<MainNavigationCubit>(MainNavigationCubit.new);
+}
+
+/// The mini player over every screen: where it goes follows the app's
+/// navigator.
+void _registerMiniPlayer() {
+  getIt.registerLazySingleton<MiniPlayerPlacementCubit>(
+    MiniPlayerPlacementCubit.new,
+  );
+  getIt.registerLazySingleton<MiniPlayerNavigatorObserver>(
+    () => MiniPlayerNavigatorObserver(getIt()),
   );
 }

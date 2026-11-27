@@ -22,6 +22,12 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
             PrayerNotificationScheduler.EXTRA_FIRE_AT_MILLIS,
             System.currentTimeMillis(),
         )
+        val kind = intent.getStringExtra(PrayerNotificationScheduler.EXTRA_KIND)
+            ?: PrayerNotificationScheduler.KIND_ADHAN
+        val prayerAtMillis = intent.getLongExtra(
+            PrayerNotificationScheduler.EXTRA_PRAYER_AT_MILLIS,
+            fireAtMillis,
+        )
 
         PrayerNotificationScheduler.showPrayerNotification(
             context,
@@ -32,6 +38,8 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                 title = title,
                 body = body,
                 fireAtMillis = fireAtMillis,
+                kind = kind,
+                prayerAtMillis = prayerAtMillis,
             ),
         )
         PrayerNotificationScheduler.onPrayerNotificationFired(context, notificationId)

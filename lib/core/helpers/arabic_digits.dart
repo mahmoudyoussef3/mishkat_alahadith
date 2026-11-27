@@ -12,3 +12,16 @@ String toWesternDigits(String input) {
   }
   return buffer.toString();
 }
+
+/// Writes Western digits as Arabic-Indic ones, leaving every other character
+/// untouched: «255» → «٢٥٥».
+String toArabicDigits(String input) {
+  final buffer = StringBuffer();
+  for (final unit in input.codeUnits) {
+    buffer.writeCharCode(switch (unit) {
+      >= 0x30 && <= 0x39 => unit - 0x30 + 0x0660,
+      _ => unit,
+    });
+  }
+  return buffer.toString();
+}

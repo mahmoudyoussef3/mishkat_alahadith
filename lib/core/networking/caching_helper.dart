@@ -1,14 +1,36 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GenericCacheService {
   static const int _defaultCacheExpirationHours = 100;
 
+  /// How much is kept, oldest save out first. Expired entries are kept for
+  /// offline use, so nothing else ever removes them, and SharedPreferences
+  /// is read whole into memory at launch: an unbounded cache would slow
+  /// every start.
+  static const int defaultMaxEntries = 400;
+  static const int defaultMaxChars = 1200000;
+  static const String _indexKey = 'generic_cache_index';
+
   static GenericCacheService? _instance;
   static GenericCacheService get instance =>
       _instance ??= GenericCacheService._();
-  GenericCacheService._();
+  GenericCacheService._()
+    : maxEntries = defaultMaxEntries,
+      maxChars = defaultMaxChars;
+
+  @visibleForTesting
+  GenericCacheService.withLimits({
+    required this.maxEntries,
+    required this.maxChars,
+  });
+
+  final int maxEntries;
+
+  /// Summed over the stored JSON strings.
+  final int maxChars;
 
   SharedPreferences? _prefs;
 
@@ -39,6 +61,8 @@ class GenericCacheService {
         cacheExpirationHours,
       );
 
+      await _remember(key);
+
       log(
         '✅ Data cached successfully for key "$key": $dataResult && $timestampResult && $expirationResult',
       );
@@ -49,14 +73,56 @@ class GenericCacheService {
     }
   }
 
+  /// Marks [key] as the newest entry and forgets the oldest ones past
+  /// [maxEntries] or [maxChars]; [key] itself is always kept. The index is
+  /// read and replaced with no await in between, so saves running at the
+  /// same time cannot drop each other from it and escape the bound.
+  Future<void> _remember(String key) async {
+    final prefs = _prefs!;
+    int sizeOf(String k) => prefs.getString('${k}_data')?.length ?? 0;
+
+    final index = [
+      for (final kept in prefs.getStringList(_indexKey) ?? const <String>[])
+        if (kept != key) kept,
+      key,
+    ];
+    var chars = index.fold<int>(0, (sum, k) => sum + sizeOf(k));
+    final evicted = <String>[];
+    while (index.length > 1 &&
+        (index.length > maxEntries || chars > maxChars)) {
+      final oldest = index.removeAt(0);
+      chars -= sizeOf(oldest);
+      evicted.add(oldest);
+    }
+    final indexSaved = prefs.setStringList(_indexKey, index);
+    try {
+      for (final oldest in evicted) {
+        await _removeEntry(oldest);
+        log('🧹 Cache entry "$oldest" evicted to stay within bounds');
+      }
+    } finally {
+      await indexSaved;
+    }
+  }
+
+  Future<List<bool>> _removeEntry(String key) => Future.wait([
+    _prefs!.remove('${key}_data'),
+    _prefs!.remove('${key}_timestamp'),
+    _prefs!.remove('${key}_expiration'),
+  ]);
+
+  /// The data saved under [key], or null when there is none or it has
+  /// expired. With [allowStale], expired data is returned too: offline, an
+  /// old copy beats an empty screen.
   Future<T?> getData<T>({
     required String key,
     required T Function(Map<String, dynamic>) fromJson,
+    bool allowStale = false,
   }) async {
     try {
       await init();
 
-      if (!await _isCacheValid(key)) {
+      if (!allowStale && !await _isCacheValid(key)) {
         log('📅 Cache expired or invalid for key "$key"');
         return null;
       }
@@ -103,13 +169,17 @@ class GenericCacheService {
     try {
       await init();
 
-      final dataKey = '${key}_data';
-      final timestampKey = '${key}_timestamp';
-      final expirationKey = '${key}_expiration';
+      final index = _prefs!.getStringList(_indexKey);
+      final indexSaved =
+          index != null && index.contains(key)
+              ? _prefs!.setStringList(_indexKey, [
+                for (final kept in index)
+                  if (kept != key) kept,
+              ])
+              : null;
 
-      final result1 = await _prefs!.remove(dataKey);
-      final result2 = await _prefs!.remove(timestampKey);
-      final result3 = await _prefs!.remove(expirationKey);
+      final [result1, result2, result3] = await _removeEntry(key);
+      await indexSaved;
 
       log('🗑️ Cache cleared for key "$key": $result1 && $result2 && $result3');
       return result1 && result2 && result3;
@@ -229,9 +299,17 @@ class CacheKeys {
   static const String bookmarkCollections = 'bookmark_collections';
 
   static const String hadithCategories = 'hadith_categories_v2';
+  static const String randomAhadith = 'random_ahadith';
+  static const String searchHistory = 'search_history';
 
   static String paginatedAhadith(String bookSlug, int chapterId) =>
       'ahadith_${bookSlug}_$chapterId';
+
+  static String localAhadith(String bookSlug, int chapterId) =>
+      'local_ahadith_${bookSlug}_$chapterId';
+
+  static String arbainAhadith(String bookSlug, int chapterId) =>
+      'arbain_ahadith_${bookSlug}_$chapterId';
 
   static String chapters(String bookSlug) => 'chapters_$bookSlug';
 
@@ -242,6 +320,9 @@ class CacheKeys {
     int chapterNumber,
     String hadithNumber,
   ) => 'nav_${bookSlug}_${chapterNumber}_$hadithNumber';
+
+  static String localNavigation(String bookSlug, String hadithNumber) =>
+      'local_nav_${bookSlug}_$hadithNumber';
 
   static String enhancedSearch(String query) =>
       'enhanced_search_${query.hashCode}';
@@ -262,4 +343,16 @@ class CacheKeys {
       'ahadith_by_category_${categoryId}_${page}_$perPage';
 
   static String hadithDetails(String id) => 'hadith_details_$id';
+
+  static String hadithAnalysis(
+    String hadith,
+    String attribution,
+    String grade,
+    String reference,
+  ) {
+    // The length alongside the hash makes two hadiths sharing a key far
+    // less likely than the hash alone would.
+    final request = '$hadith|$attribution|$grade|$reference';
+    return 'hadith_analysis_${request.length}_${request.hashCode}';
+  }
 }

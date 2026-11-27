@@ -70,6 +70,12 @@ dependencies:
   sign_in_with_apple: ^8.1.0
   connectivity_plus: ^7.1.1
   mushaf_text: ^1.4.0
+  flutter_tts: ^4.2.5
+  just_audio: ^0.10.6
+  # Already resolved through just_audio; used directly to set the session
+  # category, so recitations play through the silent switch and screen lock.
+  audio_session: ^0.2.4
+  audio_service: ^0.18.19
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
@@ -104,18 +110,15 @@ flutter:
     - assets/images/book_covers/riyadiah40.jpeg
     - shorebird.yaml
     - assets/audio/yaamsallyallaelnaby.mp3
+    - assets/azkar/
 
   fonts:
-  - family: Amiri
+  - family: Almarai
     fonts:
-      - asset: assets/fonts/Amiri-Regular.ttf
-      - asset: assets/fonts/Amiri-Bold.ttf
+      - asset: assets/fonts/Almarai-Regular.ttf
+      - asset: assets/fonts/Almarai-Bold.ttf
         weight: 700
-      - asset: assets/fonts/Amiri-Italic.ttf
-        style: italic
-      - asset: assets/fonts/Amiri-BoldItalic.ttf
-        weight: 700
-        style: italic
+
 
   - family: Cairo
     fonts:

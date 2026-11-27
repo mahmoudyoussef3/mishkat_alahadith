@@ -10,14 +10,14 @@ class HadithTextStyles {
     fontSize: 15.sp,
     fontWeight: FontWeight.w700,
     color: ColorsManager.primaryText,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle gradeLabel(Color gradeColor) => TextStyle(
     color: gradeColor,
     fontWeight: FontWeight.w800,
     fontSize: 16.sp,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle get hadithArabic => TextStyles.readingMedium;
@@ -26,19 +26,19 @@ class HadithTextStyles {
     color: textColor,
     fontWeight: FontWeight.w600,
     fontSize: (fontSize ?? 12.sp),
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle get emptyTitle => TextStyle(
     fontSize: 20.sp,
     fontWeight: FontWeight.w800,
     color: ColorsManager.primaryText,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 
   static TextStyle get emptySubtitle => TextStyle(
     fontSize: 16.sp,
     color: ColorsManager.secondaryText,
-    fontFamily: 'Amiri',
+    fontFamily: 'Almarai',
   );
 }

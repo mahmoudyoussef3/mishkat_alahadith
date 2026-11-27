@@ -6,70 +6,38 @@ import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/category_entity.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/domain/entities/hadith_entity.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_cubit.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_by_category/ahadith_by_category_state.dart';
+import 'package:mishkat_almasabih/features/ahadith_categories/presentation/ui/category_style.dart';
 
-class SimilarAhadithSection extends StatelessWidget {
-  final List<String> categoryIds;
-  final List<CategoryEntity> categories;
-
+/// "أحاديث مشابهة": a few other hadiths of [category] to read next, in a
+/// horizontal strip. Hidden while loading or when there are none.
+class SimilarAhadithSection extends StatefulWidget {
   const SimilarAhadithSection({
     super.key,
-    required this.categoryIds,
-    required this.categories,
+    required this.category,
+    required this.onOpen,
+    this.excludeId,
+    this.busy = false,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    final categoryById = {
-      for (final category in categories) category.id: category,
-    };
-    final matchedCategories =
-        categoryIds
-            .map((id) => categoryById[id])
-            .whereType<CategoryEntity>()
-            .toList();
-
-    if (matchedCategories.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children:
-          matchedCategories
-              .map(
-                (category) => Padding(
-                  padding: EdgeInsets.only(bottom: 16.h),
-                  child: _CategorySimilarAhadith(category: category),
-                ),
-              )
-              .toList(),
-    );
-  }
-}
-
-class _CategorySimilarAhadith extends StatefulWidget {
   final CategoryEntity category;
 
-  const _CategorySimilarAhadith({required this.category});
+  /// The hadith already on screen, left out of the strip.
+  final String? excludeId;
+  final ValueChanged<HadithEntity> onOpen;
+
+  /// True while a tapped hadith is being opened; further taps wait.
+  final bool busy;
 
   @override
-  State<_CategorySimilarAhadith> createState() =>
-      _CategorySimilarAhadithState();
+  State<SimilarAhadithSection> createState() => _SimilarAhadithSectionState();
 }
 
-class _CategorySimilarAhadithState extends State<_CategorySimilarAhadith> {
-  late final HadithByCategoryCubit _cubit;
-  bool _isExpanded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _cubit =
-        getIt<HadithByCategoryCubit>()
-          ..getAhadithByCategory(widget.category.id);
-  }
+class _SimilarAhadithSectionState extends State<SimilarAhadithSection> {
+  late final HadithByCategoryCubit _cubit =
+      getIt<HadithByCategoryCubit>()..getAhadithByCategory(widget.category.id);
 
   @override
   void dispose() {
@@ -79,207 +47,111 @@ class _CategorySimilarAhadithState extends State<_CategorySimilarAhadith> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _cubit,
-      child: BlocBuilder<HadithByCategoryCubit, HadithByCategoryState>(
-        builder: (context, state) {
-          if (state is HadithByCategoryLoading ||
-              state is HadithByCategoryInitial) {
-            return const SizedBox.shrink();
-          }
+    return BlocBuilder<HadithByCategoryCubit, HadithByCategoryState>(
+      bloc: _cubit,
+      builder: (context, state) {
+        if (state is! HadithByCategoryLoaded) return const SizedBox.shrink();
+        final ahadith =
+            state.ahadith.where((h) => h.id != widget.excludeId).take(6).toList();
+        if (ahadith.isEmpty) return const SizedBox.shrink();
 
-          if (state is HadithByCategoryError) {
-            return const SizedBox.shrink();
-          }
-
-          if (state is HadithByCategoryLoaded) {
-            if (state.ahadith.isEmpty) return const SizedBox.shrink();
-
-            final ahadithToShow = state.ahadith.take(3).toList();
-
-            return Container(
-              decoration: BoxDecoration(
-                color: ColorsManager.secondaryBackground,
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(
-                  color:
-                      _isExpanded
-                          ? ColorsManager.primaryPurple.withOpacity(0.3)
-                          : ColorsManager.primaryPurple.withOpacity(0.1),
-                  width: _isExpanded ? 1.5 : 1.0,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Expanded(
+                  child: Text(
+                    'أحاديث مشابهة في «${widget.category.title}»',
+                    style: TextStyles.titleMedium.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: ColorsManager.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                if (widget.busy)
+                  SizedBox.square(
+                    dimension: 16.r,
+                    child: const CircularProgressIndicator(strokeWidth: 2),
                   ),
-                ],
+                TextButton(
+                  onPressed:
+                      () => Navigator.of(context).pushNamed(
+                        Routes.ahadithListScreen,
+                        arguments: CategoryHadithsArgs(
+                          categoryId: widget.category.id,
+                          title: widget.category.title,
+                          hadithsCount: state.meta.totalItems,
+                        ),
+                      ),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w),
+                    minimumSize: Size(0, 32.h),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text('عرض الكل', style: TextStyles.actionLabel),
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            SizedBox(
+              height: 96.h,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: ahadith.length,
+                separatorBuilder: (_, _) => SizedBox(width: 10.w),
+                itemBuilder:
+                    (context, index) => _SimilarCard(
+                      hadith: ahadith[index],
+                      onTap:
+                          widget.busy ? null : () => widget.onOpen(ahadith[index]),
+                    ),
               ),
-              child: Theme(
-                data: Theme.of(
-                  context,
-                ).copyWith(dividerColor: Colors.transparent),
-                child: ExpansionTile(
-                  onExpansionChanged: (expanded) {
-                    setState(() => _isExpanded = expanded);
-                  },
-                  tilePadding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 8.h,
-                  ),
-                  childrenPadding: EdgeInsets.zero,
-                  iconColor: ColorsManager.primaryPurple,
-                  collapsedIconColor: ColorsManager.secondaryText,
-                  leading: Container(
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(
-                      color: ColorsManager.primaryPurple.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Icon(
-                      Icons.folder_special_rounded,
-                      size: 20.sp,
-                      color: ColorsManager.purpleText,
-                    ),
-                  ),
-                  title: Text(
-                    'أحاديث مشابهة في التصنيف',
-                    style: TextStyles.labelSmall.copyWith(
-                      color: ColorsManager.secondaryText,
-                    ),
-                  ),
-                  subtitle: Padding(
-                    padding: EdgeInsets.only(top: 4.h),
-                    child: Text(
-                      widget.category.title,
-                      style: TextStyles.titleMedium.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: ColorsManager.primaryText,
-                      ),
-                    ),
-                  ),
-                  children: [
-                    Container(
-                      color: ColorsManager.primaryBackground.withOpacity(0.5),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 12.h,
-                      ),
-                      child: Column(
-                        children: [
-                          ...ahadithToShow.asMap().entries.map((entry) {
-                            final hadith = entry.value;
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: 10.h),
-                              child: Material(
-                                color: ColorsManager.cardBackground,
-                                borderRadius: BorderRadius.circular(12.r),
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      Routes.shareHadithLink,
-                                      arguments: hadith.id,
-                                    );
-                                  },
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 14.w,
-                                      vertical: 14.h,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12.r),
-                                      border: Border.all(
-                                        color: ColorsManager.mediumGray
-                                            .withOpacity(0.4),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Icon(
-                                          Icons.menu_book_rounded,
-                                          size: 18.sp,
-                                          color: ColorsManager.primaryGold,
-                                        ),
-                                        SizedBox(width: 12.w),
-                                        Expanded(
-                                          child: Text(
-                                            hadith.title,
-                                            textDirection: TextDirection.rtl,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyles.bodyMedium
-                                                .copyWith(
-                                                  height: 1.6,
-                                                  color: ColorsManager
-                                                      .primaryText
-                                                      .withOpacity(0.9),
-                                                ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                          SizedBox(height: 4.h),
-                          Material(
-                            color: ColorsManager.primaryPurple.withOpacity(
-                              0.08,
-                            ),
-                            borderRadius: BorderRadius.circular(12.r),
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  Routes.ahadithListScreen,
-                                  arguments: {
-                                    'categoryId': widget.category.id,
-                                    'categoryTitle': widget.category.title,
-                                  },
-                                );
-                              },
-                              borderRadius: BorderRadius.circular(12.r),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 12.h),
-                                alignment: Alignment.center,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'عرض المزيد من الأحاديث',
-                                      style: TextStyles.labelLarge.copyWith(
-                                        color: ColorsManager.purpleText,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(width: 8.w),
-                                    Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 14.sp,
-                                      color: ColorsManager.purpleText,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _SimilarCard extends StatelessWidget {
+  const _SimilarCard({required this.hadith, required this.onTap});
+
+  final HadithEntity hadith;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 230.w,
+      child: Material(
+        color: ColorsManager.cardBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18.r),
+          side: BorderSide(color: ColorsManager.border),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                hadith.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyles.readingMedium.copyWith(
+                  fontSize: 16.sp,
+                  height: 1.85,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
+            ),
+          ),
+        ),
       ),
     );
   }

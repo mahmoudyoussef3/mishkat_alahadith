@@ -1,46 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:mishkat_almasabih/core/theming/quran_decorations.dart';
-import 'package:mishkat_almasabih/core/theming/quran_styles.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/quran_juz.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/helpers/quran_ui_helpers.dart';
 import 'package:mushaf_text/mushaf_text.dart' show toArabicNumerals;
 
-import 'index_tile_frame.dart';
+import 'quran_index_row.dart';
 
 class JuzTile extends StatelessWidget {
   final QuranJuz juz;
-  final QuranSurfaceColors colors;
   final bool isCurrent;
+  final bool isFirst;
+  final bool isLast;
   final VoidCallback onTap;
+
+  /// Recites the juz; no listen button without it.
+  final VoidCallback? onListen;
 
   const JuzTile({
     super.key,
     required this.juz,
-    required this.colors,
     required this.onTap,
+    required this.isFirst,
+    required this.isLast,
     this.isCurrent = false,
+    this.onListen,
   });
 
   @override
   Widget build(BuildContext context) {
-    return IndexTileFrame(
-      colors: colors,
-      isCurrent: isCurrent,
+    return QuranIndexRow(
+      isFirst: isFirst,
+      isLast: isLast,
       onTap: onTap,
-      leading: IndexNumberBadge(
+      leading: QuranIndexWell(
         label: toArabicNumerals(juz.number),
-        colors: colors,
+        highlighted: isCurrent,
       ),
-      title: Text(
-        juzTitle(juz.number),
-        style: QuranTextStyles.surahName(colors.title),
-      ),
-      subtitle:
-          'يبدأ من سورة ${juz.startSurahName} · الآية '
-          '${toArabicNumerals(juz.startAyahNumber)}',
-      trailing: Text(
-        'ص ${toArabicNumerals(juz.startPage)}',
-        style: QuranTextStyles.tileTrailing(colors.accent),
+      title: juzTitle(juz.number),
+      subtitle: [
+        'من سورة ${juz.startSurahName}',
+        'الآية ${toArabicNumerals(juz.startAyahNumber)}',
+        if (isCurrent) 'تقرأ الآن',
+      ].join(' · '),
+      trailing: QuranRowTrailing(
+        pageLabel: 'ص ${toArabicNumerals(juz.startPage)}',
+        onListen: onListen,
+        listenLabel: 'الاستماع إلى ${juzTitle(juz.number)}',
       ),
     );
   }

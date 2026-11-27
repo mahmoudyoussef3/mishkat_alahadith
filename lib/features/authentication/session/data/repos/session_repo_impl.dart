@@ -14,6 +14,7 @@ class SessionRepoImpl implements SessionRepo {
     CacheKeys.userStats,
     CacheKeys.bookmarks,
     CacheKeys.bookmarkCollections,
+    CacheKeys.searchHistory,
   ];
 
   final TokenStorage _tokenStorage;

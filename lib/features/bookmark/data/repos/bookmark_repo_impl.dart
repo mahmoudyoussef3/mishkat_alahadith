@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/cache_fallback.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
@@ -31,24 +32,22 @@ class BookmarkRepoImpl implements BookmarkRepo {
   }
 
   @override
-  Future<ApiResult<List<UserBookmark>>> getBookmarks() async {
-    try {
-      final token = await _tokenStorage.requireToken();
-      final response = await _apiService.getUserBookmarks(token);
-      await _cacheService.saveData<BookmarksResponse>(
+  Future<ApiResult<List<UserBookmark>>> getBookmarks() => _cacheService
+      .fetchWithStaleFallback<BookmarksResponse, List<UserBookmark>>(
         key: CacheKeys.bookmarks,
-        data: response,
+        fetch: () async {
+          final token = await _tokenStorage.requireToken();
+          return _apiService.getUserBookmarks(token);
+        },
         toJson: (d) => d.toJson(),
+        fromJson: BookmarksResponse.fromJson,
+        toEntity:
+            (d) => [
+              for (final bookmark in d.bookmarks ?? const <Bookmark>[])
+                bookmark.toEntity(),
+            ],
         cacheExpirationHours: 1,
       );
-      return ApiResult.success([
-        for (final bookmark in response.bookmarks ?? const <Bookmark>[])
-          bookmark.toEntity(),
-      ]);
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 
   @override
   Future<List<BookmarkCollection>?> getCachedCollections() async {
@@ -60,21 +59,18 @@ class BookmarkRepoImpl implements BookmarkRepo {
   }
 
   @override
-  Future<ApiResult<List<BookmarkCollection>>> getCollections() async {
-    try {
-      final token = await _tokenStorage.requireToken();
-      final response = await _apiService.getBookmarkCollection(token);
-      await _cacheService.saveData<CollectionsResponse>(
+  Future<ApiResult<List<BookmarkCollection>>> getCollections() => _cacheService
+      .fetchWithStaleFallback<CollectionsResponse, List<BookmarkCollection>>(
         key: CacheKeys.bookmarkCollections,
-        data: response,
+        fetch: () async {
+          final token = await _tokenStorage.requireToken();
+          return _apiService.getBookmarkCollection(token);
+        },
         toJson: (d) => d.toJson(),
+        fromJson: CollectionsResponse.fromJson,
+        toEntity: (d) => d.toEntities(),
         cacheExpirationHours: 1,
       );
-      return ApiResult.success(response.toEntities());
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 
   @override
   Future<ApiResult<BookmarkActionResult>> addBookmark(
@@ -83,7 +79,7 @@ class BookmarkRepoImpl implements BookmarkRepo {
     try {
       final token = await _tokenStorage.requireToken();
       final response = await _apiService.addBookmark(token, bookmark.toModel());
-      await _cacheService.clearCache(CacheKeys.bookmarks);
+      await _forgetDerivedCaches();
       return ApiResult.success(response.toEntity());
     } catch (error) {
       log(error.toString());
@@ -96,10 +92,18 @@ class BookmarkRepoImpl implements BookmarkRepo {
     try {
       final token = await _tokenStorage.requireToken();
       final response = await _apiService.deleteUserBookmsrk(bookmarkId, token);
-      await _cacheService.clearCache(CacheKeys.bookmarks);
+      await _forgetDerivedCaches();
       return ApiResult.success(response.toEntity());
     } catch (error) {
       return ApiResult.failure(ErrorHandler.toFailure(error));
     }
+  }
+
+  /// The list, the collection counts and the bookmark stats all change with
+  /// a bookmark, and offline would otherwise show them as they were before.
+  Future<void> _forgetDerivedCaches() async {
+    await _cacheService.clearCache(CacheKeys.bookmarks);
+    await _cacheService.clearCache(CacheKeys.bookmarkCollections);
+    await _cacheService.clearCache(CacheKeys.userStats);
   }
 }

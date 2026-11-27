@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/theming/app_palette.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/ayah_details.dart';
 import 'package:mishkat_almasabih/features/quran/domain/entities/mushaf_reader_settings.dart';
 import 'package:mushaf_text/mushaf_text.dart';
 
-/// The paper and ink for the reader's theme choice.
-MushafColors resolveMushafColors(
-  MushafThemeMode mode,
-  Brightness appBrightness,
-) {
+/// The palette the reader is drawn in for its paper choice. The page takes
+/// its colours from it (see `MushafPalette`), and so do the bars and sheets
+/// around the page, so night paper is never framed by a light toolbar.
+AppPalette readerPalette(MushafThemeMode mode, Brightness appBrightness) {
   return switch (mode) {
     MushafThemeMode.system =>
-      appBrightness == Brightness.dark ? MushafColors.dark : MushafColors.light,
-    MushafThemeMode.day => MushafColors.light,
-    MushafThemeMode.night => MushafColors.dark,
+      appBrightness == Brightness.dark ? AppPalette.dark : AppPalette.light,
+    MushafThemeMode.day => AppPalette.light,
+    MushafThemeMode.night => AppPalette.dark,
   };
 }
+
+/// The designed size of Quran text that wraps freely, before the reader's
+/// [QuranFontScale] — the size it has always had in the ayah sheet.
+const double _flowingQuranFontSize = 24;
+
+/// The size Quran text that wraps freely is drawn at for [scale]: the
+/// flowing layout, the ayah sheet and the size preview.
+double quranFontSize(QuranFontScale scale) =>
+    _flowingQuranFontSize.sp * scale.factor;
 
 /// Keeps Latin text such as «An-Nisā’» or «‘Abasa» in one left-to-right run
 /// inside Arabic text, so its leading or trailing quote mark stays attached

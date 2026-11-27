@@ -19,6 +19,11 @@ class QuranSurah {
 
   bool containsPage(int page) => page >= startPage && page <= endPage;
 
+  /// Whether the basmala is printed above the surah's first ayah: every surah
+  /// but At-Tawbah, which has none, and Al-Fātiḥah, whose basmala is its
+  /// first ayah.
+  bool get printsBasmala => number != 1 && number != 9;
+
   /// The surah a page opens with — the one its header names in print.
   ///
   /// A page shared by two surahs belongs to the one that is still running at
@@ -29,6 +34,27 @@ class QuranSurah {
     }
     return null;
   }
+
+  /// The surah numbered [number], if the list has it.
+  static QuranSurah? numbered(List<QuranSurah> surahs, int? number) =>
+      number == null
+          ? null
+          : surahs.where((s) => s.number == number).firstOrNull;
+
+  /// The surah being read on [page] by a reader who was in [current]:
+  /// [current] for as long as the page is one of its own, then the surah the
+  /// page opens with.
+  ///
+  /// So a reader who opens Al-Māʾidah on page 106 stays in it, though the
+  /// page opens with An-Nisāʾ.
+  static QuranSurah? readingAt(
+    List<QuranSurah> surahs,
+    int page, {
+    QuranSurah? current,
+  }) =>
+      current != null && current.containsPage(page)
+          ? current
+          : openingAt(surahs, page);
 
   @override
   bool operator ==(Object other) =>

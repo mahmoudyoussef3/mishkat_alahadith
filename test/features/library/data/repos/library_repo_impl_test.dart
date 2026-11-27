@@ -96,4 +96,16 @@ void main() {
     expect(stats.topBooks.single.chapters, 97);
     expect((await repo.getCachedStatistics())?.totalHadiths, 40000);
   });
+
+  test('offline, getCategoryBooks returns the books fetched before', () async {
+    await repo.getCategoryBooks('c1');
+    api.error = DioException(
+      requestOptions: RequestOptions(path: '/books'),
+      type: DioExceptionType.connectionError,
+    );
+
+    final result = await repo.getCategoryBooks('c1');
+
+    expect((result as ApiSuccess<CategoryBooks>).data.books.single.bookSlug, 'bukhari');
+  });
 }

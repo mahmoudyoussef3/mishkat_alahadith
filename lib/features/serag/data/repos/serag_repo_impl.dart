@@ -5,6 +5,7 @@ import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
 import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
+import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/serag_hadith_context.dart';
 import '../../domain/repos/serag_repo.dart';
 import '../mappers/serag_mapper.dart';
@@ -19,14 +20,17 @@ class SeragRepoImpl implements SeragRepo {
   @override
   Future<ApiResult<String>> ask({
     required SeragHadithContext hadith,
-    required String question,
+    required List<ChatMessage> conversation,
   }) async {
     try {
       final token = await _tokenStorage.requireToken();
       final response = await _apiService.serag(
         SeragRequestModel(
           hadith: hadith.toModel(),
-          messages: [Message(role: 'user', content: question)],
+          messages: [
+            for (final message in conversation)
+              Message(role: message.role, content: message.content),
+          ],
         ),
         token,
       );

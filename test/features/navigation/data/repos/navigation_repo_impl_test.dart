@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
@@ -11,12 +12,14 @@ import 'package:mishkat_almasabih/features/navigation/domain/entities/hadith_nav
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeApiService extends Fake implements ApiService {
+  Object? error;
+
   @override
   Future<remote.NavigationHadithResponse> navigationHadith(
     String hadithNumber,
     String bookSlug,
     String chapterNumber,
-  ) async => remote.NavigationHadithResponse(
+  ) async => error != null ? throw error! : remote.NavigationHadithResponse(
     nextHadith: remote.Hadith(id: '12', title: 'التالي'),
     currentHadithNumber: '11',
     totalHadiths: 50,
@@ -26,19 +29,32 @@ class _FakeApiService extends Fake implements ApiService {
   Future<local.LocalNavigationHadithResponse> localNavigationHadith(
     String hadithNumber,
     String bookSlug,
-  ) async => local.LocalNavigationHadithResponse(
+  ) async => error != null ? throw error! : local.LocalNavigationHadithResponse(
     prevHadith: local.Hadith(id: 3, title: 'السابق'),
     currentHadithNumber: 4,
   );
 }
 
+
+DioException _offline() => DioException(
+  requestOptions: RequestOptions(path: '/offline'),
+  type: DioExceptionType.connectionError,
+);
+
 void main() {
   final cache = GenericCacheService.instance;
+  late _FakeApiService api;
   late NavigationRepoImpl repo;
 
   setUpAll(() => SharedPreferences.setMockInitialValues({}));
-  setUp(() => repo = NavigationRepoImpl(_FakeApiService(), cache));
-  tearDown(() => cache.clearCache(CacheKeys.navigation('bukhari', 2, '11')));
+  setUp(() {
+    api = _FakeApiService();
+    repo = NavigationRepoImpl(api, cache);
+  });
+  tearDown(() async {
+    await cache.clearCache(CacheKeys.navigation('bukhari', 2, '11'));
+    await cache.clearCache(CacheKeys.localNavigation('nawawi40', '4'));
+  });
 
   test('getNavigation maps neighbours and caches under the chapter key', () async {
     final result = await repo.getNavigation(
@@ -69,5 +85,30 @@ void main() {
     expect(nav.prevHadith?.id, '3');
     expect(nav.currentHadithNumber, '4');
     expect(nav.nextHadith, isNull);
+  });
+
+  test('offline, getNavigation returns the neighbours fetched before', () async {
+    Future<ApiResult<HadithNavigation>> fetch() => repo.getNavigation(
+      hadithNumber: '11',
+      bookSlug: 'bukhari',
+      chapterNumber: '2',
+    );
+    await fetch();
+    api.error = _offline();
+
+    final result = await fetch();
+
+    expect((result as ApiSuccess<HadithNavigation>).data.nextHadith?.id, '12');
+  });
+
+  test('offline, getLocalNavigation returns the neighbours fetched before', () async {
+    Future<ApiResult<HadithNavigation>> fetch() =>
+        repo.getLocalNavigation(hadithNumber: '4', bookSlug: 'nawawi40');
+    await fetch();
+    api.error = _offline();
+
+    final result = await fetch();
+
+    expect((result as ApiSuccess<HadithNavigation>).data.prevHadith?.id, '3');
   });
 }

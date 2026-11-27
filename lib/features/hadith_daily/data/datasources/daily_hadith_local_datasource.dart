@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class DailyHadithLocalDataSource {
   static const String _key = "dailyHadith";
   static const String _widgetTextKey = 'hadith_text';
+  static const String _widgetAttributionKey = 'hadith_attribution';
+  static const String _widgetGradeKey = 'hadith_grade';
   static const String _androidWidgetName = 'HadithWidgetProvider';
   static const String _iOSWidgetName = 'HadithWidget';
 
@@ -17,13 +19,21 @@ class DailyHadithLocalDataSource {
     await prefs.setString(_key, jsonString);
     debugPrint("💾 Hadith saved");
 
-    await _updateHomeWidget(model.hadeeth);
+    await _updateHomeWidget(model);
   }
 
-  Future<void> _updateHomeWidget(String? hadithText) async {
+  Future<void> _updateHomeWidget(NewDailyHadithModel model) async {
+    final hadithText = model.hadeeth;
     if (hadithText == null || hadithText.isEmpty) return;
     try {
       await HomeWidget.saveWidgetData<String>(_widgetTextKey, hadithText);
+      // Null clears the key so the widget never shows the previous hadith's
+      // attribution or grade.
+      await HomeWidget.saveWidgetData<String>(
+        _widgetAttributionKey,
+        model.attribution,
+      );
+      await HomeWidget.saveWidgetData<String>(_widgetGradeKey, model.grade);
       await HomeWidget.updateWidget(
         name: _androidWidgetName,
         iOSName: _iOSWidgetName,

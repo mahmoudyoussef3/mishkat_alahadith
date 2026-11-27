@@ -12,12 +12,12 @@ class Routes {
 
   static const String hadithOfTheDay = '/hadithOfTheDay';
   static const String serag = '/serag';
+  static const String sirajAnalysis = '/sirajAnalysis';
   static const String profileScreen = '/profileScreen';
   static const String bookmarkScreen = '/bookmarkScreen';
   static const String searchScreen = '/searchScreen';
   static const String libraryScreen = '/libraryScreen';
   static const String hadithDetail = '/hadith';
-
 
   static const String homeScreen = '/homeScreen';
   static const String usersSuggestions = '/usersSuggestions';
@@ -32,8 +32,12 @@ class Routes {
   static const String shareHadithLink = '/api/hadith';
 
   static const String quranScreen = '/quran';
+  static const String quranAudio = '/quran/audio';
   static const String mushafReader = '/quran/reader';
   static const String quranSearch = '/quran/search';
   static const String tajweedGuide = '/quran/tajweedGuide';
+  static const String surahTafsir = '/quran/tafsir';
 
+  static const String azkarScreen = '/azkar';
+  static const String azkarReader = '/azkar/reader';
 }

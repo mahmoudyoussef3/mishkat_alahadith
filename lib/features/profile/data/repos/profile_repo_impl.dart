@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
 import 'package:mishkat_almasabih/core/networking/api_service.dart';
+import 'package:mishkat_almasabih/core/networking/cache_fallback.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 import 'package:mishkat_almasabih/core/storage/token_storage.dart';
 
@@ -31,38 +32,32 @@ class ProfileRepoImpl implements ProfileRepo {
   }
 
   @override
-  Future<ApiResult<UserProfile>> getProfile() async {
-    try {
-      final token = await _tokenStorage.requireToken();
-      final response = await _apiService.getUserProfile(token);
-      await _cacheService.saveData<UserResponseModel>(
+  Future<ApiResult<UserProfile>> getProfile() =>
+      _cacheService.fetchWithStaleFallback<UserResponseModel, UserProfile>(
         key: CacheKeys.userProfile,
-        data: response.withoutSecrets(),
-        toJson: (d) => d.toJson(),
+        fetch: () async {
+          final token = await _tokenStorage.requireToken();
+          return _apiService.getUserProfile(token);
+        },
+        toJson: (d) => d.withoutSecrets().toJson(),
+        fromJson: UserResponseModel.fromJson,
+        toEntity: (d) => d.toEntity(),
         cacheExpirationHours: 1,
       );
-      return ApiResult.success(response.toEntity());
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 
   @override
-  Future<ApiResult<UserStats>> getStats() async {
-    try {
-      final token = await _tokenStorage.requireToken();
-      final response = await _apiService.getUserStats(token);
-      await _cacheService.saveData<StatsModel>(
+  Future<ApiResult<UserStats>> getStats() =>
+      _cacheService.fetchWithStaleFallback<StatsModel, UserStats>(
         key: CacheKeys.userStats,
-        data: response,
+        fetch: () async {
+          final token = await _tokenStorage.requireToken();
+          return _apiService.getUserStats(token);
+        },
         toJson: (d) => d.toJson(),
+        fromJson: StatsModel.fromJson,
+        toEntity: (d) => d.toEntity(),
         cacheExpirationHours: 1,
       );
-      return ApiResult.success(response.toEntity());
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
 
   @override
   Future<ApiResult<UserProfile>> updateProfile({
@@ -75,6 +70,13 @@ class ProfileRepoImpl implements ProfileRepo {
         token,
         username,
         avatarPath == null ? null : File(avatarPath),
+      );
+      // So the edit is what shows offline, not the profile from before it.
+      await _cacheService.saveData<UserResponseModel>(
+        key: CacheKeys.userProfile,
+        data: response.withoutSecrets(),
+        toJson: (d) => d.toJson(),
+        cacheExpirationHours: 1,
       );
       return ApiResult.success(response.toEntity());
     } catch (error) {

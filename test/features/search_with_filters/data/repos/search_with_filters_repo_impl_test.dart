@@ -90,4 +90,14 @@ void main() {
     expect(failure.message, 'لا يوجد اتصال بالإنترنت');
     expect(api.calls, 0);
   });
+
+  test('offline, search returns the results kept for the same filters', () async {
+    await repo.search(_filters);
+    network.connected = false;
+
+    final result = await repo.search(_filters);
+
+    expect((result as ApiSuccess<List<ChapterHadith>>).data.single.id, 1);
+    expect(api.calls, 1);
+  });
 }

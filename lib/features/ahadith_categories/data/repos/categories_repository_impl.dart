@@ -1,6 +1,6 @@
 import 'package:mishkat_almasabih/core/domain/entities/explained_hadith.dart';
-import 'package:mishkat_almasabih/core/networking/api_error_handler.dart';
 import 'package:mishkat_almasabih/core/networking/api_result.dart';
+import 'package:mishkat_almasabih/core/networking/cache_fallback.dart';
 import 'package:mishkat_almasabih/core/networking/caching_helper.dart';
 import 'package:mishkat_almasabih/core/data/datasources/hadeethenc_datasource.dart';
 import 'package:mishkat_almasabih/core/networking/network_info.dart';
@@ -28,33 +28,23 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
     this._networkInfo,
   );
 
-  Future<List<CategoryModel>?> _getCachedCategories() async {
-    return await _cacheService.getData<List<CategoryModel>>(
-      key: CacheKeys.hadithCategories,
-      fromJson: (json) {
-        final items = json['categories'];
-        if (items is! List) {
-          return <CategoryModel>[];
-        }
-        return items
-            .whereType<Map<String, dynamic>>()
-            .map(CategoryModel.fromJson)
-            .toList();
-      },
-    );
+  Future<List<CategoryModel>?> _getCachedCategories() =>
+      _cacheService.getData<List<CategoryModel>>(
+        key: CacheKeys.hadithCategories,
+        fromJson: _categoriesFromJson,
+      );
+
+  static List<CategoryModel> _categoriesFromJson(Map<String, dynamic> json) {
+    final items = json['categories'];
+    if (items is! List) return <CategoryModel>[];
+    return items
+        .whereType<Map<String, dynamic>>()
+        .map(CategoryModel.fromJson)
+        .toList();
   }
 
-  Future<void> _cacheCategories(List<CategoryModel> categories) async {
-    await _cacheService.saveData<List<CategoryModel>>(
-      key: CacheKeys.hadithCategories,
-      data: categories,
-      toJson:
-          (data) => {
-            'categories': data.map((category) => category.toJson()).toList(),
-          },
-      cacheExpirationHours: 24,
-    );
-  }
+  static List<CategoryEntity> _categoryEntities(List<CategoryModel> models) =>
+      models.map((model) => model.toEntity()).toList();
 
   String _ahadithByCategoryCacheKey(
     String categoryId, {
@@ -86,41 +76,25 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
     );
   }
 
-  Future<void> _cacheAhadithByCategory(
-    String categoryId,
-    HadithByCategoryResponseModel response, {
-    int? page,
-    int? perPage,
-  }) async {
-    final cacheKey = _ahadithByCategoryCacheKey(
-      categoryId,
-      page: page,
-      perPage: perPage,
-    );
-    await _cacheService.saveData<HadithByCategoryResponseModel>(
-      key: cacheKey,
-      data: response,
-      toJson: (data) => data.toJson(),
-      cacheExpirationHours: 24,
-    );
-  }
-
   @override
   Future<ApiResult<List<CategoryEntity>>> getCategories() async {
-    try {
-      final cachedModels = await _getCachedCategories();
-      if (cachedModels != null) {
-        final entities = cachedModels.map((model) => model.toEntity()).toList();
-        return ApiResult.success(entities);
-      }
-
-      final models = await _datasource.getCategories();
-      await _cacheCategories(models);
-      final entities = models.map((model) => model.toEntity()).toList();
-      return ApiResult.success(entities);
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
+    final cachedModels = await _getCachedCategories();
+    if (cachedModels != null) {
+      return ApiResult.success(_categoryEntities(cachedModels));
     }
+
+    return _cacheService
+        .fetchWithStaleFallback<List<CategoryModel>, List<CategoryEntity>>(
+          key: CacheKeys.hadithCategories,
+          fetch: _datasource.getCategories,
+          toJson:
+              (data) => {
+                'categories':
+                    data.map((category) => category.toJson()).toList(),
+              },
+          fromJson: _categoriesFromJson,
+          toEntity: _categoryEntities,
+        );
   }
 
   @override
@@ -129,31 +103,28 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
     int? page,
     int? perPage,
   }) async {
-    try {
-      final cached = await _getCachedAhadithByCategory(
-        categoryId,
-        page: page,
-        perPage: perPage,
-      );
-      if (cached != null) {
-        return ApiResult.success(cached.toEntity());
-      }
+    final cached = await _getCachedAhadithByCategory(
+      categoryId,
+      page: page,
+      perPage: perPage,
+    );
+    if (cached != null) return ApiResult.success(cached.toEntity());
 
-      final response = await _datasource.getAhadithByCategory(
-        categoryId,
-        page: page,
-        perPage: perPage,
-      );
-      await _cacheAhadithByCategory(
-        categoryId,
-        response,
-        page: page,
-        perPage: perPage,
-      );
-      return ApiResult.success(response.toEntity());
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
+    return _cacheService.fetchWithStaleFallback<
+      HadithByCategoryResponseModel,
+      HadithResponseEntity
+    >(
+      key: _ahadithByCategoryCacheKey(categoryId, page: page, perPage: perPage),
+      fetch:
+          () => _datasource.getAhadithByCategory(
+            categoryId,
+            page: page,
+            perPage: perPage,
+          ),
+      toJson: (data) => data.toJson(),
+      fromJson: HadithByCategoryResponseModel.fromJson,
+      toEntity: (data) => data.toEntity(),
+    );
   }
 
   @override
@@ -166,19 +137,16 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
   }
 
   @override
-  Future<ApiResult<ExplainedHadith>> getHadithDetails(String id) async {
-    try {
-      await _networkInfo.ensureConnected();
-      final model = await _hadeethEnc.fetchHadith(id);
-      await _cacheService.saveData<NewDailyHadithModel>(
-        key: CacheKeys.hadithDetails(id),
-        data: model,
-        toJson: (d) => d.toJson(),
-        cacheExpirationHours: 24,
-      );
-      return ApiResult.success(model.toEntity());
-    } catch (error) {
-      return ApiResult.failure(ErrorHandler.toFailure(error));
-    }
-  }
+  Future<ApiResult<ExplainedHadith>> getHadithDetails(String id) =>
+      _cacheService
+          .fetchWithStaleFallback<NewDailyHadithModel, ExplainedHadith>(
+            key: CacheKeys.hadithDetails(id),
+            fetch: () async {
+              await _networkInfo.ensureConnected();
+              return _hadeethEnc.fetchHadith(id);
+            },
+            toJson: (d) => d.toJson(),
+            fromJson: NewDailyHadithModel.fromJson,
+            toEntity: (d) => d.toEntity(),
+          );
 }

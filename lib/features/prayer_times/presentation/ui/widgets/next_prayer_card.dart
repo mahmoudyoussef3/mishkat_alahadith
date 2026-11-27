@@ -1,92 +1,141 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_digits.dart';
+import 'package:mishkat_almasabih/core/helpers/arabic_time_format.dart';
 import 'package:mishkat_almasabih/core/theming/colors.dart';
-import 'package:mishkat_almasabih/core/theming/prayer_times_decorations.dart';
-import 'package:mishkat_almasabih/core/theming/prayer_times_styles.dart';
+import 'package:mishkat_almasabih/core/theming/styles.dart';
+import 'package:mishkat_almasabih/core/widgets/hero_surface.dart';
 
+/// The next prayer with a live countdown, and how far the current prayer
+/// window has run.
 class NextPrayerCard extends StatelessWidget {
-  final String nextPrayerLabel;
-  final DateTime nextPrayerTime;
-  final Duration remaining;
-
   const NextPrayerCard({
     super.key,
     required this.nextPrayerLabel,
     required this.nextPrayerTime,
     required this.remaining,
+    this.previousPrayerLabel,
+    this.previousPrayerTime,
   });
 
-  String _formatTime(DateTime t) {
-    final h = t.hour.toString().padLeft(2, '0');
-    final m = t.minute.toString().padLeft(2, '0');
-    return '$h:$m';
+  final String nextPrayerLabel;
+  final DateTime nextPrayerTime;
+  final Duration remaining;
+  final String? previousPrayerLabel;
+  final DateTime? previousPrayerTime;
+
+  static String _countdown(Duration remaining) {
+    final seconds = remaining.inSeconds.clamp(0, 99 * 3600);
+    String two(int value) => value.toString().padLeft(2, '0');
+    return toArabicDigits(
+      '${two(seconds ~/ 3600)}:${two(seconds % 3600 ~/ 60)}:${two(seconds % 60)}',
+    );
   }
 
-  String _formatDuration(Duration d) {
-    final hh = d.inHours;
-    final mm = d.inMinutes.remainder(60);
-    final ss = d.inSeconds.remainder(60);
-    String two(int n) => n.toString().padLeft(2, '0');
-    return '${two(hh)}:${two(mm)}:${two(ss)}';
+  double? get _progress {
+    final previous = previousPrayerTime;
+    if (previous == null) return null;
+    final window = nextPrayerTime.difference(previous).inSeconds;
+    if (window <= 0) return null;
+    return (1 - remaining.inSeconds / window).clamp(0.0, 1.0);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsetsDirectional.only(start: 16.w, end: 16.w),
-      child: Container(
-        padding: EdgeInsets.all(16.r),
-        decoration: PrayerTimesDecorations.nextPrayerContainer(),
-        child: Row(
+    final muted = ColorsManager.white.withValues(alpha: 0.78);
+    final big = TextStyle(
+      fontFamily: 'Cairo',
+      fontSize: 30.sp,
+      height: 1.3,
+      fontWeight: FontWeight.w800,
+      color: ColorsManager.white,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    final small = TextStyles.labelSmall.copyWith(
+      fontWeight: FontWeight.w600,
+      color: muted,
+    );
+    final progress = _progress;
+    final previousLabel = previousPrayerLabel;
+    final previousTime = previousPrayerTime;
+
+    return Semantics(
+      label:
+          'الصلاة القادمة $nextPrayerLabel ${formatArabicClock(nextPrayerTime)}، '
+          'بعد ${formatArabicCountdown(remaining)}',
+      excludeSemantics: true,
+      child: HeroSurface(
+        radius: 26.r,
+        padding: EdgeInsets.all(20.r),
+        imageOpacity: 0.28,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'الصلاة القادمة',
-                    style: PrayerTimesTextStyles.nextPrayerSectionLabel,
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    nextPrayerLabel,
-                    style: PrayerTimesTextStyles.nextPrayerNameLabel,
-                  ),
-                  SizedBox(height: 8.h),
-                  Row(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.schedule_rounded,
-                        color: ColorsManager.purpleText,
-                      ),
-                      SizedBox(width: 6.w),
                       Text(
-                        _formatTime(nextPrayerTime),
-                        style: PrayerTimesTextStyles.nextPrayerTimeValue,
+                        'الصلاة القادمة',
+                        style: TextStyles.caption.copyWith(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: muted,
+                        ),
+                      ),
+                      Text(nextPrayerLabel, style: big),
+                      Text(
+                        formatArabicClock(nextPrayerTime),
+                        style: TextStyles.titleSmall.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: ColorsManager.goldBright,
+                        ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('متبقٍ', style: small.copyWith(fontSize: 12.sp)),
+                    Text(
+                      _countdown(remaining),
+                      textDirection: TextDirection.ltr,
+                      style: big,
+                    ),
+                  ],
+                ),
+              ],
             ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              decoration: PrayerTimesDecorations.countdownPill(),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+            if (progress != null && previousLabel != null && previousTime != null) ...[
+              SizedBox(height: 16.h),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3.r),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6.h,
+                  color: ColorsManager.goldBright,
+                  backgroundColor: ColorsManager.white.withValues(alpha: 0.18),
+                ),
+              ),
+              SizedBox(height: 6.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    Icons.timer_outlined,
-                    color: ColorsManager.purpleText,
-                  ),
-                  SizedBox(width: 6.w),
                   Text(
-                    _formatDuration(remaining),
-                    style: PrayerTimesTextStyles.countdownValue,
+                    '$previousLabel ${formatArabicClock(previousTime)}',
+                    style: small,
+                  ),
+                  Text(
+                    '$nextPrayerLabel ${formatArabicClock(nextPrayerTime)}',
+                    style: small,
                   ),
                 ],
               ),
-            ),
+            ],
           ],
         ),
       ),

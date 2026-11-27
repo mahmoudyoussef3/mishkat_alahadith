@@ -2,14 +2,38 @@ package com.mishkat_almasabih.app
 
 import android.content.Intent
 import android.os.Bundle
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.lang.ref.WeakReference
 
-class MainActivity : FlutterActivity() {
+// AudioServiceActivity shares its engine with the service that plays the
+// Quran recitation, so Dart keeps running it with the activity gone.
+class MainActivity : AudioServiceActivity() {
+    companion object {
+        // That engine outlives the activity while a recitation plays, and
+        // its Dart asks for the tap that launched the app only once: an
+        // activity started on it again sends a tap straight away.
+        private var engineThatTookLaunch: WeakReference<FlutterEngine>? = null
+    }
+
     private val CHANNEL = "com.mishkat_almasabih.app/widget"
     private val PRAYER_CHANNEL = "com.mishkat_almasabih.app/prayer_notifications"
     private var methodChannel: MethodChannel? = null
+
+    // A daily ayah widget tap that started the app comes before Dart runs,
+    // when a message sent to it would be dropped, so it waits here for Dart
+    // to collect it.
+    private var launchDailyAyahPayload: String? = null
+
+    // Recreated by the system rather than started; set before the engine is
+    // configured, which happens within onCreate.
+    private var restored = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        restored = savedInstanceState != null
+        super.onCreate(savedInstanceState)
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -18,7 +42,19 @@ class MainActivity : FlutterActivity() {
         // exists before any alarm fires, even on a fresh install or after a reboot.
         PrayerNotificationScheduler.ensureNotificationChannel(applicationContext)
 
-        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).apply {
+            setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "takeLaunchDailyAyah" -> {
+                        engineThatTookLaunch = WeakReference(flutterEngine)
+                        result.success(launchDailyAyahPayload)
+                        launchDailyAyahPayload = null
+                    }
+
+                    else -> result.notImplemented()
+                }
+            }
+        }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PRAYER_CHANNEL)
             .setMethodCallHandler { call, result ->
@@ -116,20 +152,36 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
-        // Handle the initial intent when app is launched from widget
-        handleIntent(intent)
+        // Handle the initial intent when app is launched from widget. An
+        // activity the system recreated over an engine that kept running
+        // carries the intent that engine already handled: not handled again.
+        val dartRunning = engineThatTookLaunch?.get() === flutterEngine
+        if (!(restored && dartRunning)) handleIntent(intent, isLaunch = !dartRunning)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleIntent(intent)
+        handleIntent(intent, isLaunch = false)
     }
 
-    private fun handleIntent(intent: Intent?) {
+    private fun handleIntent(intent: Intent?, isLaunch: Boolean) {
         intent?.let {
             val openScreen = it.getStringExtra("open_screen")
             val fromWidget = it.getBooleanExtra("from_widget", false)
+
+            // Reopened from Recents, Android replays the intent the task was
+            // started with; that is not a new tap.
+            val fromHistory =
+                it.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0
+            if (fromWidget && openScreen == DailyAyahWidgetProvider.OPEN_SCREEN && !fromHistory) {
+                val payload = it.getStringExtra(DailyAyahWidgetProvider.EXTRA_PAYLOAD)
+                if (isLaunch) {
+                    launchDailyAyahPayload = payload
+                } else {
+                    methodChannel?.invokeMethod("openDailyAyah", payload)
+                }
+            }
 
             // Handle widget tap navigation
             if (fromWidget && openScreen == "hadith_of_the_day") {
@@ -140,11 +192,8 @@ class MainActivity : FlutterActivity() {
                 methodChannel?.invokeMethod("openPrayerTimes", null)
             }
 
-            // Handle deep links like mishkat://hadith?... via intent.data
-            val dataUri = it.data
-            if (dataUri != null && dataUri.scheme == "mishkat" && dataUri.host == "hadith") {
-                methodChannel?.invokeMethod("openHadithLink", dataUri.toString())
-            }
+            // Link intents (mishkat:// and https) are delivered by the
+            // app_links plugin; forwarding them here too would open them twice.
         }
     }
 }
