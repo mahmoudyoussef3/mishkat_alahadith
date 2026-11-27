@@ -9,7 +9,7 @@ import 'package:mishkat_almasabih/features/mini_player/presentation/ui/mini_play
 class DockedMiniPlayer extends StatefulWidget {
   const DockedMiniPlayer({super.key, this.onOpenQuran});
 
-  /// Overrides opening the mushaf when the Quran's player is tapped — in
+  /// Overrides opening the Quran player when the Quran's player is tapped — in
   /// the mushaf itself, with the recitation's options.
   final VoidCallback? onOpenQuran;
 

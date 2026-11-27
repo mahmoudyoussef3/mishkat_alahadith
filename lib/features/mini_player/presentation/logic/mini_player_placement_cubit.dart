@@ -13,8 +13,12 @@ part 'mini_player_placement_state.dart';
 class MiniPlayerPlacementCubit extends Cubit<MiniPlayerPlacement> {
   MiniPlayerPlacementCubit() : super(const MiniPlayerPlacement.hidden());
 
-  /// Screens shown before the app proper, which nothing should cover.
-  static const _clearRoutes = {Routes.splashScreen, Routes.onBoardingScreen};
+  /// Routes where the floating controls would be redundant or intrusive.
+  static const _clearRoutes = {
+    Routes.splashScreen,
+    Routes.onBoardingScreen,
+    Routes.quranAudio,
+  };
 
   Route<dynamic>? _top;
   final Set<Route<dynamic>> _docking = {};

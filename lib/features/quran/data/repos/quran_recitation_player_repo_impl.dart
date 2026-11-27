@@ -88,6 +88,13 @@ class QuranRecitationPlayerRepoImpl implements QuranRecitationPlayerRepo {
   }
 
   @override
+  RecitationProgress? get progress => _player.progress;
+
+  @override
+  Future<ApiResult<void>> seek(String url, Duration position) =>
+      _guard(() => _player.seek(url, position));
+
+  @override
   Future<ApiResult<void>> setSpeed(RecitationSpeed speed) =>
       _guard(() => _player.setSpeed(speed.factor));
 

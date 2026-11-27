@@ -51,6 +51,13 @@ class QuranHomeScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       AppIconButton(
+                        tooltip: 'فتح مشغّل القرآن',
+                        icon: Icons.headphones_rounded,
+                        variant: AppIconButtonVariant.tonal,
+                        onPressed: () => context.pushNamed(Routes.quranAudio),
+                      ),
+                      SizedBox(width: 8.w),
+                      AppIconButton(
                         tooltip: 'البحث في الآيات',
                         icon: Icons.search_rounded,
                         onPressed:

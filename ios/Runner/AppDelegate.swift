@@ -5,25 +5,35 @@ import workmanager_apple
 import UserNotifications
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    FirebaseApp.configure()
+    // Flutter initializes Firebase with platform options when there is no
+    // native configuration bundled in the app.
+    if FirebaseApp.app() == nil,
+       Bundle.main.url(forResource: "GoogleService-Info", withExtension: "plist") != nil {
+      FirebaseApp.configure()
+    }
 
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in
         GeneratedPluginRegistrant.register(with: registry)
     }
 
-    GeneratedPluginRegistrant.register(with: self)
-    
     UNUserNotificationCenter.current().delegate = self
 
-    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-    let prayerChannel = FlutterMethodChannel(name: "com.mishkat_almasabih.app/prayer_notifications",
-                                              binaryMessenger: controller.binaryMessenger)
-    
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    let prayerChannel = FlutterMethodChannel(
+      name: "com.mishkat_almasabih.app/prayer_notifications",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    )
+
     prayerChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
       switch call.method {
@@ -48,8 +58,6 @@ import UserNotifications
         result(FlutterMethodNotImplemented)
       }
     })
-
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
   override func userNotificationCenter(

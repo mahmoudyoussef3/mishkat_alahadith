@@ -280,6 +280,7 @@ import 'package:mishkat_almasabih/features/quran/domain/usecases/save_last_read_
 import 'package:mishkat_almasabih/features/quran/domain/usecases/save_mushaf_settings_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/search_quran_use_case.dart';
 import 'package:mishkat_almasabih/features/quran/domain/usecases/toggle_quran_bookmark_use_case.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/audio/quran_audio_catalog_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/ayah_details/ayah_details_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/flowing_page/flowing_page_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
@@ -1156,6 +1157,9 @@ void _registerQuranCloud() {
   getIt.registerLazySingleton<SetRecitationSpeedUseCase>(
     () => SetRecitationSpeedUseCase(getIt()),
   );
+  getIt.registerLazySingleton<SeekRecitationUseCase>(
+    () => SeekRecitationUseCase(getIt()),
+  );
   getIt.registerLazySingleton<WatchRecitationUseCase>(
     () => WatchRecitationUseCase(getIt()),
   );
@@ -1206,10 +1210,14 @@ void _registerQuranCloud() {
       getIt(),
       getIt(),
       getIt(),
+      getIt(),
     ),
   );
   getIt.registerLazySingleton<FilterQuranEditionsUseCase>(
     FilterQuranEditionsUseCase.new,
+  );
+  getIt.registerFactory<QuranAudioCatalogCubit>(
+    () => QuranAudioCatalogCubit(getIt(), getIt()),
   );
   getIt.registerFactory<QuranEditionsCubit>(
     () => QuranEditionsCubit(getIt(), getIt()),

@@ -176,6 +176,10 @@ class RecitationResumePoint {
   int get hashCode => Object.hash(scope, track);
 }
 
+/// Elapsed time and duration for the ayah currently loaded.
+typedef RecitationProgress =
+    ({String url, Duration position, Duration duration});
+
 /// What the player is doing.
 enum RecitationStatus { idle, loading, playing, paused, completed }
 

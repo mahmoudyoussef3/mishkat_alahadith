@@ -190,6 +190,37 @@ class AppAudioPlayer {
     if (_holds(owner)) await _player?.seek(Duration.zero, index: index);
   }
 
+  /// A snapshot of the loaded entry, for an in-app scrubber.
+  ({String url, Duration position, Duration duration})? entryProgressOf(
+    Object owner,
+  ) {
+    final player = _player;
+    if (!_holds(owner) ||
+        player == null ||
+        player.processingState != ProcessingState.ready) {
+      return null;
+    }
+    final item = player.sequenceState.currentSource?.tag;
+    final duration = player.duration;
+    if (item is! MediaItem || duration == null || duration <= Duration.zero) {
+      return null;
+    }
+    return (url: item.id, position: player.position, duration: duration);
+  }
+
+  /// Seek only if the entry the listener scrubbed is still current.
+  Future<void> seekInEntry(Object owner, String url, Duration position) async {
+    final progress = entryProgressOf(owner);
+    if (progress == null || progress.url != url) return;
+    final bounded =
+        position < Duration.zero
+            ? Duration.zero
+            : position > progress.duration
+            ? progress.duration
+            : position;
+    await _player?.seek(bounded);
+  }
+
   Future<void> setSpeed(Object owner, double speed) async {
     if (_holds(owner)) await _player?.setSpeed(speed);
   }

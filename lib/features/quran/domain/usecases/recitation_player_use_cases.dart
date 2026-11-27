@@ -83,6 +83,17 @@ class WatchRecitationUseCase {
   WatchRecitationUseCase(this._repo);
 
   Stream<RecitationPlayback> call() => _repo.watch();
+
+  RecitationProgress? get progress => _repo.progress;
+}
+
+class SeekRecitationUseCase {
+  final QuranRecitationPlayerRepo _repo;
+
+  SeekRecitationUseCase(this._repo);
+
+  Future<ApiResult<void>> call(String url, Duration position) =>
+      _repo.seek(url, position);
 }
 
 /// The controls used outside the app: the notification, the lock screen,

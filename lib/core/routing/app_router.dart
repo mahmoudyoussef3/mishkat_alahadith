@@ -41,8 +41,11 @@ import 'package:mishkat_almasabih/features/profile/presentation/ui/profile_scree
 import 'package:mishkat_almasabih/features/qiblah_finder/presentation/logic/qiblah_cubit.dart'
     show QiblahCubit;
 import 'package:mishkat_almasabih/features/qiblah_finder/presentation/ui/qiblah_finder_screen.dart';
+import 'package:mishkat_almasabih/features/quran/domain/entities/quran_edition.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/audio/quran_audio_catalog_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/hizb_index/quran_hizb_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/mushaf_reader/mushaf_reader_cubit.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_editions/quran_editions_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_index/quran_index_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/quran_search/quran_search_cubit.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/logic/reflection/quran_reflection_cubit.dart';
@@ -51,6 +54,7 @@ import 'package:mishkat_almasabih/features/quran/presentation/logic/tafsir_searc
 import 'package:mishkat_almasabih/features/quran/presentation/ui/models/mushaf_reader_args.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/models/surah_tafsir_args.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/mushaf_reader_screen.dart';
+import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_audio_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_home_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/quran_search_screen.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/screens/surah_tafsir_screen.dart';
@@ -79,10 +83,6 @@ import '../../features/authentication/login/presentation/ui/screens/login_screen
 import '../../features/onboarding/presentation/ui/onboarding_screen.dart';
 import 'package:mishkat_almasabih/features/onboarding/presentation/logic/onboarding_cubit.dart';
 import '../../features/splash/presentation/ui/splash_screen.dart';
-
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/ui/screens/ramadan_tasks_screen.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/logic/ramadan_tasks_cubit.dart';
-import 'package:mishkat_almasabih/features/ramadan_tasks/presentation/ui/screens/ramadan_progress_screen.dart';
 
 import 'package:mishkat_almasabih/core/deep_links/ui/shared_link_hadith_screen.dart';
 import 'package:mishkat_almasabih/features/ahadith_categories/presentation/logic/hadith_details/hadith_by_category_details_cubit.dart';
@@ -457,6 +457,26 @@ class AppRouter {
                   ),
                 ],
                 child: const QuranHomeScreen(),
+              ),
+        );
+      case Routes.quranAudio:
+        _logScreenView('QuranAudioScreen');
+        return MaterialPageRoute(
+          settings: settings,
+          builder:
+              (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (_) => getIt<QuranAudioCatalogCubit>()..load(),
+                  ),
+                  BlocProvider(
+                    create:
+                        (_) =>
+                            getIt<QuranEditionsCubit>()
+                              ..load(QuranEditionType.recitation),
+                  ),
+                ],
+                child: const QuranAudioScreen(),
               ),
         );
       case Routes.mushafReader:

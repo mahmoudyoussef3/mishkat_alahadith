@@ -5,15 +5,13 @@ import 'package:mishkat_almasabih/features/azkar/domain/entities/azkar_audio.dar
 import 'package:mishkat_almasabih/features/azkar/presentation/ui/models/azkar_reader_args.dart';
 import 'package:mishkat_almasabih/features/azkar/presentation/ui/widgets/reader/azkar_audio_bar.dart';
 import 'package:mishkat_almasabih/features/mini_player/presentation/logic/mini_player_placement_cubit.dart';
-import 'package:mishkat_almasabih/features/quran/presentation/logic/recitation/quran_recitation_cubit.dart';
-import 'package:mishkat_almasabih/features/quran/presentation/ui/models/mushaf_reader_args.dart';
 import 'package:mishkat_almasabih/features/quran/presentation/ui/widgets/reader/recitation_bar.dart';
 
 /// Whatever the app's one player has on — a recitation of the Quran or of
 /// the azkar — with its controls; nothing while it has nothing. Starting
 /// one replaces the other, so only one shows at a time.
 ///
-/// Tapping it opens what plays: the mushaf at the ayah, or the azkar's
+/// Tapping it opens what plays: the Quran player, or the azkar's
 /// chapter at the zikr.
 class MiniPlayer extends StatelessWidget {
   const MiniPlayer({
@@ -26,7 +24,7 @@ class MiniPlayer extends StatelessWidget {
   /// The navigator what plays is opened on.
   final NavigatorState? Function() navigator;
 
-  /// Overrides opening the mushaf — in the mushaf itself, with the
+  /// Overrides opening the Quran player — in the mushaf itself, with the
   /// recitation's options, which [quranTapHint] names.
   final VoidCallback? onOpenQuran;
   final String quranTapHint;
@@ -37,25 +35,11 @@ class MiniPlayer extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         RecitationBar(
-          onTap: onOpenQuran ?? () => _openMushaf(context),
-          tapHint: onOpenQuran == null ? 'فتح المصحف' : quranTapHint,
+          onTap: onOpenQuran ?? () => navigator()?.pushNamed(Routes.quranAudio),
+          tapHint: onOpenQuran == null ? 'فتح مشغّل القرآن' : quranTapHint,
         ),
         AzkarAudioBar(onTap: (track) => _openAzkar(context, track)),
       ],
-    );
-  }
-
-  /// The mushaf at the page of the ayah recited; nothing to open before
-  /// the recitation has an ayah.
-  void _openMushaf(BuildContext context) {
-    final track = context.read<QuranRecitationCubit>().state.currentTrack;
-    if (track == null) return;
-    navigator()?.pushNamed(
-      Routes.mushafReader,
-      arguments: MushafReaderArgs(
-        initialPage: track.page,
-        surahNumber: track.surahNumber,
-      ),
     );
   }
 

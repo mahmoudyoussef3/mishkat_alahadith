@@ -46,6 +46,7 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
   final SkipToRecitationTrackUseCase _skipTo;
   final SetRecitationSpeedUseCase _setSpeed;
   final WatchRecitationUseCase _watch;
+  final SeekRecitationUseCase _seek;
   final StandByRecitationUseCase _standBy;
   final WatchRecitationCommandsUseCase _watchCommands;
   final GetRecitationResumePointUseCase _getResumePoint;
@@ -95,6 +96,7 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
     WatchRecitationTakenOverUseCase watchTakenOver,
     this._getResumePoint,
     SaveRecitationResumePointUseCase saveResumePoint,
+    this._seek,
   ) : _resumePoint = ChangeOnlyWriter(saveResumePoint.call),
       super(const RecitationIdle(RecitationSettings.defaults)) {
     _takeovers = watchTakenOver().listen((_) => _onTakenOver());
@@ -218,6 +220,21 @@ class QuranRecitationCubit extends Cubit<QuranRecitationState> {
     final current = state;
     if (current is! RecitationActive) return;
     await _skip(current, current.hasPrevious ? current.trackIndex - 1 : 0);
+  }
+
+  RecitationProgress? get progress {
+    final current = state;
+    final progress = _watch.progress;
+    return current is RecitationActive &&
+            !current.isLoading &&
+            progress?.url == current.currentTrack.url
+        ? progress
+        : null;
+  }
+
+  Future<bool> seek(String url, Duration position) async {
+    if (progress?.url != url) return true;
+    return await _seek(url, position) is ApiSuccess;
   }
 
   Future<void> stop() async {

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:mishkat_almasabih/features/ahadith_categories/data/models/category_model.dart';
 import 'package:mishkat_almasabih/features/authentication/login/data/models/login_response_body.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/models/sign_up_request_body.dart';
 import 'package:mishkat_almasabih/features/authentication/signup/data/models/sign_up_response_body.dart';

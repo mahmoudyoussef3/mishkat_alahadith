@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mishkat_almasabih/core/di/dependency_injection.dart';
+import 'package:mishkat_almasabih/core/routing/routes.dart';
 import 'package:mishkat_almasabih/core/theming/app_palette_override.dart';
 import 'package:mishkat_almasabih/core/theming/styles.dart';
 import 'package:mishkat_almasabih/core/widgets/app_switch.dart';
@@ -63,6 +64,16 @@ class _RecitationSheetContent extends StatelessWidget {
           subtitle: 'تُظلَّل الآية المتلوّة وتُقلَّب الصفحات معها',
         ),
         SizedBox(height: 18.h),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.headphones_rounded),
+          label: const Text('فتح مشغّل القرآن'),
+          onPressed: () {
+            final navigator = Navigator.of(context);
+            navigator.pop();
+            navigator.pushNamed(Routes.quranAudio);
+          },
+        ),
+        SizedBox(height: 12.h),
         const _ReciterGroup(),
         SizedBox(height: 22.h),
         const _StartGroup(),
@@ -201,6 +212,31 @@ class _StartGroup extends StatelessWidget {
     );
   }
 }
+
+Future<void> showRecitationOptions(
+  BuildContext context,
+  QuranRecitationCubit cubit,
+) => showQuranSheet<void>(
+  context: context,
+  initialChildSize: 0.7,
+  builder:
+      (context, controller) => BlocProvider.value(
+        value: cubit,
+        child: ListView(
+          controller: controller,
+          padding: EdgeInsetsDirectional.fromSTEB(20.w, 0, 20.w, 24.h),
+          children: [
+            const QuranSheetHandle(),
+            const QuranSheetHeader(
+              title: 'إعدادات التشغيل',
+              subtitle: 'سرعة التلاوة والتكرار وجودة الصوت',
+            ),
+            SizedBox(height: 18.h),
+            const _PlaybackOptions(),
+          ],
+        ),
+      ),
+);
 
 class _PlaybackOptions extends StatelessWidget {
   const _PlaybackOptions();

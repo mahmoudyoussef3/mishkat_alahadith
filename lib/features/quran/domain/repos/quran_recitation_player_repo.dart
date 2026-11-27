@@ -37,6 +37,10 @@ abstract class QuranRecitationPlayerRepo {
   /// Moves to the start of track [index] of the playlist being played.
   Future<ApiResult<void>> skipTo(int index);
 
+  RecitationProgress? get progress;
+
+  Future<ApiResult<void>> seek(String url, Duration position);
+
   Future<ApiResult<void>> setSpeed(RecitationSpeed speed);
 
   /// The player's status, with the track it is on as an index into the

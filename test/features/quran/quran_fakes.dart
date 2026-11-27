@@ -628,6 +628,17 @@ class FakeRecitationPlayerRepo implements QuranRecitationPlayerRepo {
   }
 
   @override
+  RecitationProgress? progress;
+
+  final seeks = <(String, Duration)>[];
+
+  @override
+  Future<ApiResult<void>> seek(String url, Duration position) async {
+    seeks.add((url, position));
+    return const ApiResult.success(null);
+  }
+
+  @override
   Stream<RecitationPlayback> watch() => _playback.stream;
 
   @override
@@ -665,6 +676,7 @@ QuranRecitationCubit recitationCubit({
     WatchRecitationTakenOverUseCase(playerRepo),
     GetRecitationResumePointUseCase(readingRepo),
     SaveRecitationResumePointUseCase(readingRepo),
+    SeekRecitationUseCase(playerRepo),
   );
 }
 

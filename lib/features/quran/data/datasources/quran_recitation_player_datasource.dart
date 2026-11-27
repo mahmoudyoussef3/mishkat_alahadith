@@ -72,6 +72,11 @@ class QuranRecitationPlayerDataSource {
   /// Moves to the start of entry [index] of the queue.
   Future<void> seekToIndex(int index) => _player.seekToIndex(this, index);
 
+  RecitationProgress? get progress => _player.entryProgressOf(this);
+
+  Future<void> seek(String url, Duration position) =>
+      _player.seekInEntry(this, url, position);
+
   Future<void> setSpeed(double speed) => _player.setSpeed(this, speed);
 
   static RecitationCommand _recitationCommandOf(MediaCommand command) =>

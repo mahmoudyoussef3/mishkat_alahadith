@@ -65,6 +65,12 @@ void main() {
     expect(placement.state.spot, MiniPlayerSpot.hidden);
   });
 
+  test('hides the mini player while the Quran player is open', () {
+    placement.showRoute(_page(Routes.quranAudio));
+
+    expect(placement.state.spot, MiniPlayerSpot.hidden);
+  });
+
   test('is docked on a page that shows it in its own bar', () {
     final home = _page(Routes.mainNavigationScreen);
 
